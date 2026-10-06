@@ -21,6 +21,8 @@ public enum ErrorCode {
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     PAYLOAD_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
+    /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
+    TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
 
     private static final String TYPE_PREFIX = "urn:cafe-loyalty:problem:";

@@ -9,6 +9,7 @@
   "UNSUPPORTED_MEDIA_TYPE": "Bu format dəstəklənmir.",
   "PAYLOAD_TOO_LARGE": "Göndərilən məlumat çox böyükdür.",
   "RATE_LIMITED": "Çox sayda cəhd oldu. Bir azdan yenidən yoxlayın.",
+  "TENANT_UNAVAILABLE": "Xidmət hazırda əlçatmazdır. Bir az sonra yenidən cəhd edin.",
   "INTERNAL_ERROR": "Nəsə alınmadı. Bir azdan yenidən cəhd edin.",
   "NETWORK_ERROR": "İnternet bağlantısını yoxlayıb yenidən cəhd edin.",
   "UNKNOWN": "Gözlənilməz xəta baş verdi."

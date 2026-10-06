@@ -29,6 +29,9 @@ class ProdSafetyGuardTest {
         env.setProperty("app.crypto.keks", "kek-2026-10:" + STRONG_SECRET);
         env.setProperty("app.crypto.phone-hmac-key", STRONG_SECRET);
         env.setProperty("app.crypto.otp-pepper", STRONG_SECRET);
+        env.setProperty("app.crypto.redemption-code-key", STRONG_SECRET);
+        env.setProperty("app.tenancy.platform.app-password", "Zq7xP2mL9vR4tY8wK3nB6cH1");
+        env.setProperty("app.tenancy.platform.owner-password", "Jm5sD8fG2hK7lQ4wE9rT1yU6");
         return env;
     }
 
@@ -80,6 +83,8 @@ class ProdSafetyGuardTest {
                 .web(WebApplicationType.NONE)
                 .profiles("prod", "dev")
                 .properties(
+                        // Gözlənilən başlanğıc xətası test çıxışını böyük stack trace ilə doldurmasın
+                        "logging.level.org.springframework.boot.SpringApplication=OFF",
                         "app.crypto.keks=kek-2026-10:" + STRONG_SECRET,
                         "app.crypto.phone-hmac-key=" + STRONG_SECRET,
                         "app.crypto.otp-pepper=" + STRONG_SECRET);

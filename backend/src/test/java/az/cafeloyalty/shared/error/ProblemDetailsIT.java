@@ -13,21 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import az.cafeloyalty.support.CsrfSupport;
-import az.cafeloyalty.support.TestApiController;
+import az.cafeloyalty.support.IntegrationTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** Problem Details formatı, xəta kodları və mesajların dilə görə seçilməsi. */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Import(TestApiController.class)
-class ProblemDetailsTest {
+class ProblemDetailsIT extends IntegrationTest {
 
     @Autowired
     MockMvc mvc;

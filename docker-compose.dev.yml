@@ -1,0 +1,13 @@
+# Lokal inkişaf üçün əlavə: backend-i IDE-dən (Docker-siz) işə salanda PostgreSQL-ə qoşulmaq üçün.
+# İstifadə: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
+# Port yalnız 127.0.0.1-də açılır (xarici şəbəkədən əlçatan deyil).
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - data
+      - devdb
+
+networks:
+  devdb:

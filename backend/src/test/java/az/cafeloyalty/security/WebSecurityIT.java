@@ -10,22 +10,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import az.cafeloyalty.security.config.SecurityConfig;
 import az.cafeloyalty.support.CsrfSupport;
-import az.cafeloyalty.support.TestApiController;
+import az.cafeloyalty.support.IntegrationTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** Təhlükəsizlik başlıqları, CSRF, Origin yoxlaması və actuator-un açıqlığı. */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Import(TestApiController.class)
-class WebSecurityTest {
+class WebSecurityIT extends IntegrationTest {
 
     private static final String VALID_BODY = "{\"name\":\"Aysel\",\"code\":\"abc\"}";
 
@@ -103,7 +97,7 @@ class WebSecurityTest {
     void stateChangingRequestWithValidCsrfTokenSucceeds() throws Exception {
         CsrfSupport.Csrf csrf = CsrfSupport.obtain(mvc);
         mvc.perform(csrf.apply(post("/api/v1/public/test/echo"))
-                        .header("Origin", "http://localhost")
+                        .header("Origin", "http://alpha.test")
                         .header("Sec-Fetch-Site", "same-origin")
                         .contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isOk())

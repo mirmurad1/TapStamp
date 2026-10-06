@@ -5,10 +5,13 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * Tətbiqə xas konfiqurasiya ({@code app.*}). Sirr dəyərləri burada saxlanılmır — onlar yalnız env-dən gəlir.
+ *
+ * @param platformDomain platforma panelinin domeni (məs. {@code platform.localhost}); tenant domeni deyil
  */
 @ConfigurationProperties("app")
 public record AppProperties(
         @DefaultValue("az") String defaultLanguage,
+        @DefaultValue("platform.localhost") String platformDomain,
         @DefaultValue Security security,
         @DefaultValue Notifications notifications,
         @DefaultValue Dev dev) {

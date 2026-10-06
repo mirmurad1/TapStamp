@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(problemHandlers))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
-                        .requestMatchers("/api/v1/csrf", "/api/v1/public/**").permitAll()
+                        .requestMatchers("/api/v1/csrf", "/api/v1/context", "/api/v1/public/**").permitAll()
                         .anyRequest().denyAll());
         return http.build();
     }

@@ -2,7 +2,7 @@
 
 NFC əsaslı kafe loyallıq sistemi. Müştəri telefonunu piştaxtadakı NFC çipinə toxundurur, qəhvə möhürü qazanır və kart dolanda hədiyyə qəhvə alır. Kafe sahibləri və işçiləri üçün idarəetmə paneli var. Platforma multi-tenant-dır: hər şirkətin öz domeni və ayrıca verilənlər bazası olur.
 
-> **Vəziyyət:** Mərhələ 1 — skelet və infrastruktur. Tam plan: [docs/architecture-plan.md](docs/architecture-plan.md).
+> **Vəziyyət:** Mərhələ 2 — multi-tenancy (hər şirkətə ayrıca baza), şifrələmə və test məlumatları. Tam plan: [docs/architecture-plan.md](docs/architecture-plan.md).
 
 ## Texnologiyalar
 
@@ -71,35 +71,75 @@ Telefon / brauzer ──HTTPS──► nginx ──► /api, /t  → backend (Sp
 
    443 və ya 80 portu məşğuldursa, `.env`-də `HTTPS_PORT=8443` və `HTTP_PORT=8080` təyin edin və ünvanlara portu əlavə edin.
 
-> Mərhələ 1-də bütün domenlər eyni skelet tətbiqi göstərir. Domenə görə şirkətin seçilməsi Mərhələ 2-də əlavə olunur.
+5. Mühiti avtomatik yoxlayın (TLS, domenə görə şirkət seçimi, təhlükəsizlik başlıqları — 18 yoxlama):
 
-## Lokal inkişaf (Docker-siz)
+   ```bash
+   bash scripts/smoke-test.sh
+   ```
 
-Backend (PowerShell, JDK 21 ilə):
+Şirkət domenə görə seçilir: `mockcoffee.localhost` və `demo-cay.localhost` fərqli bazalarla işləyir, bir-birinin məlumatını görmür. Məsələn, https://mockcoffee.localhost/api/v1/public/company yalnız Mock Coffee House-un məlumatını qaytarır.
 
-```powershell
-$env:JAVA_HOME = "<JDK 21 qovluğu>"; $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-cd backend
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
-```
+## Test məlumatları (yalnız dev)
 
-Swagger UI (yalnız dev): http://localhost:8080/api/v1/docs
+`dev` profilində tətbiq ilk dəfə işə düşəndə iki şirkəti **real provisioning servisi ilə** yaradır (ayrıca baza, ayrıca DB rolu) və doldurur:
 
-Frontend:
+| Şirkət | Domen | Məzmun |
+|---|---|---|
+| Mock Coffee House | `mockcoffee.localhost` | 2 filial (Mərkəz, Gənclik), 3 NFC çipi (biri `NTAG424_SUN`), "9 möhür → hədiyyə qəhvə" qaydası, ~150 müştəri və son 90 günün tarixçəsi (möhürlər, mükafatlar, istifadə olunmuş mükafatlar, rədd edilmiş toxunuşlar, fırıldaq işarələri) |
+| Demo Çay Evi | `demo-cay.localhost` | 1 filial, 1 çip, 12 müştəri — tenant izolyasiyasını nümayiş etdirmək üçün |
+
+Müştərilərin dili təxminən 65% az, 20% ru, 15% en-dir. Telefon nömrələri saxtadır və bazada şifrələnmiş saxlanılır. Seed yalnız boş bazanı doldurur, təkrar işə salma məlumatı dublikat etmir. Söndürmək üçün: `.env` faylında `DEV_SEED_ENABLED=false`.
+
+İşçi hesabları (giriş məlumatları) Mərhələ 3-də əlavə olunacaq.
+
+## Yeni şirkətin yaradılması (provisioning)
+
+Prod-da yeni şirkət işləyən tətbiqdən ayrı, birdəfəlik əmrlə yaradılır. Bu, tətbiqin baza yaratma hüququ olmadan işləməsinə imkan verir:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+java -jar app.jar --spring.main.web-application-type=none \
+  --provision-tenant=mockcoffee --domain=bonus.mockcoffee.az \
+  --name-az="Mock Coffee House" --name-en="Mock Coffee House" --name-ru="Mock Coffee House"
 ```
 
-Vite dev serveri http://localhost:5173 ünvanında işləyir; `/api` sorğularını backend-ə (8080) ötürür. Admin paneli: http://localhost:5173/admin
+Proses ayrıca baza (`loyalty_t_<slug>`), iki DB rolu (sxem sahibi və yalnız DML hüquqlu tətbiq rolu) yaradır, miqrasiyaları işə salır və domeni qeydiyyata alır. Yarımçıq qalsa, eyni əmri təkrar işə salmaq kifayətdir.
+
+## Lokal inkişaf (Docker-siz backend)
+
+1. Yalnız PostgreSQL-i Docker-də işə salın (port yalnız `127.0.0.1`-də açılır):
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
+   ```
+
+2. Backend (PowerShell, JDK 21 ilə). `dev` profili sirləri layihənin kökündəki `.env` faylından oxuyur:
+
+   ```powershell
+   $env:JAVA_HOME = "<JDK 21 qovluğu>"; $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+   cd backend
+   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
+   ```
+
+   Swagger UI (yalnız dev): http://localhost:8080/api/v1/docs
+
+3. Frontend:
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+   Vite dev serveri `/api` sorğularını backend-ə (8080) ötürür. Şirkət domenə görə seçildiyi üçün `localhost` yox, dev domenini açın: http://mockcoffee.localhost:5173 (admin: http://mockcoffee.localhost:5173/admin).
 
 ## Testlər
 
 ```powershell
-cd backend; .\mvnw.cmd verify          # unit, inteqrasiya (Docker lazımdır) və ArchUnit testləri
+cd backend; .\mvnw.cmd test            # unit və ArchUnit testləri (Docker lazım deyil)
+cd backend; .\mvnw.cmd verify          # + inteqrasiya testləri (*IT): Testcontainers ilə real PostgreSQL 16
 ```
+
+İnteqrasiya testləri production-dakı eyni init skripti ilə PostgreSQL konteyneri qaldırır, iki test şirkəti yaradır və izolyasiyanı həm HTTP, həm də DB hüquqları səviyyəsində yoxlayır. Docker yoxdursa, bu testlər uğursuz sayılmır, atlanır.
 
 ```bash
 cd frontend

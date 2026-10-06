@@ -12,10 +12,10 @@ app:
   notifications:
     sms-provider: ${APP_SMS_PROVIDER:http}
     mail-provider: ${APP_MAIL_PROVIDER:smtp}
-  crypto:
-    keks: ${APP_CRYPTO_KEKS:}
-    phone-hmac-key: ${APP_PHONE_HMAC_KEY:}
-    otp-pepper: ${APP_OTP_PEPPER:}
+  tenancy:
+    provisioner:
+      # Prod-da yeni şirkət ayrıca, birdəfəlik əmrlə yaradılır (README → tenant qoşulması)
+      enabled: ${APP_PROVISIONING_ENABLED:false}
 
 logging:
   structured:

@@ -35,7 +35,7 @@
 | Arxitektura üslubu | **Modul-monolit** (modular monolith: bir tətbiq, daxildə sərhədləri aydın olan modullar) | Bu miqyas üçün mikroservislər lüzumsuz əməliyyat yükü yaradır. Modul sərhədləri ArchUnit testləri ilə qorunur. |
 | Backend | Java 21, **Spring Boot 4.1.x** (Spring Security 7, Hibernate 7, Jackson 3), Spring Data JPA, PostgreSQL 16, Flyway, Bean Validation, MapStruct, Lombok (minimal), Bucket4j, springdoc-openapi. Əlavə: BouncyCastle (AES-CMAC, Argon2), libphonenumber, ICU4J, ShedLock. Qurma aləti: **Maven** (wrapper ilə). | Spring Boot 3.5-in pulsuz dəstəyi 30.06.2026-da bitib, 4.1 isə 31.07.2027-yə qədər dəstəklənir (§18). |
 | Multi-tenancy (bir sistemdə bir neçə müstəqil şirkət) | **Hər şirkət üçün ayrıca verilənlər bazası** (database-per-tenant) və ayrıca DB rolu. Platforma bazasında yalnız şirkətlərin reyestri, domenlər və platforma adminləri saxlanılır. | Şirkətlərin məlumatları fiziki olaraq ayrılır: bir şirkətin DB bağlantısı digər şirkətin bazasını heç cür oxuya bilməz. |
-| Tenant-ın müəyyənləşdirilməsi | Sorğunun `Host` başlığına görə (hər şirkətin öz domeni var). Hibernate multi-tenancy (DATABASE strategiyası) hər tenant üçün ayrıca connection pool-dan istifadə edir. | Sorğunun body-si və ya parametrləri tenant-ı heç vaxt təyin etmir. |
+| Tenant-ın müəyyənləşdirilməsi | Sorğunun `Host` başlığına görə (hər şirkətin öz domeni var). `TenantRoutingDataSource` bağlantını cari tenant-ın ayrıca connection pool-undan verir. | Sorğunun body-si və ya parametrləri tenant-ı heç vaxt təyin etmir. |
 | Domenlər | Hər şirkət **yalnız öz domenində** işləyir (məs. `bonus.mockcoffee.az`): müştəri tətbiqi `/`, işçi paneli `/admin`. Platforma paneli platformanın öz domenindədir. Dev-də `mockcoffee.localhost` kimi ünvanlar işlədilir. | Sizin seçiminiz. TLS sertifikatları hər domen üçün avtomatik alınır (Let's Encrypt). |
 | Frontend | **Bir Vite layihəsi, iki giriş nöqtəsi** (multi-page build): `index.html` → müştəri PWA, `admin/index.html` → işçi və platforma paneli. Ortaq kod `src/shared` qovluğundadır. | i18n, UI komponentləri və API klienti təkrarlanmır. Müştərinin telefonu admin kodunu və Recharts-ı yükləmir. |
 | Müştəri hesabı | Hesab **şirkətin öz bazasındadır**: eyni telefon nömrəsi hər kafedə ayrıca qeydiyyatdan keçir. | Sizin seçiminiz. Hər şirkət ayrıca məlumat nəzarətçisidir, şirkətlər arasında müştəri məlumatı bağlantısı yaranmır. |
@@ -86,7 +86,7 @@ Docker quraşdırılana qədər Docker tələb etməyən işlər görülür: ske
        ┌─────────────────▼──────────────────┐   ┌─────────────▼─────────────┐
        │ backend — Spring Boot 4.1           │   │ frontend — statik fayllar  │
        │  TenantResolver: Host → tenant      │   │ (müştəri PWA + admin SPA)  │
-       │  Hibernate multi-tenancy (DATABASE) │   └────────────────────────────┘
+       │  TenantRoutingDataSource            │   └────────────────────────────┘
        │  modullar: nfc · loyalty · customer │
        │  admin · analytics · audit ·        │── SmsProvider ─► Console (dev) / real provayder
        │  notification · platform · [dev]    │── MailSender  ─► Console (dev) / SMTP
@@ -108,7 +108,7 @@ Bütün vaxtlar bazada UTC kimi saxlanılır, ekranda isə şirkətin saat qurş
 1. **nginx:** sertifikat SNI adına görə seçilir (`ssl_certificate /etc/nginx/certs/$ssl_server_name/fullchain.pem`). Sertifikatı olmayan domenlə TLS bağlantısı qurulmur. HTTP `Host` başlığı SNI ilə üst-üstə düşmürsə, `421` qaytarılır. Bu, bir domenin TLS bağlantısı üzərindən başqa şirkətin `Host`-una sorğu göndərməyin qarşısını alır.
 2. **`TenantResolutionFilter`:** `Host` (kiçik hərflə, portsuz) platforma bazasındakı `tenant_domains` cədvəlində axtarılır (60 saniyəlik keşlə). Tapılmazsa, heç bir emal olmadan `404` qaytarılır. Platformanın öz domeni "platforma konteksti" deməkdir: bu kontekstdə tenant məlumatına müraciət mümkün deyil.
 3. **`TenantContext`** sorğu müddətində tenant-ı saxlayır və sorğu bitəndə mütləq təmizlənir. Bunu ayrıca test yoxlayır, çünki təmizlənməsə thread-lər arasında sızma ola bilər.
-4. **Hibernate:** `CurrentTenantIdentifierResolver` tenant-ı `TenantContext`-dən götürür, `MultiTenantConnectionProvider` həmin tenant-ın Hikari pool-undan bağlantı verir. Tenant yoxdursa, istisna atılır və əməliyyat rədd edilir (fail closed).
+4. **Bağlantı marşrutu:** JPA və JDBC `TenantRoutingDataSource` üzərində işləyir: bağlantı `TenantContext`-dəki tenant-ın Hikari pool-undan verilir. Tenant yoxdursa, bağlantı verilmir və əməliyyat rədd edilir (fail closed). Aktiv tranzaksiya daxilində tenant-ı dəyişmək qadağandır. Hibernate başlanğıcda heç bir tenant bazasına qoşulmur; entity-lərin sxemə uyğunluğu `EntityMappingIT` testi ilə yoxlanılır.
 5. **DB rolları:** hər tenant bazasının öz rolu var (`t_<slug>_app`, təsadüfi şifrə ilə; şifrə platforma bazasında envelope encryption ilə saxlanılır). `REVOKE CONNECT ON DATABASE … FROM PUBLIC` icra olunur, yəni rol yalnız öz bazasına qoşula bilir. A şirkətinin kontekstində SQL inyeksiyası olsa belə, bağlantı B şirkətinin bazasını fiziki olaraq görə bilməz.
 6. **Cookie-lər domenə bağlıdır** (`__Host-` prefiksi), ona görə A şirkətinin sessiyası B-yə heç vaxt göndərilmir. Sessiya qeydləri də tenant bazasındadır: A-nın tokeni B-nin bazasında sadəcə yoxdur.
 7. **Fon işləri** aktiv tenant-ların siyahısını gəzir, hər biri üçün `TenantContext` qurur və işi icra edir. Bir tenant-dakı xəta digərlərinə təsir etmir.
@@ -134,7 +134,7 @@ Proses idempotentdir: yarımçıq qalarsa, təkrar işə salındıqda qaldığı
 |---|---|
 | `shared` | Problem Details xəta formatı, i18n, `Clock`, idempotentlik, ümumi baza sinifləri |
 | `security` | Spring Security konfiqurasiyası, CSRF, başlıqlar, rate limiting, kriptoqrafiya (KEK/DEK, AES-GCM, HMAC, token generatoru) |
-| `tenancy` | Tenant reyestri, domenlər, `TenantResolutionFilter`, `TenantContext`, Hibernate multi-tenancy, connection pool-lar, provisioning, tenant miqrasiyaları |
+| `tenancy` | Tenant reyestri, domenlər, `TenantResolutionFilter`, `TenantContext`, `TenantRoutingDataSource`, connection pool-lar, provisioning, tenant miqrasiyaları |
 | `company` | Şirkət profili (tenant daxilində), filiallar |
 | `customer` | OTP, qeydiyyat, sessiyalar, cihazlar, razılıqlar, hesabın silinməsi |
 | `staff` | Şirkət işçiləri: giriş, TOTP, bloklanma, şifrə bərpası, dəvətlər, rollar |
@@ -404,7 +404,7 @@ INDEX (phone_hash, created_at DESC)
 
 legal_documents (
   id, type text,                               -- PRIVACY_POLICY|TERMS
-  version int, content jsonb,                  -- {az,en,ru}, Markdown
+  doc_version int, content jsonb,              -- {az,en,ru}, Markdown
   published_at, is_current bool,
   UNIQUE (type, version)
 )
@@ -470,7 +470,7 @@ INDEX (created_at DESC), (tag_id, created_at DESC), (customer_id, created_at DES
 
 ```sql
 reward_rules (                                 -- versiyalı mükafat qaydası
-  id, version int UNIQUE,
+  id, rule_version int UNIQUE,
   stamps_required int CHECK (stamps_required BETWEEN 1 AND 50),   -- məs. 9 möhür → 10-cu qəhvə pulsuz
   reward_name jsonb NOT NULL, reward_description jsonb,
   active bool, created_by, created_at,
@@ -1555,7 +1555,7 @@ Dependency-check ilk dəfə NVD bazasını yükləyir və yavaş işləyir. Ona 
 |---|---|---|---|
 | 0 | **Plan** | Bu sənəd | ✅ təsdiq olunub |
 | 1 | **Skelet, infrastruktur, ümumi qatlar** | Git repozitoriyası, Maven backend (Spring Boot 4.1), Vite (2 giriş nöqtəsi), Tailwind + shadcn tema (açıq və qaranlıq), Compose (4 servis + dev domenləri üçün TLS), `.env.example`, `gen-secrets`, Problem Details, i18n infrastrukturu (backend + tipli frontend + dil seçicisi), təhlükəsizlik başlıqları, actuator, `ProdSafetyGuard`, ArchUnit, CI skeleti, README qaralaması, `CLAUDE.md` | Kontekst yüklənir; başlıqlar; actuator-da yalnız health; prod qoruyucusu; i18n açar paritetı (BE + FE); `docker compose up` smoke testi (Docker quraşdırıldıqdan sonra) |
-| 2 | **Multi-tenancy, verilənlər modeli, kriptoqrafiya** | Platforma və tenant miqrasiyaları, DB rolları, tenant reyestri və domenlər, Host ilə tenant-ın müəyyənləşdirilməsi, Hibernate multi-tenancy, tenant üzrə connection pool-lar, provisioning servisi və CLI, envelope encryption, telefonun şifrələnməsi və HMAC, UUIDv7, dev seed (2 tenant) | Tenant-lar arası izolyasiya, provisioning-in idempotentliyi, `TenantContext` sızması, şifrələmə round-trip və AAD, seed-in deterministikliyi |
+| 2 | **Multi-tenancy, verilənlər modeli, kriptoqrafiya** | Platforma və tenant miqrasiyaları, DB rolları, tenant reyestri və domenlər, Host ilə tenant-ın müəyyənləşdirilməsi, `TenantRoutingDataSource`, tenant üzrə connection pool-lar, provisioning servisi və CLI, envelope encryption, telefonun şifrələnməsi və HMAC, UUIDv7, dev seed (2 tenant) | Tenant-lar arası izolyasiya, provisioning-in idempotentliyi, `TenantContext` sızması, şifrələmə round-trip və AAD, seed-in deterministikliyi |
 | 3 | **İşçi və platforma autentifikasiyası, RBAC** | Argon2id, giriş, TOTP (OWNER və SUPER_ADMIN üçün məcburi), bloklanma, şifrə bərpası, dəvətlər, sessiyalar, step-up, `AccessPolicy`; admin giriş UI və layout (3 dil), platforma panelinin əsası (tenant siyahısı, provisioning) | `StaffAuthIT`, `PlatformAuthIT`, rol matrisi, IDOR karkası |
 | 4 | **Müştəri autentifikasiyası** | libphonenumber, OTP, `SmsProvider` + konsol, dev outbox, Bucket4j limitləri, AT/RT sessiyaları, rotasiya, CSRF, razılıqlar, cihazlar, hesabın silinməsi; müştərinin giriş, OTP və qeydiyyat UI-ı | `OtpIT`, `CustomerSessionIT`, `RateLimitIT`, SMS seqment testi |
 | 5 | **NFC toxunuşu və möhürlər** | `TagVerifier`, `Ntag424SunVerifier`, `DevSimulatorVerifier`, simulyator səhifəsi, tap token axını, claim, sui-istifadə qaydaları, işçi təsdiqi, `tap_events` və fırıldaq işarələri; profil səhifəsi, animasiyalar, xəta vəziyyətləri | AN12196 vektorları, paralel `TapReplayIT`, `StampClaimIT`, ilk Playwright axını |
@@ -1602,6 +1602,8 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 4 | Spring Boot versiyası | **4.1.x** (Spring Security 7, Hibernate 7, Jackson 3) | endoflife.date məlumatına görə 3.5-in pulsuz dəstəyi 30.06.2026-da bitib (ödənişli dəstək 2032-yə qədərdir); start.spring.io artıq 3.x təklif etmir; 4.1 pulsuz olaraq 31.07.2027-yə qədər dəstəklənir. Bu, ilkin tələbdəki "3.x / Security 6"-dan kənarlaşmadır və "məsləhət gördüyün" cavabınıza əsasən qəbul olunub |
 | 5 | Git | Repozitoriya yaradılır, hər mərhələ ayrıca commit olunur | |
 | 6 | Domenlər | **Yalnız şirkətin öz domeni** | Dev-də `*.localhost`; prod-da Let's Encrypt (certbot) |
+| 7 | Tenant bağlantısının seçilməsi (Mərhələ 2) | Hibernate-in öz multi-tenancy mexanizmi əvəzinə Spring səviyyəsində `TenantRoutingDataSource` | Funksional olaraq eynidir, amma daha sadədir: JPA və JDBC eyni marşrutu işlədir, tranzaksiya meneceri platforma bazasının bağlantısını tenant bağlantısı ilə qarışdırmır. Hibernate başlanğıcda bazaya qoşulmadığı üçün sxem uyğunluğu `EntityMappingIT` testi ilə yoxlanılır |
+| 8 | Sütun adları (Mərhələ 2) | `reward_rules.version` → `rule_version`, `legal_documents.version` → `doc_version` | Optimistik kilid sütunu (`version`) ilə qarışıqlığın qarşısını almaq üçün |
 
 ---
 

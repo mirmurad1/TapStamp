@@ -29,7 +29,10 @@ public class ProdSafetyGuard implements BeanFactoryPostProcessor, EnvironmentAwa
     static final List<String> REQUIRED_SECRETS = List.of(
             "app.crypto.keks",
             "app.crypto.phone-hmac-key",
-            "app.crypto.otp-pepper");
+            "app.crypto.otp-pepper",
+            "app.crypto.redemption-code-key",
+            "app.tenancy.platform.app-password",
+            "app.tenancy.platform.owner-password");
 
     /** .env.example faylındakı və ya tipik yer tutucu dəyərlərin fraqmentləri. */
     private static final List<String> PLACEHOLDER_MARKERS = List.of("change_me", "changeme", "example", "placeholder", "dev-only");

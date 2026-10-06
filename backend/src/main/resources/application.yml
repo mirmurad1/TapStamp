@@ -9,6 +9,11 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  jpa:
+    open-in-view: false
+  flyway:
+    # Miqrasiyalar DatabaseMigrator ilə idarə olunur (platforma + hər tenant bazası)
+    enabled: false
 
 server:
   port: 8080
@@ -37,6 +42,13 @@ management:
       show-details: never
       probes:
         enabled: true
+      group:
+        readiness:
+          include: readinessState,platformDatabase
+  health:
+    # Əsas DataSource tenant marşrutlayıcısıdır; əvəzində platformDatabase indikatoru işləyir
+    db:
+      enabled: false
 
 springdoc:
   api-docs:
@@ -48,6 +60,7 @@ springdoc:
 
 app:
   default-language: az
+  platform-domain: ${APP_PLATFORM_DOMAIN:platform.localhost}
   security:
     cookie-secure: true
     hsts-enabled: true
@@ -57,3 +70,17 @@ app:
   dev:
     simulator-enabled: false
     seed-enabled: false
+  tenancy:
+    db-host: ${DB_HOST:localhost}
+    db-port: ${DB_PORT:5432}
+    platform:
+      app-password: ${DB_PLATFORM_APP_PASSWORD:}
+      owner-password: ${DB_PLATFORM_OWNER_PASSWORD:}
+    provisioner:
+      password: ${DB_PROVISIONER_PASSWORD:}
+  crypto:
+    keks: ${APP_CRYPTO_KEKS:}
+    active-kek-id: ${APP_CRYPTO_ACTIVE_KEK_ID:}
+    phone-hmac-key: ${APP_PHONE_HMAC_KEY:}
+    otp-pepper: ${APP_OTP_PEPPER:}
+    redemption-code-key: ${APP_REDEMPTION_CODE_KEY:}

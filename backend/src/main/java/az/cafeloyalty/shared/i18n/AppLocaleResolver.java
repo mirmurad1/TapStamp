@@ -14,7 +14,7 @@ import org.springframework.web.servlet.LocaleResolver;
  *   <li>daxil olmuş istifadəçinin profilindəki dil ({@link #PROFILE_LANGUAGE_ATTRIBUTE} atributu, sessiya filtri qoyur);</li>
  *   <li>{@code lang} cookie-si;</li>
  *   <li>{@code Accept-Language} başlığı (dəstəklənən ilk dil);</li>
- *   <li>standart dil ({@code az}).</li>
+ *   <li>şirkətin standart dili, o da yoxdursa platformanın standart dili ({@code az}).</li>
  * </ol>
  * Nəticə həmişə dəstəklənən dillərdən biridir.
  */
@@ -22,6 +22,8 @@ public class AppLocaleResolver implements LocaleResolver {
 
     public static final String LANG_COOKIE = "lang";
     public static final String PROFILE_LANGUAGE_ATTRIBUTE = AppLocaleResolver.class.getName() + ".PROFILE_LANGUAGE";
+    /** Şirkətin standart dili (tenant filtri qoyur); istifadəçinin seçimi və brauzer dili olmayanda işlədilir. */
+    public static final String TENANT_DEFAULT_LANGUAGE_ATTRIBUTE = AppLocaleResolver.class.getName() + ".TENANT_DEFAULT";
 
     private final Language defaultLanguage;
 
@@ -40,6 +42,8 @@ public class AppLocaleResolver implements LocaleResolver {
         }
         return fromCookie(request)
                 .or(() -> fromAcceptLanguage(request))
+                .or(() -> request.getAttribute(TENANT_DEFAULT_LANGUAGE_ATTRIBUTE) instanceof Language tenantDefault
+                        ? Optional.of(tenantDefault) : Optional.empty())
                 .orElse(defaultLanguage);
     }
 

@@ -1,4 +1,9 @@
 # Yalnız lokal inkişaf mühiti. Prod-da bu profil aktiv olarsa tətbiq başlamır (ProdSafetyGuard).
+spring:
+  config:
+    # Docker-siz işə salanda sirlər layihənin kökündəki .env faylından oxunur (scripts/gen-secrets ilə yaradılır)
+    import: optional:file:./.env[.properties],optional:file:../.env[.properties]
+
 springdoc:
   api-docs:
     enabled: true

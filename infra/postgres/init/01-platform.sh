@@ -18,6 +18,9 @@ CREATE ROLE loyalty_platform_owner LOGIN PASSWORD :'owner_password';
 CREATE ROLE loyalty_platform_app LOGIN PASSWORD :'app_password';
 -- Yalnız yeni tenant bazası və rolu yaratmaq üçün (prod-da ayrıca, birdəfəlik əmrlə işlədilməsi tövsiyə olunur)
 CREATE ROLE loyalty_provisioner LOGIN CREATEDB CREATEROLE PASSWORD :'provisioner_password';
+-- PostgreSQL 16+: yaradılan rollara SET hüququ avtomatik verilsin ki, CREATE DATABASE ... OWNER <rol> işləsin.
+-- INHERIT verilmir: provisioner tenant bazalarına qoşula və məlumatlarını oxuya bilməz.
+ALTER ROLE loyalty_provisioner SET createrole_self_grant TO 'set';
 
 CREATE DATABASE loyalty_platform OWNER loyalty_platform_owner ENCODING 'UTF8' TEMPLATE template0;
 REVOKE ALL ON DATABASE loyalty_platform FROM PUBLIC;
