@@ -1,0 +1,35 @@
+# Sirlər və lokal konfiqurasiya
+.env
+.env.*
+!.env.example
+
+# Claude Code lokal parametrləri
+.claude/settings.local.json
+
+# TLS sertifikatları (yalnız yer tutucu qovluqlar commit olunur)
+infra/nginx/certs/**
+!infra/nginx/certs/.gitkeep
+
+# Backend
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/*.tsbuildinfo
+
+# E2E
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+
+# IDE və OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
