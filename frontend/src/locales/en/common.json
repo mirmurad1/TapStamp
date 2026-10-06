@@ -1,0 +1,31 @@
+{
+  "app": { "loyaltyCard": "Loyalty card" },
+  "language": { "label": "Language", "az": "Azərbaycanca", "en": "English", "ru": "Русский" },
+  "theme": {
+    "label": "Theme",
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme",
+    "toggle": "Change theme"
+  },
+  "actions": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "save": "Save",
+    "retry": "Try again",
+    "back": "Back",
+    "close": "Close"
+  },
+  "states": { "loading": "Loading…", "comingSoon": "This section is coming soon." },
+  "units": {
+    "stamp_one": "{{count}} stamp",
+    "stamp_other": "{{count}} stamps",
+    "coffee_one": "{{count}} coffee",
+    "coffee_other": "{{count}} coffees"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "There is nothing at this address.",
+    "home": "Back to home"
+  }
+}

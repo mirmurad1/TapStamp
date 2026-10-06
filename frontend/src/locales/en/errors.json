@@ -1,0 +1,15 @@
+{
+  "VALIDATION_FAILED": "Some fields need fixing. Please check and try again.",
+  "MALFORMED_REQUEST": "The request could not be sent. Please refresh the page.",
+  "UNAUTHENTICATED": "Please sign in to continue.",
+  "FORBIDDEN": "You do not have permission to do this.",
+  "CSRF_INVALID": "Security check failed. Please refresh the page and try again.",
+  "NOT_FOUND": "We could not find what you were looking for.",
+  "METHOD_NOT_ALLOWED": "This action is not supported.",
+  "UNSUPPORTED_MEDIA_TYPE": "This format is not supported.",
+  "PAYLOAD_TOO_LARGE": "The data you sent is too large.",
+  "RATE_LIMITED": "Too many attempts. Please try again shortly.",
+  "INTERNAL_ERROR": "Something went wrong. Please try again shortly.",
+  "NETWORK_ERROR": "Check your internet connection and try again.",
+  "UNKNOWN": "An unexpected error occurred."
+}

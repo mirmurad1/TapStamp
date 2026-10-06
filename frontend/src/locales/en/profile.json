@@ -1,0 +1,14 @@
+{
+  "greeting": { "guest": "Welcome!", "named": "Hi, {{name}}!" },
+  "intro": "Every coffee brings you one step closer to a free one. Tap your phone on the NFC tag at the counter to collect a stamp.",
+  "card": {
+    "title": "Stamp card",
+    "progress_one": "{{count}} stamp to your free coffee",
+    "progress_other": "{{count}} stamps to your free coffee",
+    "giftCup": "Free coffee cup",
+    "filledCup": "Stamped cup",
+    "emptyCup": "Empty cup",
+    "stampedToast": "Your coffee is stamped ☕",
+    "claimReward": "Claim your free coffee"
+  }
+}

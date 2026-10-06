@@ -1,0 +1,97 @@
+# nginx başlanğıcda bu şablondan /etc/nginx/conf.d/app.conf yaradır (envsubst).
+# ${...} şəklində yalnız env dəyişənləri əvəz olunur; nginx-in öz $dəyişənlərinə toxunulmur.
+
+upstream backend {
+    server backend:8080;
+    keepalive 16;
+}
+
+upstream frontend {
+    server frontend:8080;
+    keepalive 16;
+}
+
+# HTTP: yalnız ACME (Let's Encrypt) yoxlaması və HTTPS-ə yönləndirmə
+server {
+    listen 80 default_server;
+    server_name _;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# SNI göndərməyən və ya tanınmayan domenlə gələn TLS bağlantıları rədd edilir
+server {
+    listen 443 ssl default_server;
+    ssl_reject_handshake on;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    # Yalnız düzgün formatlı domen adları (sertifikat faylının yolunda istifadə olunur)
+    server_name ~^[a-z0-9-]+(\.[a-z0-9-]+)+$;
+
+    # Sertifikat SNI adına görə seçilir: certs/<domen>/fullchain.pem.
+    # Sertifikatı olmayan domenlə TLS bağlantısı qurulmur (fail closed).
+    ssl_certificate     /etc/nginx/certs/$ssl_server_name/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/$ssl_server_name/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # HTTP Host başlığı TLS SNI ilə eyni olmalıdır: bir domenin bağlantısı üzərindən
+    # başqa şirkətin domeninə sorğu göndərmək mümkün olmasın
+    if ($host != $ssl_server_name) {
+        return 421;
+    }
+
+    location /api/ {
+        limit_req zone=api_per_ip burst=40 nodelay;
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+
+    # NFC toxunuşu: kriptoqrafik yoxlama backend-dədir
+    location /t/ {
+        limit_req zone=tap_per_ip burst=10 nodelay;
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+
+    location = /manifest.webmanifest {
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+
+    # Actuator-dan yalnız health xaricə açıqdır
+    location ~ ^/actuator/health(/(liveness|readiness))?$ {
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+    location /actuator {
+        return 404;
+    }
+
+    # Daxili endpoint-lər (məs. TLS domen siyahısı) heç vaxt xaricə açılmır
+    location /internal {
+        return 404;
+    }
+
+    # Swagger UI yalnız dev profilində mövcuddur; prod-da backend 404 qaytarır
+    location /swagger-ui/ {
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+
+    location / {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
+        proxy_pass http://frontend;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+    }
+}

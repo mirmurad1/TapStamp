@@ -1,0 +1,59 @@
+# Ümumi konfiqurasiya. Sirlər burada YOXDUR — yalnız env dəyişənlərindən gəlir (.env.example-a bax).
+spring:
+  application:
+    name: cafe-loyalty
+  jackson:
+    deserialization:
+      # Naməlum JSON sahələri rədd edilir (mass assignment qorunması)
+      fail-on-unknown-properties: true
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: 8080
+  # nginx-in X-Forwarded-* başlıqları yalnız daxili şəbəkədəki proxy-dən qəbul olunur (Tomcat RemoteIpValve)
+  forward-headers-strategy: native
+  max-http-request-header-size: 16KB
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+    path: /api/v1/openapi.json
+  swagger-ui:
+    enabled: false
+    path: /api/v1/docs
+
+app:
+  default-language: az
+  security:
+    cookie-secure: true
+    hsts-enabled: true
+  notifications:
+    sms-provider: ${APP_SMS_PROVIDER:console}
+    mail-provider: ${APP_MAIL_PROVIDER:console}
+  dev:
+    simulator-enabled: false
+    seed-enabled: false

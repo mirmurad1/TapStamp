@@ -1,0 +1,14 @@
+{
+  "shell": { "title": "Management", "mainNav": "Main navigation", "openMenu": "Open menu" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "staffConsole": "Staff console",
+    "settings": "Settings",
+    "audit": "Audit log"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Key figures for customers, stamps and rewards."
+  }
+}

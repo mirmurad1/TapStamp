@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+/* Şriftlər öz serverimizdən verilir (CSP və məxfilik): Inter — mətn, Lora — başlıqlar.
+   Hər ikisi Azərbaycan hərflərini (ə, ğ, ı, ö, ü, ş, ç) və Kiril əlifbasını dəstəkləyir — fonts.test.ts yoxlayır. */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/lora';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tema tokenləri: premium qəhvə evi palitrası (krem, espresso, karamel). Kontrast WCAG AA-ya uyğundur. */
+:root {
+  --background: #f6efe6;
+  --foreground: #2b1b12;
+  --card: #fffbf5;
+  --card-foreground: #2b1b12;
+  --muted: #eadcc8;
+  --muted-foreground: #6b5546;
+  --primary: #3b2418;
+  --primary-foreground: #fbf6ef;
+  --accent: #c8763a;
+  --accent-foreground: #2b1b12;
+  --success: #4f7048;
+  --destructive: #b4442f;
+  --border: #e2d3bf;
+  --ring: #c8763a;
+  --radius: 1.25rem;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #1a1310;
+  --foreground: #f3e9dd;
+  --card: #251b16;
+  --card-foreground: #f3e9dd;
+  --muted: #34271f;
+  --muted-foreground: #c4b3a3;
+  --primary: #f3e9dd;
+  --primary-foreground: #2b1b12;
+  --accent: #e09a5f;
+  --accent-foreground: #1a1310;
+  --success: #8db383;
+  --destructive: #e58a76;
+  --border: #3a2c23;
+  --ring: #e09a5f;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Lora Variable', ui-serif, Georgia, serif;
+  --radius-sm: calc(var(--radius) - 0.75rem);
+  --radius-md: calc(var(--radius) - 0.5rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+}
+
+/* Hərəkətə həssas istifadəçilər üçün animasiyalar söndürülür */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "app": { "loyaltyCard": "Loyallıq kartı" },
+  "language": { "label": "Dil", "az": "Azərbaycanca", "en": "English", "ru": "Русский" },
+  "theme": {
+    "label": "Mövzu",
+    "light": "Açıq mövzu",
+    "dark": "Qaranlıq mövzu",
+    "system": "Sistem mövzusu",
+    "toggle": "Mövzunu dəyiş"
+  },
+  "actions": {
+    "continue": "Davam et",
+    "cancel": "Ləğv et",
+    "save": "Yadda saxla",
+    "retry": "Yenidən cəhd et",
+    "back": "Geri",
+    "close": "Bağla"
+  },
+  "states": { "loading": "Yüklənir…", "comingSoon": "Bu bölmə tezliklə hazır olacaq." },
+  "units": {
+    "stamp_one": "{{count}} möhür",
+    "stamp_other": "{{count}} möhür",
+    "coffee_one": "{{count}} qəhvə",
+    "coffee_other": "{{count}} qəhvə"
+  },
+  "notFound": {
+    "title": "Səhifə tapılmadı",
+    "description": "Bu ünvanda heç nə yoxdur.",
+    "home": "Ana səhifəyə qayıt"
+  }
+}

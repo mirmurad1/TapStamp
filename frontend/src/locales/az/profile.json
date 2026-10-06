@@ -1,0 +1,14 @@
+{
+  "greeting": { "guest": "Xoş gəlmisiniz!", "named": "Salam, {{name}}!" },
+  "intro": "Hər qəhvə sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu piştaxtadakı NFC nişanına toxundurun.",
+  "card": {
+    "title": "Möhür kartı",
+    "progress_one": "Hədiyyə qəhvəyə {{count}} möhür qalıb",
+    "progress_other": "Hədiyyə qəhvəyə {{count}} möhür qalıb",
+    "giftCup": "Hədiyyə fincanı",
+    "filledCup": "Doldurulmuş fincan",
+    "emptyCup": "Boş fincan",
+    "stampedToast": "Qəhvən qeydə alındı ☕",
+    "claimReward": "Hədiyyə qəhvəni al"
+  }
+}

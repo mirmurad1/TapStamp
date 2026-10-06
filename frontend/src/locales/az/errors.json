@@ -1,0 +1,15 @@
+{
+  "VALIDATION_FAILED": "Bəzi sahələr səhv doldurulub. Yoxlayıb yenidən cəhd edin.",
+  "MALFORMED_REQUEST": "Sorğu göndərilə bilmədi. Səhifəni yeniləyin.",
+  "UNAUTHENTICATED": "Davam etmək üçün daxil olun.",
+  "FORBIDDEN": "Bu əməliyyat üçün icazəniz yoxdur.",
+  "CSRF_INVALID": "Təhlükəsizlik yoxlaması alınmadı. Səhifəni yeniləyib yenidən cəhd edin.",
+  "NOT_FOUND": "Axtardığınız məlumat tapılmadı.",
+  "METHOD_NOT_ALLOWED": "Bu əməliyyat dəstəklənmir.",
+  "UNSUPPORTED_MEDIA_TYPE": "Bu format dəstəklənmir.",
+  "PAYLOAD_TOO_LARGE": "Göndərilən məlumat çox böyükdür.",
+  "RATE_LIMITED": "Çox sayda cəhd oldu. Bir azdan yenidən yoxlayın.",
+  "INTERNAL_ERROR": "Nəsə alınmadı. Bir azdan yenidən cəhd edin.",
+  "NETWORK_ERROR": "İnternet bağlantısını yoxlayıb yenidən cəhd edin.",
+  "UNKNOWN": "Gözlənilməz xəta baş verdi."
+}

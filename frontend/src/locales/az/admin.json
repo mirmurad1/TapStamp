@@ -1,0 +1,14 @@
+{
+  "shell": { "title": "İdarəetmə", "mainNav": "Əsas menyu", "openMenu": "Menyunu aç" },
+  "nav": {
+    "dashboard": "İdarəetmə paneli",
+    "customers": "Müştərilər",
+    "staffConsole": "İşçi konsolu",
+    "settings": "Parametrlər",
+    "audit": "Audit jurnalı"
+  },
+  "dashboard": {
+    "title": "İdarəetmə paneli",
+    "subtitle": "Müştərilər, möhürlər və mükafatlar üzrə əsas göstəricilər."
+  }
+}

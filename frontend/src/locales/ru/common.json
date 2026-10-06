@@ -1,0 +1,35 @@
+{
+  "app": { "loyaltyCard": "Карта лояльности" },
+  "language": { "label": "Язык", "az": "Azərbaycanca", "en": "English", "ru": "Русский" },
+  "theme": {
+    "label": "Тема",
+    "light": "Светлая тема",
+    "dark": "Тёмная тема",
+    "system": "Системная тема",
+    "toggle": "Сменить тему"
+  },
+  "actions": {
+    "continue": "Продолжить",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "retry": "Повторить",
+    "back": "Назад",
+    "close": "Закрыть"
+  },
+  "states": { "loading": "Загрузка…", "comingSoon": "Этот раздел скоро появится." },
+  "units": {
+    "stamp_one": "{{count}} штамп",
+    "stamp_few": "{{count}} штампа",
+    "stamp_many": "{{count}} штампов",
+    "stamp_other": "{{count}} штампа",
+    "coffee_one": "{{count}} кофе",
+    "coffee_few": "{{count}} кофе",
+    "coffee_many": "{{count}} кофе",
+    "coffee_other": "{{count}} кофе"
+  },
+  "notFound": {
+    "title": "Страница не найдена",
+    "description": "По этому адресу ничего нет.",
+    "home": "На главную"
+  }
+}

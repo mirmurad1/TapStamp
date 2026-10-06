@@ -1,0 +1,26 @@
+# Production. ProdSafetyGuard başlanğıcda konfiqurasiyanı yoxlayır və təhlükəli dəyərlərdə tətbiqi dayandırır.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  security:
+    cookie-secure: true
+    hsts-enabled: true
+  notifications:
+    sms-provider: ${APP_SMS_PROVIDER:http}
+    mail-provider: ${APP_MAIL_PROVIDER:smtp}
+  crypto:
+    keks: ${APP_CRYPTO_KEKS:}
+    phone-hmac-key: ${APP_PHONE_HMAC_KEY:}
+    otp-pepper: ${APP_OTP_PEPPER:}
+
+logging:
+  structured:
+    format:
+      # Strukturlaşdırılmış JSON loglar (ECS formatı)
+      console: ecs
+  level:
+    root: INFO

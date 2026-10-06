@@ -1,0 +1,18 @@
+# Yalnız lokal inkişaf mühiti. Prod-da bu profil aktiv olarsa tətbiq başlamır (ProdSafetyGuard).
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+app:
+  security:
+    # *.localhost domenlərində HSTS brauzerin bütün localhost ünvanlarına təsir edir
+    hsts-enabled: false
+  dev:
+    simulator-enabled: true
+    seed-enabled: ${DEV_SEED_ENABLED:true}
+
+logging:
+  level:
+    az.cafeloyalty: DEBUG
