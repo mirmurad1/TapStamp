@@ -12,5 +12,16 @@
   "TENANT_UNAVAILABLE": "Xidmət hazırda əlçatmazdır. Bir az sonra yenidən cəhd edin.",
   "INTERNAL_ERROR": "Nəsə alınmadı. Bir azdan yenidən cəhd edin.",
   "NETWORK_ERROR": "İnternet bağlantısını yoxlayıb yenidən cəhd edin.",
-  "UNKNOWN": "Gözlənilməz xəta baş verdi."
+  "UNKNOWN": "Gözlənilməz xəta baş verdi.",
+  "SESSION_EXPIRED": "Təhlükəsizlik üçün sessiyanız bağlandı. Yenidən daxil olun.",
+  "LOGIN_FAILED": "Email və ya şifrə yanlışdır.",
+  "LOGIN_TEMPORARILY_BLOCKED": "Çox sayda uğursuz cəhd oldu. Bir neçə dəqiqədən sonra yenidən cəhd edin.",
+  "MFA_INVALID": "Kod yanlışdır. Tətbiqdəki ən son kodu daxil edin.",
+  "MFA_ALREADY_ENABLED": "İki addımlı yoxlama artıq qurulub.",
+  "STEP_UP_REQUIRED": "Bu əməliyyat üçün kimliyinizi yenidən təsdiqləyin.",
+  "PASSWORD_POLICY_VIOLATION": "Şifrə tələblərə uyğun deyil.",
+  "CURRENT_PASSWORD_INVALID": "Cari şifrə yanlışdır.",
+  "TOKEN_INVALID": "Linkin vaxtı keçib və ya artıq istifadə olunub. Yenisini istəyin.",
+  "ALREADY_EXISTS": "Bu məlumatla qeyd artıq mövcuddur.",
+  "PROVISIONING_DISABLED": "Bu serverdə yeni şirkət yaratmaq söndürülüb."
 }

@@ -36,7 +36,8 @@ public final class Hkdf {
         return okm.toByteArray();
     }
 
-    static byte[] hmac(byte[] key, byte[] data) {
+    /** HMAC-SHA256. */
+    public static byte[] hmac(byte[] key, byte[] data) {
         try {
             Mac mac = Mac.getInstance(HMAC);
             mac.init(new SecretKeySpec(key, HMAC));

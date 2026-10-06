@@ -1,0 +1,50 @@
+package az.cafeloyalty.security.ratelimit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import az.cafeloyalty.support.AdminClient;
+import az.cafeloyalty.support.AdminIntegrationTest;
+import az.cafeloyalty.support.TestTenants;
+import org.junit.jupiter.api.Test;
+
+/** Rate limiting: IP üzrə giriş limiti, şirkətlər arası ayrılıq, açarlarda şəxsi məlumatın olmaması. */
+class RateLimitIT extends AdminIntegrationTest {
+
+    @Test
+    void loginAttemptsPerIpAreLimitedWithRetryAfter() throws Exception {
+        String ip = AdminClient.uniqueIp();
+        for (int i = 0; i < 20; i++) {
+            AdminClient.staff(mvc, TestTenants.ALPHA_HOST).fromIp(ip)
+                    .login(uniqueEmail("flood"), "Yanlış-şifrə-12345")
+                    .andExpect(status().isUnauthorized());
+        }
+        AdminClient.staff(mvc, TestTenants.ALPHA_HOST).fromIp(ip)
+                .login(uniqueEmail("flood"), "Yanlış-şifrə-12345")
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
+                .andExpect(jsonPath("$.retryAfterSeconds").isNumber())
+                .andExpect(header().exists("Retry-After"));
+
+        // Hər şirkətin öz limiti var: eyni IP beta-da bloklanmayıb
+        AdminClient.staff(mvc, TestTenants.BETA_HOST).fromIp(ip)
+                .login(uniqueEmail("flood"), "Yanlış-şifrə-12345")
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void bucketKeysContainNoEmailsOrIpAddresses() throws Exception {
+        String ip = AdminClient.uniqueIp();
+        String email = uniqueEmail("private");
+        AdminClient.staff(mvc, TestTenants.ALPHA_HOST).fromIp(ip).login(email, "Yanlış-şifrə-12345");
+        List<String> keys = platformJdbc.sql("SELECT id FROM rate_limit_buckets").query(String.class).list();
+        assertThat(keys).isNotEmpty()
+                .noneMatch(key -> key.contains(ip))
+                .noneMatch(key -> key.contains("@"))
+                .allMatch(key -> key.matches("^[A-Z_]+:(t:[0-9a-f-]{36}|platform):[0-9a-f]{32}$"));
+    }
+}

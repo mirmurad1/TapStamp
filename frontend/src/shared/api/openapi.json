@@ -1,0 +1,1849 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "description" : "Kafe loyallıq platformasının REST API-si.\n\n* Tenant (şirkət) sorğunun domenindən müəyyən olunur.\n* Autentifikasiya HttpOnly cookie-lərlə aparılır; dəyişdirici sorğular `X-XSRF-TOKEN` başlığı tələb edir.\n* Xətalar RFC 7807 (Problem Details) formatındadır və dildən asılı olmayan `code` sahəsi daşıyır.\n* Mətnlər `lang` cookie-si və ya `Accept-Language` başlığına görə az, en və ya ru dilində qaytarılır.\n",
+    "title" : "Kafe Loyallıq API",
+    "version" : "v1"
+  },
+  "tags" : [ {
+    "description" : "Sorğunun hansı şirkətə və ya platformaya aid olduğu",
+    "name" : "Kontekst"
+  }, {
+    "description" : "CSRF qorunması üçün köməkçi endpoint-lər",
+    "name" : "Təhlükəsizlik"
+  }, {
+    "description" : "Kafenin ictimai məlumatı",
+    "name" : "Kafe"
+  } ],
+  "paths" : {
+    "/api/v1/admin/auth/invitations/accept" : {
+      "post" : {
+        "description" : "Hesab yaradılır və istifadəçi daxil olur. Sahib üçün növbəti addım TOTP qeydiyyatıdır.",
+        "operationId" : "accept",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AcceptInvitationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dəvətin qəbulu",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/invitations/inspect" : {
+      "post" : {
+        "description" : "Token POST body-də göndərilir (URL-də yox). Etibarsız, vaxtı keçmiş və ya istifadə olunmuş token üçün `TOKEN_INVALID`.",
+        "operationId" : "inspect",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InvitationTokenRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InvitationDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dəvət linkinin yoxlanılması",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/login" : {
+      "post" : {
+        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
+        "operationId" : "login_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Email və şifrə ilə giriş",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/logout" : {
+      "post" : {
+        "description" : "Cari sessiyanı ləğv edir və cookie-ni silir. Sessiya artıq bitibsə də 204 qaytarır.",
+        "operationId" : "logout_1",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Çıxış",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/mfa/enrollment" : {
+      "post" : {
+        "description" : "Yeni sirr yaradır; QR kod frontend-də göstərilir.",
+        "operationId" : "startEnrollment_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnrollmentStartResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP qeydiyyatına başlamaq",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/mfa/enrollment/confirm" : {
+      "post" : {
+        "description" : "Tətbiqdəki kodla təsdiqlənir; 10 bərpa kodu bir dəfə qaytarılır.",
+        "operationId" : "confirmEnrollment_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodesResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP qeydiyyatının təsdiqi",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/mfa/verify" : {
+      "post" : {
+        "description" : "Uğurlu olarsa sessiya tokeni yenilənir. 5 yanlış koddan sonra sessiya ləğv olunur.",
+        "operationId" : "verifyMfa_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP və ya bərpa kodu ilə girişin tamamlanması",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/password/forgot" : {
+      "post" : {
+        "description" : "Həmişə 202 qaytarır — hesabın mövcud olub-olmadığı açıqlanmır. Link 30 dəqiqə etibarlıdır.",
+        "operationId" : "forgotPassword_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordForgotRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        },
+        "summary" : "Şifrə bərpası linki istəmək",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/password/reset" : {
+      "post" : {
+        "description" : "Birdəfəlik token ilə. Uğurlu olarsa istifadəçinin bütün sessiyaları ləğv olunur.",
+        "operationId" : "resetPassword_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Yeni şifrənin təyin edilməsi",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/session" : {
+      "get" : {
+        "description" : "Frontend səhifə yenilənəndə hansı addımı göstərəcəyini bununla bilir (giriş, TOTP, TOTP qeydiyyatı və ya panel). Sessiya yoxdursa və ya bitibsə NONE qaytarır.",
+        "operationId" : "session_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionStateResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sessiyanın vəziyyəti",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/auth/step-up" : {
+      "post" : {
+        "description" : "TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.",
+        "operationId" : "stepUp_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Həssas əməliyyat üçün təkrar təsdiq",
+        "tags" : [ "Admin: autentifikasiya" ]
+      }
+    },
+    "/api/v1/admin/me" : {
+      "get" : {
+        "description" : "Rollar, filiallar, dil və 2FA vəziyyəti.",
+        "operationId" : "me_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Daxil olmuş adminin profili",
+        "tags" : [ "Admin: hesab" ]
+      },
+      "patch" : {
+        "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
+        "operationId" : "update_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Profilin yenilənməsi",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/mfa/recovery-codes" : {
+      "post" : {
+        "description" : "Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.",
+        "operationId" : "regenerateRecoveryCodes_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodesResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Yeni bərpa kodları",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/password" : {
+      "post" : {
+        "description" : "Digər bütün sessiyalar ləğv olunur, cari sessiyanın tokeni yenilənir.",
+        "operationId" : "changePassword_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Şifrənin dəyişdirilməsi",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/sessions" : {
+      "get" : {
+        "operationId" : "sessions_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SessionResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Aktiv sessiyalar (cihazlar)",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/sessions/{sessionId}" : {
+      "delete" : {
+        "operationId" : "revokeSession_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sessionId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Sessiyanın ləğvi (cihazdan çıxış)",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/team" : {
+      "get" : {
+        "description" : "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür.",
+        "operationId" : "members",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MemberResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Komanda üzvləri",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/admin/team/invitations" : {
+      "get" : {
+        "operationId" : "invitations",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/InvitationResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Gözləyən dəvətlər",
+        "tags" : [ "Admin: komanda" ]
+      },
+      "post" : {
+        "description" : "Dəvət emaili 72 saat etibarlı link ilə göndərilir. Sahib istənilən rolu, menecer yalnız öz filialına barista (STAFF) dəvət edə bilər. MANAGER və STAFF üçün filial məcburidir, sahib üçün göstərilmir.",
+        "operationId" : "invite",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InviteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InvitationResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "İşçi dəvəti",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/admin/team/invitations/{invitationId}" : {
+      "delete" : {
+        "operationId" : "revokeInvitation",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "invitationId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Dəvətin ləğvi",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/admin/team/members/{userId}/mfa-reset" : {
+      "post" : {
+        "description" : "Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP) tələb edir.",
+        "operationId" : "resetMfa",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "İşçinin TOTP-sinin sıfırlanması",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/admin/team/members/{userId}/status" : {
+      "patch" : {
+        "description" : "Bloklananda bütün sessiyaları dərhal ləğv olunur. Sonuncu aktiv sahib bloklana bilməz.",
+        "operationId" : "updateStatus_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MemberStatusRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "İşçinin bloklanması və ya aktivləşdirilməsi",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/context" : {
+      "get" : {
+        "description" : "Frontend bu cavaba görə rejimi seçir: şirkətin domenində (`TENANT`) müştəri və işçi tətbiqi, platformanın domenində (`PLATFORM`) platforma paneli işləyir. Gizli məlumat qaytarılmır.",
+        "operationId" : "context",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContextResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cari domenin konteksti",
+        "tags" : [ "Kontekst" ]
+      }
+    },
+    "/api/v1/csrf" : {
+      "get" : {
+        "description" : "`__Host-XSRF-TOKEN` cookie-sini qoyur (yoxdursa). Frontend bu cookie-nin dəyərini bütün dəyişdirici sorğularda `X-XSRF-TOKEN` başlığında göndərməlidir.",
+        "operationId" : "csrf",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "CSRF tokenini təmin edir",
+        "tags" : [ "Təhlükəsizlik" ]
+      }
+    },
+    "/api/v1/platform/auth/login" : {
+      "post" : {
+        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Email və şifrə ilə giriş",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/logout" : {
+      "post" : {
+        "description" : "Cari sessiyanı ləğv edir və cookie-ni silir. Sessiya artıq bitibsə də 204 qaytarır.",
+        "operationId" : "logout",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Çıxış",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/mfa/enrollment" : {
+      "post" : {
+        "description" : "Yeni sirr yaradır; QR kod frontend-də göstərilir.",
+        "operationId" : "startEnrollment",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnrollmentStartResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP qeydiyyatına başlamaq",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/mfa/enrollment/confirm" : {
+      "post" : {
+        "description" : "Tətbiqdəki kodla təsdiqlənir; 10 bərpa kodu bir dəfə qaytarılır.",
+        "operationId" : "confirmEnrollment",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodesResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP qeydiyyatının təsdiqi",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/mfa/verify" : {
+      "post" : {
+        "description" : "Uğurlu olarsa sessiya tokeni yenilənir. 5 yanlış koddan sonra sessiya ləğv olunur.",
+        "operationId" : "verifyMfa",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "TOTP və ya bərpa kodu ilə girişin tamamlanması",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/password/forgot" : {
+      "post" : {
+        "description" : "Həmişə 202 qaytarır — hesabın mövcud olub-olmadığı açıqlanmır. Link 30 dəqiqə etibarlıdır.",
+        "operationId" : "forgotPassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordForgotRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        },
+        "summary" : "Şifrə bərpası linki istəmək",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/password/reset" : {
+      "post" : {
+        "description" : "Birdəfəlik token ilə. Uğurlu olarsa istifadəçinin bütün sessiyaları ləğv olunur.",
+        "operationId" : "resetPassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Yeni şifrənin təyin edilməsi",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/session" : {
+      "get" : {
+        "description" : "Frontend səhifə yenilənəndə hansı addımı göstərəcəyini bununla bilir (giriş, TOTP, TOTP qeydiyyatı və ya panel). Sessiya yoxdursa və ya bitibsə NONE qaytarır.",
+        "operationId" : "session",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionStateResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sessiyanın vəziyyəti",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/auth/step-up" : {
+      "post" : {
+        "description" : "TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.",
+        "operationId" : "stepUp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Həssas əməliyyat üçün təkrar təsdiq",
+        "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/me" : {
+      "get" : {
+        "description" : "Rollar, filiallar, dil və 2FA vəziyyəti.",
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Daxil olmuş adminin profili",
+        "tags" : [ "Platforma: hesab" ]
+      },
+      "patch" : {
+        "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
+        "operationId" : "update",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Profilin yenilənməsi",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/mfa/recovery-codes" : {
+      "post" : {
+        "description" : "Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.",
+        "operationId" : "regenerateRecoveryCodes",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodesResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Yeni bərpa kodları",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/password" : {
+      "post" : {
+        "description" : "Digər bütün sessiyalar ləğv olunur, cari sessiyanın tokeni yenilənir.",
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Şifrənin dəyişdirilməsi",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/sessions" : {
+      "get" : {
+        "operationId" : "sessions",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SessionResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Aktiv sessiyalar (cihazlar)",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/sessions/{sessionId}" : {
+      "delete" : {
+        "operationId" : "revokeSession",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sessionId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Sessiyanın ləğvi (cihazdan çıxış)",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/tenants" : {
+      "get" : {
+        "operationId" : "list",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TenantResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Bütün şirkətlər",
+        "tags" : [ "Platforma: şirkətlər" ]
+      },
+      "post" : {
+        "description" : "Ayrıca baza və DB rolları yaradılır, miqrasiyalar işə salınır. Step-up tələb edir. Prod-da standart olaraq söndürülüb (`APP_PROVISIONING_ENABLED`) — onda `PROVISIONING_DISABLED`.",
+        "operationId" : "provision",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProvisionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Yeni şirkət yaratmaq",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkət haqqında məlumat",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/owner-invitations" : {
+      "post" : {
+        "description" : "Dəvət linki şirkətin öz domenində açılır, 72 saat etibarlıdır.",
+        "operationId" : "inviteOwner",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OwnerInvitationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OwnerInvitationResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Şirkət sahibinə dəvət",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/owners" : {
+      "get" : {
+        "operationId" : "owners",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/OwnerResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin sahibləri",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/owners/{userId}/mfa-reset" : {
+      "post" : {
+        "description" : "Sahib həm telefonunu, həm bərpa kodlarını itirəndə. Step-up tələb edir; audit jurnalına yazılır.",
+        "operationId" : "resetOwnerMfa",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Sahibin TOTP-sinin sıfırlanması",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/stats" : {
+      "get" : {
+        "description" : "Yalnız saylar — müştərilərin şəxsi məlumatı göstərilmir.",
+        "operationId" : "stats",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin ümumi göstəriciləri",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/status" : {
+      "patch" : {
+        "description" : "Step-up tələb edir.",
+        "operationId" : "updateStatus",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TenantStatusRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkəti dayandırmaq və ya bərpa etmək",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/public/company" : {
+      "get" : {
+        "description" : "Domenə görə müəyyən olunan kafenin adı, təsviri, aktiv filialları və mükafat qaydası. Autentifikasiya tələb etmir. Platforma domenində 404 qaytarır.",
+        "operationId" : "company",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PublicCompanyResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kafe haqqında ictimai məlumat",
+        "tags" : [ "Kafe" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "AcceptInvitationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "displayName" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "token" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "displayName", "password", "token" ]
+      },
+      "BranchResponse" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
+      },
+      "ChangePasswordRequest" : {
+        "type" : "object",
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "newPassword" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "currentPassword", "newPassword" ]
+      },
+      "CodeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "6 rəqəmli TOTP kodu və ya bərpa kodu (xxxxx-xxxxx)",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "code" ]
+      },
+      "ContextResponse" : {
+        "type" : "object",
+        "properties" : {
+          "scope" : {
+            "type" : "string",
+            "enum" : [ "TENANT", "PLATFORM", "NONE" ]
+          },
+          "tenant" : {
+            "$ref" : "#/components/schemas/Tenant"
+          }
+        }
+      },
+      "EnrollmentStartResponse" : {
+        "type" : "object",
+        "description" : "TOTP qeydiyyatı: sirr autentifikator tətbiqinə əl ilə və ya QR kod ilə əlavə olunur",
+        "properties" : {
+          "otpauthUri" : {
+            "type" : "string"
+          },
+          "secret" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Features" : {
+        "type" : "object",
+        "properties" : {
+          "devTools" : {
+            "type" : "boolean",
+            "description" : "Dev alətləri (simulyator, outbox) — yalnız dev mühitində"
+          }
+        }
+      },
+      "InvitationDetailsResponse" : {
+        "type" : "object",
+        "description" : "Dəvətin məzmunu (qəbul səhifəsində göstərilir)",
+        "properties" : {
+          "branchName" : {
+            "type" : "string"
+          },
+          "companyName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          }
+        }
+      },
+      "InvitationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          }
+        }
+      },
+      "InvitationTokenRequest" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "token" ]
+      },
+      "InviteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          },
+          "language" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "az|en|ru"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "SUPER_ADMIN", "COMPANY_OWNER", "BRANCH_MANAGER", "STAFF" ]
+          }
+        },
+        "required" : [ "email", "language", "role" ]
+      },
+      "LocalizedText" : {
+        "type" : "object",
+        "properties" : {
+          "az" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "en" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "ru" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "az" ]
+      },
+      "LoginRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "email", "password" ]
+      },
+      "LoginResponse" : {
+        "type" : "object",
+        "description" : "Girişin nəticəsi. Sessiya cookie-si HttpOnly-dir; token cavabda qaytarılmır.",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "AUTHENTICATED", "MFA_REQUIRED", "MFA_ENROLLMENT_REQUIRED" ]
+          }
+        }
+      },
+      "MeResponse" : {
+        "type" : "object",
+        "description" : "Daxil olmuş admin haqqında məlumat",
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "features" : {
+            "$ref" : "#/components/schemas/Features"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "preferredLanguage" : {
+            "type" : "string"
+          },
+          "realm" : {
+            "type" : "string",
+            "description" : "STAFF — şirkət işçisi, PLATFORM — platforma admini"
+          },
+          "recoveryCodesRemaining" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleResponse"
+            }
+          },
+          "totpEnabled" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "MemberResponse" : {
+        "type" : "object",
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "lastLoginAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleResponse"
+            }
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "totpEnabled" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "MemberStatusRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "pattern" : "ACTIVE|DISABLED"
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "OwnerInvitationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          },
+          "language" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "az|en|ru"
+          }
+        },
+        "required" : [ "email", "language" ]
+      },
+      "OwnerInvitationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "OwnerResponse" : {
+        "type" : "object",
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "lastLoginAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "totpEnabled" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PasswordForgotRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "email" ]
+      },
+      "PasswordResetRequest" : {
+        "type" : "object",
+        "properties" : {
+          "newPassword" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "token" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "newPassword", "token" ]
+      },
+      "ProvisionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "defaultLanguage" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "az|en|ru"
+          },
+          "displayName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "primaryDomain" : {
+            "type" : "string",
+            "description" : "Şirkətin öz domeni, məs. bonus.mockcoffee.az",
+            "maxLength" : 253,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+          },
+          "slug" : {
+            "type" : "string",
+            "description" : "Texniki ad (baza adında istifadə olunur): kiçik latın hərfləri, rəqəm, alt xətt",
+            "minLength" : 1,
+            "pattern" : "^[a-z][a-z0-9_]{1,30}$"
+          },
+          "timezone" : {
+            "type" : "string",
+            "maxLength" : 64,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "defaultLanguage", "displayName", "primaryDomain", "slug", "timezone" ]
+      },
+      "PublicCompanyResponse" : {
+        "type" : "object",
+        "description" : "Kafenin ictimai məlumatı: ad, təsvir, filiallar və mükafat qaydası",
+        "properties" : {
+          "branches" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BranchResponse"
+            }
+          },
+          "defaultLanguage" : {
+            "type" : "string",
+            "description" : "Şirkətin standart dili: az, en və ya ru"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardRule" : {
+            "$ref" : "#/components/schemas/RewardRuleResponse",
+            "description" : "Aktiv mükafat qaydası; təyin olunmayıbsa null"
+          },
+          "timezone" : {
+            "type" : "string",
+            "description" : "IANA saat qurşağı, məs. Asia/Baku"
+          }
+        }
+      },
+      "RecoveryCodesResponse" : {
+        "type" : "object",
+        "description" : "Bərpa kodları yalnız bir dəfə göstərilir; hər biri bir dəfə istifadə oluna bilər",
+        "properties" : {
+          "recoveryCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "RewardRuleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "rewardDescription" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Hədiyyə üçün lazım olan möhür sayı"
+          }
+        }
+      },
+      "RoleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SessionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "current" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ip" : {
+            "type" : "string"
+          },
+          "lastActivityAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "userAgent" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SessionStateResponse" : {
+        "type" : "object",
+        "description" : "Cari sessiyanın vəziyyəti: NONE — daxil olmayıb, PENDING_MFA — TOTP gözlənilir, MFA_ENROLLMENT — TOTP qurulmalıdır, ACTIVE — tam daxil olub",
+        "properties" : {
+          "state" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StatsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "activeCustomers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "activeStaff" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "branches" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Tenant" : {
+        "type" : "object",
+        "properties" : {
+          "defaultLanguage" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TenantResponse" : {
+        "type" : "object",
+        "properties" : {
+          "defaultLanguage" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "domains" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "primaryDomain" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TenantStatusRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "pattern" : "ACTIVE|SUSPENDED"
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "UpdateProfileRequest" : {
+        "type" : "object",
+        "properties" : {
+          "displayName" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 1
+          },
+          "preferredLanguage" : {
+            "type" : "string",
+            "pattern" : "az|en|ru"
+          }
+        }
+      }
+    }
+  }
+}

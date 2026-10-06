@@ -1,6 +1,8 @@
-# Lokal inkişaf üçün əlavə: backend-i IDE-dən (Docker-siz) işə salanda PostgreSQL-ə qoşulmaq üçün.
-# İstifadə: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
-# Port yalnız 127.0.0.1-də açılır (xarici şəbəkədən əlçatan deyil).
+# Lokal inkişaf üçün əlavə (yalnız dev):
+#  * PostgreSQL — backend-i IDE-dən (Docker-siz) işə salanda qoşulmaq üçün;
+#  * backend — Vite dev serverinin proxy-si üçün (http://mockcoffee.localhost:5173 → 127.0.0.1:8080).
+# İstifadə: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# Portlar yalnız 127.0.0.1-də açılır (xarici şəbəkədən əlçatan deyil).
 services:
   postgres:
     ports:
@@ -8,6 +10,10 @@ services:
     networks:
       - data
       - devdb
+
+  backend:
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
 
 networks:
   devdb:

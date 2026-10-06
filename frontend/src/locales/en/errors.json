@@ -12,5 +12,16 @@
   "TENANT_UNAVAILABLE": "The service is not available right now. Please try again later.",
   "INTERNAL_ERROR": "Something went wrong. Please try again shortly.",
   "NETWORK_ERROR": "Check your internet connection and try again.",
-  "UNKNOWN": "An unexpected error occurred."
+  "UNKNOWN": "An unexpected error occurred.",
+  "SESSION_EXPIRED": "For your security, your session has ended. Please sign in again.",
+  "LOGIN_FAILED": "Incorrect email or password.",
+  "LOGIN_TEMPORARILY_BLOCKED": "Too many failed attempts. Please try again in a few minutes.",
+  "MFA_INVALID": "Invalid code. Enter the latest code from your app.",
+  "MFA_ALREADY_ENABLED": "Two-step verification is already set up.",
+  "STEP_UP_REQUIRED": "Please confirm your identity again to continue.",
+  "PASSWORD_POLICY_VIOLATION": "The password does not meet the requirements.",
+  "CURRENT_PASSWORD_INVALID": "The current password is incorrect.",
+  "TOKEN_INVALID": "The link has expired or has already been used. Please request a new one.",
+  "ALREADY_EXISTS": "A record with these details already exists.",
+  "PROVISIONING_DISABLED": "Creating companies is disabled on this server."
 }

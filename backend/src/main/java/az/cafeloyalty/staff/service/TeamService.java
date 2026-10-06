@@ -1,0 +1,133 @@
+package az.cafeloyalty.staff.service;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import az.cafeloyalty.security.admin.AdminAccount;
+import az.cafeloyalty.security.admin.AdminAuthService;
+import az.cafeloyalty.security.admin.AdminPrincipal;
+import az.cafeloyalty.security.admin.AdminRealm;
+import az.cafeloyalty.security.admin.AdminRealms;
+import az.cafeloyalty.security.admin.AdminRole;
+import az.cafeloyalty.security.admin.RoleGrant;
+import az.cafeloyalty.shared.error.ApiException;
+import az.cafeloyalty.shared.error.ErrorCode;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Service;
+
+/** Komanda: işçilərin siyahısı, hesabın bloklanması/aktivləşdirilməsi, itirilmiş TOTP-nin sıfırlanması. */
+@Service
+public class TeamService {
+
+    public record MemberView(UUID id, String email, String displayName, AdminAccount.AccountStatus status,
+                             List<RoleGrant> roles, boolean totpEnabled, Instant lastLoginAt) {
+    }
+
+    private final JdbcClient jdbc;
+    private final AdminRealms realms;
+    private final AdminAuthService auth;
+    private final Clock clock;
+
+    public TeamService(@Qualifier("tenantJdbc") JdbcClient jdbc, AdminRealms realms, AdminAuthService auth, Clock clock) {
+        this.jdbc = jdbc;
+        this.realms = realms;
+        this.auth = auth;
+        this.clock = clock;
+    }
+
+    public List<MemberView> members(AdminPrincipal principal) {
+        Map<UUID, Set<RoleGrant>> roles = new HashMap<>();
+        jdbc.sql("SELECT staff_user_id, role, branch_id FROM staff_roles")
+                .query(rs -> {
+                    roles.computeIfAbsent(rs.getObject("staff_user_id", UUID.class), id -> new HashSet<>())
+                            .add(new RoleGrant(AdminRole.valueOf(rs.getString("role")), rs.getObject("branch_id", UUID.class)));
+                });
+        List<MemberView> members = new ArrayList<>();
+        jdbc.sql("""
+                        SELECT id, email, display_name, status, totp_enabled_at, last_login_at FROM staff_users
+                        WHERE status <> 'INVITED' ORDER BY created_at""")
+                .query(rs -> {
+                    UUID id = rs.getObject("id", UUID.class);
+                    Set<RoleGrant> grants = roles.getOrDefault(id, Set.of());
+                    if (TeamPermissions.canView(principal, grants) || id.equals(principal.userId())) {
+                        var lastLogin = rs.getTimestamp("last_login_at");
+                        members.add(new MemberView(id, rs.getString("email"), rs.getString("display_name"),
+                                AdminAccount.AccountStatus.valueOf(rs.getString("status")),
+                                grants.stream().sorted((a, b) -> a.role().compareTo(b.role())).toList(),
+                                rs.getTimestamp("totp_enabled_at") != null,
+                                lastLogin == null ? null : lastLogin.toInstant()));
+                    }
+                });
+        return members;
+    }
+
+    /** Hesabın bloklanması: bütün sessiyalar dərhal ləğv olunur. Sonuncu aktiv sahib bloklana bilməz. */
+    public void updateStatus(AdminPrincipal principal, UUID userId, AdminAccount.AccountStatus status) {
+        if (status == AdminAccount.AccountStatus.INVITED) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        AdminAccount target = manageable(principal, userId);
+        if (target.status() == status) {
+            return;
+        }
+        Instant now = clock.instant();
+        Set<RoleGrant> grants = realms.accounts(AdminRealm.STAFF).loadRoles(userId);
+        boolean owner = grants.stream().anyMatch(grant -> grant.role() == AdminRole.COMPANY_OWNER);
+        realms.tx(AdminRealm.STAFF).executeWithoutResult(tx -> {
+            if (status == AdminAccount.AccountStatus.DISABLED && owner && activeOwners() <= 1) {
+                throw new ApiException(ErrorCode.FORBIDDEN);
+            }
+            realms.accounts(AdminRealm.STAFF).updateStatus(userId, status, now);
+            if (status == AdminAccount.AccountStatus.DISABLED) {
+                realms.sessions(AdminRealm.STAFF).revokeAll(userId, "ACCOUNT_DISABLED", now, null);
+            }
+        });
+        realms.audit(AdminRealm.STAFF, status == AdminAccount.AccountStatus.DISABLED ? "STAFF_DISABLED" : "STAFF_ENABLED",
+                principal.userId(), "account", userId, Map.of());
+    }
+
+    /**
+     * İtirilmiş telefona görə TOTP-nin sıfırlanması (yalnız sahib, step-up ilə). İşçinin sessiyaları ləğv olunur;
+     * növbəti girişdə TOTP-ni yenidən qurur.
+     */
+    public void resetMfa(AdminPrincipal principal, UUID userId) {
+        if (!principal.hasRole(AdminRole.COMPANY_OWNER)) {
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+        auth.requireStepUp(principal);
+        manageable(principal, userId);
+        Instant now = clock.instant();
+        realms.tx(AdminRealm.STAFF).executeWithoutResult(tx -> {
+            realms.accounts(AdminRealm.STAFF).resetTotp(userId, now);
+            realms.sessions(AdminRealm.STAFF).revokeAll(userId, "MFA_RESET", now, null);
+        });
+        realms.audit(AdminRealm.STAFF, "STAFF_MFA_RESET", principal.userId(), "account", userId, Map.of());
+    }
+
+    private AdminAccount manageable(AdminPrincipal principal, UUID userId) {
+        AdminAccount target = realms.accounts(AdminRealm.STAFF).findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        Set<RoleGrant> grants = realms.accounts(AdminRealm.STAFF).loadRoles(userId);
+        if (!TeamPermissions.canManage(principal, userId, grants)) {
+            // Menecer görmədiyi işçinin mövcudluğunu öyrənməsin
+            throw new ApiException(TeamPermissions.canView(principal, grants) ? ErrorCode.FORBIDDEN : ErrorCode.NOT_FOUND);
+        }
+        return target;
+    }
+
+    private int activeOwners() {
+        return jdbc.sql("""
+                        SELECT count(DISTINCT u.id) FROM staff_users u JOIN staff_roles r ON r.staff_user_id = u.id
+                        WHERE r.role = 'COMPANY_OWNER' AND u.status = 'ACTIVE'""")
+                .query(Integer.class)
+                .single();
+    }
+}

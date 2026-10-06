@@ -14,6 +14,8 @@ public final class TestTenants {
 
     public static final String ALPHA_HOST = "alpha.test";
     public static final String BETA_HOST = "beta.test";
+    /** Platforma panelinin domeni (app.platform-domain standart dəyəri). */
+    public static final String PLATFORM_HOST = "platform.localhost";
 
     private TestTenants() {
     }

@@ -17,6 +17,8 @@ app:
   dev:
     simulator-enabled: true
     seed-enabled: ${DEV_SEED_ENABLED:true}
+    # Test hesablarının şifrəsi (README-də göstərilir). Yalnız dev profilində oxunur.
+    seed-admin-password: ${DEV_SEED_ADMIN_PASSWORD:Kofe-Dev-Parol-2026}
 
 logging:
   level:

@@ -71,6 +71,11 @@ public class ProdSafetyGuard implements BeanFactoryPostProcessor, EnvironmentAwa
             }
         }
 
+        if ("smtp".equals(env.getProperty("app.notifications.mail-provider", "").trim().toLowerCase(Locale.ROOT))
+                && env.getProperty("app.notifications.mail-from", "").isBlank()) {
+            violations.add("app.notifications.mail-from təyin olunmayıb (smtp üçün məcburidir)");
+        }
+
         if (!env.getProperty("app.security.cookie-secure", Boolean.class, true)) {
             violations.add("app.security.cookie-secure söndürülüb");
         }

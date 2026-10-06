@@ -1,6 +1,13 @@
 {
-  "app": { "loyaltyCard": "Loyalty card" },
-  "language": { "label": "Language", "az": "Azərbaycanca", "en": "English", "ru": "Русский" },
+  "app": {
+    "loyaltyCard": "Loyalty card"
+  },
+  "language": {
+    "label": "Language",
+    "az": "Azərbaycanca",
+    "en": "English",
+    "ru": "Русский"
+  },
   "theme": {
     "label": "Theme",
     "light": "Light theme",
@@ -14,9 +21,17 @@
     "save": "Save",
     "retry": "Try again",
     "back": "Back",
-    "close": "Close"
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "download": "Download"
   },
-  "states": { "loading": "Loading…", "comingSoon": "This section is coming soon." },
+  "states": {
+    "loading": "Loading…",
+    "comingSoon": "This section is coming soon."
+  },
   "units": {
     "stamp_one": "{{count}} stamp",
     "stamp_other": "{{count}} stamps",
@@ -27,5 +42,15 @@
     "title": "Page not found",
     "description": "There is nothing at this address.",
     "home": "Back to home"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "passwordMismatch": "Passwords do not match.",
+    "code": "Enter the 6-digit code.",
+    "recoveryCode": "The code must look like xxxxx-xxxxx.",
+    "slug": "Must start with a lowercase letter and contain only lowercase letters, digits and underscores (2–31 characters).",
+    "domain": "Enter a valid domain, e.g. bonus.mockcoffee.az.",
+    "tooLong": "The text is too long."
   }
 }

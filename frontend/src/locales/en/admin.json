@@ -1,14 +1,182 @@
 {
-  "shell": { "title": "Management", "mainNav": "Main navigation", "openMenu": "Open menu" },
+  "shell": {
+    "title": "Management",
+    "mainNav": "Main navigation",
+    "openMenu": "Open menu",
+    "platformTitle": "Platform"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "customers": "Customers",
     "staffConsole": "Staff console",
     "settings": "Settings",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "team": "Team",
+    "account": "My account",
+    "tenants": "Companies"
   },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Key figures for customers, stamps and rewards."
+  },
+  "userMenu": {
+    "label": "User menu",
+    "account": "Account settings",
+    "signOut": "Sign out"
+  },
+  "roles": {
+    "SUPER_ADMIN": "Platform admin",
+    "COMPANY_OWNER": "Owner",
+    "BRANCH_MANAGER": "Branch manager",
+    "STAFF": "Barista"
+  },
+  "account": {
+    "title": "My account",
+    "profile": {
+      "title": "Profile",
+      "displayName": "Name",
+      "language": "Interface language",
+      "languageHint": "Your choice applies on all your devices and in emails.",
+      "saved": "Saved."
+    },
+    "password": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Repeat the new password",
+      "submit": "Change password",
+      "changed": "Password changed. Sessions on other devices have been signed out."
+    },
+    "security": {
+      "title": "Two-step verification",
+      "enabled": "On",
+      "disabled": "Not set up",
+      "recoveryRemaining_one": "{{count}} unused recovery code left.",
+      "recoveryRemaining_other": "{{count}} unused recovery codes left.",
+      "regenerate": "Generate new recovery codes",
+      "regenerateHint": "Your old recovery codes will stop working."
+    },
+    "sessions": {
+      "title": "Active sessions",
+      "subtitle": "Devices signed in to your account. Sign out any session you don't recognise and change your password.",
+      "current": "This device",
+      "lastActive": "Last active: {{time}}",
+      "started": "Signed in: {{time}}",
+      "revoke": "Sign out session",
+      "unknownDevice": "Unknown device",
+      "revoked": "Session signed out."
+    }
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Invite staff and manage their roles and access.",
+    "members": "Staff",
+    "invitations": "Pending invitations",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "twoFactor": "2FA",
+      "lastLogin": "Last sign-in",
+      "expires": "Valid until",
+      "actions": "Actions"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "DISABLED": "Blocked",
+      "INVITED": "Invited"
+    },
+    "twoFactorOn": "On",
+    "twoFactorOff": "Off",
+    "never": "Never",
+    "you": "You",
+    "allBranches": "All branches",
+    "empty": "Nobody here yet.",
+    "noInvitations": "No pending invitations.",
+    "invite": {
+      "open": "Invite staff",
+      "title": "New staff invitation",
+      "description": "An invitation email with a link valid for 72 hours will be sent.",
+      "email": "Email",
+      "role": "Role",
+      "branch": "Branch",
+      "language": "Email language",
+      "submit": "Send invitation",
+      "sent": "Invitation sent to {{email}}."
+    },
+    "actions": {
+      "disable": "Block",
+      "enable": "Activate",
+      "resetMfa": "Reset 2FA",
+      "revokeInvitation": "Revoke"
+    },
+    "confirm": {
+      "disable": "Block {{name}}? All of their sessions will be signed out immediately.",
+      "resetMfa": "Reset two-step verification for {{name}}? They will set it up again at the next sign-in."
+    },
+    "done": {
+      "disabled": "Account blocked.",
+      "enabled": "Account activated.",
+      "mfaReset": "2FA reset.",
+      "revoked": "Invitation revoked."
+    }
+  },
+  "platform": {
+    "title": "Companies",
+    "subtitle": "Cafe chains on the platform. Each company has its own database and its own domain.",
+    "newTenant": "New company",
+    "empty": "No companies yet.",
+    "columns": {
+      "name": "Name",
+      "slug": "Technical name",
+      "domain": "Domain",
+      "status": "Status",
+      "language": "Language"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "PROVISIONING": "Provisioning",
+      "MIGRATION_FAILED": "Migration failed",
+      "DECOMMISSIONED": "Decommissioned"
+    },
+    "provision": {
+      "title": "New company",
+      "description": "A separate database and access roles will be created for the company. This may take a few seconds.",
+      "slug": "Technical name",
+      "slugHint": "Lowercase Latin letters, digits and underscores; used in the database name and cannot be changed later.",
+      "nameAz": "Name (Azərbaycanca)",
+      "nameEn": "Name (English)",
+      "nameRu": "Name (Русский)",
+      "domain": "Company domain",
+      "domainHint": "E.g. bonus.mockcoffee.az. The DNS record must point to this server.",
+      "language": "Default language",
+      "timezone": "Time zone",
+      "submit": "Create company",
+      "created": "Company created."
+    },
+    "detail": {
+      "back": "All companies",
+      "stats": "Overview",
+      "branches": "Branches",
+      "customers": "Active customers",
+      "staff": "Active staff",
+      "domains": "Domains",
+      "owners": "Owners",
+      "noOwners": "No owner has joined yet.",
+      "inviteOwner": "Invite the owner",
+      "ownerEmail": "Owner's email",
+      "language": "Email language",
+      "invite": "Send invitation",
+      "invited": "Invitation sent.",
+      "suspend": "Suspend company",
+      "activate": "Reactivate company",
+      "suspendConfirm": "The company's domain will stop serving requests immediately. Continue?",
+      "resetMfa": "Reset 2FA",
+      "resetMfaConfirm": "Reset two-step verification for {{name}}? Do this only when the owner has lost both the phone and the recovery codes. The action is recorded in the audit log.",
+      "mfaReset": "2FA reset.",
+      "unavailable": "The company is not active — its data is unavailable."
+    }
   }
 }

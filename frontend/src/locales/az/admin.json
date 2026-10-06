@@ -1,14 +1,182 @@
 {
-  "shell": { "title": "İdarəetmə", "mainNav": "Əsas menyu", "openMenu": "Menyunu aç" },
+  "shell": {
+    "title": "İdarəetmə",
+    "mainNav": "Əsas menyu",
+    "openMenu": "Menyunu aç",
+    "platformTitle": "Platforma"
+  },
   "nav": {
     "dashboard": "İdarəetmə paneli",
     "customers": "Müştərilər",
     "staffConsole": "İşçi konsolu",
     "settings": "Parametrlər",
-    "audit": "Audit jurnalı"
+    "audit": "Audit jurnalı",
+    "team": "Komanda",
+    "account": "Hesabım",
+    "tenants": "Şirkətlər"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
     "subtitle": "Müştərilər, möhürlər və mükafatlar üzrə əsas göstəricilər."
+  },
+  "userMenu": {
+    "label": "İstifadəçi menyusu",
+    "account": "Hesab parametrləri",
+    "signOut": "Çıxış"
+  },
+  "roles": {
+    "SUPER_ADMIN": "Platforma admini",
+    "COMPANY_OWNER": "Sahib",
+    "BRANCH_MANAGER": "Filial meneceri",
+    "STAFF": "Barista"
+  },
+  "account": {
+    "title": "Hesabım",
+    "profile": {
+      "title": "Profil",
+      "displayName": "Ad",
+      "language": "İnterfeys dili",
+      "languageHint": "Seçdiyiniz dil bütün cihazlarınızda və emaillərdə istifadə olunur.",
+      "saved": "Yadda saxlanıldı."
+    },
+    "password": {
+      "title": "Şifrəni dəyiş",
+      "current": "Cari şifrə",
+      "new": "Yeni şifrə",
+      "confirm": "Yeni şifrəni təkrarlayın",
+      "submit": "Şifrəni dəyiş",
+      "changed": "Şifrə dəyişdirildi. Digər cihazlardakı sessiyalar bağlandı."
+    },
+    "security": {
+      "title": "İki addımlı yoxlama",
+      "enabled": "Aktivdir",
+      "disabled": "Qurulmayıb",
+      "recoveryRemaining_one": "{{count}} istifadə olunmamış bərpa kodu qalıb.",
+      "recoveryRemaining_other": "{{count}} istifadə olunmamış bərpa kodu qalıb.",
+      "regenerate": "Yeni bərpa kodları yarat",
+      "regenerateHint": "Köhnə bərpa kodları etibarsız olacaq."
+    },
+    "sessions": {
+      "title": "Aktiv sessiyalar",
+      "subtitle": "Hesabınıza daxil olmuş cihazlar. Tanımadığınız sessiyanı bağlayın və şifrəni dəyişin.",
+      "current": "Bu cihaz",
+      "lastActive": "Son fəaliyyət: {{time}}",
+      "started": "Giriş: {{time}}",
+      "revoke": "Sessiyanı bağla",
+      "unknownDevice": "Naməlum cihaz",
+      "revoked": "Sessiya bağlandı."
+    }
+  },
+  "team": {
+    "title": "Komanda",
+    "subtitle": "İşçiləri dəvət edin, rolları və girişi idarə edin.",
+    "members": "İşçilər",
+    "invitations": "Gözləyən dəvətlər",
+    "columns": {
+      "name": "Ad",
+      "email": "Email",
+      "role": "Rol",
+      "status": "Status",
+      "twoFactor": "2FA",
+      "lastLogin": "Son giriş",
+      "expires": "Etibarlıdır",
+      "actions": "Əməliyyatlar"
+    },
+    "status": {
+      "ACTIVE": "Aktiv",
+      "DISABLED": "Bloklanıb",
+      "INVITED": "Dəvət olunub"
+    },
+    "twoFactorOn": "Var",
+    "twoFactorOff": "Yoxdur",
+    "never": "Heç vaxt",
+    "you": "Siz",
+    "allBranches": "Bütün filiallar",
+    "empty": "Hələ heç kim yoxdur.",
+    "noInvitations": "Gözləyən dəvət yoxdur.",
+    "invite": {
+      "open": "İşçi dəvət et",
+      "title": "Yeni işçi dəvəti",
+      "description": "Dəvət emaili 72 saat etibarlı link ilə göndəriləcək.",
+      "email": "Email",
+      "role": "Rol",
+      "branch": "Filial",
+      "language": "Emailin dili",
+      "submit": "Dəvət göndər",
+      "sent": "Dəvət {{email}} ünvanına göndərildi."
+    },
+    "actions": {
+      "disable": "Blokla",
+      "enable": "Aktivləşdir",
+      "resetMfa": "2FA-nı sıfırla",
+      "revokeInvitation": "Ləğv et"
+    },
+    "confirm": {
+      "disable": "{{name}} bloklansın? Bütün sessiyaları dərhal bağlanacaq.",
+      "resetMfa": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Növbəti girişdə onu yenidən quracaq."
+    },
+    "done": {
+      "disabled": "Hesab bloklandı.",
+      "enabled": "Hesab aktivləşdirildi.",
+      "mfaReset": "2FA sıfırlandı.",
+      "revoked": "Dəvət ləğv edildi."
+    }
+  },
+  "platform": {
+    "title": "Şirkətlər",
+    "subtitle": "Platformaya qoşulmuş kafe şəbəkələri. Hər şirkətin ayrıca bazası və öz domeni var.",
+    "newTenant": "Yeni şirkət",
+    "empty": "Hələ şirkət yoxdur.",
+    "columns": {
+      "name": "Ad",
+      "slug": "Texniki ad",
+      "domain": "Domen",
+      "status": "Status",
+      "language": "Dil"
+    },
+    "status": {
+      "ACTIVE": "Aktiv",
+      "SUSPENDED": "Dayandırılıb",
+      "PROVISIONING": "Yaradılır",
+      "MIGRATION_FAILED": "Miqrasiya xətası",
+      "DECOMMISSIONED": "Bağlanıb"
+    },
+    "provision": {
+      "title": "Yeni şirkət",
+      "description": "Şirkət üçün ayrıca baza və giriş rolları yaradılacaq. Bu bir neçə saniyə çəkə bilər.",
+      "slug": "Texniki ad",
+      "slugHint": "Kiçik latın hərfləri, rəqəmlər və alt xətt; bazanın adında istifadə olunur və sonra dəyişmir.",
+      "nameAz": "Ad (Azərbaycanca)",
+      "nameEn": "Ad (English)",
+      "nameRu": "Ad (Русский)",
+      "domain": "Şirkətin domeni",
+      "domainHint": "Məs. bonus.mockcoffee.az. Domenin DNS qeydi bu serverə yönəldilməlidir.",
+      "language": "Standart dil",
+      "timezone": "Saat qurşağı",
+      "submit": "Şirkəti yarat",
+      "created": "Şirkət yaradıldı."
+    },
+    "detail": {
+      "back": "Bütün şirkətlər",
+      "stats": "Göstəricilər",
+      "branches": "Filiallar",
+      "customers": "Aktiv müştərilər",
+      "staff": "Aktiv işçilər",
+      "domains": "Domenlər",
+      "owners": "Sahiblər",
+      "noOwners": "Sahib hələ qoşulmayıb.",
+      "inviteOwner": "Sahibi dəvət et",
+      "ownerEmail": "Sahibin emaili",
+      "language": "Emailin dili",
+      "invite": "Dəvət göndər",
+      "invited": "Dəvət göndərildi.",
+      "suspend": "Şirkəti dayandır",
+      "activate": "Şirkəti bərpa et",
+      "suspendConfirm": "Şirkətin domeni dərhal xidmət göstərməyi dayandıracaq. Davam edilsin?",
+      "resetMfa": "2FA-nı sıfırla",
+      "resetMfaConfirm": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Bu, sahib telefonunu və bərpa kodlarını itirəndə edilir və audit jurnalına yazılır.",
+      "mfaReset": "2FA sıfırlandı.",
+      "unavailable": "Şirkət aktiv deyil — məlumatlar əlçatmazdır."
+    }
   }
 }

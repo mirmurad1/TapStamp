@@ -40,6 +40,13 @@ check_body "Demo Çay Evi öz məlumatını görür" demo-cay.localhost /api/v1/
 check_body "platforma domeni tenant deyil" platform.localhost /api/v1/context '"PLATFORM"'
 check_status "platforma domenində şirkət məlumatı yoxdur" platform.localhost /api/v1/public/company 404
 
+echo "Admin girişi"
+check_body "sessiyasız vəziyyət NONE-dur" mockcoffee.localhost /api/v1/admin/auth/session '"NONE"'
+check_status "admin API sessiyasız bağlıdır" mockcoffee.localhost /api/v1/admin/me 401
+check_status "platforma API şirkət domenində mövcud deyil" mockcoffee.localhost /api/v1/platform/tenants 404
+check_status "platforma API sessiyasız bağlıdır" platform.localhost /api/v1/platform/tenants 401
+check_status "şirkət API-si platforma domenində mövcud deyil" platform.localhost /api/v1/admin/me 404
+
 echo "TLS qatı"
 code=$(curl -s -o /dev/null -w '%{http_code}' "${CURL_OPTS[@]}" -H "Host: demo-cay.localhost" "$(url mockcoffee.localhost /api/v1/public/company)")
 [[ "$code" == "421" ]] && pass "Host və SNI uyğunsuzluğu rədd edilir (421)" || fail "Host/SNI uyğunsuzluğu: alınan $code"

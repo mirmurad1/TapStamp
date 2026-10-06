@@ -22,7 +22,11 @@ export default defineConfig([
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Kontekst provayderi ilə birlikdə ixrac olunan hook-lar (standart React nümunəsi)
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, allowExportNames: ['useAdminAuth', 'useMe', 'useStepUp'] },
+      ],
       // React avtomatik escape edir; xam HTML yalnız sanitizasiya ilə və heç vaxt istifadəçi məzmunu üçün
       'no-restricted-syntax': [
         'error',
@@ -44,6 +48,32 @@ export default defineConfig([
         {
           mode: 'jsx-only',
           'jsx-attributes': { include: ['alt', 'aria-label', 'title', 'placeholder', 'label'] },
+          // Standart siyahı + react-hook-form metodları (sahə adları UI mətni deyil)
+          callees: {
+            exclude: [
+              'i18n(ext)?',
+              't',
+              'require',
+              'addEventListener',
+              'removeEventListener',
+              'postMessage',
+              'getElementById',
+              'dispatch',
+              'commit',
+              'includes',
+              'indexOf',
+              'endsWith',
+              'startsWith',
+              'register',
+              'watch',
+              'getValues',
+              'resetField',
+              'setValue',
+              'setError',
+              'clearErrors',
+              'trigger',
+            ],
+          },
         },
       ],
     },

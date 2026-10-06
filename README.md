@@ -90,7 +90,23 @@ Telefon / brauzer ──HTTPS──► nginx ──► /api, /t  → backend (Sp
 
 Müştərilərin dili təxminən 65% az, 20% ru, 15% en-dir. Telefon nömrələri saxtadır və bazada şifrələnmiş saxlanılır. Seed yalnız boş bazanı doldurur, təkrar işə salma məlumatı dublikat etmir. Söndürmək üçün: `.env` faylında `DEV_SEED_ENABLED=false`.
 
-İşçi hesabları (giriş məlumatları) Mərhələ 3-də əlavə olunacaq.
+### Dev giriş məlumatları
+
+> ⚠️ Bu hesablar **yalnız `dev` profilində** yaradılır (`DevAccountSeeder`). Prod-da `dev` profili və seed aktiv olarsa, tətbiq ümumiyyətlə başlamır (`ProdSafetyGuard`).
+
+Bütün hesabların şifrəsi: **`Kofe-Dev-Parol-2026`** (`.env` faylında `DEV_SEED_ADMIN_PASSWORD` ilə dəyişdirilə bilər).
+
+| Panel | Ünvan | Email | Rol | 2FA |
+|---|---|---|---|---|
+| Mock Coffee House | https://mockcoffee.localhost/admin | `owner@mockcoffee.az` | Sahib (bütün filiallar) | ✅ dev TOTP sirri |
+| Mock Coffee House | https://mockcoffee.localhost/admin | `manager@mockcoffee.az` | Filial meneceri (Gənclik) | — |
+| Mock Coffee House | https://mockcoffee.localhost/admin | `barista@mockcoffee.az` | Barista (Mərkəz), interfeys dili rus | — |
+| Demo Çay Evi | https://demo-cay.localhost/admin | `owner@democay.az` | Sahib | ilk girişdə qurulur (QR kod) |
+| Platforma | https://platform.localhost/admin | `superadmin@platform.localhost` | Platforma admini | ✅ dev TOTP sirri |
+
+**Dev TOTP sirri** (sahib və platforma admini üçün): `MNQW MZJN NRXX SYLM OR4S 2ZDF OYWW WZLZ`. Autentifikator tətbiqinə (Google Authenticator, Microsoft Authenticator, 1Password və s.) "açarı əl ilə daxil et" ilə əlavə edin: növ — vaxta əsaslanan (TOTP), 6 rəqəm, 30 saniyə. Hər kod yalnız bir dəfə qəbul olunur — eyni kodla ikinci giriş üçün növbəti kodu gözləyin.
+
+**Dev poçt qutusu.** Dev-də email göndərilmir: dəvət və şifrə bərpası məktubları yaddaşda saxlanılır və cari domen üzrə göstərilir — məsələn, https://mockcoffee.localhost/api/v1/dev/outbox (platforma üçün https://platform.localhost/api/v1/dev/outbox). Məktubdakı linki brauzerdə açın. Bu endpoint prod-da mövcud deyil.
 
 ## Yeni şirkətin yaradılması (provisioning)
 
@@ -104,7 +120,30 @@ java -jar app.jar --spring.main.web-application-type=none \
 
 Proses ayrıca baza (`loyalty_t_<slug>`), iki DB rolu (sxem sahibi və yalnız DML hüquqlu tətbiq rolu) yaradır, miqrasiyaları işə salır və domeni qeydiyyata alır. Yarımçıq qalsa, eyni əmri təkrar işə salmaq kifayətdir.
 
-## Lokal inkişaf (Docker-siz backend)
+Platforma panelindən (https://platform.localhost/admin → "Yeni şirkət") yaratmaq da mümkündür: bu, step-up (TOTP ilə təkrar təsdiq) tələb edir və prod-da standart olaraq söndürülüb (`APP_PROVISIONING_ENABLED=false`). Şirkət yaradılandan sonra platforma admini sahibə dəvət göndərir — link şirkətin öz domenində açılır, sahib hesab yaradır və ilk girişdə 2FA qurur.
+
+### İlk platforma admini (prod)
+
+Prod-da veb interfeysdən qeydiyyat yoxdur. İlk platforma admini birdəfəlik əmrlə yaradılır; şifrə əmr sətrində (və shell tarixçəsində) görünməsin deyə yalnız mühit dəyişənindən oxunur:
+
+```bash
+PLATFORM_ADMIN_PASSWORD='<ən azı 12 simvol>' java -jar app.jar --spring.main.web-application-type=none \
+  --create-platform-admin=admin@example.az --display-name="Ad Soyad"
+```
+
+İlk girişdə TOTP qurulması məcburidir. Əmrdən sonra `PLATFORM_ADMIN_PASSWORD` dəyişənini silin.
+
+## Lokal inkişaf
+
+**Variant A — backend Docker-də, frontend Vite ilə (ən sadəsi).** `docker-compose.dev.yml` backend-i və PostgreSQL-i yalnız `127.0.0.1`-də açır:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+```
+
+Sonra frontend-i Vite ilə işə salın (3-cü addım). Brauzer `*.localhost` domenlərini təhlükəsiz kontekst sayır, ona görə `__Host-` cookie-ləri HTTP-də də işləyir.
+
+**Variant B — backend IDE-dən (Docker-siz):**
 
 1. Yalnız PostgreSQL-i Docker-də işə salın (port yalnız `127.0.0.1`-də açılır):
 
@@ -130,7 +169,7 @@ Proses ayrıca baza (`loyalty_t_<slug>`), iki DB rolu (sxem sahibi və yalnız D
    npm run dev
    ```
 
-   Vite dev serveri `/api` sorğularını backend-ə (8080) ötürür. Şirkət domenə görə seçildiyi üçün `localhost` yox, dev domenini açın: http://mockcoffee.localhost:5173 (admin: http://mockcoffee.localhost:5173/admin).
+   Vite dev serveri `/api` sorğularını backend-ə (8080) ötürür. Şirkət domenə görə seçildiyi üçün `localhost` yox, dev domenini açın: http://mockcoffee.localhost:5173 (admin: http://mockcoffee.localhost:5173/admin, platforma: http://platform.localhost:5173/admin).
 
 ## Testlər
 
@@ -141,6 +180,8 @@ cd backend; .\mvnw.cmd verify          # + inteqrasiya testləri (*IT): Testcont
 
 İnteqrasiya testləri production-dakı eyni init skripti ilə PostgreSQL konteyneri qaldırır, iki test şirkəti yaradır və izolyasiyanı həm HTTP, həm də DB hüquqları səviyyəsində yoxlayır. Docker yoxdursa, bu testlər uğursuz sayılmır, atlanır.
 
+Autentifikasiya testləri (`StaffAuthIT`, `PasswordResetIT`, `InvitationIT`, `PlatformAdminIT`, `AdminAccessIT`, `RateLimitIT`) idarə olunan test saatı ilə işləyir: 30 dəqiqəlik fəaliyyətsizlik, 8 saatlıq mütləq limit, link ömrü və TOTP addımları gözləmədən yoxlanılır. `AdminAccessIT` bütün admin endpoint-lərinin inventarını çıxarır və sessiyasız heç birinin işləmədiyini təsdiqləyir.
+
 ```bash
 cd frontend
 npm run lint        # ESLint (UI-da tərcüməsiz mətn qadağandır)
@@ -148,6 +189,15 @@ npm run typecheck   # TypeScript (mövcud olmayan tərcümə açarı xəta verir
 npm test            # Vitest: tərcümə paritetı, cəm formaları, formatlar, şriftlər
 npm run build
 ```
+
+## API müqaviləsi (OpenAPI → TypeScript)
+
+Frontend-in API klienti backend-in OpenAPI sənədindən yaradılan tiplərlə işləyir (`openapi-fetch`): mövcud olmayan endpoint və ya səhv sahə build zamanı xəta verir.
+
+1. `backend`-də `.\mvnw.cmd verify` — `OpenApiContractIT` sənədi `frontend/src/shared/api/openapi.json`-a yazır (hər əməliyyatın Azərbaycan dilində təsviri olduğunu da yoxlayır).
+2. `frontend`-də `npm run api:types` — `schema.d.ts` yenilənir.
+
+CI hər iki faylın commit olunmuş versiyasının aktual olduğunu yoxlayır.
 
 ## Yeni tərcümə açarının əlavə edilməsi
 
@@ -183,7 +233,6 @@ docs/       arxitektura planı və sənədlər
 
 Aşağıdakı bölmələr müvafiq mərhələlərdə əlavə olunacaq:
 
-- Dev giriş məlumatları və test məlumatları (Mərhələ 2–3)
 - NFC toxunuşunun simulyasiyası (Mərhələ 5)
 - Real NTAG 424 DNA çipinin SUN ilə proqramlaşdırılması (Mərhələ 9, `docs/nfc-ntag424-programming.md`)
 - Yeni şirkətin və domenin qoşulması (Mərhələ 9, `docs/tenant-onboarding.md`)

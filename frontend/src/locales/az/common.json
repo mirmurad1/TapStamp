@@ -1,6 +1,13 @@
 {
-  "app": { "loyaltyCard": "Loyallıq kartı" },
-  "language": { "label": "Dil", "az": "Azərbaycanca", "en": "English", "ru": "Русский" },
+  "app": {
+    "loyaltyCard": "Loyallıq kartı"
+  },
+  "language": {
+    "label": "Dil",
+    "az": "Azərbaycanca",
+    "en": "English",
+    "ru": "Русский"
+  },
   "theme": {
     "label": "Mövzu",
     "light": "Açıq mövzu",
@@ -14,9 +21,17 @@
     "save": "Yadda saxla",
     "retry": "Yenidən cəhd et",
     "back": "Geri",
-    "close": "Bağla"
+    "close": "Bağla",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "confirm": "Təsdiqlə",
+    "delete": "Sil",
+    "download": "Yüklə"
   },
-  "states": { "loading": "Yüklənir…", "comingSoon": "Bu bölmə tezliklə hazır olacaq." },
+  "states": {
+    "loading": "Yüklənir…",
+    "comingSoon": "Bu bölmə tezliklə hazır olacaq."
+  },
   "units": {
     "stamp_one": "{{count}} möhür",
     "stamp_other": "{{count}} möhür",
@@ -27,5 +42,15 @@
     "title": "Səhifə tapılmadı",
     "description": "Bu ünvanda heç nə yoxdur.",
     "home": "Ana səhifəyə qayıt"
+  },
+  "validation": {
+    "required": "Bu sahə məcburidir.",
+    "email": "Düzgün email ünvanı daxil edin.",
+    "passwordMismatch": "Şifrələr eyni deyil.",
+    "code": "6 rəqəmli kodu daxil edin.",
+    "recoveryCode": "Kod xxxxx-xxxxx formatında olmalıdır.",
+    "slug": "Kiçik latın hərfi ilə başlamalı, yalnız kiçik hərf, rəqəm və alt xətt olmalıdır (2–31 simvol).",
+    "domain": "Düzgün domen daxil edin, məs. bonus.mockcoffee.az.",
+    "tooLong": "Mətn çox uzundur."
   }
 }

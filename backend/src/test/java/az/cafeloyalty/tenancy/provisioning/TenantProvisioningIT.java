@@ -73,7 +73,7 @@ class TenantProvisioningIT extends IntegrationTest {
                     .query(String.class).list()).containsExactly("NFC_KEYS", "PII", "TOTP");
         });
         assertThat(platformJdbc.sql("SELECT schema_version FROM tenants WHERE id = :id")
-                .param("id", tenant.id()).query(String.class).single()).isEqualTo("1");
+                .param("id", tenant.id()).query(String.class).single()).isEqualTo("2");
     }
 
     @Test

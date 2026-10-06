@@ -26,6 +26,7 @@ class ProdSafetyGuardTest {
         env.setActiveProfiles("prod");
         env.setProperty("app.notifications.sms-provider", "http");
         env.setProperty("app.notifications.mail-provider", "smtp");
+        env.setProperty("app.notifications.mail-from", "no-reply@cafe.az");
         env.setProperty("app.crypto.keks", "kek-2026-10:" + STRONG_SECRET);
         env.setProperty("app.crypto.phone-hmac-key", STRONG_SECRET);
         env.setProperty("app.crypto.otp-pepper", STRONG_SECRET);
@@ -45,6 +46,13 @@ class ProdSafetyGuardTest {
         MockEnvironment env = safeProdEnvironment();
         env.setActiveProfiles("prod", "dev");
         assertThat(ProdSafetyGuard.checkEnvironment(env)).anySatisfy(v -> assertThat(v).contains("'dev'"));
+    }
+
+    @Test
+    void smtpWithoutSenderAddressIsRejected() {
+        MockEnvironment env = safeProdEnvironment();
+        env.setProperty("app.notifications.mail-from", " ");
+        assertThat(ProdSafetyGuard.checkEnvironment(env)).anySatisfy(v -> assertThat(v).contains("mail-from"));
     }
 
     @Test

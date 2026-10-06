@@ -37,6 +37,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /** Sessiya filtri sessiyanın vaxtının bitdiyini bu atributla bildirir: 401 cavabı SESSION_EXPIRED kodunu alır. */
+    public static final String SESSION_EXPIRED_ATTRIBUTE = "az.cafeloyalty.session-expired";
+
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final ProblemDetailFactory problems;
@@ -59,7 +62,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
-        return respond(ErrorCode.UNAUTHENTICATED, request);
+        return respond(unauthenticated(request), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -68,7 +71,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             return respond(ErrorCode.CSRF_INVALID, request);
         }
         // Daxil olmamış istifadəçi üçün 403 əvəzinə 401: əvvəlcə giriş lazımdır
-        return respond(isAnonymous() ? ErrorCode.UNAUTHENTICATED : ErrorCode.FORBIDDEN, request);
+        return respond(isAnonymous() ? unauthenticated(request) : ErrorCode.FORBIDDEN, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -145,6 +148,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static String lastSegment(String code) {
         int dot = code.lastIndexOf('.');
         return dot >= 0 ? code.substring(dot + 1) : code;
+    }
+
+    private static ErrorCode unauthenticated(HttpServletRequest request) {
+        return Boolean.TRUE.equals(request.getAttribute(SESSION_EXPIRED_ATTRIBUTE))
+                ? ErrorCode.SESSION_EXPIRED : ErrorCode.UNAUTHENTICATED;
     }
 
     private static boolean isAnonymous() {

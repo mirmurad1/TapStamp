@@ -31,9 +31,19 @@ public record AppProperties(
             @DefaultValue("console") String mailProvider) {
     }
 
-    /** Yalnız dev mühitində işləyən imkanlar; prod-da aktiv olarsa tətbiq başlamır. */
+    /**
+     * Yalnız dev mühitində işləyən imkanlar; prod-da aktiv olarsa tətbiq başlamır.
+     *
+     * @param seedAdminPassword dev test hesablarının şifrəsi (yalnız {@code application-dev.yml}-də təyin olunur)
+     */
     public record Dev(
             @DefaultValue("false") boolean simulatorEnabled,
-            @DefaultValue("false") boolean seedEnabled) {
+            @DefaultValue("false") boolean seedEnabled,
+            String seedAdminPassword) {
+
+        @Override
+        public String toString() {
+            return "Dev[simulatorEnabled=" + simulatorEnabled + ", seedEnabled=" + seedEnabled + "]";
+        }
     }
 }

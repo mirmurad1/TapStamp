@@ -6,19 +6,22 @@ import { cn } from '@/shared/lib/cn';
 
 interface LanguageSwitcherProps {
   className?: string;
+  /** Daxil olmuş istifadəçinin seçimini profilə yazmaq üçün (bütün cihazlarda eyni dil). */
+  onSelect?: (lang: Language) => void;
 }
 
 /**
  * Kompakt dil seçicisi (AZ / EN / RU). Dil dərhal dəyişir: səhifə yenilənmir və komponentlər
  * yenidən qurulmur, ona görə yarımçıq doldurulmuş formalar (məs. OTP) itmir.
  */
-export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ className, onSelect }: LanguageSwitcherProps) {
   const { t, i18n } = useTranslation('common');
   const active = currentLanguage();
 
   const select = (lang: Language) => {
     if (lang !== i18n.language) {
       void changeLanguage(lang);
+      onSelect?.(lang);
     }
   };
 

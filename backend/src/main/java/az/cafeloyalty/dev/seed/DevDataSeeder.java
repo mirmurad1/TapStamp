@@ -41,17 +41,20 @@ public class DevDataSeeder implements ApplicationRunner {
     private final TransactionTemplate transaction;
     private final EnvelopeCipher tenantCipher;
     private final PhoneHasher phoneHasher;
+    private final DevAccountSeeder accounts;
 
     public DevDataSeeder(AppProperties properties, TenantProvisioner provisioner,
                          @Qualifier("tenantDataSource") DataSource tenantDataSource,
                          PlatformTransactionManager transactionManager,
-                         @Qualifier("tenantCipher") EnvelopeCipher tenantCipher, PhoneHasher phoneHasher) {
+                         @Qualifier("tenantCipher") EnvelopeCipher tenantCipher, PhoneHasher phoneHasher,
+                         DevAccountSeeder accounts) {
         this.properties = properties;
         this.provisioner = provisioner;
         this.tenantJdbc = new NamedParameterJdbcTemplate(tenantDataSource);
         this.transaction = new TransactionTemplate(transactionManager);
         this.tenantCipher = tenantCipher;
         this.phoneHasher = phoneHasher;
+        this.accounts = accounts;
     }
 
     @Override
@@ -61,6 +64,7 @@ public class DevDataSeeder implements ApplicationRunner {
         }
         seed(SeedCatalog.mockCoffee());
         seed(SeedCatalog.demoTea());
+        accounts.seedPlatformAdmin();
     }
 
     public void seed(TenantSeed seed) {
@@ -70,12 +74,14 @@ public class DevDataSeeder implements ApplicationRunner {
             Integer branches = tenantJdbc.getJdbcTemplate().queryForObject("SELECT count(*) FROM branches", Integer.class);
             if (branches != null && branches > 0) {
                 log.info("Test məlumatları artıq mövcuddur: {}", tenant.slug());
-                return;
+            } else {
+                TenantSeedWriter.Summary summary = transaction.execute(status ->
+                        new TenantSeedWriter(tenantJdbc, tenantCipher, phoneHasher, info, Instant.now(), seed.randomSeed())
+                                .write(seed));
+                log.info("Test məlumatları yazıldı: {} → {}", tenant.slug(), summary);
             }
-            TenantSeedWriter.Summary summary = transaction.execute(status ->
-                    new TenantSeedWriter(tenantJdbc, tenantCipher, phoneHasher, info, Instant.now(), seed.randomSeed())
-                            .write(seed));
-            log.info("Test məlumatları yazıldı: {} → {}", tenant.slug(), summary);
+            // Hesablar ayrıca və idempotent yaradılır (əvvəlki mərhələdə doldurulmuş bazalara da əlavə olunur)
+            accounts.seedStaff(tenant.slug());
         });
     }
 }

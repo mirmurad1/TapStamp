@@ -14,6 +14,19 @@ spring:
   flyway:
     # Miqrasiyalar DatabaseMigrator ilə idarə olunur (platforma + hər tenant bazası)
     enabled: false
+  mail:
+    # Yalnız APP_MAIL_PROVIDER=smtp olanda istifadə olunur
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
 server:
   port: 8080
@@ -49,6 +62,9 @@ management:
     # Əsas DataSource tenant marşrutlayıcısıdır; əvəzində platformDatabase indikatoru işləyir
     db:
       enabled: false
+    # SMTP-nin əlçatmazlığı tətbiqi "hazır deyil" etməməlidir (email arxa planda göndərilir)
+    mail:
+      enabled: false
 
 springdoc:
   api-docs:
@@ -67,6 +83,15 @@ app:
   notifications:
     sms-provider: ${APP_SMS_PROVIDER:console}
     mail-provider: ${APP_MAIL_PROVIDER:console}
+    mail-from: ${APP_MAIL_FROM:}
+  admin-auth:
+    session-absolute: 8h
+    session-idle: 30m
+    step-up-validity: 10m
+    password-reset-ttl: 30m
+    invitation-ttl: 72h
+    # Emaildəki linklər üçün (443 olarsa port göstərilmir)
+    links-https-port: ${HTTPS_PORT:443}
   dev:
     simulator-enabled: false
     seed-enabled: false

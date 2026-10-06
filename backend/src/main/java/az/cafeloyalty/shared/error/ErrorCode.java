@@ -21,6 +21,23 @@ public enum ErrorCode {
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     PAYLOAD_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
+    /** Sessiyanın vaxtı bitib (fəaliyyətsizlik və ya mütləq limit) — yenidən daxil olmaq lazımdır. */
+    SESSION_EXPIRED(HttpStatus.UNAUTHORIZED),
+    /** Email və ya şifrə yanlışdır (hansının səhv olduğu açıqlanmır). */
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED),
+    /** Çox sayda uğursuz cəhd: hesab müvəqqəti bloklanıb (mövcud olmayan email-lər üçün də eyni cavab). */
+    LOGIN_TEMPORARILY_BLOCKED(HttpStatus.TOO_MANY_REQUESTS),
+    MFA_INVALID(HttpStatus.UNAUTHORIZED),
+    MFA_ALREADY_ENABLED(HttpStatus.CONFLICT),
+    /** Həssas əməliyyat son 10 dəqiqədə TOTP təsdiqi tələb edir. */
+    STEP_UP_REQUIRED(HttpStatus.FORBIDDEN),
+    PASSWORD_POLICY_VIOLATION(HttpStatus.BAD_REQUEST),
+    CURRENT_PASSWORD_INVALID(HttpStatus.BAD_REQUEST),
+    /** Şifrə bərpası və ya dəvət linki etibarsızdır, vaxtı keçib və ya artıq istifadə olunub. */
+    TOKEN_INVALID(HttpStatus.BAD_REQUEST),
+    ALREADY_EXISTS(HttpStatus.CONFLICT),
+    /** Bu instansiyada yeni şirkət yaratmaq söndürülüb (prod-da standart). */
+    PROVISIONING_DISABLED(HttpStatus.CONFLICT),
     /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
     TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
