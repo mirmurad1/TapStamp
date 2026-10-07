@@ -9,6 +9,7 @@ node scripts/screenshots/customer-flow.cjs
 ```
 ```bash
 node scripts/screenshots/admin-settings.cjs
+node scripts/screenshots/account-team.cjs
 ```
 
 `customer-flow.cjs` test müştərisi yaradır və kartını dev bazasında doldurur — yalnız dev mühiti üçündür.
