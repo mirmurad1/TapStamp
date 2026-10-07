@@ -126,6 +126,13 @@ public class OtpChallengeStore {
                 .update() == 1;
     }
 
+    public void linkTapToken(UUID id, UUID tapTokenId) {
+        jdbc.sql("UPDATE otp_challenges SET tap_token_id = :tokenId WHERE id = :id")
+                .param("tokenId", tapTokenId)
+                .param("id", id)
+                .update();
+    }
+
     public void markLocked(UUID id) {
         jdbc.sql("UPDATE otp_challenges SET status = 'LOCKED' WHERE id = :id AND status = 'ACTIVE'").param("id", id).update();
     }

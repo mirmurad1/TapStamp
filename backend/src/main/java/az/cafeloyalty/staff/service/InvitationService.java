@@ -76,7 +76,8 @@ public class InvitationService {
 
     public InvitationService(@Qualifier("tenantJdbc") JdbcClient jdbc, PlatformTransactionManager transactionManager,
                              AdminRealms realms, AdminAuthService auth, PasswordHasher hasher, RateLimiter rateLimiter,
-                             MailSender mail, MailTemplates templates, TaskExecutor mailExecutor, AuditLogger audit,
+                             MailSender mail, MailTemplates templates,
+                             @Qualifier("applicationTaskExecutor") TaskExecutor mailExecutor, AuditLogger audit,
                              AdminAuthProperties properties, Clock clock) {
         this.jdbc = jdbc;
         this.tx = new TransactionTemplate(transactionManager);

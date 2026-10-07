@@ -30,13 +30,8 @@ function missing(available: Set<number>, text: string): string[] {
 }
 
 describe('şriftlər Azərbaycan və Kiril hərflərini dəstəkləyir', () => {
-  it('Inter (əsas mətn)', () => {
+  it('Inter (mətn və başlıqlar)', () => {
     const inter = codepoints('@fontsource-variable/inter');
     expect(missing(inter, AZERBAIJANI + RUSSIAN + MANAT)).toEqual([]);
-  });
-
-  it('Lora (başlıqlar)', () => {
-    const lora = codepoints('@fontsource-variable/lora');
-    expect(missing(lora, AZERBAIJANI + RUSSIAN)).toEqual([]);
   });
 });

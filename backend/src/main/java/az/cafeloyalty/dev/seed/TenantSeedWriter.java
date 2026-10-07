@@ -397,10 +397,12 @@ final class TenantSeedWriter {
     private void updateProfile(TenantSeed seed) {
         jdbc.update("""
                         UPDATE company_profile SET description = CAST(:description AS jsonb), sms_sender_name = :sender,
+                                                   brand_color = :brandColor,
                                                    updated_at = :now""",
                 params()
                         .addValue("description", TEXT.convertToDatabaseColumn(seed.description()))
-                        .addValue("sender", seed.smsSenderName()));
+                        .addValue("sender", seed.smsSenderName())
+                        .addValue("brandColor", seed.brandColor()));
     }
 
     private UUID insertBranch(BranchSeed branch) {

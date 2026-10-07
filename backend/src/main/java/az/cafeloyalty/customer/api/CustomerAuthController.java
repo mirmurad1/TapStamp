@@ -14,6 +14,7 @@ import az.cafeloyalty.customer.auth.RegistrationService;
 import az.cafeloyalty.customer.consent.LegalDocumentService;
 import az.cafeloyalty.customer.consent.LegalDocumentService.DocumentRef;
 import az.cafeloyalty.customer.consent.LegalDocumentService.DocumentType;
+import az.cafeloyalty.nfc.BrowserIdCookie;
 import az.cafeloyalty.shared.error.ApiException;
 import az.cafeloyalty.shared.error.ErrorCode;
 import az.cafeloyalty.shared.i18n.Language;
@@ -49,21 +50,26 @@ public class CustomerAuthController {
     private final CustomerCookies cookies;
     private final LegalDocumentService legal;
     private final AuditLogger audit;
+    private final BrowserIdCookie browserIds;
 
     public CustomerAuthController(OtpService otp, RegistrationService registration, CustomerSessionService sessions,
-                                  CustomerCookies cookies, LegalDocumentService legal, AuditLogger audit) {
+                                  CustomerCookies cookies, LegalDocumentService legal, AuditLogger audit,
+                                  BrowserIdCookie browserIds) {
         this.otp = otp;
         this.registration = registration;
         this.sessions = sessions;
         this.cookies = cookies;
         this.legal = legal;
         this.audit = audit;
+        this.browserIds = browserIds;
     }
 
     public record OtpRequest(
             @Schema(description = "Telefon nömrəsi istənilən formatda: 050 123 45 67, +994501234567 və s.")
             @NotBlank @Size(max = 32) String phone,
-            @Schema(description = "SMS-in dili") @NotBlank @Pattern(regexp = "az|en|ru") String language) {
+            @Schema(description = "SMS-in dili") @NotBlank @Pattern(regexp = "az|en|ru") String language,
+            @Schema(description = "Toxunuşdan sonra giriş: toxunuş tokeni 10 dəqiqəlik bu sorğuya rezerv olunur")
+            @Size(max = 128) String tapToken) {
         @Override
         public String toString() {
             return "OtpRequest[***]";
@@ -140,7 +146,8 @@ public class CustomerAuthController {
             gündə 10, IP üzrə saatda 20. Yalnız mobil nömrələr və şirkətin icazə verdiyi ölkələr qəbul olunur.""")
     OtpChallengeResponse requestOtp(@Valid @RequestBody OtpRequest request, HttpServletRequest http) {
         Language language = Language.fromTag(request.language()).orElse(Language.DEFAULT);
-        OtpService.Issued issued = otp.requestLogin(request.phone(), language, ClientInfo.of(http));
+        OtpService.Issued issued = otp.requestLogin(request.phone(), language, ClientInfo.of(http), request.tapToken(),
+                browserIds.read(http).orElse(null));
         return new OtpChallengeResponse(issued.challengeId(), issued.expiresAt(), issued.resendAvailableAt());
     }
 

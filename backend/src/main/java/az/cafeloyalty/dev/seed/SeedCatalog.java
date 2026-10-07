@@ -32,6 +32,7 @@ public final class SeedCatalog {
     }
 
     public record TenantSeed(ProvisionTenantCommand command, LocalizedText description, String smsSenderName,
+                             String brandColor,
                              List<BranchSeed> branches, RuleSeed rule, int customerCount, long randomSeed) {
     }
 
@@ -45,6 +46,7 @@ public final class SeedCatalog {
                         "Freshly roasted coffee and a warm atmosphere in the heart of Baku. Every cup brings you closer to a free one.",
                         "Свежеобжаренный кофе и уютная атмосфера в центре Баку. Каждая чашка приближает вас к подарочной."),
                 "MockCoffee",
+                "#7C3AED",
                 List.of(
                         new BranchSeed(
                                 LocalizedText.of("Mərkəz filialı", "City Centre", "Центральный филиал"),
@@ -80,6 +82,7 @@ public final class SeedCatalog {
                 LocalizedText.of("İçərişəhərdə ənənəvi çay evi.", "A traditional tea house in the Old City.",
                         "Традиционный чайный дом в Старом городе."),
                 "DemoCay",
+                "#0D9488",
                 List.of(new BranchSeed(
                         LocalizedText.of("İçərişəhər", "Old City", "Ичеришехер"),
                         LocalizedText.of("Qüllə küçəsi 3, Bakı", "3 Gulle Street, Baku", "ул. Гюлля, 3, Баку"),

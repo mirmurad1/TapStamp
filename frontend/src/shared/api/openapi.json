@@ -422,6 +422,106 @@
         "tags" : [ "Admin: hesab" ]
       }
     },
+    "/api/v1/admin/staff-console/pending-stamps" : {
+      "get" : {
+        "description" : "Yalnız işçinin öz filialı; başqa filial üçün 404.",
+        "operationId" : "pending",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PendingStampResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Gözləyən möhürlər",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
+    "/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm" : {
+      "post" : {
+        "description" : "Möhür karta yazılır; kart dolubsa hədiyyə kartı yaranır.",
+        "operationId" : "confirm",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "stampId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StampDecisionResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhürü təsdiqlə",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
+    "/api/v1/admin/staff-console/pending-stamps/{stampId}/reject" : {
+      "post" : {
+        "description" : "Səbəb məcburidir və auditə yazılır.",
+        "operationId" : "reject",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "stampId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RejectStampRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StampDecisionResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhürü rədd et",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
     "/api/v1/admin/team" : {
       "get" : {
         "description" : "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür.",
@@ -868,6 +968,29 @@
         },
         "summary" : "Ad və dilin dəyişdirilməsi",
         "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/gift-cards" : {
+      "get" : {
+        "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
+        "operationId" : "list_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GiftCardResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Hədiyyə kartları",
+        "tags" : [ "Müştəri: hədiyyə kartları" ]
       }
     },
     "/api/v1/me/sessions" : {
@@ -1594,6 +1717,97 @@
         "summary" : "Sənədin mətni",
         "tags" : [ "İctimai" ]
       }
+    },
+    "/api/v1/taps/{token}" : {
+      "get" : {
+        "description" : "Yan təsiri yoxdur. Token tanınmırsa `TAP_TOKEN_EXPIRED`.",
+        "operationId" : "status",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "token",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TapStatusResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Toxunuşun vəziyyəti",
+        "tags" : [ "Toxunuş (NFC)" ]
+      }
+    },
+    "/api/v1/taps/{token}/claim" : {
+      "post" : {
+        "description" : "Token 60 saniyə etibarlıdır, birdəfəlikdir və toxunuşun edildiyi brauzerə bağlıdır (`TAP_BINDING_MISMATCH`). Eyni müştəri təkrar göndərsə eyni nəticə qaytarılır (idempotent), başqa müştəri `TAP_TOKEN_USED` alır. Qaydalar: `STAMP_COOLDOWN_ACTIVE`, `STAMP_DAILY_LIMIT_REACHED` (hər ikisində `retryAfterSeconds`), `OUTSIDE_BUSINESS_HOURS`.",
+        "operationId" : "claim",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "token",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClaimResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Toxunuşa görə möhür",
+        "tags" : [ "Toxunuş (NFC)" ]
+      }
+    },
+    "/t/{uid}" : {
+      "get" : {
+        "description" : "Çipin imzasını yoxlayır və `303 /tap/{token}` (60 saniyəlik birdəfəlik token, brauzerə bağlı) və ya `303 /tap/error?code=` cavabı verir. HEAD sorğuları və link-preview botları sayğacı istehlak etmir.",
+        "operationId" : "tap",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "uid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "picc",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "cmac",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "NFC toxunuşu",
+        "tags" : [ "Toxunuş (NFC)" ]
+      }
     }
   },
   "components" : {
@@ -1653,6 +1867,16 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "nextStampAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Növbəti möhürün mümkün olduğu an; null — indi mümkündür"
+          },
+          "pendingStamps" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "İşçi təsdiqi gözləyən möhürlər"
+          },
           "rewardDescription" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },
@@ -1684,6 +1908,36 @@
           }
         },
         "required" : [ "currentPassword", "newPassword" ]
+      },
+      "ClaimResponse" : {
+        "type" : "object",
+        "description" : "Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı.",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "currentStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "giftCardId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "stampId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PENDING", "CONFIRMED" ]
+          }
+        }
       },
       "CodeRequest" : {
         "type" : "object",
@@ -1827,6 +2081,39 @@
           "devTools" : {
             "type" : "boolean",
             "description" : "Dev alətləri (simulyator, outbox) — yalnız dev mühitində"
+          }
+        }
+      },
+      "GiftCardResponse" : {
+        "type" : "object",
+        "description" : "Hədiyyə kartı. code — daimi unikal kod: işçiyə göstərilir (QR-da da eyni kod var).",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "earnedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Müddəti; null — müddətsiz"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "redeemedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "AVAILABLE", "REDEEMED", "REVOKED", "EXPIRED" ]
           }
         }
       },
@@ -2117,6 +2404,12 @@
             "description" : "Telefon nömrəsi istənilən formatda: 050 123 45 67, +994501234567 və s.",
             "maxLength" : 32,
             "minLength" : 0
+          },
+          "tapToken" : {
+            "type" : "string",
+            "description" : "Toxunuşdan sonra giriş: toxunuş tokeni 10 dəqiqəlik bu sorğuya rezerv olunur",
+            "maxLength" : 128,
+            "minLength" : 0
           }
         },
         "required" : [ "language", "phone" ]
@@ -2252,6 +2545,34 @@
           }
         }
       },
+      "PendingStampResponse" : {
+        "type" : "object",
+        "description" : "Təsdiq gözləyən möhür. Telefon yalnız maskalı göstərilir.",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "customerName" : {
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phoneMasked" : {
+            "type" : "string"
+          }
+        }
+      },
       "ProvisionRequest" : {
         "type" : "object",
         "properties" : {
@@ -2293,6 +2614,10 @@
             "items" : {
               "$ref" : "#/components/schemas/BranchResponse"
             }
+          },
+          "brandColor" : {
+            "type" : "string",
+            "description" : "Brend rəngi (#RRGGBB): müştəri tətbiqinin əsas rəngi"
           },
           "defaultLanguage" : {
             "type" : "string",
@@ -2354,6 +2679,17 @@
           }
         },
         "required" : [ "acceptedDocuments", "language", "registrationToken" ]
+      },
+      "RejectStampRequest" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "reason" ]
       },
       "RevokedResponse" : {
         "type" : "object",
@@ -2443,6 +2779,18 @@
           }
         }
       },
+      "StampDecisionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "stampId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
       "StatsResponse" : {
         "type" : "object",
         "properties" : {
@@ -2457,6 +2805,30 @@
           "branches" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "TapStatusResponse" : {
+        "type" : "object",
+        "description" : "Toxunuşun vəziyyəti. sameBrowser=false — link başqa brauzerdə açılıb, möhür alınmayacaq.",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "branchName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "sameBrowser" : {
+            "type" : "boolean"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "RESERVED", "CONSUMED", "REJECTED", "EXPIRED" ]
           }
         }
       },

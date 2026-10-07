@@ -23,5 +23,7 @@ public abstract class IntegrationTest {
         // Bütün test sinifləri eyni şirkətdə çoxlu OTP göndərir: şirkət və qlobal limitlər testlər arasında paylaşılmasın
         registry.add("app.rate-limits.otp-request-per-tenant", () -> 100_000);
         registry.add("app.rate-limits.otp-request-global", () -> 100_000);
+        // Fon işləri (token və möhür müddətləri) testlərdə birbaşa çağırılır — paralel işləyib nəticəni pozmasın
+        registry.add("app.jobs.enabled", () -> false);
     }
 }

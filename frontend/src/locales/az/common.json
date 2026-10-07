@@ -35,8 +35,8 @@
   "units": {
     "stamp_one": "{{count}} möhür",
     "stamp_other": "{{count}} möhür",
-    "coffee_one": "{{count}} qəhvə",
-    "coffee_other": "{{count}} qəhvə"
+    "visit_one": "{{count}} ziyarət",
+    "visit_other": "{{count}} ziyarət"
   },
   "notFound": {
     "title": "Səhifə tapılmadı",
@@ -50,7 +50,7 @@
     "code": "6 rəqəmli kodu daxil edin.",
     "recoveryCode": "Kod xxxxx-xxxxx formatında olmalıdır.",
     "slug": "Kiçik latın hərfi ilə başlamalı, yalnız kiçik hərf, rəqəm və alt xətt olmalıdır (2–31 simvol).",
-    "domain": "Düzgün domen daxil edin, məs. bonus.mockcoffee.az.",
+    "domain": "Düzgün domen daxil edin, məs. moyka.mockcoffe.com.",
     "tooLong": "Mətn çox uzundur."
   }
 }

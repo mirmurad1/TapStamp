@@ -11,6 +11,9 @@ export type LegalDocument = Schemas['LegalDocumentResponse'];
 export type OtpChallenge = Schemas['OtpChallengeResponse'];
 export type OtpVerifyResult = Schemas['OtpVerifyResponse'];
 export type DocumentAcceptance = Schemas['DocumentAcceptance'];
+export type TapStatus = Schemas['TapStatusResponse'];
+export type ClaimResult = Schemas['ClaimResponse'];
+export type GiftCard = Schemas['GiftCardResponse'];
 export type CustomerSessionState = 'ACTIVE' | 'REFRESH_REQUIRED' | 'NONE';
 
 /** Hüquqi sənədlərin URL adları (/legal/privacy, /legal/terms). */
@@ -30,8 +33,8 @@ export const publicApi = {
 export const customerAuthApi = {
   session: async (): Promise<CustomerSessionState> =>
     ((await unwrap(api.GET('/api/v1/auth/session'))).state ?? 'NONE') as CustomerSessionState,
-  requestOtp: (phone: string, language: string) =>
-    unwrap(api.POST('/api/v1/auth/otp/request', { body: { phone, language } })),
+  requestOtp: (phone: string, language: string, tapToken?: string) =>
+    unwrap(api.POST('/api/v1/auth/otp/request', { body: { phone, language, tapToken } })),
   verifyOtp: (challengeId: string, code: string) =>
     unwrap(api.POST('/api/v1/auth/otp/verify', { body: { challengeId, code } })),
   register: (body: Schemas['RegisterRequest']) => unwrap(api.POST('/api/v1/auth/register', { body })),
@@ -51,4 +54,14 @@ export const meApi = {
   revokeDevice: (sessionId: string) =>
     unwrap(api.DELETE('/api/v1/me/sessions/{sessionId}', { params: { path: { sessionId } } })),
   revokeOtherDevices: () => unwrap(api.POST('/api/v1/me/sessions/revoke-others')),
+};
+
+/** NFC toxunuşundan sonrakı səhifə: tokenin vəziyyəti və möhürün alınması. */
+export const tapApi = {
+  status: (token: string) => unwrap(api.GET('/api/v1/taps/{token}', { params: { path: { token } } })),
+  claim: (token: string) => unwrap(api.POST('/api/v1/taps/{token}/claim', { params: { path: { token } } })),
+};
+
+export const giftCardApi = {
+  list: () => unwrap(api.GET('/api/v1/me/gift-cards')),
 };

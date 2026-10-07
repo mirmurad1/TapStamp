@@ -13,7 +13,8 @@
     "audit": "Audit jurnalı",
     "team": "Komanda",
     "account": "Hesabım",
-    "tenants": "Şirkətlər"
+    "tenants": "Şirkətlər",
+    "simulator": "NFC simulyatoru"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -28,7 +29,7 @@
     "SUPER_ADMIN": "Platforma admini",
     "COMPANY_OWNER": "Sahib",
     "BRANCH_MANAGER": "Filial meneceri",
-    "STAFF": "Barista"
+    "STAFF": "İşçi"
   },
   "account": {
     "title": "Hesabım",
@@ -124,7 +125,7 @@
   },
   "platform": {
     "title": "Şirkətlər",
-    "subtitle": "Platformaya qoşulmuş kafe şəbəkələri. Hər şirkətin ayrıca bazası və öz domeni var.",
+    "subtitle": "Platformaya qoşulmuş şirkətlər. Hər şirkətin ayrıca bazası və öz domeni var.",
     "newTenant": "Yeni şirkət",
     "empty": "Hələ şirkət yoxdur.",
     "columns": {
@@ -150,7 +151,7 @@
       "nameEn": "Ad (English)",
       "nameRu": "Ad (Русский)",
       "domain": "Şirkətin domeni",
-      "domainHint": "Məs. bonus.mockcoffee.az. Domenin DNS qeydi bu serverə yönəldilməlidir.",
+      "domainHint": "Məs. moyka.mockcoffe.com. Domenin DNS qeydi bu serverə yönəldilməlidir.",
       "language": "Standart dil",
       "timezone": "Saat qurşağı",
       "submit": "Şirkəti yarat",
@@ -178,5 +179,44 @@
       "mfaReset": "2FA sıfırlandı.",
       "unavailable": "Şirkət aktiv deyil — məlumatlar əlçatmazdır."
     }
+  },
+  "staffConsole": {
+    "title": "İşçi konsolu",
+    "subtitle": "Filialınızın təsdiq gözləyən möhürləri. Siyahı hər 5 saniyədən bir yenilənir.",
+    "branch": "Filial",
+    "pending": {
+      "title": "Təsdiq gözləyən möhürlər",
+      "empty": "Gözləyən möhür yoxdur.",
+      "customer": "Müştəri",
+      "anonymous": "Adsız müştəri",
+      "waiting": "{{time}} əvvəl",
+      "expires": "Avtomatik rədd: {{time}}",
+      "confirm": "Təsdiqlə",
+      "reject": "Rədd et",
+      "confirmed": "Möhür təsdiqləndi.",
+      "rejected": "Möhür rədd edildi.",
+      "rejectTitle": "Möhürü rədd et",
+      "rejectReason": "Səbəb",
+      "rejectHint": "Məs. müştəri sifariş etməyib. Səbəb audit jurnalına yazılır."
+    }
+  },
+  "simulator": {
+    "title": "NFC simulyatoru",
+    "subtitle": "Yalnız dev mühiti: çipə toxunuşu təqlid edir. Hər basış sayğacı artırır və yeni imzalı link yaradır — real çip kimi.",
+    "tag": "Çip",
+    "tap": "Toxun",
+    "counter": "Sayğac: {{counter}}",
+    "lastCounter": "Son qəbul olunmuş sayğac: {{counter}}",
+    "link": "Toxunuş linki",
+    "open": "Bu brauzerdə aç",
+    "replay": "Eyni linki təkrar aç",
+    "replayHint": "Eyni link ikinci dəfə \"Bu link artıq istifadə olunub\" xətası verməlidir (replay qorunması).",
+    "qr": "Telefonla skan edin (eyni Wi-Fi şəbəkəsində və ya domen telefonda açılırsa).",
+    "qrLabel": "Toxunuş linkinin QR kodu",
+    "types": {
+      "NTAG424_SUN": "NTAG 424 DNA (real kriptoqrafiya)",
+      "SIMULATED": "Simulyasiya"
+    },
+    "disabled": "deaktiv"
   }
 }

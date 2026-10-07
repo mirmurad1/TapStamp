@@ -35,11 +35,13 @@ public record AppProperties(
      * Yalnız dev mühitində işləyən imkanlar; prod-da aktiv olarsa tətbiq başlamır.
      *
      * @param seedAdminPassword dev test hesablarının şifrəsi (yalnız {@code application-dev.yml}-də təyin olunur)
+     * @param simulatorKey      simulyasiya olunan çiplərin HMAC açarı (base64, yalnız dev)
      */
     public record Dev(
             @DefaultValue("false") boolean simulatorEnabled,
             @DefaultValue("false") boolean seedEnabled,
-            String seedAdminPassword) {
+            String seedAdminPassword,
+            String simulatorKey) {
 
         @Override
         public String toString() {

@@ -19,6 +19,8 @@ app:
     seed-enabled: ${DEV_SEED_ENABLED:true}
     # Test hesablarının şifrəsi (README-də göstərilir). Yalnız dev profilində oxunur.
     seed-admin-password: ${DEV_SEED_ADMIN_PASSWORD:Kofe-Dev-Parol-2026}
+    # Simulyasiya olunan çiplərin imza açarı (scripts/gen-secrets yaradır); boşdursa hər başlanğıcda təsadüfi
+    simulator-key: ${APP_DEV_SIMULATOR_KEY:}
 
 logging:
   level:

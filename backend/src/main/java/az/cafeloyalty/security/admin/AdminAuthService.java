@@ -27,6 +27,7 @@ import az.cafeloyalty.shared.error.ErrorCode;
 import az.cafeloyalty.shared.i18n.Language;
 import az.cafeloyalty.shared.pii.EmailMasker;
 import az.cafeloyalty.shared.web.ClientInfo;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +82,8 @@ public class AdminAuthService {
     private final Clock clock;
 
     public AdminAuthService(AdminRealms realms, PasswordHasher hasher, PasswordPolicy passwordPolicy, TotpService totp,
-                            RateLimiter rateLimiter, MailSender mail, MailTemplates templates, TaskExecutor mailExecutor,
+                            RateLimiter rateLimiter, MailSender mail, MailTemplates templates,
+                            @Qualifier("applicationTaskExecutor") TaskExecutor mailExecutor,
                             AdminAuthProperties properties, Clock clock) {
         this.realms = realms;
         this.hasher = hasher;

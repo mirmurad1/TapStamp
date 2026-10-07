@@ -24,7 +24,8 @@ describe('cəm formaları', () => {
     expect(t('units.stamp', { count: 5 })).toBe('5 штампов');
     expect(t('units.stamp', { count: 11 })).toBe('11 штампов');
     expect(t('units.stamp', { count: 21 })).toBe('21 штамп');
-    expect(t('units.coffee', { count: 5 })).toBe('5 кофе');
+    expect(t('units.visit', { count: 5 })).toBe('5 визитов');
+    expect(t('units.visit', { count: 3 })).toBe('3 визита');
   });
 
   it('ingilis dilində tək və cəm', () => {

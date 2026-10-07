@@ -127,9 +127,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/consents", "/api/v1/auth/step-up/otp/request",
                                 "/api/v1/auth/step-up/otp/verify").hasAuthority(CUSTOMER)
                         .requestMatchers("/api/v1/me", "/api/v1/me/**").hasAuthority(CUSTOMER)
+                        // NFC toxunuşu (brauzer naviqasiyası) və toxunuşdan sonrakı səhifə
+                        .requestMatchers(HttpMethod.GET, "/t/*").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/t/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/taps/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/taps/*/claim").hasAuthority(CUSTOMER)
                         .requestMatchers("/api/v1/admin/**").hasAuthority(STAFF)
                         .requestMatchers("/api/v1/platform/**").hasAuthority(PLATFORM)
                         // Dev alətləri (outbox): controller-lər yalnız dev profilində mövcuddur, prod-da simulyator söndürülüb
+                        // Simulyator imzalı toxunuş yaradır: yalnız dev-də və yalnız daxil olmuş işçi üçün
+                        .requestMatchers("/api/v1/dev/simulator/**").access((authentication, context) ->
+                                new AuthorizationDecision(properties.dev().simulatorEnabled()
+                                        && authentication.get().getAuthorities().stream()
+                                        .anyMatch(authority -> STAFF.equals(authority.getAuthority()))))
                         .requestMatchers("/api/v1/dev/**").access((authentication, context) ->
                                 new AuthorizationDecision(properties.dev().simulatorEnabled()))
                         .anyRequest().denyAll());

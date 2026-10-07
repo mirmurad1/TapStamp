@@ -35,8 +35,8 @@
   "units": {
     "stamp_one": "{{count}} stamp",
     "stamp_other": "{{count}} stamps",
-    "coffee_one": "{{count}} coffee",
-    "coffee_other": "{{count}} coffees"
+    "visit_one": "{{count}} visit",
+    "visit_other": "{{count}} visits"
   },
   "notFound": {
     "title": "Page not found",
@@ -50,7 +50,7 @@
     "code": "Enter the 6-digit code.",
     "recoveryCode": "The code must look like xxxxx-xxxxx.",
     "slug": "Must start with a lowercase letter and contain only lowercase letters, digits and underscores (2–31 characters).",
-    "domain": "Enter a valid domain, e.g. bonus.mockcoffee.az.",
+    "domain": "Enter a valid domain, e.g. moyka.mockcoffe.com.",
     "tooLong": "The text is too long."
   }
 }

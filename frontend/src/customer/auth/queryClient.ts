@@ -6,6 +6,7 @@ export const customerKeys = {
   session: ['customer-session'] as const,
   me: ['customer-me'] as const,
   devices: ['customer-devices'] as const,
+  giftCards: ['customer-gift-cards'] as const,
 };
 
 /** Sessiya itəndə (yeniləmə də alınmadı): müştəri qonaq olur, şəxsi məlumat keşdən silinir. */
@@ -15,6 +16,7 @@ export function clearCustomerData(client: QueryClient): void {
   // gətirər (sonsuz dövr)
   client.getQueryCache().findAll({ queryKey: customerKeys.me }).forEach((query) => query.reset());
   client.removeQueries({ queryKey: customerKeys.devices });
+  client.removeQueries({ queryKey: customerKeys.giftCards });
 }
 
 function onError(client: QueryClient, error: unknown) {

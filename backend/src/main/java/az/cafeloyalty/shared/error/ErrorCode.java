@@ -54,6 +54,30 @@ public enum ErrorCode {
     REFRESH_RACE(HttpStatus.CONFLICT),
     /** Müştəri hesabı şirkət tərəfindən bloklanıb. */
     CUSTOMER_BLOCKED(HttpStatus.FORBIDDEN),
+    /** Toxunuş linkinin formatı yanlışdır (çip düzgün proqramlaşdırılmayıb və ya link əl ilə dəyişdirilib). */
+    TAP_MALFORMED(HttpStatus.BAD_REQUEST),
+    /** Bu şirkətdə belə çip qeydiyyatda deyil. */
+    TAG_UNKNOWN(HttpStatus.NOT_FOUND),
+    /** Çip deaktiv edilib. */
+    TAG_DISABLED(HttpStatus.FORBIDDEN),
+    /** Çipin imzası yanlışdır. Dəqiq səbəb (PICC, UID, CMAC) yalnız toxunuş jurnalındadır. */
+    TAP_SIGNATURE_INVALID(HttpStatus.BAD_REQUEST),
+    /** Bu toxunuş linki artıq istifadə olunub (köhnə sayğac) — çipə yenidən toxunmaq lazımdır. */
+    TAP_REPLAYED(HttpStatus.CONFLICT),
+    /** Toxunuşun vaxtı keçib (60 saniyə) və ya token tanınmır. */
+    TAP_TOKEN_EXPIRED(HttpStatus.GONE),
+    /** Bu toxunuş artıq istifadə olunub. */
+    TAP_TOKEN_USED(HttpStatus.CONFLICT),
+    /** Toxunuş başqa brauzerdə edilib — link başqasına ötürülə bilməz. */
+    TAP_BINDING_MISMATCH(HttpStatus.FORBIDDEN),
+    /** Növbəti möhür üçün hələ tezdir; cavabda {@code retryAfterSeconds} var. */
+    STAMP_COOLDOWN_ACTIVE(HttpStatus.CONFLICT),
+    /** Bu günün möhür limiti dolub; cavabda növbəti günə qədər {@code retryAfterSeconds} var. */
+    STAMP_DAILY_LIMIT_REACHED(HttpStatus.CONFLICT),
+    /** Filial hazırda bağlıdır (iş saatları qaydası aktivdir). */
+    OUTSIDE_BUSINESS_HOURS(HttpStatus.CONFLICT),
+    /** Möhür artıq təsdiqlənib, rədd edilib və ya vaxtı keçib. */
+    STAMP_NOT_PENDING(HttpStatus.CONFLICT),
     /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
     TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);

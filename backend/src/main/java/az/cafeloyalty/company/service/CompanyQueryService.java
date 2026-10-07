@@ -36,6 +36,6 @@ public class CompanyQueryService {
                 .toList();
         var rule = rewardRules.findByActiveTrue().map(PublicCompanyResponse.RewardRuleResponse::from).orElse(null);
         return new PublicCompanyResponse(profile.getName(), profile.getDescription(), profile.getTimezone(),
-                profile.getDefaultLanguage(), activeBranches, rule);
+                profile.getDefaultLanguage(), profile.getBrandColor(), activeBranches, rule);
     }
 }

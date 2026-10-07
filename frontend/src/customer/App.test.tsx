@@ -104,7 +104,8 @@ describe('müştəri tətbiqi', () => {
     await user.click(screen.getByRole('button', { name: 'Qeydiyyatı tamamla' }));
 
     await screen.findByRole('heading', { name: 'Salam, Aysel!' });
-    expect(screen.getByText('Hədiyyə qəhvəyə 6 möhür qalıb')).toBeInTheDocument();
+    expect(screen.getByText('Hədiyyəyə 6 möhür qalıb')).toBeInTheDocument();
+    expect(screen.getAllByRole('img', { name: 'Möhür vurulub' })).toHaveLength(3);
     await waitFor(() => expect(window.location.pathname).toBe('/'));
 
     const register = requests.find((request) => request.path === 'POST /api/v1/auth/register');

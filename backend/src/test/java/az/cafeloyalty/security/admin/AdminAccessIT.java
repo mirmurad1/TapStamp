@@ -111,12 +111,14 @@ class AdminAccessIT extends AdminIntegrationTest {
             "POST /api/v1/auth/otp/verify",
             "POST /api/v1/auth/register",
             "POST /api/v1/auth/refresh",
-            "POST /api/v1/auth/logout");
+            "POST /api/v1/auth/logout",
+            "GET /api/v1/taps/{token}");
 
     @Test
     void everyCustomerEndpointRejectsAnonymousRequests() throws Exception {
         List<Endpoint> customer = new ArrayList<>(endpoints("/api/v1/auth/"));
         customer.addAll(endpoints("/api/v1/me"));
+        customer.addAll(endpoints("/api/v1/taps/"));
         assertThat(customer).hasSizeGreaterThan(10);
         for (Endpoint endpoint : customer) {
             if (!PUBLIC_CUSTOMER_ENDPOINTS.contains(endpoint.key())) {
@@ -137,6 +139,7 @@ class AdminAccessIT extends AdminIntegrationTest {
                         || pattern.startsWith("/api/v1/auth/") || pattern.equals("/api/v1/me")
                         || pattern.startsWith("/api/v1/me/")
                         || pattern.startsWith("/api/v1/platform/") || pattern.startsWith("/api/v1/public/")
+                        || pattern.startsWith("/api/v1/taps/") || pattern.startsWith("/t/")
                         || pattern.equals("/api/v1/csrf") || pattern.equals("/api/v1/context")
                         || pattern.startsWith("/api/v1/docs") || pattern.startsWith("/api/v1/openapi.json")
                         || pattern.startsWith("/swagger-ui") || pattern.equals("/error");

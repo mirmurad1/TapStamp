@@ -19,6 +19,7 @@ import az.cafeloyalty.shared.error.ErrorCode;
 import az.cafeloyalty.shared.i18n.Language;
 import az.cafeloyalty.shared.i18n.LocalizedText;
 import az.cafeloyalty.shared.persistence.LocalizedTextConverter;
+import az.cafeloyalty.shared.persistence.SqlTime;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class CustomerAccountService {
 
+    /**
+     * @param pendingStamps işçi təsdiqi gözləyən möhürlər ("barista təsdiqi gözlənilir")
+     * @param nextStampAt   şirkətin standart cooldown-una görə növbəti möhürün mümkün olduğu an (null — indi mümkündür)
+     */
     public record Card(int currentStamps, int totalStamps, int stampsRequired, LocalizedText rewardName,
-                       LocalizedText rewardDescription) {
+                       LocalizedText rewardDescription, int pendingStamps, Instant nextStampAt) {
     }
 
     public record AvailableReward(UUID id, LocalizedText name, Instant earnedAt) {
@@ -69,19 +74,26 @@ public class CustomerAccountService {
         CustomerStore.Customer customer = active(principal);
         Card card = jdbc.sql("""
                         SELECT la.current_stamps, la.total_stamps, r.stamps_required, r.reward_name::text AS reward_name,
-                               r.reward_description::text AS reward_description
+                               r.reward_description::text AS reward_description,
+                               (SELECT count(*) FROM stamps WHERE customer_id = :customerId AND status = 'PENDING') AS pending,
+                               (SELECT max(created_at) + make_interval(mins => (
+                                        SELECT min_interval_minutes FROM stamp_policies WHERE branch_id IS NULL))
+                                FROM stamps WHERE customer_id = :customerId AND source = 'NFC_TAP'
+                                  AND status IN ('PENDING', 'CONFIRMED')) AS next_stamp_at
                         FROM reward_rules r
                         LEFT JOIN loyalty_accounts la ON la.customer_id = :customerId
                         WHERE r.active""")
                 .param("customerId", customer.id())
                 .query((rs, n) -> new Card(rs.getInt("current_stamps"), rs.getInt("total_stamps"),
                         rs.getInt("stamps_required"), TEXT.convertToEntityAttribute(rs.getString("reward_name")),
-                        TEXT.convertToEntityAttribute(rs.getString("reward_description"))))
+                        TEXT.convertToEntityAttribute(rs.getString("reward_description")), rs.getInt("pending"),
+                        futureOrNull(SqlTime.instant(rs, "next_stamp_at"))))
                 .optional()
                 .orElse(null);
         List<AvailableReward> rewards = jdbc.sql("""
                         SELECT id, reward_name_snapshot::text AS name, earned_at FROM rewards
-                        WHERE customer_id = :customerId AND status = 'AVAILABLE' ORDER BY earned_at""")
+                        WHERE customer_id = :customerId AND status = 'AVAILABLE'
+                          AND (expires_at IS NULL OR expires_at > now()) ORDER BY earned_at""")
                 .param("customerId", customer.id())
                 .query((rs, n) -> {
                     Timestamp earned = rs.getTimestamp("earned_at");
@@ -127,6 +139,10 @@ public class CustomerAccountService {
                     Map.of("deletedAt", now.atOffset(ZoneOffset.UTC).toString()));
         });
         sessions.revokeAll(customer.id(), "ACCOUNT_DELETED");
+    }
+
+    private Instant futureOrNull(Instant at) {
+        return at != null && at.isAfter(clock.instant()) ? at : null;
     }
 
     private CustomerStore.Customer active(CustomerPrincipal principal) {

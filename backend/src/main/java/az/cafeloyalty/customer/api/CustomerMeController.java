@@ -48,7 +48,10 @@ public class CustomerMeController {
     }
 
     public record CardResponse(int currentStamps, int totalStamps, int stampsRequired, LocalizedText rewardName,
-                               LocalizedText rewardDescription) {
+                               LocalizedText rewardDescription,
+                               @Schema(description = "İşçi təsdiqi gözləyən möhürlər") int pendingStamps,
+                               @Schema(description = "Növbəti möhürün mümkün olduğu an; null — indi mümkündür")
+                               Instant nextStampAt) {
     }
 
     public record RewardResponse(UUID id, LocalizedText name, Instant earnedAt) {
@@ -83,7 +86,7 @@ public class CustomerMeController {
         return new CustomerMeResponse(profile.id(), profile.name(), profile.phoneMasked(), profile.language().tag(),
                 profile.registeredAt(),
                 card == null ? null : new CardResponse(card.currentStamps(), card.totalStamps(), card.stampsRequired(),
-                        card.rewardName(), card.rewardDescription()),
+                        card.rewardName(), card.rewardDescription(), card.pendingStamps(), card.nextStampAt()),
                 profile.availableRewards().stream()
                         .map(reward -> new RewardResponse(reward.id(), reward.name(), reward.earnedAt())).toList(),
                 profile.pendingConsents().stream()

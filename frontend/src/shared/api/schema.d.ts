@@ -322,6 +322,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/staff-console/pending-stamps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Gözləyən möhürlər
+         * @description Yalnız işçinin öz filialı; başqa filial üçün 404.
+         */
+        get: operations["pending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Möhürü təsdiqlə
+         * @description Möhür karta yazılır; kart dolubsa hədiyyə kartı yaranır.
+         */
+        post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff-console/pending-stamps/{stampId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Möhürü rədd et
+         * @description Səbəb məcburidir və auditə yazılır.
+         */
+        post: operations["reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/team": {
         parameters: {
             query?: never;
@@ -663,6 +723,26 @@ export interface paths {
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
         patch: operations["update_1"];
+        trace?: never;
+    };
+    "/api/v1/me/gift-cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hədiyyə kartları
+         * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
+         */
+        get: operations["list_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/me/sessions": {
@@ -1189,6 +1269,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/taps/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Toxunuşun vəziyyəti
+         * @description Yan təsiri yoxdur. Token tanınmırsa `TAP_TOKEN_EXPIRED`.
+         */
+        get: operations["status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taps/{token}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Toxunuşa görə möhür
+         * @description Token 60 saniyə etibarlıdır, birdəfəlikdir və toxunuşun edildiyi brauzerə bağlıdır (`TAP_BINDING_MISMATCH`). Eyni müştəri təkrar göndərsə eyni nəticə qaytarılır (idempotent), başqa müştəri `TAP_TOKEN_USED` alır. Qaydalar: `STAMP_COOLDOWN_ACTIVE`, `STAMP_DAILY_LIMIT_REACHED` (hər ikisində `retryAfterSeconds`), `OUTSIDE_BUSINESS_HOURS`.
+         */
+        post: operations["claim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/t/{uid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * NFC toxunuşu
+         * @description Çipin imzasını yoxlayır və `303 /tap/{token}` (60 saniyəlik birdəfəlik token, brauzerə bağlı) və ya `303 /tap/error?code=` cavabı verir. HEAD sorğuları və link-preview botları sayğacı istehlak etmir.
+         */
+        get: operations["tap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1212,6 +1352,16 @@ export interface components {
         CardResponse: {
             /** Format: int32 */
             currentStamps?: number;
+            /**
+             * Format: date-time
+             * @description Növbəti möhürün mümkün olduğu an; null — indi mümkündür
+             */
+            nextStampAt?: string;
+            /**
+             * Format: int32
+             * @description İşçi təsdiqi gözləyən möhürlər
+             */
+            pendingStamps?: number;
             rewardDescription?: components["schemas"]["LocalizedText"];
             rewardName?: components["schemas"]["LocalizedText"];
             /** Format: int32 */
@@ -1222,6 +1372,21 @@ export interface components {
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        /** @description Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı. */
+        ClaimResponse: {
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: int32 */
+            currentStamps?: number;
+            /** Format: uuid */
+            giftCardId?: string;
+            /** Format: uuid */
+            stampId?: string;
+            /** Format: int32 */
+            stampsRequired?: number;
+            /** @enum {string} */
+            status?: "PENDING" | "CONFIRMED";
         };
         CodeRequest: {
             /** @description 6 rəqəmli TOTP kodu və ya bərpa kodu (xxxxx-xxxxx) */
@@ -1278,6 +1443,24 @@ export interface components {
         Features: {
             /** @description Dev alətləri (simulyator, outbox) — yalnız dev mühitində */
             devTools?: boolean;
+        };
+        /** @description Hədiyyə kartı. code — daimi unikal kod: işçiyə göstərilir (QR-da da eyni kod var). */
+        GiftCardResponse: {
+            code?: string;
+            /** Format: date-time */
+            earnedAt?: string;
+            /**
+             * Format: date-time
+             * @description Müddəti; null — müddətsiz
+             */
+            expiresAt?: string;
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
+            /** Format: date-time */
+            redeemedAt?: string;
+            /** @enum {string} */
+            status?: "AVAILABLE" | "REDEEMED" | "REVOKED" | "EXPIRED";
         };
         /** @description Dəvətin məzmunu (qəbul səhifəsində göstərilir) */
         InvitationDetailsResponse: {
@@ -1388,6 +1571,8 @@ export interface components {
             language: string;
             /** @description Telefon nömrəsi istənilən formatda: 050 123 45 67, +994501234567 və s. */
             phone: string;
+            /** @description Toxunuşdan sonra giriş: toxunuş tokeni 10 dəqiqəlik bu sorğuya rezerv olunur */
+            tapToken?: string;
         };
         OtpVerifyRequest: {
             /** Format: uuid */
@@ -1438,6 +1623,19 @@ export interface components {
             /** Format: int32 */
             version?: number;
         };
+        /** @description Təsdiq gözləyən möhür. Telefon yalnız maskalı göstərilir. */
+        PendingStampResponse: {
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            customerName?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: uuid */
+            id?: string;
+            phoneMasked?: string;
+        };
         ProvisionRequest: {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
@@ -1450,6 +1648,8 @@ export interface components {
         /** @description Kafenin ictimai məlumatı: ad, təsvir, filiallar və mükafat qaydası */
         PublicCompanyResponse: {
             branches?: components["schemas"]["BranchResponse"][];
+            /** @description Brend rəngi (#RRGGBB): müştəri tətbiqinin əsas rəngi */
+            brandColor?: string;
             /** @description Şirkətin standart dili: az, en və ya ru */
             defaultLanguage?: string;
             description?: components["schemas"]["LocalizedText"];
@@ -1468,6 +1668,9 @@ export interface components {
             language: string;
             name?: string;
             registrationToken: string;
+        };
+        RejectStampRequest: {
+            reason: string;
         };
         RevokedResponse: {
             /** Format: int32 */
@@ -1509,6 +1712,11 @@ export interface components {
         SessionStateResponse: {
             state?: string;
         };
+        StampDecisionResponse: {
+            /** Format: uuid */
+            stampId?: string;
+            status?: string;
+        };
         StatsResponse: {
             /** Format: int64 */
             activeCustomers?: number;
@@ -1516,6 +1724,17 @@ export interface components {
             activeStaff?: number;
             /** Format: int32 */
             branches?: number;
+        };
+        /** @description Toxunuşun vəziyyəti. sameBrowser=false — link başqa brauzerdə açılıb, möhür alınmayacaq. */
+        TapStatusResponse: {
+            /** Format: uuid */
+            branchId?: string;
+            branchName?: components["schemas"]["LocalizedText"];
+            /** Format: date-time */
+            expiresAt?: string;
+            sameBrowser?: boolean;
+            /** @enum {string} */
+            status?: "ACTIVE" | "RESERVED" | "CONSUMED" | "REJECTED" | "EXPIRED";
         };
         Tenant: {
             defaultLanguage?: string;
@@ -1921,6 +2140,76 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    pending: {
+        parameters: {
+            query: {
+                branchId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PendingStampResponse"][];
+                };
+            };
+        };
+    };
+    confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stampId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StampDecisionResponse"];
+                };
+            };
+        };
+    };
+    reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stampId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectStampRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StampDecisionResponse"];
+                };
             };
         };
     };
@@ -2342,6 +2631,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CustomerMeResponse"];
+                };
+            };
+        };
+    };
+    list_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GiftCardResponse"][];
                 };
             };
         };
@@ -2970,6 +3279,73 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["LegalDocumentResponse"];
                 };
+            };
+        };
+    };
+    status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TapStatusResponse"];
+                };
+            };
+        };
+    };
+    claim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClaimResponse"];
+                };
+            };
+        };
+    };
+    tap: {
+        parameters: {
+            query?: {
+                picc?: string;
+                cmac?: string;
+            };
+            header?: never;
+            path: {
+                uid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

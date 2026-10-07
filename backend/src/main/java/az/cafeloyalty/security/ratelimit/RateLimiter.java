@@ -66,7 +66,19 @@ public class RateLimiter {
      * @param subject məsələn IP ünvanı və ya email (hash-lənir)
      */
     public void consume(RateLimitPolicy policy, String scope, String subject) {
-        ConsumptionProbe probe = bucket(policy, scope, subject).tryConsumeAndReturnRemaining(1);
+        consume(bucket(policy, scope, subject, capacity(policy)));
+    }
+
+    /**
+     * Həcmi qaydadan gələn limit (məs. filialın parametri). Həcm açarın bir hissəsidir — dəyişəndə yeni limit dərhal
+     * qüvvəyə minir.
+     */
+    public void consume(RateLimitPolicy policy, String scope, String subject, int capacity) {
+        consume(bucket(policy, scope + ":c" + capacity, subject, capacity));
+    }
+
+    private static void consume(BucketProxy bucket) {
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         if (!probe.isConsumed()) {
             throw rateLimited(probe.getNanosToWaitForRefill());
         }
@@ -74,12 +86,12 @@ public class RateLimiter {
 
     /** Bir cəhd istehlak edir və limitin aşılıb-aşılmadığını qaytarır (istisna atmadan). */
     public boolean tryConsume(RateLimitPolicy policy, String scope, String subject) {
-        return bucket(policy, scope, subject).tryConsume(1);
+        return bucket(policy, scope, subject, capacity(policy)).tryConsume(1);
     }
 
     /** Limitin hazırda bitib-bitmədiyini yoxlayır (istehlak etmədən). */
     public boolean isExhausted(RateLimitPolicy policy, String scope, String subject) {
-        return bucket(policy, scope, subject).getAvailableTokens() <= 0;
+        return bucket(policy, scope, subject, capacity(policy)).getAvailableTokens() <= 0;
     }
 
     public static ApiException rateLimited(long nanosToWait) {
@@ -87,8 +99,7 @@ public class RateLimiter {
         return new ApiException(ErrorCode.RATE_LIMITED, new Object[0], Map.of("retryAfterSeconds", seconds));
     }
 
-    private BucketProxy bucket(RateLimitPolicy policy, String scope, String subject) {
-        int capacity = capacity(policy);
+    private BucketProxy bucket(RateLimitPolicy policy, String scope, String subject, int capacity) {
         BucketConfiguration configuration = BucketConfiguration.builder()
                 .addLimit(limit -> limit.capacity(capacity).refillIntervally(capacity, policy.window()))
                 .build();

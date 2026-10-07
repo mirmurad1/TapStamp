@@ -43,6 +43,9 @@ public class CompanyProfile {
     @Column(name = "sms_sender_name")
     private String smsSenderName;
 
+    @Column(name = "brand_color", nullable = false)
+    private String brandColor;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
@@ -75,5 +78,9 @@ public class CompanyProfile {
 
     public String getSmsSenderName() {
         return smsSenderName;
+    }
+
+    public String getBrandColor() {
+        return brandColor;
     }
 }

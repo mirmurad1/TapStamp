@@ -37,10 +37,10 @@
     "stamp_few": "{{count}} штампа",
     "stamp_many": "{{count}} штампов",
     "stamp_other": "{{count}} штампа",
-    "coffee_one": "{{count}} кофе",
-    "coffee_few": "{{count}} кофе",
-    "coffee_many": "{{count}} кофе",
-    "coffee_other": "{{count}} кофе"
+    "visit_one": "{{count}} визит",
+    "visit_few": "{{count}} визита",
+    "visit_many": "{{count}} визитов",
+    "visit_other": "{{count}} визита"
   },
   "notFound": {
     "title": "Страница не найдена",
@@ -54,7 +54,7 @@
     "code": "Введите 6-значный код.",
     "recoveryCode": "Код должен быть в формате xxxxx-xxxxx.",
     "slug": "Должно начинаться со строчной латинской буквы и содержать только строчные буквы, цифры и подчёркивания (2–31 символ).",
-    "domain": "Введите корректный домен, например bonus.mockcoffee.az.",
+    "domain": "Введите корректный домен, например moyka.mockcoffe.com.",
     "tooLong": "Слишком длинный текст."
   }
 }

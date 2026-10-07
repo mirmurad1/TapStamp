@@ -3,33 +3,83 @@
     "guest": "Welcome!",
     "named": "Hi, {{name}}!"
   },
-  "intro": "Every coffee brings you one step closer to a free one. Tap your phone on the NFC tag at the counter to collect a stamp.",
+  "intro": "Every visit brings you one step closer to a reward. Tap your phone on the NFC tag to collect a stamp.",
   "card": {
     "title": "Stamp card",
-    "progress_one": "{{count}} stamp to your free coffee",
-    "progress_other": "{{count}} stamps to your free coffee",
-    "giftCup": "Free coffee cup",
-    "filledCup": "Stamped cup",
-    "emptyCup": "Empty cup",
-    "stampedToast": "Your coffee is stamped ☕",
-    "claimReward": "Claim your free coffee",
-    "reward": "Reward: {{name}}"
+    "progress_one": "{{count}} stamp to your reward",
+    "progress_other": "{{count}} stamps to your reward",
+    "complete": "Card complete!",
+    "gift": "Reward",
+    "filled": "Stamped",
+    "empty": "Empty slot",
+    "reward": "Reward: {{name}}",
+    "pending_one": "{{count}} stamp is waiting for staff approval",
+    "pending_other": "{{count}} stamps are waiting for staff approval",
+    "nextStampIn": "Next stamp in {{time}}"
   },
   "nav": {
     "home": "Home",
+    "giftCards": "Gift cards",
     "settings": "Settings",
     "signIn": "Sign in"
   },
   "guest": {
     "cta": "Sign in and collect stamps",
-    "branches": "Our branches",
+    "branches": "Our locations",
     "rule_one": "Collect {{count}} stamp — {{reward}} is on us!",
     "rule_other": "Collect {{count}} stamps — {{reward}} is on us!"
   },
   "rewards": {
     "title": "Your rewards",
     "ready": "Ready",
-    "hint": "Ask the barista to redeem your reward."
+    "hint": "Show the card code to a staff member to get your reward.",
+    "open": "View gift cards"
+  },
+  "giftCards": {
+    "title": "Gift cards",
+    "subtitle": "A gift card appears here when your stamp card is complete. Show the code or QR to a staff member to get your reward.",
+    "empty": "No gift cards yet. Keep collecting stamps!",
+    "available": "Ready to use",
+    "history": "History",
+    "code": "Card code",
+    "show": "Show code",
+    "showHint": "Show this code or QR to a staff member. They will verify the card and hand over your reward.",
+    "qrLabel": "Gift card QR code",
+    "earnedAt": "Earned: {{date}}",
+    "expiresAt": "Valid until: {{date}}",
+    "noExpiry": "No expiry",
+    "redeemedAt": "Used: {{date}}",
+    "close": "Close",
+    "status": {
+      "AVAILABLE": "Ready",
+      "REDEEMED": "Used",
+      "REVOKED": "Cancelled",
+      "EXPIRED": "Expired"
+    }
+  },
+  "celebrate": {
+    "title": "Congratulations!",
+    "subtitle": "Your card is complete — {{reward}} is yours!",
+    "subtitleGeneric": "Your card is complete — the reward is yours!",
+    "hint": "The gift card has been added to “Gift cards”.",
+    "open": "View gift card",
+    "later": "Later"
+  },
+  "tap": {
+    "checking": "Checking your tap…",
+    "title": "Collect a stamp",
+    "branch": "{{branch}}",
+    "signInToCollect": "Sign in with your phone number to collect the stamp. Your tap is kept for 10 minutes.",
+    "signIn": "Sign in and collect",
+    "collecting": "Adding your stamp…",
+    "stamped": "Stamp added!",
+    "pending": "Waiting for staff approval",
+    "pendingHint": "The stamp will be added to your card as soon as a staff member approves it.",
+    "home": "View my card",
+    "tryAgain": "Tap your phone on the NFC tag again.",
+    "retryIn": "You can collect your next stamp in {{time}}.",
+    "otherBrowser": "This link was opened on another device. Tap the NFC tag with your own phone to collect the stamp.",
+    "errorTitle": "No stamp this time"
   },
   "settings": {
     "title": "Settings",
@@ -57,9 +107,9 @@
       "description": "Your phone number, name and all your stamps will be deleted. This cannot be undone.",
       "open": "Delete account",
       "sendCode": "Send SMS code",
-      "codeHint": "Enter the code we sent to your phone to confirm.",
+      "codeHint": "Enter the code sent to your phone to confirm.",
       "confirm": "Delete my account permanently",
-      "done": "Your account has been deleted. Hope to see you again!"
+      "done": "Your account has been deleted. We hope to see you again!"
     }
   },
   "legal": {

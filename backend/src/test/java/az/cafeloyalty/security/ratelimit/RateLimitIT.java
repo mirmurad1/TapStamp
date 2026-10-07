@@ -68,6 +68,6 @@ class RateLimitIT extends AdminIntegrationTest {
         assertThat(keys).isNotEmpty()
                 .noneMatch(key -> key.contains(ip))
                 .noneMatch(key -> key.contains("@"))
-                .allMatch(key -> key.matches("^[A-Z_]+:(t:[0-9a-f-]{36}|platform|global):[0-9a-f]{32}$"));
+                .allMatch(key -> key.matches("^[A-Z_]+:(t:[0-9a-f-]{36}|platform|global)(:c[0-9]+)?:[0-9a-f]{32}$"));
     }
 }

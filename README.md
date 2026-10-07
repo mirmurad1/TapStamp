@@ -100,7 +100,7 @@ Bütün hesabların şifrəsi: **`Kofe-Dev-Parol-2026`** (`.env` faylında `DEV_
 |---|---|---|---|---|
 | Mock Coffee House | https://mockcoffee.localhost/admin | `owner@mockcoffee.az` | Sahib (bütün filiallar) | ✅ dev TOTP sirri |
 | Mock Coffee House | https://mockcoffee.localhost/admin | `manager@mockcoffee.az` | Filial meneceri (Gənclik) | — |
-| Mock Coffee House | https://mockcoffee.localhost/admin | `barista@mockcoffee.az` | Barista (Mərkəz), interfeys dili rus | — |
+| Mock Coffee House | https://mockcoffee.localhost/admin | `barista@mockcoffee.az` | İşçi (Mərkəz), interfeys dili rus | — |
 | Demo Çay Evi | https://demo-cay.localhost/admin | `owner@democay.az` | Sahib | ilk girişdə qurulur (QR kod) |
 | Platforma | https://platform.localhost/admin | `superadmin@platform.localhost` | Platforma admini | ✅ dev TOTP sirri |
 
@@ -200,6 +200,7 @@ npm run lint        # ESLint (UI-da tərcüməsiz mətn qadağandır)
 npm run typecheck   # TypeScript (mövcud olmayan tərcümə açarı xəta verir)
 npm test            # Vitest: tərcümə paritetı, cəm formaları, formatlar, şriftlər
 npm run build
+npm run e2e          # Playwright: işləyən dev mühitinə qarşı (docker compose), sistemdəki Edge ilə
 ```
 
 ## API müqaviləsi (OpenAPI → TypeScript)
@@ -241,10 +242,24 @@ scripts/    sirlərin və dev sertifikatlarının yaradılması
 docs/       arxitektura planı və sənədlər
 ```
 
+### NFC toxunuşunun simulyasiyası (dev)
+
+Real çip olmadan bütün axını yoxlamaq üçün:
+
+1. https://mockcoffee.localhost/admin — `barista@mockcoffee.az` ilə daxil olun (2FA yoxdur).
+2. Menyuda **NFC simulyatoru** (yalnız dev-də görünür): çipi seçin və **Toxun** düyməsini basın. Hər basış, real çip kimi, sayğacı artırır və yeni imzalı link (`/t/{uid}?picc=…&cmac=…`) yaradır.
+   - `04A1B2C3D4E5F2` (Piştaxta 2) — `NTAG424_SUN`: link **real NTAG 424 DNA kriptoqrafiyası** ilə yaradılır (AES-128 PICCData + AES-CMAC), yoxlamanı `Ntag424SunVerifier` aparır.
+   - Digərləri — `SIMULATED`: `APP_DEV_SIMULATOR_KEY` ilə HMAC imzası (yalnız dev).
+3. "Bu brauzerdə aç" — linki açın (və ya QR-ı telefonla skan edin). Daxil olmamısınızsa, telefon nömrəsi ilə girişdən sonra möhür avtomatik verilir (toxunuş 10 dəqiqə saxlanılır).
+4. "Eyni linki təkrar aç" — ikinci dəfə **"Bu link artıq istifadə olunub"** görünməlidir (replay qorunması).
+
+Kart dolanda (Mock Coffee House-da 9 möhür) təbrik animasiyası çıxır və **Hədiyyə kartları** bölməsində daimi unikal kodlu (`7K3M-9QX2` formatında) və QR-lı kart yaranır. Sui-istifadə qaydaları (standart): iki möhür arasında 20 dəqiqə, gündə ən çox 3 möhür (şirkətin saat qurşağı ilə). Qaydaların admin paneldən dəyişdirilməsi Mərhələ 7-dədir; dev-də sınamaq üçün `stamp_policies` cədvəlində dəyişin.
+
+İşçi təsdiqi rejimi (`require_staff_approval`) aktiv olan filialda möhür **İşçi konsolu**nda təsdiqlənənə qədər gözləyir; 30 dəqiqə ərzində təsdiqlənməzsə, avtomatik rədd edilir.
+
 ## Növbəti bölmələr
 
 Aşağıdakı bölmələr müvafiq mərhələlərdə əlavə olunacaq:
 
-- NFC toxunuşunun simulyasiyası (Mərhələ 5)
 - Real NTAG 424 DNA çipinin SUN ilə proqramlaşdırılması (Mərhələ 9, `docs/nfc-ntag424-programming.md`)
 - Yeni şirkətin və domenin qoşulması (Mərhələ 9, `docs/tenant-onboarding.md`)

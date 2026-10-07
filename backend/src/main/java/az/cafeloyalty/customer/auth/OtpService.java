@@ -13,6 +13,8 @@ import az.cafeloyalty.company.service.CompanySettings;
 import az.cafeloyalty.customer.CustomerStore;
 import az.cafeloyalty.customer.auth.OtpChallengeStore.Purpose;
 import az.cafeloyalty.customer.phone.PhoneNumberService;
+import az.cafeloyalty.nfc.BrowserIdCookie;
+import az.cafeloyalty.nfc.TapTokenStore;
 import az.cafeloyalty.notification.sms.SmsMessage;
 import az.cafeloyalty.notification.sms.SmsProvider;
 import az.cafeloyalty.notification.sms.SmsTemplates;
@@ -71,8 +73,11 @@ public class OtpService {
 
     private static final Logger log = LoggerFactory.getLogger(OtpService.class);
     private static final String GLOBAL_SCOPE = "global";
+    /** Toxunuş tokeni SMS gələnə və kod daxil edilənə qədər saxlanılır. */
+    static final Duration TAP_RESERVATION = Duration.ofMinutes(10);
 
     private final OtpChallengeStore challenges;
+    private final TapTokenStore tapTokens;
     private final OtpCodes codes;
     private final CustomerStore customers;
     private final PhoneNumberService phoneNumbers;
@@ -89,13 +94,14 @@ public class OtpService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public OtpService(OtpChallengeStore challenges, OtpCodes codes, CustomerStore customers,
+    public OtpService(OtpChallengeStore challenges, TapTokenStore tapTokens, OtpCodes codes, CustomerStore customers,
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
                       @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
                       CompanySettings companySettings, TenantDirectory directory, SmsProvider sms,
-                      SmsTemplates templates, TaskExecutor executor, AuditLogger audit,
+                      SmsTemplates templates, @Qualifier("applicationTaskExecutor") TaskExecutor executor, AuditLogger audit,
                       CustomerAuthProperties properties, PlatformTransactionManager transactionManager, Clock clock) {
         this.challenges = challenges;
+        this.tapTokens = tapTokens;
         this.codes = codes;
         this.customers = customers;
         this.phoneNumbers = phoneNumbers;
@@ -115,10 +121,16 @@ public class OtpService {
 
     // ------------------------------------------------------------------ Giriş
 
-    public Issued requestLogin(String rawPhone, Language language, ClientInfo client) {
+    /**
+     * @param tapToken  toxunuşdan sonra girişə başlayan qonağın tokeni (istəyə bağlı) — 10 dəqiqəlik bu kod sorğusuna
+     *                  rezerv olunur; yalnız eyni brauzerdən. Token etibarsızdırsa giriş yenə davam edir.
+     * @param browserId brauzer identifikatoru ({@code __Host-cl_bid})
+     */
+    public Issued requestLogin(String rawPhone, Language language, ClientInfo client, String tapToken,
+                               String browserId) {
         CompanySettings.Settings settings = companySettings.current();
         String phone = phoneNumbers.normalize(rawPhone, settings.allowedPhoneRegions());
-        return issue(phone, language, Purpose.LOGIN, null, settings, client);
+        return issue(phone, language, Purpose.LOGIN, null, settings, client, tapToken, browserId);
     }
 
     public LoginResult verifyLogin(UUID challengeId, String code, ClientInfo client) {
@@ -144,7 +156,8 @@ public class OtpService {
                 .filter(c -> c.status() == CustomerStore.Status.ACTIVE)
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHENTICATED));
         String phone = cipher.decryptString(customer.phoneEnc(), customerPhoneAad(customer.id()));
-        return issue(phone, customer.language(), Purpose.STEP_UP, customer.id(), companySettings.current(), client);
+        return issue(phone, customer.language(), Purpose.STEP_UP, customer.id(), companySettings.current(), client,
+                null, null);
     }
 
     public void verifyStepUp(CustomerPrincipal principal, UUID challengeId, String code, ClientInfo client) {
@@ -154,7 +167,7 @@ public class OtpService {
     // ------------------------------------------------------------------ Ümumi məntiq
 
     private Issued issue(String phone, Language language, Purpose purpose, UUID customerId,
-                         CompanySettings.Settings settings, ClientInfo client) {
+                         CompanySettings.Settings settings, ClientInfo client, String tapToken, String browserId) {
         TenantInfo tenant = TenantContext.require();
         String scope = "t:" + tenant.id();
         Instant now = clock.instant();
@@ -180,6 +193,11 @@ public class OtpService {
         tx.executeWithoutResult(status -> {
             challenges.supersedeActive(phoneHash, purpose);
             challenges.insert(challenge);
+            if (tapToken != null && !tapToken.isBlank()) {
+                tapTokens.reserve(SecureTokens.hash(tapToken), BrowserIdCookie.bindingHash(browserId), id,
+                        now.plus(TAP_RESERVATION), now)
+                        .ifPresent(tokenId -> challenges.linkTapToken(id, tokenId));
+            }
         });
 
         // SMS yalnız commit-dən sonra və arxa planda: cavab vaxtı provayderin sürətindən asılı deyil

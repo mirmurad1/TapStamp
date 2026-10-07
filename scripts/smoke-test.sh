@@ -53,6 +53,24 @@ check_status "müştəri profili sessiyasız bağlıdır" mockcoffee.localhost /
 check_body "hüquqi sənədlər açıqdır" mockcoffee.localhost /api/v1/public/legal '"PRIVACY_POLICY"'
 check_status "müştəri API-si platforma domenində mövcud deyil" platform.localhost /api/v1/auth/session 404
 
+echo "NFC toxunuşu"
+check_location() { # ad host yol gözlənilən_location
+  local location
+  location=$(curl -s -o /dev/null -w '%{redirect_url}' "${CURL_OPTS[@]}" "$(url "$2" "$3")")
+  [[ "$location" == *"$4" ]] && pass "$1" || fail "$1: gözlənilən $4, alınan $location"
+}
+check_location "yanlış formatlı toxunuş xəta səhifəsinə yönəlir" mockcoffee.localhost "/t/04A1B2C3D4E5F1?picc=00&cmac=00" "/tap/error?code=TAP_MALFORMED"
+check_location "saxta imza ümumi kodla rədd edilir" mockcoffee.localhost \
+  "/t/04A1B2C3D4E5F2?picc=00000000000000000000000000000000&cmac=0000000000000000" "/tap/error?code=TAP_SIGNATURE_INVALID"
+check_location "başqa şirkətin çipi tanınmır" demo-cay.localhost \
+  "/t/04A1B2C3D4E5F2?picc=00000000000000000000000000000000&cmac=0000000000000000" "/tap/error?code=TAG_UNKNOWN"
+headers=$(curl -s -D - -o /dev/null "${CURL_OPTS[@]}" "$(url mockcoffee.localhost '/t/04A1B2C3D4E5F1?picc=00&cmac=00')")
+grep -qi "^referrer-policy: no-referrer" <<<"$headers" && pass "toxunuş yönləndirməsi: no-referrer" || fail "toxunuş yönləndirməsində no-referrer yoxdur"
+grep -qi "^cache-control: no-store" <<<"$headers" && pass "toxunuş yönləndirməsi: no-store" || fail "toxunuş yönləndirməsində no-store yoxdur"
+check_status "naməlum toxunuş tokeni" mockcoffee.localhost /api/v1/taps/unknown-token 410
+check_status "möhür sessiyasız alınmır" mockcoffee.localhost /api/v1/me/gift-cards 401
+check_body "toxunuş səhifəsi (SPA)" mockcoffee.localhost /tap/error '<div id="root">'
+
 echo "TLS qatı"
 code=$(curl -s -o /dev/null -w '%{http_code}' "${CURL_OPTS[@]}" -H "Host: demo-cay.localhost" "$(url mockcoffee.localhost /api/v1/public/company)")
 [[ "$code" == "421" ]] && pass "Host və SNI uyğunsuzluğu rədd edilir (421)" || fail "Host/SNI uyğunsuzluğu: alınan $code"

@@ -1,61 +1,80 @@
-import { Gift } from 'lucide-react';
+import { Gift, Hourglass, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/cn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 
 interface StampCardProps {
-  /** Hədiyyə üçün lazım olan möhür sayı (məs. 9 → 10-cu qəhvə pulsuzdur). */
+  /** Hədiyyə üçün lazım olan möhür sayı. */
   stampsRequired: number;
   /** Cari kartdakı möhürlər. */
   current: number;
   /** Hədiyyənin adı (cari dildə). */
   rewardName?: string;
+  /** İşçi təsdiqini gözləyən möhürlər (kartda ayrıca işarələnir). */
+  pending?: number;
+  /** Bu indeksdən başlayan möhürlər yeni vurulub — animasiya ilə görünür. */
+  animateFrom?: number;
+  /** Kart dolub (hədiyyə kartı yaranıb) — hədiyyə xanası canlanır. */
+  completed?: boolean;
 }
 
-/** Möhür kartı: N fincan + hədiyyə fincanı. Animasiyalar Mərhələ 5-də əlavə olunur. */
-export function StampCard({ stampsRequired, current, rewardName }: StampCardProps) {
+/**
+ * Möhür kartı: N xana + hədiyyə xanası. İkon bütün şirkətlər üçün eynidir (ulduz), rəng şirkətin brend rəngidir —
+ * kafe, avtoyuma, bərbər və s. üçün eyni dərəcədə uyğundur.
+ */
+export function StampCard({ stampsRequired, current, rewardName, pending = 0, animateFrom, completed }: StampCardProps) {
   const { t } = useTranslation('profile');
-  const remaining = Math.max(stampsRequired - current, 0);
+  const shown = completed ? stampsRequired : Math.min(current, stampsRequired);
+  const remaining = Math.max(stampsRequired - shown, 0);
+  const pendingSlots = Math.min(pending, stampsRequired - shown);
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
+      <div className="h-1.5 bg-linear-to-r from-primary via-accent to-highlight" aria-hidden="true" />
       <CardHeader>
         <CardTitle>{t('card.title')}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t('card.progress', { count: remaining })}</p>
-        {rewardName ? <p className="text-sm font-medium text-accent">{t('card.reward', { name: rewardName })}</p> : null}
+        <p className="text-sm text-muted-foreground">
+          {completed ? t('card.complete') : t('card.progress', { count: remaining })}
+        </p>
+        {rewardName ? <p className="text-sm font-semibold text-primary">{t('card.reward', { name: rewardName })}</p> : null}
       </CardHeader>
       <CardContent>
         <ol className="grid grid-cols-5 gap-3">
           {Array.from({ length: stampsRequired }, (_, index) => {
-            const filled = index < current;
+            const filled = index < shown;
+            const waiting = !filled && index < shown + pendingSlots;
+            const fresh = filled && animateFrom !== undefined && index >= animateFrom;
             return (
               <li key={index} className="flex justify-center">
-                <CupIcon filled={filled} label={t(filled ? 'card.filledCup' : 'card.emptyCup')} />
+                <StampSlot filled={filled} waiting={waiting} fresh={fresh} delay={fresh ? (index - (animateFrom ?? 0)) * 120 : 0} />
               </li>
             );
           })}
           <li className="flex justify-center">
             <span
               role="img"
-              aria-label={t('card.giftCup')}
-              className="grid size-12 place-items-center rounded-full border-2 border-dashed border-accent text-accent"
+              aria-label={t('card.gift')}
+              className={cn(
+                'grid size-12 place-items-center rounded-full bg-linear-to-br from-accent to-highlight text-white shadow-md',
+                completed ? 'animate-gift-bounce' : 'opacity-90',
+              )}
             >
               <Gift className="size-6" aria-hidden="true" />
             </span>
           </li>
         </ol>
         <div
-          className="mt-5 h-2 overflow-hidden rounded-full bg-muted"
+          className="mt-5 h-2.5 overflow-hidden rounded-full bg-muted"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={stampsRequired}
-          aria-valuenow={current}
+          aria-valuenow={shown}
           aria-label={t('card.title')}
         >
           <div
-            className="h-full rounded-full bg-accent transition-[width] duration-500"
-            style={{ width: `${(Math.min(current, stampsRequired) / stampsRequired) * 100}%` }}
+            className="h-full rounded-full bg-linear-to-r from-primary to-accent transition-[width] duration-700 ease-out"
+            style={{ width: `${(shown / stampsRequired) * 100}%` }}
           />
         </div>
       </CardContent>
@@ -63,31 +82,40 @@ export function StampCard({ stampsRequired, current, rewardName }: StampCardProp
   );
 }
 
-function CupIcon({ filled, label }: { filled: boolean; label: string }) {
+function StampSlot({ filled, waiting, fresh, delay }: { filled: boolean; waiting: boolean; fresh: boolean; delay: number }) {
+  const { t } = useTranslation('profile');
+  if (waiting) {
+    return (
+      <span
+        role="img"
+        aria-label={t('card.pending', { count: 1 })}
+        className="grid size-12 place-items-center rounded-full border-2 border-dashed border-highlight text-highlight"
+      >
+        <Hourglass className="size-5" aria-hidden="true" />
+      </span>
+    );
+  }
   return (
-    <svg
-      role="img"
-      aria-label={label}
-      viewBox="0 0 48 48"
-      className={cn('size-12', filled ? 'text-primary' : 'text-muted-foreground/45')}
-    >
-      <path
-        d="M10 18h22v10a10 10 0 0 1-10 10h-2a10 10 0 0 1-10-10z"
-        fill={filled ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      <path d="M32 21h3a5 5 0 0 1 0 10h-3" fill="none" stroke="currentColor" strokeWidth="2.5" />
-      {filled && (
-        <path
-          d="M17 8c-1.5 2.5 1.5 4 0 6.5M24 7c-1.5 2.5 1.5 4 0 6.5"
-          fill="none"
-          className="stroke-accent"
-          strokeWidth="2"
-          strokeLinecap="round"
+    <span className="relative grid size-12 place-items-center">
+      {fresh ? (
+        <span
+          className="animate-stamp-ring absolute inset-0 rounded-full border-4 border-primary"
+          style={{ animationDelay: `${delay + 250}ms` }}
+          aria-hidden="true"
         />
-      )}
-    </svg>
+      ) : null}
+      <span
+        role="img"
+        aria-label={t(filled ? 'card.filled' : 'card.empty')}
+        className={cn(
+          'grid size-12 place-items-center rounded-full',
+          filled ? 'bg-primary text-primary-foreground shadow-md' : 'border-2 border-dashed border-border text-muted-foreground/40',
+          fresh && 'animate-stamp-pop',
+        )}
+        style={fresh ? { animationDelay: `${delay}ms` } : undefined}
+      >
+        <Star className="size-6" fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+      </span>
+    </span>
   );
 }

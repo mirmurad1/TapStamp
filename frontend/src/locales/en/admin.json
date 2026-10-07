@@ -13,7 +13,8 @@
     "audit": "Audit log",
     "team": "Team",
     "account": "My account",
-    "tenants": "Companies"
+    "tenants": "Companies",
+    "simulator": "NFC simulator"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -28,7 +29,7 @@
     "SUPER_ADMIN": "Platform admin",
     "COMPANY_OWNER": "Owner",
     "BRANCH_MANAGER": "Branch manager",
-    "STAFF": "Barista"
+    "STAFF": "Staff"
   },
   "account": {
     "title": "My account",
@@ -124,7 +125,7 @@
   },
   "platform": {
     "title": "Companies",
-    "subtitle": "Cafe chains on the platform. Each company has its own database and its own domain.",
+    "subtitle": "Companies on the platform. Each company has its own database and its own domain.",
     "newTenant": "New company",
     "empty": "No companies yet.",
     "columns": {
@@ -150,7 +151,7 @@
       "nameEn": "Name (English)",
       "nameRu": "Name (Русский)",
       "domain": "Company domain",
-      "domainHint": "E.g. bonus.mockcoffee.az. The DNS record must point to this server.",
+      "domainHint": "E.g. moyka.mockcoffe.com. The DNS record must point to this server.",
       "language": "Default language",
       "timezone": "Time zone",
       "submit": "Create company",
@@ -178,5 +179,44 @@
       "mfaReset": "2FA reset.",
       "unavailable": "The company is not active — its data is unavailable."
     }
+  },
+  "staffConsole": {
+    "title": "Staff console",
+    "subtitle": "Stamps waiting for approval at your location. The list refreshes every 5 seconds.",
+    "branch": "Location",
+    "pending": {
+      "title": "Stamps awaiting approval",
+      "empty": "No pending stamps.",
+      "customer": "Customer",
+      "anonymous": "Unnamed customer",
+      "waiting": "{{time}} ago",
+      "expires": "Auto-reject: {{time}}",
+      "confirm": "Approve",
+      "reject": "Reject",
+      "confirmed": "Stamp approved.",
+      "rejected": "Stamp rejected.",
+      "rejectTitle": "Reject stamp",
+      "rejectReason": "Reason",
+      "rejectHint": "E.g. the customer did not order. The reason is written to the audit log."
+    }
+  },
+  "simulator": {
+    "title": "NFC simulator",
+    "subtitle": "Development only: simulates tapping a tag. Every press increments the counter and creates a new signed link — just like a real tag.",
+    "tag": "Tag",
+    "tap": "Tap",
+    "counter": "Counter: {{counter}}",
+    "lastCounter": "Last accepted counter: {{counter}}",
+    "link": "Tap link",
+    "open": "Open in this browser",
+    "replay": "Open the same link again",
+    "replayHint": "Opening the same link twice must show \"Link already used\" (replay protection).",
+    "qr": "Scan with a phone (if the domain resolves on the phone).",
+    "qrLabel": "Tap link QR code",
+    "types": {
+      "NTAG424_SUN": "NTAG 424 DNA (real cryptography)",
+      "SIMULATED": "Simulated"
+    },
+    "disabled": "disabled"
   }
 }

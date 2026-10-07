@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Coffee, ShieldCheck } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { LayoutGrid, Nfc, ShieldCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router';
@@ -9,12 +9,13 @@ import { cn } from '@/shared/lib/cn';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
-import { accountApi } from '../api/adminApi';
+import { accountApi, simulatorApi } from '../api/adminApi';
 import { useAdminAuth, useMe } from '../auth/AdminAuthProvider';
 import { sessionKeys } from '../auth/session';
 import { StepUpProvider } from '../auth/StepUpProvider';
 import { navigationFor } from './navigation';
 import { UserMenu } from './UserMenu';
+import { SIMULATOR_TAGS_KEY } from '../pages/dev/simulatorKeys';
 
 /** Admin panelinin çərçivəsi: sol menyu (rollara görə), yuxarı panel (dil, mövzu, istifadəçi menyusu). */
 export function AdminLayout() {
@@ -22,7 +23,18 @@ export function AdminLayout() {
   const { scope, realm } = useAdminAuth();
   const me = useMe();
   const queryClient = useQueryClient();
-  const items = navigationFor(scope, me);
+  // Dev simulyatoru yalnız mövcud olduqda (dev mühiti) menyuda görünür; prod-da endpoint 403 qaytarır
+  const simulator = useQuery({
+    queryKey: SIMULATOR_TAGS_KEY,
+    queryFn: simulatorApi.tags,
+    enabled: scope === 'TENANT',
+    retry: false,
+    staleTime: 60_000,
+  });
+  const items = [
+    ...navigationFor(scope, me),
+    ...(simulator.isSuccess ? [{ section: 'simulator' as const, to: '/dev/simulator', icon: Nfc, roles: [] }] : []),
+  ];
   const title = scope === 'PLATFORM' ? t('shell.platformTitle') : t('shell.title');
 
   // Dil seçimi profilə yazılır: növbəti girişdə və digər cihazlarda da eyni dil açılır
@@ -35,7 +47,7 @@ export function AdminLayout() {
     document.title = title;
   }, [title]);
 
-  const Icon = scope === 'PLATFORM' ? ShieldCheck : Coffee;
+  const Icon = scope === 'PLATFORM' ? ShieldCheck : LayoutGrid;
   return (
     <StepUpProvider>
       <div className="flex min-h-dvh flex-col md:flex-row">

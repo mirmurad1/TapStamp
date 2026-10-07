@@ -3,20 +3,23 @@
     "guest": "Xoş gəlmisiniz!",
     "named": "Salam, {{name}}!"
   },
-  "intro": "Hər qəhvə sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu piştaxtadakı NFC nişanına toxundurun.",
+  "intro": "Hər ziyarət sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu NFC nişanına toxundurun.",
   "card": {
     "title": "Möhür kartı",
-    "progress_one": "Hədiyyə qəhvəyə {{count}} möhür qalıb",
-    "progress_other": "Hədiyyə qəhvəyə {{count}} möhür qalıb",
-    "giftCup": "Hədiyyə fincanı",
-    "filledCup": "Doldurulmuş fincan",
-    "emptyCup": "Boş fincan",
-    "stampedToast": "Qəhvən qeydə alındı ☕",
-    "claimReward": "Hədiyyə qəhvəni al",
-    "reward": "Hədiyyə: {{name}}"
+    "progress_one": "Hədiyyəyə {{count}} möhür qalıb",
+    "progress_other": "Hədiyyəyə {{count}} möhür qalıb",
+    "complete": "Kart doldu!",
+    "gift": "Hədiyyə",
+    "filled": "Möhür vurulub",
+    "empty": "Boş xana",
+    "reward": "Hədiyyə: {{name}}",
+    "pending_one": "{{count}} möhür işçi təsdiqini gözləyir",
+    "pending_other": "{{count}} möhür işçi təsdiqini gözləyir",
+    "nextStampIn": "Növbəti möhür {{time}} sonra"
   },
   "nav": {
     "home": "Ana səhifə",
+    "giftCards": "Hədiyyə kartları",
     "settings": "Parametrlər",
     "signIn": "Daxil ol"
   },
@@ -29,7 +32,54 @@
   "rewards": {
     "title": "Hədiyyələriniz",
     "ready": "Hazırdır",
-    "hint": "Hədiyyəni almaq üçün baristaya yaxınlaşın."
+    "hint": "Hədiyyəni almaq üçün kartın kodunu işçiyə göstərin.",
+    "open": "Hədiyyə kartlarına bax"
+  },
+  "giftCards": {
+    "title": "Hədiyyə kartları",
+    "subtitle": "Kart dolanda hədiyyə kartı burada yaranır. Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.",
+    "empty": "Hələ hədiyyə kartınız yoxdur. Möhür toplamağa davam edin!",
+    "available": "İstifadəyə hazır",
+    "history": "Tarixçə",
+    "code": "Kartın kodu",
+    "show": "Kodu göstər",
+    "showHint": "Bu kodu və ya QR-ı işçiyə göstərin. İşçi kartın həqiqiliyini yoxlayıb hədiyyəni təqdim edəcək.",
+    "qrLabel": "Hədiyyə kartının QR kodu",
+    "earnedAt": "Qazanıldı: {{date}}",
+    "expiresAt": "Son tarix: {{date}}",
+    "noExpiry": "Müddətsiz",
+    "redeemedAt": "İstifadə olundu: {{date}}",
+    "close": "Bağla",
+    "status": {
+      "AVAILABLE": "Hazırdır",
+      "REDEEMED": "İstifadə olunub",
+      "REVOKED": "Ləğv edilib",
+      "EXPIRED": "Müddəti bitib"
+    }
+  },
+  "celebrate": {
+    "title": "Təbriklər!",
+    "subtitle": "Kartınız doldu — {{reward}} sizindir!",
+    "subtitleGeneric": "Kartınız doldu — hədiyyə sizindir!",
+    "hint": "Hədiyyə kartı “Hədiyyə kartları” bölməsinə əlavə olundu.",
+    "open": "Hədiyyə kartına bax",
+    "later": "Sonra"
+  },
+  "tap": {
+    "checking": "Toxunuş yoxlanılır…",
+    "title": "Möhür toplayın",
+    "branch": "{{branch}}",
+    "signInToCollect": "Möhürü almaq üçün telefon nömrənizlə daxil olun. Toxunuşunuz 10 dəqiqə saxlanılır.",
+    "signIn": "Daxil ol və möhürü al",
+    "collecting": "Möhür əlavə olunur…",
+    "stamped": "Möhür əlavə olundu!",
+    "pending": "İşçi təsdiqi gözlənilir",
+    "pendingHint": "Möhür işçi təsdiqləyən kimi kartınıza əlavə olunacaq.",
+    "home": "Kartıma bax",
+    "tryAgain": "Telefonu NFC nişanına yenidən toxundurun.",
+    "retryIn": "Növbəti möhürü {{time}} sonra ala bilərsiniz.",
+    "otherBrowser": "Bu link başqa cihazda açılıb. Möhürü almaq üçün telefonunuzu NFC nişanına özünüz toxundurun.",
+    "errorTitle": "Möhür verilmədi"
   },
   "settings": {
     "title": "Parametrlər",

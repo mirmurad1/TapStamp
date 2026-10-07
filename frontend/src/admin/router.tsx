@@ -11,6 +11,8 @@ import { MfaPage } from './pages/auth/MfaPage';
 import { MfaSetupPage } from './pages/auth/MfaSetupPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { SimulatorPage } from './pages/dev/SimulatorPage';
+import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
 import { TeamPage } from './pages/team/TeamPage';
@@ -66,7 +68,8 @@ export const adminRouter = createBrowserRouter(
                         { path: 'audit/*', element: <PlaceholderPage section="audit" /> },
                       ],
                     },
-                    { path: 'staff-console/*', element: <PlaceholderPage section="staffConsole" /> },
+                    { path: 'staff-console/*', element: <StaffConsolePage /> },
+                    { path: 'dev/simulator', element: <SimulatorPage /> },
                   ],
                 },
                 {

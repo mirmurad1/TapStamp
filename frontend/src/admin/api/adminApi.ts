@@ -1,3 +1,5 @@
+import type { Client } from 'openapi-fetch';
+
 import { api, unwrap } from '@/shared/api/client';
 import type { components } from '@/shared/api/schema';
 
@@ -144,4 +146,61 @@ export const platformApi = {
     unwrap(
       api.POST('/api/v1/platform/tenants/{tenantId}/owners/{userId}/mfa-reset', { params: { path: { tenantId, userId } } }),
     ),
+};
+
+export type PendingStamp = Schemas['PendingStampResponse'];
+
+/** İşçi konsolu: təsdiq gözləyən möhürlər (filial üzrə). */
+export const staffConsoleApi = {
+  pendingStamps: (branchId: string) =>
+    unwrap(api.GET('/api/v1/admin/staff-console/pending-stamps', { params: { query: { branchId } } })),
+  confirmStamp: (stampId: string) =>
+    unwrap(
+      api.POST('/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm', { params: { path: { stampId } } }),
+    ),
+  rejectStamp: (stampId: string, reason: string) =>
+    unwrap(
+      api.POST('/api/v1/admin/staff-console/pending-stamps/{stampId}/reject', {
+        params: { path: { stampId } },
+        body: { reason },
+      }),
+    ),
+};
+
+/** Simulyatorun çipi (dev endpoint-i OpenAPI sənədində yoxdur — sənəd prod konfiqurasiyası ilə yaradılır). */
+export interface SimulatedTag {
+  id: string;
+  uid: string;
+  label: string;
+  type: 'NTAG424_SUN' | 'SIMULATED';
+  active: boolean;
+  lastCounter: number;
+  branchId: string;
+  branchName?: Schemas['LocalizedText'];
+}
+
+export interface SimulatedTap {
+  path: string;
+  counter: number;
+}
+
+interface DevPaths {
+  '/api/v1/dev/simulator/tags': {
+    get: { responses: { 200: { content: { 'application/json': SimulatedTag[] } } } };
+  };
+  '/api/v1/dev/simulator/taps': {
+    post: {
+      requestBody: { content: { 'application/json': { tagId: string } } };
+      responses: { 200: { content: { 'application/json': SimulatedTap } } };
+    };
+  };
+}
+
+// Eyni klient (CSRF, sessiya yeniləməsi) — yalnız yol tipləri əl ilə verilib
+const devApi = api as unknown as Client<DevPaths>;
+
+/** NFC simulyatoru — yalnız dev mühitində mövcuddur (prod-da 403). */
+export const simulatorApi = {
+  tags: () => unwrap(devApi.GET('/api/v1/dev/simulator/tags')),
+  tap: (tagId: string) => unwrap(devApi.POST('/api/v1/dev/simulator/taps', { body: { tagId } })),
 };

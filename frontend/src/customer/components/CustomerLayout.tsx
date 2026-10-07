@@ -1,37 +1,34 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Coffee, Settings } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Gift, Settings, Sparkles } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router';
 
-import type { Language } from '@/shared/i18n/languages';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
+import { applyBrandColor } from '@/shared/lib/brand';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
-import { meApi, publicApi } from '../api/customerApi';
+import { publicApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
-import { customerKeys } from '../auth/queryClient';
 import { ConsentPage } from '../pages/ConsentPage';
 
-/** Müştəri tətbiqinin çərçivəsi: mobil üçün dar sütun, header-də dil seçicisi və parametrlər. */
+/** Müştəri tətbiqinin çərçivəsi: mobil üçün dar sütun; header-də şirkət, hədiyyə kartları və parametrlər. */
 export function CustomerLayout() {
   const { t, i18n } = useTranslation(['common', 'profile']);
   const { status, me } = useCustomerSession();
-  const queryClient = useQueryClient();
   const location = useLocation();
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const companyName = resolveText(company.data?.name, currentLanguage());
   const accountDeleted = Boolean((location.state as { accountDeleted?: boolean } | null)?.accountDeleted);
 
-  // Daxil olmuş müştərinin dil seçimi profilə yazılır (SMS-lər də bu dildə gəlir)
-  const saveLanguage = useMutation({
-    mutationFn: (lang: Language) => meApi.update({ preferredLanguage: lang }),
-    onSuccess: (updated) => queryClient.setQueryData(customerKeys.me, updated),
-  });
+
+  // Şirkətin brend rəngi tətbiqin əsas rəngi olur
+  const brandColor = company.data?.brandColor;
+  useEffect(() => applyBrandColor(brandColor), [brandColor]);
 
   useEffect(() => {
     document.title = companyName ? `${companyName} · ${t('common:app.loyaltyCard')}` : t('common:app.loyaltyCard');
@@ -50,13 +47,27 @@ export function CustomerLayout() {
           aria-label={t('profile:nav.home')}
         >
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-            <Coffee className="size-5" aria-hidden="true" />
+            {companyName ? (
+              <span className="text-lg font-bold" aria-hidden="true">
+                {companyName.charAt(0).toLocaleUpperCase()}
+              </span>
+            ) : (
+              <Sparkles className="size-5" aria-hidden="true" />
+            )}
           </span>
-          {companyName ? <span className="truncate font-display font-semibold">{companyName}</span> : null}
+          {companyName ? <span className="truncate font-display font-bold">{companyName}</span> : null}
         </Link>
         <div className="flex shrink-0 items-center gap-1">
-          <LanguageSwitcher onSelect={status === 'signedIn' ? (lang) => saveLanguage.mutate(lang) : undefined} />
+          {/* Daxil olmuş müştəri dili Parametrlərdə dəyişir — dar ekranda şirkətin adına yer qalsın */}
+          {status === 'signedIn' ? null : <LanguageSwitcher />}
           <ThemeToggle />
+          {status === 'signedIn' ? (
+            <Button asChild variant="ghost" size="icon">
+              <Link to="/gift-cards" aria-label={t('profile:nav.giftCards')}>
+                <Gift aria-hidden="true" />
+              </Link>
+            </Button>
+          ) : null}
           {status === 'signedIn' ? (
             <Button asChild variant="ghost" size="icon">
               <Link to="/settings" aria-label={t('profile:nav.settings')}>

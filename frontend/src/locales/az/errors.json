@@ -31,5 +31,17 @@
   "OTP_ATTEMPTS_EXCEEDED": "Çox sayda yanlış cəhd oldu. Bir az sonra yeni kod istəyin.",
   "CONSENT_REQUIRED": "Davam etmək üçün şərtlərlə razılaşın.",
   "REFRESH_RACE": "Sessiya yenilənir. Yenidən cəhd edin.",
-  "CUSTOMER_BLOCKED": "Hesabınız bloklanıb. Kafe ilə əlaqə saxlayın."
+  "CUSTOMER_BLOCKED": "Hesabınız bloklanıb. Şirkətlə əlaqə saxlayın.",
+  "TAP_MALFORMED": "Toxunuş linki natamamdır. Telefonu NFC nişanına yenidən toxundurun.",
+  "TAG_UNKNOWN": "Bu NFC nişanı tanınmadı. İşçiyə müraciət edin.",
+  "TAG_DISABLED": "Bu NFC nişanı hazırda işləmir. İşçiyə müraciət edin.",
+  "TAP_SIGNATURE_INVALID": "Toxunuşu təsdiqləmək mümkün olmadı. Telefonu NFC nişanına yenidən toxundurun.",
+  "TAP_REPLAYED": "Bu link artıq istifadə olunub. Hər toxunuş yalnız bir dəfə keçərlidir.",
+  "TAP_TOKEN_EXPIRED": "Toxunuşun vaxtı keçib. Telefonu NFC nişanına yenidən toxundurun.",
+  "TAP_TOKEN_USED": "Bu toxunuşa görə möhür artıq verilib.",
+  "TAP_BINDING_MISMATCH": "Möhürü yalnız NFC nişanına toxunduğunuz telefonda almaq olar.",
+  "STAMP_COOLDOWN_ACTIVE": "Növbəti möhür üçün bir az gözləyin.",
+  "STAMP_DAILY_LIMIT_REACHED": "Bu günün möhür limiti doldu. Sabah yenidən gəlin!",
+  "OUTSIDE_BUSINESS_HOURS": "Möhürlər yalnız iş saatlarında verilir.",
+  "STAMP_NOT_PENDING": "Bu möhür artıq emal olunub."
 }

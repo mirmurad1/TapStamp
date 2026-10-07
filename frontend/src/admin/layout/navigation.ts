@@ -20,7 +20,8 @@ export type AdminSection =
   | 'settings'
   | 'audit'
   | 'tenants'
-  | 'account';
+  | 'account'
+  | 'simulator';
 
 type Role = 'SUPER_ADMIN' | 'COMPANY_OWNER' | 'BRANCH_MANAGER' | 'STAFF';
 

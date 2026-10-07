@@ -25,7 +25,14 @@ public enum RateLimitPolicy {
     OTP_REQUEST_GLOBAL(300, Duration.ofMinutes(1)),
     OTP_VERIFY_PER_IP(60, Duration.ofHours(1)),
     /** Bir telefon üçün gündə ən çox 10 uğursuz OTP yoxlaması (bütün sorğular üzrə cəmi). */
-    OTP_VERIFY_FAILURE_PER_PHONE(10, Duration.ofDays(1));
+    OTP_VERIFY_FAILURE_PER_PHONE(10, Duration.ofDays(1)),
+    /** NFC toxunuşu — IP üzrə (kafenin Wi-Fi-ı nəzərə alınıb). */
+    TAP_PER_IP(30, Duration.ofMinutes(1)),
+    /**
+     * Çip üzrə dəqiqədə toxunuş — həcm filialın sui-istifadə qaydasından gəlir ({@code max_taps_per_tag_per_minute}).
+     * Yalnız imzası doğru toxunuşlar sayılır: saxta sorğularla həqiqi müştərilərin limitini tükətmək olmur.
+     */
+    TAP_PER_TAG(10, Duration.ofMinutes(1));
 
     private final int defaultCapacity;
     private final Duration window;

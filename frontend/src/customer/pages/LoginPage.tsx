@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link, Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 
 import { isApiError } from '@/shared/api/client';
@@ -27,15 +27,18 @@ type Step =
 export function LoginPage() {
   const { status, refresh } = useCustomerSession();
   const navigate = useNavigate();
+  const tapToken = useTapToken();
+  // NFC toxunuşundan gəlibsə — girişdən sonra möhürü almaq üçün toxunuş səhifəsinə qayıdır
+  const afterLogin = tapToken ? `/tap/${encodeURIComponent(tapToken)}` : '/';
   const [step, setStep] = useState<Step>({ name: 'phone' });
 
   if (status === 'signedIn') {
-    return <Navigate to="/" replace />;
+    return <Navigate to={afterLogin} replace />;
   }
 
   const finish = async () => {
     await refresh();
-    void navigate('/', { replace: true });
+    void navigate(afterLogin, { replace: true });
   };
 
   return (
@@ -68,9 +71,10 @@ const phoneSchema = z.object({ phone: z.string().trim().min(1, 'required').max(3
 
 function PhoneStep({ onSent }: { onSent: (phone: string, challengeId: string, resendAt: number) => void }) {
   const { t } = useTranslation(['auth', 'common']);
+  const tapToken = useTapToken();
   const form = useForm<z.infer<typeof phoneSchema>>({ resolver: zodResolver(phoneSchema), defaultValues: { phone: '' } });
   const request = useMutation({
-    mutationFn: (phone: string) => customerAuthApi.requestOtp(phone, currentLanguage()),
+    mutationFn: (phone: string) => customerAuthApi.requestOtp(phone, currentLanguage(), tapToken),
     onSuccess: (challenge, phone) =>
       onSent(phone, challenge.challengeId ?? '', Date.parse(challenge.resendAvailableAt ?? '') || Date.now() + 60_000),
   });
@@ -133,6 +137,7 @@ function useCountdown(until: number): number {
 
 function CodeStep({ phone, challengeId, resendAt, onResent, onChangePhone, onAuthenticated, onRegistrationRequired }: CodeStepProps) {
   const { t } = useTranslation(['auth', 'common']);
+  const tapToken = useTapToken();
   const [resendUntil, setResendUntil] = useState(resendAt);
   const secondsLeft = useCountdown(resendUntil);
   const form = useForm<z.infer<typeof codeSchema>>({ resolver: zodResolver(codeSchema), defaultValues: { code: '' } });
@@ -148,7 +153,7 @@ function CodeStep({ phone, challengeId, resendAt, onResent, onChangePhone, onAut
     onError: () => form.reset({ code: '' }),
   });
   const resend = useMutation({
-    mutationFn: () => customerAuthApi.requestOtp(phone, currentLanguage()),
+    mutationFn: () => customerAuthApi.requestOtp(phone, currentLanguage(), tapToken),
     onSuccess: (challenge) =>
       onResent(challenge.challengeId ?? challengeId, Date.parse(challenge.resendAvailableAt ?? '') || Date.now() + 60_000),
     onError: (error) => {
@@ -294,4 +299,11 @@ function LegalLink({ slug, children }: { slug: string; children?: ReactNode }) {
       {children}
     </a>
   );
+}
+
+/** NFC toxunuşunun tokeni ({@code /login?tap=…}): OTP sorğusu ilə göndərilir və 10 dəqiqəlik rezerv olunur. */
+function useTapToken(): string | undefined {
+  const [params] = useSearchParams();
+  const token = params.get('tap');
+  return token && /^[A-Za-z0-9_-]{20,128}$/.test(token) ? token : undefined;
 }
