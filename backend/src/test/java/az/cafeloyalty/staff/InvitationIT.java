@@ -82,14 +82,14 @@ class InvitationIT extends AdminIntegrationTest {
     }
 
     @Test
-    void invitedOwnerMustEnrollTotpAfterAccepting() throws Exception {
+    void invitedOwnerSignsInWithoutMandatoryTotp() throws Exception {
         AdminClient owner = owner();
         String email = uniqueEmail("co-owner");
         owner.post("/team/invitations", invite(email, AdminRole.COMPANY_OWNER, null, "az")).andExpect(status().isCreated());
         String token = TestMailbox.token(mailbox.awaitMessage(email, 1));
         AdminClient.staff(mvc, HOST)
                 .post("/auth/invitations/accept", Map.of("token", token, "displayName", "Ortaq", "password", NEW_PASSWORD))
-                .andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
+                .andExpect(jsonPath("$.status").value("AUTHENTICATED"));
     }
 
     @Test

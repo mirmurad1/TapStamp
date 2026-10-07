@@ -114,11 +114,20 @@ public class TeamController {
         team.updateStatus(principal, userId, AdminAccount.AccountStatus.valueOf(request.status()));
     }
 
+    @DeleteMapping("/members/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "İşçinin silinməsi", description = """
+            Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, \
+            komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.""")
+    void delete(@PathVariable UUID userId, @AuthenticationPrincipal AdminPrincipal principal) {
+        team.delete(principal, userId);
+    }
+
     @PostMapping("/members/{userId}/mfa-reset")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('COMPANY_OWNER')")
     @Operation(summary = "İşçinin TOTP-sinin sıfırlanması",
-            description = "Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP) tələb edir.")
+            description = "Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP kodu və ya 2FA yoxdursa şifrə) tələb edir.")
     void resetMfa(@PathVariable UUID userId, @AuthenticationPrincipal AdminPrincipal principal) {
         team.resetMfa(principal, userId);
     }

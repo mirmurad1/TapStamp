@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
-/** Komanda: işçilərin siyahısı, hesabın bloklanması/aktivləşdirilməsi, itirilmiş TOTP-nin sıfırlanması. */
+/** Komanda: işçilərin siyahısı, bloklanma/aktivləşdirmə, yumşaq silinmə, itirilmiş TOTP-nin sıfırlanması. */
 @Service
 public class TeamService {
 
@@ -53,7 +53,7 @@ public class TeamService {
         List<MemberView> members = new ArrayList<>();
         jdbc.sql("""
                         SELECT id, email, display_name, status, totp_enabled_at, last_login_at FROM staff_users
-                        WHERE status <> 'INVITED' ORDER BY created_at""")
+                        WHERE status NOT IN ('INVITED', 'DELETED') ORDER BY created_at""")
                 .query(rs -> {
                     UUID id = rs.getObject("id", UUID.class);
                     Set<RoleGrant> grants = roles.getOrDefault(id, Set.of());
@@ -95,6 +95,29 @@ public class TeamService {
     }
 
     /**
+     * İşçinin silinməsi — yumşaq silinmə (soft delete): sətir tarixçə üçün bazada qalır (status DELETED), sessiyaları
+     * ləğv olunur, siyahıda və girişdə görünmür, email yenidən dəvət üçün boşalır. Özünü və sonuncu aktiv sahibi
+     * silmək olmaz.
+     */
+    public void delete(AdminPrincipal principal, UUID userId) {
+        if (userId.equals(principal.userId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+        manageable(principal, userId);
+        Instant now = clock.instant();
+        Set<RoleGrant> grants = realms.accounts(AdminRealm.STAFF).loadRoles(userId);
+        boolean owner = grants.stream().anyMatch(grant -> grant.role() == AdminRole.COMPANY_OWNER);
+        realms.tx(AdminRealm.STAFF).executeWithoutResult(tx -> {
+            if (owner && activeOwners(userId) < 1) {
+                throw new ApiException(ErrorCode.FORBIDDEN);
+            }
+            realms.accounts(AdminRealm.STAFF).softDelete(userId, principal.userId(), now);
+            realms.sessions(AdminRealm.STAFF).revokeAll(userId, "ACCOUNT_DELETED", now, null);
+        });
+        realms.audit(AdminRealm.STAFF, "STAFF_DELETED", principal.userId(), "account", userId, Map.of());
+    }
+
+    /**
      * İtirilmiş telefona görə TOTP-nin sıfırlanması (yalnız sahib, step-up ilə). İşçinin sessiyaları ləğv olunur;
      * növbəti girişdə TOTP-ni yenidən qurur.
      */
@@ -114,6 +137,7 @@ public class TeamService {
 
     private AdminAccount manageable(AdminPrincipal principal, UUID userId) {
         AdminAccount target = realms.accounts(AdminRealm.STAFF).findById(userId)
+                .filter(account -> account.status() != AdminAccount.AccountStatus.DELETED)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         Set<RoleGrant> grants = realms.accounts(AdminRealm.STAFF).loadRoles(userId);
         if (!TeamPermissions.canManage(principal, userId, grants)) {
@@ -124,9 +148,16 @@ public class TeamService {
     }
 
     private int activeOwners() {
+        return activeOwners(null);
+    }
+
+    /** Aktiv sahiblərin sayı ({@code excluded} istisna olmaqla). */
+    private int activeOwners(UUID excluded) {
         return jdbc.sql("""
                         SELECT count(DISTINCT u.id) FROM staff_users u JOIN staff_roles r ON r.staff_user_id = u.id
-                        WHERE r.role = 'COMPANY_OWNER' AND u.status = 'ACTIVE'""")
+                        WHERE r.role = 'COMPANY_OWNER' AND u.status = 'ACTIVE'
+                          AND (CAST(:excluded AS uuid) IS NULL OR u.id <> CAST(:excluded AS uuid))""")
+                .param("excluded", excluded)
                 .query(Integer.class)
                 .single();
     }

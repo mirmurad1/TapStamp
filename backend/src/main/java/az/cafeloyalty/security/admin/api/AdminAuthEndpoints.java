@@ -13,6 +13,7 @@ import az.cafeloyalty.security.admin.api.AdminAuthDtos.PasswordForgotRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.PasswordResetRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.RecoveryCodesResponse;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.SessionStateResponse;
+import az.cafeloyalty.security.admin.api.AdminAuthDtos.StepUpRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,8 +51,8 @@ public abstract class AdminAuthEndpoints {
 
     @PostMapping("/login")
     @Operation(summary = "Email və şifrə ilə giriş", description = """
-            Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, \
-            `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). \
+            Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu tələb olunur; \
+            2FA (iki addımlı yoxlama) hamı üçün könüllüdür. \
             Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.""")
     LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest http, HttpServletResponse response) {
         var result = auth.login(realm(), request.email(), request.password(), ClientInfo.of(http));
@@ -88,9 +89,11 @@ public abstract class AdminAuthEndpoints {
     @PostMapping("/step-up")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Həssas əməliyyat üçün təkrar təsdiq",
-            description = "TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.")
-    void stepUp(@Valid @RequestBody CodeRequest request, @AuthenticationPrincipal AdminPrincipal principal) {
-        auth.stepUp(principal, request.code());
+            description = """
+                    2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara \
+                    (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.""")
+    void stepUp(@Valid @RequestBody StepUpRequest request, @AuthenticationPrincipal AdminPrincipal principal) {
+        auth.stepUp(principal, request.code(), request.password());
     }
 
     @PostMapping("/logout")

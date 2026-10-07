@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Laptop, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Laptop, ShieldCheck, ShieldOff, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 
@@ -25,7 +26,7 @@ import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { PasswordInput } from '../../components/PasswordInput';
 import { RecoveryCodesList } from '../../components/RecoveryCodesList';
-import { newPassword, requiredPassword, useValidationMessage } from '../../lib/forms';
+import { newPassword, requiredPassword, totpCode, useValidationMessage } from '../../lib/forms';
 
 export function AccountPage() {
   const { t } = useTranslation('admin');
@@ -117,8 +118,17 @@ function SecurityCard() {
     onSuccess: (data) => setCodes(data.recoveryCodes ?? []),
   });
 
+  const [prompt, setPrompt] = useState<MfaAction>();
+  const [notice, setNotice] = useState<string>();
+
   const done = () => {
     setCodes(undefined);
+    void queryClient.invalidateQueries({ queryKey: sessionKeys.me });
+  };
+
+  const finished = (action: MfaAction) => {
+    setPrompt(undefined);
+    setNotice(t(`admin:account.security.done.${action}`));
     void queryClient.invalidateQueries({ queryKey: sessionKeys.me });
   };
 
@@ -131,6 +141,11 @@ function SecurityCard() {
             <Badge tone="success">
               <ShieldCheck className="mr-1 size-3.5" aria-hidden="true" />
               {t('admin:account.security.enabled')}
+            </Badge>
+          ) : me.totpPaused ? (
+            <Badge tone="warning">
+              <ShieldOff className="mr-1 size-3.5" aria-hidden="true" />
+              {t('admin:account.security.paused')}
             </Badge>
           ) : (
             <Badge tone="danger">
@@ -148,23 +163,132 @@ function SecurityCard() {
       <CardContent className="flex flex-col gap-4">
         {codes ? (
           <RecoveryCodesList codes={codes} onDone={done} doneLabel={t('common:actions.close')} />
-        ) : me.totpEnabled ? (
-          <>
-            <ApiErrorAlert error={regenerate.error} />
-            <div className="flex flex-col gap-1">
-              <Button variant="outline" className="self-start" onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
-                {t('admin:account.security.regenerate')}
-              </Button>
-              <p className="text-xs text-muted-foreground">{t('admin:account.security.regenerateHint')}</p>
-            </div>
-          </>
         ) : (
-          <Button asChild className="self-start">
-            <Link to="/mfa/setup">{t('auth:mfaSetup.title')}</Link>
-          </Button>
+          <>
+            {notice ? <Alert tone="success">{notice}</Alert> : null}
+            {me.totpEnabled ? (
+              <>
+                <ApiErrorAlert error={regenerate.error} />
+                <div className="flex flex-col gap-1">
+                  <Button variant="outline" className="self-start" onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
+                    {t('admin:account.security.regenerate')}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{t('admin:account.security.regenerateHint')}</p>
+                </div>
+              </>
+            ) : me.totpPaused ? (
+              <p className="text-sm text-muted-foreground">{t('admin:account.security.pausedHint')}</p>
+            ) : (
+              <Button asChild className="self-start">
+                <Link to="/mfa/setup">{t('auth:mfaSetup.title')}</Link>
+              </Button>
+            )}
+            {me.totpEnabled || me.totpPaused ? (
+              <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                {me.totpEnabled ? (
+                  <Button variant="outline" onClick={() => setPrompt('pause')}>
+                    <ShieldOff className="size-4" aria-hidden="true" />
+                    {t('admin:account.security.pause')}
+                  </Button>
+                ) : (
+                  <Button onClick={() => setPrompt('resume')}>
+                    <ShieldCheck className="size-4" aria-hidden="true" />
+                    {t('admin:account.security.resume')}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => setPrompt('remove')}
+                >
+                  <Trash2 className="size-4" aria-hidden="true" />
+                  {t('admin:account.security.remove')}
+                </Button>
+              </div>
+            ) : null}
+          </>
         )}
       </CardContent>
+      {prompt ? <MfaActionDialog action={prompt} onClose={() => setPrompt(undefined)} onDone={finished} /> : null}
     </Card>
+  );
+}
+
+type MfaAction = 'pause' | 'resume' | 'remove';
+
+/**
+ * 2FA-nın söndürülməsi/silinməsi cari şifrə ilə təsdiqlənir (2FA kodu tələb olunmur — telefon əldə olmasa da olar);
+ * yenidən aktivləşdirmə autentifikator tətbiqinin kodu ilə.
+ */
+function MfaActionDialog({
+  action,
+  onClose,
+  onDone,
+}: {
+  action: MfaAction;
+  onClose: () => void;
+  onDone: (action: MfaAction) => void;
+}) {
+  const { t } = useTranslation(['admin', 'common', 'auth']);
+  const validation = useValidationMessage();
+  const { realm } = useAdminAuth();
+  const me = useMe();
+  const withCode = action === 'resume';
+  const form = useForm<{ secret: string }>({
+    resolver: zodResolver(z.object({ secret: withCode ? totpCode : requiredPassword })),
+    defaultValues: { secret: '' },
+  });
+  const run = useMutation({
+    mutationFn: (secret: string) =>
+      action === 'pause'
+        ? accountApi.pauseMfa(realm, secret)
+        : action === 'resume'
+          ? accountApi.resumeMfa(realm, secret)
+          : accountApi.removeMfa(realm, secret),
+    onSuccess: () => onDone(action),
+  });
+  const danger = action === 'remove';
+
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t(`admin:account.security.dialog.${action}.title`)}</DialogTitle>
+          <DialogDescription>{t(`admin:account.security.dialog.${action}.description`)}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={form.handleSubmit(({ secret }) => run.mutate(secret))} className="flex flex-col gap-4" noValidate>
+          <ApiErrorAlert error={run.error} />
+          {withCode ? (
+            <Field id="mfa-action-code" label={t('auth:mfa.code')} error={validation(form.formState.errors.secret?.message)}>
+              <Input {...form.register('secret')} inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus />
+            </Field>
+          ) : (
+            <>
+              <input type="hidden" name="username" autoComplete="username" value={me.email ?? ''} readOnly />
+              <Field
+                id="mfa-action-password"
+                label={t('admin:account.password.current')}
+                error={validation(form.formState.errors.secret?.message)}
+              >
+                <PasswordInput {...form.register('secret')} autoComplete="current-password" autoFocus />
+              </Field>
+            </>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              {t('common:actions.cancel')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={run.isPending}
+              className={danger ? 'bg-destructive text-white hover:bg-destructive/90' : undefined}
+            >
+              {t(`admin:account.security.dialog.${action}.confirm`)}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

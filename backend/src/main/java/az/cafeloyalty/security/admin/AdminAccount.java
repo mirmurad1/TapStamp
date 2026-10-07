@@ -18,16 +18,24 @@ public record AdminAccount(
         Long totpLastUsedStep,
         int failedLoginCount,
         Instant lockedUntil,
-        Instant lastLoginAt) {
+        Instant lastLoginAt,
+        Instant totpDisabledAt) {
 
     public enum AccountStatus {
         ACTIVE,
         DISABLED,
-        INVITED
+        INVITED,
+        /** Yumşaq silinmiş (soft delete): sətir tarixçə üçün qalır, giriş və siyahılarda görünmür. */
+        DELETED
     }
 
     public boolean totpEnabled() {
         return totpEnabledAt != null && totpSecretEnc != null;
+    }
+
+    /** 2FA müvəqqəti söndürülüb: sirr saxlanılır, eyni tətbiqin kodu ilə yenidən aktivləşdirilə bilər. */
+    public boolean totpPaused() {
+        return totpEnabledAt == null && totpDisabledAt != null && totpSecretEnc != null;
     }
 
     public boolean lockedAt(Instant now) {

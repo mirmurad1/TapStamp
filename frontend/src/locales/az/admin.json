@@ -55,7 +55,34 @@
       "recoveryRemaining_one": "{{count}} istifadə olunmamış bərpa kodu qalıb.",
       "recoveryRemaining_other": "{{count}} istifadə olunmamış bərpa kodu qalıb.",
       "regenerate": "Yeni bərpa kodları yarat",
-      "regenerateHint": "Köhnə bərpa kodları etibarsız olacaq."
+      "regenerateHint": "Köhnə bərpa kodları etibarsız olacaq.",
+      "paused": "Müvəqqəti söndürülüb",
+      "pausedHint": "İki addımlı yoxlama müvəqqəti söndürülüb: girişdə kod soruşulmur. Autentifikator tətbiqindəki köhnə qeyd saxlanılıb — yenidən aktivləşdirmək üçün oradakı kod kifayətdir.",
+      "pause": "Müvəqqəti söndür",
+      "resume": "Yenidən aktivləşdir",
+      "remove": "2FA-nı sil",
+      "done": {
+        "pause": "İki addımlı yoxlama müvəqqəti söndürüldü.",
+        "resume": "İki addımlı yoxlama yenidən aktivdir.",
+        "remove": "İki addımlı yoxlama silindi. İstəsəniz yenidən qura bilərsiniz."
+      },
+      "dialog": {
+        "pause": {
+          "title": "İki addımlı yoxlamanı söndürmək",
+          "description": "Girişdə kod soruşulmayacaq. Tətbiqdəki qeyd saxlanılır, sonra eyni tətbiqin kodu ilə yenidən aktivləşdirə bilərsiniz. Təsdiq üçün cari şifrənizi daxil edin.",
+          "confirm": "Söndür"
+        },
+        "resume": {
+          "title": "İki addımlı yoxlamanı yenidən aktivləşdirmək",
+          "description": "Autentifikator tətbiqindəki 6 rəqəmli kodu daxil edin.",
+          "confirm": "Aktivləşdir"
+        },
+        "remove": {
+          "title": "İki addımlı yoxlamanı silmək",
+          "description": "Sirr və bütün bərpa kodları silinəcək. Yenidən qoşmaq üçün yeni QR kodu skan etməli olacaqsınız (məsələn, telefonu dəyişəndə). Təsdiq üçün cari şifrənizi daxil edin.",
+          "confirm": "Sil"
+        }
+      }
     },
     "sessions": {
       "title": "Aktiv sessiyalar",
@@ -110,17 +137,20 @@
       "disable": "Blokla",
       "enable": "Aktivləşdir",
       "resetMfa": "2FA-nı sıfırla",
-      "revokeInvitation": "Ləğv et"
+      "revokeInvitation": "Ləğv et",
+      "delete": "Sil"
     },
     "confirm": {
       "disable": "{{name}} bloklansın? Bütün sessiyaları dərhal bağlanacaq.",
-      "resetMfa": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Növbəti girişdə onu yenidən quracaq."
+      "resetMfa": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Sessiyaları bağlanacaq; növbəti girişdə kod soruşulmayacaq, istəsə yenidən qura bilər.",
+      "delete": "{{name}} silinsin? Hesabı dərhal bağlanacaq və komanda siyahısından çıxacaq. Keçmiş əməliyyatların tarixçəsi qorunur."
     },
     "done": {
       "disabled": "Hesab bloklandı.",
       "enabled": "Hesab aktivləşdirildi.",
       "mfaReset": "2FA sıfırlandı.",
-      "revoked": "Dəvət ləğv edildi."
+      "revoked": "Dəvət ləğv edildi.",
+      "deleted": "İşçi silindi."
     }
   },
   "platform": {

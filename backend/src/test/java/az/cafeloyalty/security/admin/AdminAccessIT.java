@@ -1,6 +1,7 @@
 package az.cafeloyalty.security.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Duration;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import az.cafeloyalty.support.AdminClient;
+import az.cafeloyalty.tenancy.TenantContext;
 import az.cafeloyalty.support.AdminIntegrationTest;
 import az.cafeloyalty.support.TestTenants;
 import jakarta.servlet.http.Cookie;
@@ -187,6 +189,43 @@ class AdminAccessIT extends AdminIntegrationTest {
         owner.patch("/team/members/" + ownerId + "/status", Map.of("status", "DISABLED")).andExpect(status().isForbidden());
         owner.patch("/team/members/" + otherOwnerId + "/status", Map.of("status", "INVITED"))
                 .andExpect(status().isBadRequest());
+
+        // Silinmə: menecer sahibi silə bilməz, heç kim özünü silə bilməz
+        manager.delete("/team/members/" + otherOwnerId).andExpect(status().isNotFound());
+        owner.delete("/team/members/" + ownerId).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deletedMemberIsSoftDeletedAndCanBeInvitedAgain() throws Exception {
+        String host = TestTenants.ALPHA_HOST;
+        UUID branch = branchOf(host);
+        String ownerEmail = uniqueEmail("owner");
+        createStaff(host, ownerEmail, AdminRole.COMPANY_OWNER, null, true);
+        String baristaEmail = uniqueEmail("barista");
+        UUID baristaId = createStaff(host, baristaEmail, AdminRole.STAFF, branch, false);
+        AdminClient owner = signedInStaff(host, ownerEmail, true);
+        AdminClient barista = signedInStaff(host, baristaEmail, false);
+
+        owner.delete("/team/members/" + baristaId).andExpect(status().isNoContent());
+
+        // Sessiya dərhal bağlanır, giriş mümkün deyil, siyahıda görünmür, təkrar əməliyyat — 404
+        barista.get("/me").andExpect(status().isUnauthorized());
+        AdminClient.staff(mvc, host).login(baristaEmail, PASSWORD).andExpect(jsonPath("$.code").value("LOGIN_FAILED"));
+        owner.get("/team").andExpect(jsonPath("$[?(@.id == '" + baristaId + "')]").isEmpty());
+        owner.delete("/team/members/" + baristaId).andExpect(status().isNotFound());
+        owner.patch("/team/members/" + baristaId + "/status", Map.of("status", "ACTIVE")).andExpect(status().isNotFound());
+
+        // Sətir bazada qalır (soft delete), kim və nə vaxt sildiyi qeyd olunur
+        Map<String, Object> row = TenantContext.callAs(tenant(host), () -> tenantJdbc.sql(
+                        "SELECT status, deleted_at, deleted_by FROM staff_users WHERE id = :id")
+                .param("id", baristaId).query().singleRow());
+        assertThat(row.get("status")).isEqualTo("DELETED");
+        assertThat(row.get("deleted_at")).isNotNull();
+        assertThat(row.get("deleted_by").toString()).isEqualTo(json(owner.get("/me"), "$.id"));
+
+        // Eyni email yenidən dəvət oluna bilər
+        owner.post("/team/invitations", Map.of("email", baristaEmail, "role", "STAFF", "branchId", branch.toString(),
+                "language", "az")).andExpect(status().isCreated());
     }
 
     @Test

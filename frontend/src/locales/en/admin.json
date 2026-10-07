@@ -55,7 +55,34 @@
       "recoveryRemaining_one": "{{count}} unused recovery code left.",
       "recoveryRemaining_other": "{{count}} unused recovery codes left.",
       "regenerate": "Generate new recovery codes",
-      "regenerateHint": "Your old recovery codes will stop working."
+      "regenerateHint": "Your old recovery codes will stop working.",
+      "paused": "Temporarily off",
+      "pausedHint": "Two-step verification is temporarily off: no code is asked at sign-in. The entry in your authenticator app is kept — its code is enough to turn it back on.",
+      "pause": "Turn off temporarily",
+      "resume": "Turn back on",
+      "remove": "Remove 2FA",
+      "done": {
+        "pause": "Two-step verification is temporarily off.",
+        "resume": "Two-step verification is on again.",
+        "remove": "Two-step verification was removed. You can set it up again at any time."
+      },
+      "dialog": {
+        "pause": {
+          "title": "Turn off two-step verification",
+          "description": "No code will be asked at sign-in. The entry in your app is kept, so you can turn it back on later with a code from the same app. Enter your current password to confirm.",
+          "confirm": "Turn off"
+        },
+        "resume": {
+          "title": "Turn two-step verification back on",
+          "description": "Enter the 6-digit code from your authenticator app.",
+          "confirm": "Turn on"
+        },
+        "remove": {
+          "title": "Remove two-step verification",
+          "description": "The secret and all recovery codes will be deleted. To use it again you will scan a new QR code (for example, after changing phones). Enter your current password to confirm.",
+          "confirm": "Remove"
+        }
+      }
     },
     "sessions": {
       "title": "Active sessions",
@@ -110,17 +137,20 @@
       "disable": "Block",
       "enable": "Activate",
       "resetMfa": "Reset 2FA",
-      "revokeInvitation": "Revoke"
+      "revokeInvitation": "Revoke",
+      "delete": "Delete"
     },
     "confirm": {
       "disable": "Block {{name}}? All of their sessions will be signed out immediately.",
-      "resetMfa": "Reset two-step verification for {{name}}? They will set it up again at the next sign-in."
+      "resetMfa": "Reset two-step verification for {{name}}? Their sessions will be signed out; no code will be asked at the next sign-in and they can set it up again.",
+      "delete": "Delete {{name}}? Their account will be closed immediately and removed from the team list. The history of past actions is kept."
     },
     "done": {
       "disabled": "Account blocked.",
       "enabled": "Account activated.",
       "mfaReset": "2FA reset.",
-      "revoked": "Invitation revoked."
+      "revoked": "Invitation revoked.",
+      "deleted": "Team member deleted."
     }
   },
   "platform": {

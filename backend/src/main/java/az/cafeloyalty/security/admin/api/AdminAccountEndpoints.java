@@ -12,7 +12,9 @@ import az.cafeloyalty.security.admin.AdminRealms;
 import az.cafeloyalty.security.admin.AdminSessionCookies;
 import az.cafeloyalty.shared.web.ClientInfo;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.ChangePasswordRequest;
+import az.cafeloyalty.security.admin.api.AdminAuthDtos.CodeRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.MeResponse;
+import az.cafeloyalty.security.admin.api.AdminAuthDtos.PasswordConfirmRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.RecoveryCodesResponse;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.RoleResponse;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.SessionResponse;
@@ -99,15 +101,40 @@ public abstract class AdminAccountEndpoints {
         return new RecoveryCodesResponse(auth.regenerateRecoveryCodes(principal));
     }
 
+    @PostMapping("/me/mfa/pause")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "2FA-nın müvəqqəti söndürülməsi", description = """
+            Cari şifrə ilə təsdiqlənir (2FA kodu lazım deyil). Sirr saxlanılır: yenidən aktivləşdirmək üçün eyni \
+            autentifikator tətbiqinin kodu kifayətdir.""")
+    void pauseMfa(@Valid @RequestBody PasswordConfirmRequest request, @AuthenticationPrincipal AdminPrincipal principal) {
+        auth.pauseTotp(principal, request.password());
+    }
+
+    @PostMapping("/me/mfa/resume")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Söndürülmüş 2FA-nın yenidən aktivləşdirilməsi", description = "Autentifikator tətbiqindəki kodla.")
+    void resumeMfa(@Valid @RequestBody CodeRequest request, @AuthenticationPrincipal AdminPrincipal principal) {
+        auth.resumeTotp(principal, request.code());
+    }
+
+    @PostMapping("/me/mfa/remove")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "2FA-nın tam silinməsi", description = """
+            Cari şifrə ilə təsdiqlənir. Sirr və bərpa kodları silinir; yenidən qoşmaq üçün yeni QR kod skan olunur.""")
+    void removeMfa(@Valid @RequestBody PasswordConfirmRequest request, @AuthenticationPrincipal AdminPrincipal principal) {
+        auth.removeTotp(principal, request.password());
+    }
+
     private MeResponse toResponse(AdminPrincipal principal) {
         List<RoleResponse> roles = principal.roles().stream()
                 .sorted(Comparator.comparing(grant -> grant.role().ordinal()))
                 .map(grant -> new RoleResponse(grant.role().name(), grant.branchId()))
                 .toList();
-        int remaining = principal.totpEnabled()
+        var account = realms.accounts(realm()).findById(principal.userId()).orElseThrow();
+        int remaining = account.totpEnabled()
                 ? realms.accounts(realm()).remainingRecoveryCodes(principal.userId()) : 0;
         return new MeResponse(principal.userId(), principal.email(), principal.displayName(),
-                principal.language().tag(), realm().name(), roles, principal.totpEnabled(), remaining,
+                principal.language().tag(), realm().name(), roles, account.totpEnabled(), account.totpPaused(), remaining,
                 new MeResponse.Features(appProperties.dev().simulatorEnabled()));
     }
 }

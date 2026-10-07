@@ -13,7 +13,8 @@ import { Input } from '@/shared/ui/input';
 
 import { authApi } from '../api/adminApi';
 import { ApiErrorAlert } from '../components/ApiErrorAlert';
-import { totpCode, useValidationMessage } from '../lib/forms';
+import { PasswordInput } from '../components/PasswordInput';
+import { requiredPassword, totpCode, useValidationMessage } from '../lib/forms';
 import { useAdminAuth } from './AdminAuthProvider';
 
 type WithStepUp = <T>(action: () => Promise<T>) => Promise<T>;
@@ -21,8 +22,8 @@ type WithStepUp = <T>(action: () => Promise<T>) => Promise<T>;
 const StepUpContext = createContext<WithStepUp | null>(null);
 
 /**
- * Həssas əməliyyatı icra edir; backend {@code STEP_UP_REQUIRED} qaytararsa, TOTP kodu soruşulur və əməliyyat
- * təsdiqdən sonra avtomatik təkrarlanır. İstifadəçi pəncərəni bağlayarsa, ilkin xəta qaytarılır.
+ * Həssas əməliyyatı icra edir; backend {@code STEP_UP_REQUIRED} qaytararsa, kimlik yenidən təsdiqlənir (2FA aktivdirsə
+ * TOTP kodu, deyilsə cari şifrə) və əməliyyat təsdiqdən sonra avtomatik təkrarlanır. İstifadəçi pəncərəni bağlayarsa, ilkin xəta qaytarılır.
  */
 export function useStepUp(): WithStepUp {
   const value = useContext(StepUpContext);
@@ -32,7 +33,8 @@ export function useStepUp(): WithStepUp {
   return value;
 }
 
-const schema = z.object({ code: totpCode });
+const codeSchema = z.object({ secret: totpCode });
+const passwordSchema = z.object({ secret: requiredPassword });
 
 interface Pending {
   resolve: () => void;
@@ -42,17 +44,22 @@ interface Pending {
 export function StepUpProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation(['auth', 'common']);
   const validation = useValidationMessage();
-  const { realm } = useAdminAuth();
+  const { realm, me } = useAdminAuth();
+  const useCode = Boolean(me?.totpEnabled);
   const [open, setOpen] = useState(false);
   const pending = useRef<Pending | null>(null);
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { code: '' } });
-  const stepUp = useMutation({ mutationFn: (code: string) => authApi.stepUp(realm, code) });
+  const form = useForm<{ secret: string }>({
+    resolver: zodResolver(useCode ? codeSchema : passwordSchema),
+    defaultValues: { secret: '' },
+  });
+  const stepUp = useMutation({ mutationFn: (secret: string) => authApi.stepUp(realm, useCode ? { code: secret } : { password: secret }),
+  });
 
   const requestStepUp = useCallback(
     () =>
       new Promise<void>((resolve, reject) => {
         pending.current = { resolve, reject };
-        form.reset({ code: '' });
+        form.reset({ secret: '' });
         stepUp.reset();
         setOpen(true);
       }),
@@ -82,8 +89,8 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
     pending.current = null;
   };
 
-  const submit = form.handleSubmit(async ({ code }) => {
-    await stepUp.mutateAsync(code).then(
+  const submit = form.handleSubmit(async ({ secret }) => {
+    await stepUp.mutateAsync(secret).then(
       () => {
         setOpen(false);
         pending.current?.resolve();
@@ -100,19 +107,29 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('auth:stepUp.title')}</DialogTitle>
-            <DialogDescription>{t('auth:stepUp.description')}</DialogDescription>
+            <DialogDescription>{useCode ? t('auth:stepUp.description') : t('auth:stepUp.passwordDescription')}</DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
             <ApiErrorAlert error={stepUp.error} />
-            <Field id="step-up-code" label={t('auth:mfa.code')} error={validation(form.formState.errors.code?.message)}>
-              <Input
-                {...form.register('code')}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                autoFocus
-              />
-            </Field>
+            {useCode ? (
+              <Field id="step-up-code" label={t('auth:mfa.code')} error={validation(form.formState.errors.secret?.message)}>
+                <Input
+                  {...form.register('secret')}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  autoFocus
+                />
+              </Field>
+            ) : (
+              <Field
+                id="step-up-password"
+                label={t('auth:stepUp.password')}
+                error={validation(form.formState.errors.secret?.message)}
+              >
+                <PasswordInput {...form.register('secret')} autoComplete="current-password" autoFocus />
+              </Field>
+            )}
             <DialogFooter>
               <Button variant="outline" onClick={close}>
                 {t('common:actions.cancel')}

@@ -49,12 +49,12 @@ class PlatformAdminIT extends AdminIntegrationTest {
     }
 
     @Test
-    void platformAdminWithoutTotpMustEnroll() throws Exception {
+    void platformAdminWithoutTotpSignsInDirectly() throws Exception {
         String email = uniqueEmail("super-new");
         createPlatformAdmin(email, false);
         AdminClient client = AdminClient.platform(mvc);
-        client.login(email, PASSWORD).andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
-        client.get("/tenants").andExpect(status().isForbidden());
+        client.login(email, PASSWORD).andExpect(jsonPath("$.status").value("AUTHENTICATED"));
+        client.get("/tenants").andExpect(status().isOk());
     }
 
     @Test
@@ -126,7 +126,7 @@ class PlatformAdminIT extends AdminIntegrationTest {
         AdminClient owner = AdminClient.staff(mvc, domain);
         owner.post("/auth/invitations/accept",
                         Map.of("token", TestMailbox.token(mail), "displayName", "Sahib", "password", PASSWORD))
-                .andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
+                .andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         admin.get("/tenants/" + tenantId + "/owners")
                 .andExpect(jsonPath("$[0].email").value(ownerEmail))
                 .andExpect(jsonPath("$[0].totpEnabled").value(false));
@@ -162,7 +162,7 @@ class PlatformAdminIT extends AdminIntegrationTest {
 
         ownerSession.get("/me").andExpect(status().isUnauthorized());
         AdminClient.staff(mvc, TestTenants.ALPHA_HOST).login(ownerEmail, PASSWORD)
-                .andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
+                .andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         // Şirkətin audit jurnalında platformanın müdaxiləsi görünür
         Integer audited = TenantContext.callAs(tenant(TestTenants.ALPHA_HOST), () -> tenantJdbc.sql("""
                         SELECT count(*) FROM audit_logs

@@ -69,6 +69,21 @@ public final class AdminAuthDtos {
         }
     }
 
+    @Schema(description = "2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir")
+    public record StepUpRequest(@Size(max = 32) String code, @Size(max = 128) String password) {
+        @Override
+        public String toString() {
+            return "StepUpRequest[***]";
+        }
+    }
+
+    public record PasswordConfirmRequest(@NotBlank @Size(max = 128) String password) {
+        @Override
+        public String toString() {
+            return "PasswordConfirmRequest[***]";
+        }
+    }
+
     public record UpdateProfileRequest(
             @Size(min = 1, max = 80) String displayName,
             @Pattern(regexp = "az|en|ru") String preferredLanguage) {
@@ -86,6 +101,7 @@ public final class AdminAuthDtos {
             @Schema(description = "STAFF — şirkət işçisi, PLATFORM — platforma admini") String realm,
             List<RoleResponse> roles,
             boolean totpEnabled,
+            @Schema(description = "2FA müvəqqəti söndürülüb; eyni tətbiqin kodu ilə yenidən aktivləşdirilə bilər") boolean totpPaused,
             int recoveryCodesRemaining,
             Features features) {
 

@@ -62,11 +62,12 @@ export const authApi = {
         ? api.POST('/api/v1/platform/auth/mfa/enrollment/confirm', { body: { code } })
         : api.POST('/api/v1/admin/auth/mfa/enrollment/confirm', { body: { code } }),
     ),
-  stepUp: (realm: Realm, code: string) =>
+  /** 2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə). */
+  stepUp: (realm: Realm, body: { code?: string; password?: string }) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST('/api/v1/platform/auth/step-up', { body: { code } })
-        : api.POST('/api/v1/admin/auth/step-up', { body: { code } }),
+        ? api.POST('/api/v1/platform/auth/step-up', { body })
+        : api.POST('/api/v1/admin/auth/step-up', { body }),
     ),
   logout: (realm: Realm) =>
     unwrap(isPlatform(realm) ? api.POST('/api/v1/platform/auth/logout') : api.POST('/api/v1/admin/auth/logout')),
@@ -114,6 +115,26 @@ export const accountApi = {
         ? api.POST('/api/v1/platform/me/mfa/recovery-codes')
         : api.POST('/api/v1/admin/me/mfa/recovery-codes'),
     ),
+  /** 2FA-nın müvəqqəti söndürülməsi (cari şifrə ilə; sirr saxlanılır). */
+  pauseMfa: (realm: Realm, password: string) =>
+    unwrap(
+      isPlatform(realm)
+        ? api.POST('/api/v1/platform/me/mfa/pause', { body: { password } })
+        : api.POST('/api/v1/admin/me/mfa/pause', { body: { password } }),
+    ),
+  resumeMfa: (realm: Realm, code: string) =>
+    unwrap(
+      isPlatform(realm)
+        ? api.POST('/api/v1/platform/me/mfa/resume', { body: { code } })
+        : api.POST('/api/v1/admin/me/mfa/resume', { body: { code } }),
+    ),
+  /** 2FA-nın tam silinməsi (sirr və bərpa kodları). */
+  removeMfa: (realm: Realm, password: string) =>
+    unwrap(
+      isPlatform(realm)
+        ? api.POST('/api/v1/platform/me/mfa/remove', { body: { password } })
+        : api.POST('/api/v1/admin/me/mfa/remove', { body: { password } }),
+    ),
 };
 
 export const teamApi = {
@@ -128,6 +149,9 @@ export const teamApi = {
     ),
   resetMfa: (userId: string) =>
     unwrap(api.POST('/api/v1/admin/team/members/{userId}/mfa-reset', { params: { path: { userId } } })),
+  /** Yumşaq silinmə: hesab bazada qalır, giriş və siyahıdan çıxır. */
+  deleteMember: (userId: string) =>
+    unwrap(api.DELETE('/api/v1/admin/team/members/{userId}', { params: { path: { userId } } })),
 };
 
 export const platformApi = {

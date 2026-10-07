@@ -18,6 +18,7 @@
   "LOGIN_TEMPORARILY_BLOCKED": "Too many failed attempts. Please try again in a few minutes.",
   "MFA_INVALID": "Invalid code. Enter the latest code from your app.",
   "MFA_ALREADY_ENABLED": "Two-step verification is already set up.",
+  "MFA_NOT_ENABLED": "Two-step verification is not on.",
   "STEP_UP_REQUIRED": "Please confirm your identity again to continue.",
   "PASSWORD_POLICY_VIOLATION": "The password does not meet the requirements.",
   "CURRENT_PASSWORD_INVALID": "The current password is incorrect.",

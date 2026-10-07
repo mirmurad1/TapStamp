@@ -143,7 +143,7 @@ PLATFORM_ADMIN_PASSWORD='<ən azı 12 simvol>' java -jar app.jar --spring.main.w
   --create-platform-admin=admin@example.az --display-name="Ad Soyad"
 ```
 
-İlk girişdə TOTP qurulması məcburidir. Əmrdən sonra `PLATFORM_ADMIN_PASSWORD` dəyişənini silin.
+2FA (TOTP) könüllüdür — hesab səhifəsindən qurmaq tövsiyə olunur. Əmrdən sonra `PLATFORM_ADMIN_PASSWORD` dəyişənini silin.
 
 ## Lokal inkişaf
 

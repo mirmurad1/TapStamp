@@ -18,6 +18,7 @@
   "LOGIN_TEMPORARILY_BLOCKED": "Çox sayda uğursuz cəhd oldu. Bir neçə dəqiqədən sonra yenidən cəhd edin.",
   "MFA_INVALID": "Kod yanlışdır. Tətbiqdəki ən son kodu daxil edin.",
   "MFA_ALREADY_ENABLED": "İki addımlı yoxlama artıq qurulub.",
+  "MFA_NOT_ENABLED": "İki addımlı yoxlama aktiv deyil.",
   "STEP_UP_REQUIRED": "Bu əməliyyat üçün kimliyinizi yenidən təsdiqləyin.",
   "PASSWORD_POLICY_VIOLATION": "Şifrə tələblərə uyğun deyil.",
   "CURRENT_PASSWORD_INVALID": "Cari şifrə yanlışdır.",

@@ -106,14 +106,15 @@ class StaffAuthIT extends AdminIntegrationTest {
     }
 
     @Test
-    void ownerMustEnrollTotpBeforeAccessingThePanel() throws Exception {
+    void ownerMayEnrollTotpVoluntarily() throws Exception {
         String email = newOwner(false);
         AdminClient client = AdminClient.staff(mvc, HOST);
-        client.login(email, PASSWORD).andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
+        client.login(email, PASSWORD).andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         String enrollmentSession = client.session();
 
-        client.get("/me").andExpect(status().isForbidden());
-        client.get("/team").andExpect(status().isForbidden());
+        // 2FA könüllüdür: sahib onsuz da panelə daxil olur
+        client.get("/me").andExpect(status().isOk()).andExpect(jsonPath("$.totpEnabled").value(false));
+        client.get("/team").andExpect(status().isOk());
 
         ResultActions start = client.post("/auth/mfa/enrollment").andExpect(status().isOk());
         String secret = json(start, "$.secret");
@@ -334,6 +335,39 @@ class StaffAuthIT extends AdminIntegrationTest {
     }
 
     @Test
+    void totpCanBePausedResumedAndRemovedWithPassword() throws Exception {
+        String email = newOwner(true);
+        AdminClient client = signedInStaff(HOST, email, true);
+
+        // Söndürmək üçün 2FA kodu yox, cari şifrə tələb olunur
+        client.post("/me/mfa/pause", Map.of("password", "Yanlış-şifrə-12345"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CURRENT_PASSWORD_INVALID"));
+        client.post("/me/mfa/pause", Map.of("password", PASSWORD)).andExpect(status().isNoContent());
+        client.get("/me").andExpect(jsonPath("$.totpEnabled").value(false)).andExpect(jsonPath("$.totpPaused").value(true));
+        AdminClient.staff(mvc, HOST).login(email, PASSWORD).andExpect(jsonPath("$.status").value("AUTHENTICATED"));
+
+        // Eyni tətbiqin kodu ilə yenidən aktivləşir (yeni QR lazım deyil)
+        client.post("/me/mfa/resume", Map.of("code", "000000")).andExpect(jsonPath("$.code").value("MFA_INVALID"));
+        client.post("/me/mfa/resume", Map.of("code", freshTotp(TOTP_SECRET))).andExpect(status().isNoContent());
+        client.get("/me").andExpect(jsonPath("$.totpEnabled").value(true)).andExpect(jsonPath("$.totpPaused").value(false));
+        AdminClient.staff(mvc, HOST).login(email, PASSWORD).andExpect(jsonPath("$.status").value("MFA_REQUIRED"));
+
+        // Tam silinmə: sirr və bərpa kodları gedir
+        client.post("/me/mfa/remove", Map.of("password", PASSWORD)).andExpect(status().isNoContent());
+        client.get("/me")
+                .andExpect(jsonPath("$.totpEnabled").value(false))
+                .andExpect(jsonPath("$.totpPaused").value(false))
+                .andExpect(jsonPath("$.recoveryCodesRemaining").value(0));
+        client.post("/me/mfa/resume", Map.of("code", freshTotp(TOTP_SECRET))).andExpect(jsonPath("$.code").value("MFA_NOT_ENABLED"));
+        client.post("/me/mfa/remove", Map.of("password", PASSWORD)).andExpect(jsonPath("$.code").value("MFA_NOT_ENABLED"));
+
+        // 2FA olmadan step-up şifrə ilə olur
+        client.post("/auth/step-up", Map.of("code", "123456")).andExpect(jsonPath("$.code").value("CURRENT_PASSWORD_INVALID"));
+        client.post("/auth/step-up", Map.of("password", PASSWORD)).andExpect(status().isNoContent());
+    }
+
+    @Test
     void ownerResetsLostTotpOfAnotherOwnerWithStepUp() throws Exception {
         AdminClient owner = signedInStaff(HOST, newOwner(true), true);
         String otherEmail = newOwner(true);
@@ -345,7 +379,7 @@ class StaffAuthIT extends AdminIntegrationTest {
         owner.post("/team/members/" + otherId + "/mfa-reset").andExpect(status().isNoContent());
 
         AdminClient.staff(mvc, HOST).login(otherEmail, PASSWORD)
-                .andExpect(jsonPath("$.status").value("MFA_ENROLLMENT_REQUIRED"));
+                .andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         // Step-up 10 dəqiqə etibarlıdır
         clock.advance(Duration.ofMinutes(11));
         owner.post("/team/members/" + otherId + "/mfa-reset").andExpect(jsonPath("$.code").value("STEP_UP_REQUIRED"));

@@ -134,9 +134,8 @@ public class AdminAuthService {
         }
         accounts.recordSuccessfulLogin(account.id(), now);
 
-        Set<RoleGrant> roles = accounts.loadRoles(account.id());
-        AdminSession.State state = account.totpEnabled() ? AdminSession.State.PENDING_MFA
-                : mfaMandatory(realm, roles) ? AdminSession.State.MFA_ENROLLMENT : AdminSession.State.ACTIVE;
+        // 2FA hamı üçün könüllüdür: aktivdirsə kod soruşulur, deyilsə birbaşa panelə
+        AdminSession.State state = account.totpEnabled() ? AdminSession.State.PENDING_MFA : AdminSession.State.ACTIVE;
         IssuedSession session = openSession(realm, account.id(), state, client, now);
         realms.audit(realm, state == AdminSession.State.ACTIVE ? "ADMIN_LOGIN_SUCCEEDED" : "ADMIN_PASSWORD_VERIFIED",
                 account.id(), "account", account.id(), Map.of("state", state.name()));
@@ -146,8 +145,7 @@ public class AdminAuthService {
     /** Dəvət qəbul olunandan sonra birbaşa daxil olmaq üçün. */
     public LoginResult signIn(AdminRealm realm, UUID userId, ClientInfo client) {
         Instant now = clock.instant();
-        Set<RoleGrant> roles = realms.accounts(realm).loadRoles(userId);
-        AdminSession.State state = mfaMandatory(realm, roles) ? AdminSession.State.MFA_ENROLLMENT : AdminSession.State.ACTIVE;
+        AdminSession.State state = AdminSession.State.ACTIVE;
         realms.accounts(realm).recordSuccessfulLogin(userId, now);
         return new LoginResult(statusOf(state), openSession(realm, userId, state, client, now));
     }
@@ -209,6 +207,51 @@ public class AdminAuthService {
         return new EnrollmentResult(codes, session);
     }
 
+    /**
+     * 2FA-nın müvəqqəti söndürülməsi. Kod yox, cari şifrə tələb olunur (telefonu əlində olmayan istifadəçi də edə
+     * bilsin). Sirr və bərpa kodları saxlanılır — {@link #resumeTotp} ilə eyni tətbiqin kodu kifayətdir.
+     */
+    public void pauseTotp(AdminPrincipal principal, String password) {
+        Instant now = clock.instant();
+        AdminAccount account = confirmPassword(principal, password, now);
+        if (!account.totpEnabled()) {
+            throw new ApiException(ErrorCode.MFA_NOT_ENABLED);
+        }
+        realms.accounts(principal.realm()).pauseTotp(account.id(), now);
+        realms.audit(principal.realm(), "ADMIN_MFA_PAUSED", account.id(), "account", account.id(), Map.of());
+    }
+
+    /** Müvəqqəti söndürülmüş 2FA-nın eyni autentifikator tətbiqinin kodu ilə yenidən aktivləşdirilməsi. */
+    public void resumeTotp(AdminPrincipal principal, String code) {
+        requireState(principal, AdminSession.State.ACTIVE);
+        Instant now = clock.instant();
+        AdminAccount account = account(principal);
+        if (!account.totpPaused()) {
+            throw new ApiException(ErrorCode.MFA_NOT_ENABLED);
+        }
+        OptionalLong step = code == null ? OptionalLong.empty()
+                : totp.verify(decryptSecret(principal.realm(), account), code.trim(), account.totpLastUsedStep());
+        if (step.isEmpty()) {
+            onMfaFailure(principal, account, now);
+        }
+        realms.accounts(principal.realm()).enableTotp(account.id(), step.getAsLong(), now);
+        realms.audit(principal.realm(), "ADMIN_MFA_RESUMED", account.id(), "account", account.id(), Map.of());
+    }
+
+    /**
+     * 2FA-nın tam silinməsi: sirr və bərpa kodları silinir. Yenidən qoşmaq üçün yeni QR kod skan olunur (məs. telefon
+     * dəyişəndə). Cari şifrə tələb olunur.
+     */
+    public void removeTotp(AdminPrincipal principal, String password) {
+        Instant now = clock.instant();
+        AdminAccount account = confirmPassword(principal, password, now);
+        if (!account.totpEnabled() && !account.totpPaused()) {
+            throw new ApiException(ErrorCode.MFA_NOT_ENABLED);
+        }
+        realms.accounts(principal.realm()).resetTotp(account.id(), now);
+        realms.audit(principal.realm(), "ADMIN_MFA_REMOVED", account.id(), "account", account.id(), Map.of());
+    }
+
     public List<String> regenerateRecoveryCodes(AdminPrincipal principal) {
         requireStepUp(principal);
         List<String> codes = recoveryCodes();
@@ -221,16 +264,20 @@ public class AdminAuthService {
 
     // ------------------------------------------------------------------ Step-up
 
-    /** Həssas əməliyyatdan əvvəl kimliyin TOTP ilə yenidən təsdiqi. */
-    public void stepUp(AdminPrincipal principal, String code) {
+    /**
+     * Həssas əməliyyatdan əvvəl kimliyin yenidən təsdiqi: 2FA aktivdirsə TOTP kodu ilə, deyilsə cari şifrə ilə
+     * (2FA könüllüdür).
+     */
+    public void stepUp(AdminPrincipal principal, String code, String password) {
         requireState(principal, AdminSession.State.ACTIVE);
         Instant now = clock.instant();
         AdminAccount account = account(principal);
-        if (!account.totpEnabled()) {
-            throw new ApiException(ErrorCode.STEP_UP_REQUIRED);
-        }
-        if (!checkSecondFactor(principal.realm(), account, code, false, now)) {
-            onMfaFailure(principal, account, now);
+        if (account.totpEnabled()) {
+            if (!checkSecondFactor(principal.realm(), account, code, false, now)) {
+                onMfaFailure(principal, account, now);
+            }
+        } else {
+            confirmPassword(principal, password, now);
         }
         realms.sessions(principal.realm()).markStepUp(principal.sessionId(), now);
         realms.audit(principal.realm(), "ADMIN_STEP_UP", account.id(), "session", principal.sessionId(), Map.of());
@@ -343,8 +390,18 @@ public class AdminAuthService {
 
     // ------------------------------------------------------------------ Daxili köməkçilər
 
-    private boolean mfaMandatory(AdminRealm realm, Set<RoleGrant> roles) {
-        return realm == AdminRealm.PLATFORM || roles.stream().anyMatch(r -> r.role() == AdminRole.COMPANY_OWNER);
+    /** Cari şifrənin təkrar yoxlanması; yanlış cəhdlər girişdəki kimi sayılır və hesabı müvəqqəti bloklayır. */
+    private AdminAccount confirmPassword(AdminPrincipal principal, String password, Instant now) {
+        requireState(principal, AdminSession.State.ACTIVE);
+        AdminAccount account = account(principal);
+        if (account.lockedAt(now)) {
+            throw new ApiException(ErrorCode.LOGIN_TEMPORARILY_BLOCKED);
+        }
+        if (password == null || !hasher.matches(password, account.passwordHash())) {
+            registerFailure(principal.realm(), account, now, "BAD_CURRENT_PASSWORD");
+            throw new ApiException(ErrorCode.CURRENT_PASSWORD_INVALID);
+        }
+        return account;
     }
 
     private IssuedSession openSession(AdminRealm realm, UUID userId, AdminSession.State state, ClientInfo client,

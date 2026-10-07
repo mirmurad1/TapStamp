@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Email və şifrə ilə giriş
-         * @description Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.
+         * @description Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu tələb olunur; 2FA (iki addımlı yoxlama) hamı üçün könüllüdür. Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.
          */
         post: operations["login_1"];
         delete?: never;
@@ -215,7 +215,7 @@ export interface paths {
         put?: never;
         /**
          * Həssas əməliyyat üçün təkrar təsdiq
-         * @description TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.
+         * @description 2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.
          */
         post: operations["stepUp_1"];
         delete?: never;
@@ -248,6 +248,26 @@ export interface paths {
         patch: operations["update_2"];
         trace?: never;
     };
+    "/api/v1/admin/me/mfa/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 2FA-nın müvəqqəti söndürülməsi
+         * @description Cari şifrə ilə təsdiqlənir (2FA kodu lazım deyil). Sirr saxlanılır: yenidən aktivləşdirmək üçün eyni autentifikator tətbiqinin kodu kifayətdir.
+         */
+        post: operations["pauseMfa_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/me/mfa/recovery-codes": {
         parameters: {
             query?: never;
@@ -262,6 +282,46 @@ export interface paths {
          * @description Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.
          */
         post: operations["regenerateRecoveryCodes_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/me/mfa/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 2FA-nın tam silinməsi
+         * @description Cari şifrə ilə təsdiqlənir. Sirr və bərpa kodları silinir; yenidən qoşmaq üçün yeni QR kod skan olunur.
+         */
+        post: operations["removeMfa_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/me/mfa/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Söndürülmüş 2FA-nın yenidən aktivləşdirilməsi
+         * @description Autentifikator tətbiqindəki kodla.
+         */
+        post: operations["resumeMfa_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -542,6 +602,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/team/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * İşçinin silinməsi
+         * @description Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.
+         */
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/team/members/{userId}/mfa-reset": {
         parameters: {
             query?: never;
@@ -553,7 +633,7 @@ export interface paths {
         put?: never;
         /**
          * İşçinin TOTP-sinin sıfırlanması
-         * @description Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP) tələb edir.
+         * @description Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP kodu və ya 2FA yoxdursa şifrə) tələb edir.
          */
         post: operations["resetMfa"];
         delete?: never;
@@ -909,7 +989,7 @@ export interface paths {
         put?: never;
         /**
          * Email və şifrə ilə giriş
-         * @description Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.
+         * @description Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu tələb olunur; 2FA (iki addımlı yoxlama) hamı üçün könüllüdür. Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.
          */
         post: operations["login"];
         delete?: never;
@@ -1069,7 +1149,7 @@ export interface paths {
         put?: never;
         /**
          * Həssas əməliyyat üçün təkrar təsdiq
-         * @description TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.
+         * @description 2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.
          */
         post: operations["stepUp"];
         delete?: never;
@@ -1102,6 +1182,26 @@ export interface paths {
         patch: operations["update"];
         trace?: never;
     };
+    "/api/v1/platform/me/mfa/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 2FA-nın müvəqqəti söndürülməsi
+         * @description Cari şifrə ilə təsdiqlənir (2FA kodu lazım deyil). Sirr saxlanılır: yenidən aktivləşdirmək üçün eyni autentifikator tətbiqinin kodu kifayətdir.
+         */
+        post: operations["pauseMfa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/me/mfa/recovery-codes": {
         parameters: {
             query?: never;
@@ -1116,6 +1216,46 @@ export interface paths {
          * @description Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.
          */
         post: operations["regenerateRecoveryCodes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/me/mfa/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 2FA-nın tam silinməsi
+         * @description Cari şifrə ilə təsdiqlənir. Sirr və bərpa kodları silinir; yenidən qoşmaq üçün yeni QR kod skan olunur.
+         */
+        post: operations["removeMfa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/me/mfa/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Söndürülmüş 2FA-nın yenidən aktivləşdirilməsi
+         * @description Autentifikator tətbiqindəki kodla.
+         */
+        post: operations["resumeMfa"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1671,6 +1811,8 @@ export interface components {
             recoveryCodesRemaining?: number;
             roles?: components["schemas"]["RoleResponse"][];
             totpEnabled?: boolean;
+            /** @description 2FA müvəqqəti söndürülüb; eyni tətbiqin kodu ilə yenidən aktivləşdirilə bilər */
+            totpPaused?: boolean;
         };
         MemberResponse: {
             displayName?: string;
@@ -1737,6 +1879,9 @@ export interface components {
             lastLoginAt?: string;
             status?: string;
             totpEnabled?: boolean;
+        };
+        PasswordConfirmRequest: {
+            password: string;
         };
         PasswordForgotRequest: {
             /** Format: email */
@@ -1909,6 +2054,11 @@ export interface components {
             activeStaff?: number;
             /** Format: int32 */
             branches?: number;
+        };
+        /** @description 2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir */
+        StepUpRequest: {
+            code?: string;
+            password?: string;
         };
         /** @description Toxunuşun vəziyyəti. sameBrowser=false — link başqa brauzerdə açılıb, möhür alınmayacaq. */
         TapStatusResponse: {
@@ -2189,7 +2339,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CodeRequest"];
+                "application/json": components["schemas"]["StepUpRequest"];
             };
         };
         responses: {
@@ -2246,6 +2396,28 @@ export interface operations {
             };
         };
     };
+    pauseMfa_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     regenerateRecoveryCodes_1: {
         parameters: {
             query?: never;
@@ -2263,6 +2435,50 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["RecoveryCodesResponse"];
                 };
+            };
+        };
+    };
+    removeMfa_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resumeMfa_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2626,6 +2842,26 @@ export interface operations {
             header?: never;
             path: {
                 invitationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
             };
             cookie?: never;
         };
@@ -3241,7 +3477,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CodeRequest"];
+                "application/json": components["schemas"]["StepUpRequest"];
             };
         };
         responses: {
@@ -3298,6 +3534,28 @@ export interface operations {
             };
         };
     };
+    pauseMfa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     regenerateRecoveryCodes: {
         parameters: {
             query?: never;
@@ -3315,6 +3573,50 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["RecoveryCodesResponse"];
                 };
+            };
+        };
+    };
+    removeMfa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resumeMfa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

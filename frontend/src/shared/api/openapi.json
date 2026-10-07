@@ -78,7 +78,7 @@
     },
     "/api/v1/admin/auth/login" : {
       "post" : {
-        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
+        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu tələb olunur; 2FA (iki addımlı yoxlama) hamı üçün könüllüdür. Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
         "operationId" : "login_1",
         "requestBody" : {
           "content" : {
@@ -267,13 +267,13 @@
     },
     "/api/v1/admin/auth/step-up" : {
       "post" : {
-        "description" : "TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.",
+        "description" : "2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.",
         "operationId" : "stepUp_1",
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/CodeRequest"
+                "$ref" : "#/components/schemas/StepUpRequest"
               }
             }
           },
@@ -336,6 +336,29 @@
         "tags" : [ "Admin: hesab" ]
       }
     },
+    "/api/v1/admin/me/mfa/pause" : {
+      "post" : {
+        "description" : "Cari şifrə ilə təsdiqlənir (2FA kodu lazım deyil). Sirr saxlanılır: yenidən aktivləşdirmək üçün eyni autentifikator tətbiqinin kodu kifayətdir.",
+        "operationId" : "pauseMfa_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordConfirmRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "2FA-nın müvəqqəti söndürülməsi",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
     "/api/v1/admin/me/mfa/recovery-codes" : {
       "post" : {
         "description" : "Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.",
@@ -353,6 +376,52 @@
           }
         },
         "summary" : "Yeni bərpa kodları",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/mfa/remove" : {
+      "post" : {
+        "description" : "Cari şifrə ilə təsdiqlənir. Sirr və bərpa kodları silinir; yenidən qoşmaq üçün yeni QR kod skan olunur.",
+        "operationId" : "removeMfa_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordConfirmRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "2FA-nın tam silinməsi",
+        "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/me/mfa/resume" : {
+      "post" : {
+        "description" : "Autentifikator tətbiqindəki kodla.",
+        "operationId" : "resumeMfa_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Söndürülmüş 2FA-nın yenidən aktivləşdirilməsi",
         "tags" : [ "Admin: hesab" ]
       }
     },
@@ -802,9 +871,31 @@
         "tags" : [ "Admin: komanda" ]
       }
     },
+    "/api/v1/admin/team/members/{userId}" : {
+      "delete" : {
+        "description" : "Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.",
+        "operationId" : "delete_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "İşçinin silinməsi",
+        "tags" : [ "Admin: komanda" ]
+      }
+    },
     "/api/v1/admin/team/members/{userId}/mfa-reset" : {
       "post" : {
-        "description" : "Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP) tələb edir.",
+        "description" : "Telefonunu itirmiş işçi üçün. Yalnız sahib; step-up (son 10 dəqiqədə TOTP kodu və ya 2FA yoxdursa şifrə) tələb edir.",
         "operationId" : "resetMfa",
         "parameters" : [ {
           "in" : "path",
@@ -1243,7 +1334,7 @@
     },
     "/api/v1/platform/auth/login" : {
       "post" : {
-        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu, `MFA_ENROLLMENT_REQUIRED` olarsa TOTP qeydiyyatı tələb olunur (sahib və platforma admini üçün məcburidir). Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
+        "description" : "Uğurlu olarsa HttpOnly sessiya cookie-si qoyulur. Status `MFA_REQUIRED` olarsa TOTP kodu tələb olunur; 2FA (iki addımlı yoxlama) hamı üçün könüllüdür. Yanlış email və yanlış şifrə eyni cavabı alır (`LOGIN_FAILED`); 5 uğursuz cəhddən sonra müvəqqəti bloklanma.",
         "operationId" : "login",
         "requestBody" : {
           "content" : {
@@ -1432,13 +1523,13 @@
     },
     "/api/v1/platform/auth/step-up" : {
       "post" : {
-        "description" : "TOTP kodu ilə; 10 dəqiqə ərzində həssas əməliyyatlara (tam telefon, ixrac, açarlar) icazə verir.",
+        "description" : "2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.",
         "operationId" : "stepUp",
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/CodeRequest"
+                "$ref" : "#/components/schemas/StepUpRequest"
               }
             }
           },
@@ -1501,6 +1592,29 @@
         "tags" : [ "Platforma: hesab" ]
       }
     },
+    "/api/v1/platform/me/mfa/pause" : {
+      "post" : {
+        "description" : "Cari şifrə ilə təsdiqlənir (2FA kodu lazım deyil). Sirr saxlanılır: yenidən aktivləşdirmək üçün eyni autentifikator tətbiqinin kodu kifayətdir.",
+        "operationId" : "pauseMfa",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordConfirmRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "2FA-nın müvəqqəti söndürülməsi",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
     "/api/v1/platform/me/mfa/recovery-codes" : {
       "post" : {
         "description" : "Köhnə kodlar etibarsız olur. Step-up (son 10 dəqiqədə TOTP) tələb edir.",
@@ -1518,6 +1632,52 @@
           }
         },
         "summary" : "Yeni bərpa kodları",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/mfa/remove" : {
+      "post" : {
+        "description" : "Cari şifrə ilə təsdiqlənir. Sirr və bərpa kodları silinir; yenidən qoşmaq üçün yeni QR kod skan olunur.",
+        "operationId" : "removeMfa",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordConfirmRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "2FA-nın tam silinməsi",
+        "tags" : [ "Platforma: hesab" ]
+      }
+    },
+    "/api/v1/platform/me/mfa/resume" : {
+      "post" : {
+        "description" : "Autentifikator tətbiqindəki kodla.",
+        "operationId" : "resumeMfa",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Söndürülmüş 2FA-nın yenidən aktivləşdirilməsi",
         "tags" : [ "Platforma: hesab" ]
       }
     },
@@ -2582,6 +2742,10 @@
           },
           "totpEnabled" : {
             "type" : "boolean"
+          },
+          "totpPaused" : {
+            "type" : "boolean",
+            "description" : "2FA müvəqqəti söndürülüb; eyni tətbiqin kodu ilə yenidən aktivləşdirilə bilər"
           }
         }
       },
@@ -2757,6 +2921,17 @@
             "type" : "boolean"
           }
         }
+      },
+      "PasswordConfirmRequest" : {
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "password" ]
       },
       "PasswordForgotRequest" : {
         "type" : "object",
@@ -3165,6 +3340,22 @@
           "branches" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "StepUpRequest" : {
+        "type" : "object",
+        "description" : "2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "maxLength" : 32,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
           }
         }
       },

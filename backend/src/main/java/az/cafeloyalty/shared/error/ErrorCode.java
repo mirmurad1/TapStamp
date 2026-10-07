@@ -29,6 +29,7 @@ public enum ErrorCode {
     LOGIN_TEMPORARILY_BLOCKED(HttpStatus.TOO_MANY_REQUESTS),
     MFA_INVALID(HttpStatus.UNAUTHORIZED),
     MFA_ALREADY_ENABLED(HttpStatus.CONFLICT),
+    MFA_NOT_ENABLED(HttpStatus.CONFLICT),
     /** Həssas əməliyyat son 10 dəqiqədə TOTP təsdiqi tələb edir. */
     STEP_UP_REQUIRED(HttpStatus.FORBIDDEN),
     PASSWORD_POLICY_VIOLATION(HttpStatus.BAD_REQUEST),

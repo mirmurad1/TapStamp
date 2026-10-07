@@ -34,7 +34,7 @@ public class AdminAccountStore {
     }
 
     public Optional<AdminAccount> findByEmail(String email) {
-        return jdbc.sql("SELECT * FROM " + users + " WHERE email = :email")
+        return jdbc.sql("SELECT * FROM " + users + " WHERE email = :email AND status <> 'DELETED'")
                 .param("email", normalizeEmail(email))
                 .query(AdminAccountStore::map)
                 .optional();
@@ -102,14 +102,15 @@ public class AdminAccountStore {
     /** Hələ təsdiqlənməmiş TOTP sirri (qeydiyyat zamanı). */
     public void storePendingTotp(UUID id, byte[] secretEnc, Instant now) {
         jdbc.sql("UPDATE " + users + """
-                         SET totp_secret_enc = :secret, totp_enabled_at = NULL, totp_last_used_step = NULL, updated_at = :now
+                         SET totp_secret_enc = :secret, totp_enabled_at = NULL, totp_last_used_step = NULL, totp_disabled_at = NULL,
+                             updated_at = :now
                         WHERE id = :id AND totp_enabled_at IS NULL""")
                 .param("secret", secretEnc).param("id", id).param("now", ts(now)).update();
     }
 
     public void enableTotp(UUID id, long usedStep, Instant now) {
         jdbc.sql("UPDATE " + users + """
-                         SET totp_enabled_at = :now, totp_last_used_step = :step, updated_at = :now
+                         SET totp_enabled_at = :now, totp_last_used_step = :step, totp_disabled_at = NULL, updated_at = :now
                         WHERE id = :id AND totp_secret_enc IS NOT NULL""")
                 .param("step", usedStep).param("id", id).param("now", ts(now)).update();
     }
@@ -127,11 +128,29 @@ public class AdminAccountStore {
 
     public void resetTotp(UUID id, Instant now) {
         jdbc.sql("UPDATE " + users + """
-                         SET totp_secret_enc = NULL, totp_enabled_at = NULL, totp_last_used_step = NULL, updated_at = :now
+                         SET totp_secret_enc = NULL, totp_enabled_at = NULL, totp_last_used_step = NULL, totp_disabled_at = NULL,
+                             updated_at = :now
                         WHERE id = :id""")
                 .param("id", id).param("now", ts(now)).update();
         jdbc.sql("DELETE FROM " + realm.recoveryCodesTable() + " WHERE " + realm.userIdColumn() + " = :id")
                 .param("id", id).update();
+    }
+
+    /** 2FA-nın müvəqqəti söndürülməsi: sirr və bərpa kodları saxlanılır. */
+    public void pauseTotp(UUID id, Instant now) {
+        jdbc.sql("UPDATE " + users + """
+                         SET totp_enabled_at = NULL, totp_disabled_at = :now, updated_at = :now
+                        WHERE id = :id AND totp_enabled_at IS NOT NULL""")
+                .param("id", id).param("now", ts(now)).update();
+    }
+
+    /** Yumşaq silinmə: sətir qalır, status DELETED olur və email yeni hesab üçün boşalır. */
+    public void softDelete(UUID id, UUID deletedBy, Instant now) {
+        jdbc.sql("UPDATE " + users + """
+                         SET status = 'DELETED', deleted_at = :now, deleted_by = :by, updated_at = :now,
+                             version = version + 1
+                        WHERE id = :id AND status <> 'DELETED'""")
+                .param("id", id).param("by", deletedBy).param("now", ts(now)).update();
     }
 
     public void updateProfile(UUID id, String displayName, Language language, Instant now) {
@@ -247,7 +266,8 @@ public class AdminAccountStore {
                 step,
                 rs.getInt("failed_login_count"),
                 instant(rs, "locked_until"),
-                instant(rs, "last_login_at"));
+                instant(rs, "last_login_at"),
+                instant(rs, "totp_disabled_at"));
     }
 
     static Set<AdminRole> roles(Set<RoleGrant> grants) {

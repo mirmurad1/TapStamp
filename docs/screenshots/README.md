@@ -40,3 +40,7 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase6-06-customer-gift-card-history.png` | Müştəri: hədiyyə kartları tarixçəsi |
 | `phase6-08-admin-settings.png` | Admin: Parametrlər (yenilənmiş) |
 | `phase6-09-admin-confirm-dialog.png` | Tətbiqin öz təsdiq dialoqu (brauzerin `confirm` pəncərəsi əvəzinə) |
+| `phase6-10-account-2fa.png` | Hesabım: 2FA — müvəqqəti söndür və sil düymələri |
+| `phase6-11-account-2fa-remove-dialog.png` | 2FA-nın silinməsi: cari şifrə ilə təsdiq |
+| `phase6-12-team-delete.png` | Komanda: "Sil" düyməsi |
+| `phase6-13-team-delete-confirm.png` | İşçinin silinməsinin təsdiqi (soft delete) |

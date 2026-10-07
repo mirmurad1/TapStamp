@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserPlus } from 'lucide-react';
+import { Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -92,6 +92,14 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
     },
   });
 
+  const remove = useMutation({
+    mutationFn: (member: Member) => teamApi.deleteMember(member.id ?? ''),
+    onSuccess: () => {
+      onNotice(t('admin:team.done.deleted'));
+      void queryClient.invalidateQueries({ queryKey: TEAM_KEY });
+    },
+  });
+
   const confirm = useConfirm();
   const confirmAndRun = (message: string, action: () => void) => {
     void confirm({ message, danger: true }).then((ok) => ok && action());
@@ -103,7 +111,7 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
         <CardTitle>{t('admin:team.members')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <ApiErrorAlert error={members.error ?? status.error ?? resetMfa.error} />
+        <ApiErrorAlert error={members.error ?? status.error ?? resetMfa.error ?? remove.error} />
         {members.isPending ? <InlineLoading /> : null}
         {members.data && members.data.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:team.empty')}</p> : null}
         {members.data && members.data.length > 0 ? (
@@ -192,6 +200,18 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
                                 {t('admin:team.actions.resetMfa')}
                               </Button>
                             ) : null}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              disabled={remove.isPending}
+                              onClick={() =>
+                                confirmAndRun(t('admin:team.confirm.delete', { name }), () => remove.mutate(member))
+                              }
+                            >
+                              <Trash2 className="size-4" aria-hidden="true" />
+                              {t('admin:team.actions.delete')}
+                            </Button>
                           </div>
                         ) : null}
                       </td>
