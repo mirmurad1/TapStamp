@@ -14,7 +14,8 @@
     "team": "Komanda",
     "account": "Hesabım",
     "tenants": "Şirkətlər",
-    "simulator": "NFC simulyatoru"
+    "simulator": "NFC simulyatoru",
+    "tags": "NFC çipləri"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -454,5 +455,87 @@
       "COOLDOWN_HAMMERING": "Gözləmə müddətində çoxlu cəhd",
       "BINDING_MISMATCH": "Link başqa cihazda açılıb"
     }
+  },
+  "tags": {
+    "title": "NFC çipləri",
+    "subtitle": "Piştaxtadakı çiplər: qeydiyyat, açarlar, deaktivasiya və toxunuş jurnalı.",
+    "empty": "Hələ çip qeydiyyatdan keçməyib.",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "DISABLED": "Deaktiv"
+    },
+    "simulated": "Simulyator",
+    "keys": "Açarlar",
+    "activeKey": "Aktiv: v{{version}}",
+    "notActivated": "Hələ aktivləşməyib",
+    "pendingKey": "Yeni açar v{{version}} — paket yüklənməyib",
+    "pendingExported": "Yeni açar v{{version}} — çipə ilk toxunuşu gözləyir",
+    "lastTap": "Son toxunuş",
+    "taps7d_one": "son 7 gündə {{count}} toxunuş",
+    "taps7d_other": "son 7 gündə {{count}} toxunuş",
+    "actions": {
+      "events": "Jurnal",
+      "package": "Provisioning paketi",
+      "rotate": "Açarı yenilə",
+      "disable": "Deaktiv et",
+      "enable": "Aktivləşdir"
+    },
+    "confirm": {
+      "disable": "\"{{label}}\" deaktiv edilsin? Bu çipə edilən bütün toxunuşlar dərhal rədd olunacaq.",
+      "rotate": "\"{{label}}\" üçün yeni açarlar yaradılsın? Çipi yeni açarlarla proqramlaşdırana qədər köhnə açar işləməyə davam edəcək."
+    },
+    "register": {
+      "open": "Çip əlavə et",
+      "title": "Yeni NFC çipi",
+      "description": "Server 3 təsadüfi açar yaradır. Sonra provisioning paketini yükləyib çipi proqramlaşdırın; ilk toxunuş çipi aktivləşdirir.",
+      "uid": "UID",
+      "uidHint": "7 bayt, 14 hex simvol (məs. 04:A1:B2:C3:D4:E5:F6).",
+      "label": "Etiket",
+      "labelHint": "Məsələn, \"Piştaxta 1\".",
+      "submit": "Qeydiyyatdan keçir",
+      "invalid": "UID (14 hex simvol), etiket və filialı yoxlayın."
+    },
+    "package": {
+      "title": "Provisioning paketi: {{uid}} (v{{version}})",
+      "description": "Bu məlumatla çipi NXP TagXplorer və NFC oxuyucusu ilə proqramlaşdırın (bax: docs/nfc-ntag424-programming.md).",
+      "once": "Açarlar yalnız indi göstərilir və bir daha göstərilməyəcək. Faylı təhlükəsiz yerdə saxlayın və proqramlaşdırmadan sonra silin.",
+      "download": "JSON yüklə"
+    },
+    "events": {
+      "title": "\"{{label}}\" — toxunuş jurnalı",
+      "description": "Son 100 cəhd: qəbul və rədd edilənlər, səbəbləri ilə.",
+      "empty": "Hələ toxunuş yoxdur.",
+      "outcome": {
+        "ACCEPTED": "Qəbul",
+        "REJECTED": "Rədd"
+      },
+      "stage": {
+        "VERIFY": "Çipin yoxlanması",
+        "CLAIM": "Möhürün alınması"
+      }
+    },
+    "simulatorKey": "Simulyator açarı (yalnız dev)"
+  },
+  "audit": {
+    "title": "Audit jurnalı",
+    "subtitle": "Kim, nə vaxt və nə etdi. Jurnal dəyişdirilə və silinə bilməz.",
+    "filters": {
+      "action": "Əməliyyat",
+      "from": "Başlanğıc",
+      "to": "Son"
+    },
+    "columns": {
+      "time": "Vaxt",
+      "actor": "İcraçı",
+      "action": "Əməliyyat",
+      "details": "Təfərrüat"
+    },
+    "actorType": {
+      "STAFF": "İşçi",
+      "CUSTOMER": "Müştəri",
+      "PLATFORM": "Platforma",
+      "SYSTEM": "Sistem"
+    },
+    "empty": "Qeyd tapılmadı."
   }
 }

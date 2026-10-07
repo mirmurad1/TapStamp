@@ -101,6 +101,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Audit jurnalı
+         * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
+         */
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit-logs/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Jurnalda olan əməliyyat adları (filtr üçün) */
+        get: operations["actions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/auth/invitations/accept": {
         parameters: {
             query?: never;
@@ -332,7 +369,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).
          */
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -516,7 +553,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_2"];
+        patch: operations["update_3"];
         trace?: never;
     };
     "/api/v1/admin/me/mfa/pause": {
@@ -809,6 +846,144 @@ export interface paths {
          * @description Səbəb məcburidir və auditə yazılır.
          */
         post: operations["reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Çiplərin siyahısı
+         * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.
+         */
+        get: operations["list_1"];
+        put?: never;
+        /**
+         * Çipin qeydiyyatı
+         * @description Server 3 təsadüfi açar yaradır (PENDING); ilk toxunuş onları aktivləşdirir.
+         */
+        post: operations["register_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Etiket və ya filialın dəyişdirilməsi */
+        patch: operations["update_2"];
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deaktivasiya
+         * @description Dərhal qüvvəyə minir: bütün toxunuşlar TAG_DISABLED alır.
+         */
+        post: operations["disable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Aktivləşdirmə */
+        post: operations["enable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Çipin toxunuş jurnalı
+         * @description Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.
+         */
+        get: operations["events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}/key-rotations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Açarın yenilənməsi
+         * @description Yeni PENDING açar dəsti (step-up). Çip yeni açarlarla proqramlaşdırılandan sonra ilk toxunuşda keçid avtomatik olur; o vaxta qədər köhnə açar işləyir.
+         */
+        post: operations["rotate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tags/{tagId}/provisioning-package": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Provisioning paketi
+         * @description Çipin proqramlaşdırılması üçün URL şablonu, SDM ofsetləri və açarlar. Step-up tələb edir; PENDING açarlar yalnız bir dəfə göstərilir (təkrar — PROVISIONING_ALREADY_EXPORTED), auditə yazılır.
+         */
+        post: operations["provisioningPackage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1189,7 +1364,7 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1753,7 +1928,7 @@ export interface paths {
          * Cari hüquqi sənədlər
          * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1970,6 +2145,21 @@ export interface components {
         EnrollmentStartResponse: {
             otpauthUri?: string;
             secret?: string;
+        };
+        Entry: {
+            action?: string;
+            /** Format: uuid */
+            actorId?: string;
+            actorName?: string;
+            actorType?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            details?: string;
+            /** Format: uuid */
+            id?: string;
+            ip?: string;
+            targetId?: string;
+            targetType?: string;
         };
         Features: {
             /** @description Dev alətləri (simulyator, outbox) — yalnız dev mühitində */
@@ -2269,6 +2459,22 @@ export interface components {
             slug: string;
             timezone: string;
         };
+        ProvisioningPackage: {
+            appMasterKey?: string;
+            /** Format: int32 */
+            keyVersion?: number;
+            note?: string;
+            /** Format: int32 */
+            piccDataOffset?: number;
+            sdmFileReadKey?: string;
+            /** Format: int32 */
+            sdmMacInputOffset?: number;
+            /** Format: int32 */
+            sdmMacOffset?: number;
+            sdmMetaReadKey?: string;
+            uid?: string;
+            url?: string;
+        };
         /** @description Kafenin ictimai məlumatı: ad, təsvir, filiallar və mükafat qaydası */
         PublicCompanyResponse: {
             branches?: components["schemas"]["BranchResponse"][];
@@ -2454,6 +2660,56 @@ export interface components {
             code?: string;
             password?: string;
         };
+        /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
+        TagRegisterRequest: {
+            /** Format: uuid */
+            branchId: string;
+            label: string;
+            uid: string;
+        };
+        TagUpdateRequest: {
+            /** Format: uuid */
+            branchId?: string;
+            label?: string;
+        };
+        TagView: {
+            /** Format: int32 */
+            activeKeyVersion?: number;
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            id?: string;
+            label?: string;
+            /** Format: int32 */
+            lastCounter?: number;
+            /** Format: date-time */
+            lastTapAt?: string;
+            pendingExported?: boolean;
+            /** Format: int32 */
+            pendingKeyVersion?: number;
+            status?: string;
+            /** Format: int64 */
+            tapsLast7Days?: number;
+            type?: string;
+            uid?: string;
+        };
+        TapEvent: {
+            /** Format: int32 */
+            counter?: number;
+            /** Format: int32 */
+            counterGap?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            customerId?: string;
+            /** Format: uuid */
+            id?: string;
+            outcome?: string;
+            reason?: string;
+            stage?: string;
+        };
         /** @description Toxunuşun vəziyyəti. sameBrowser=false — link başqa brauzerdə açılıb, möhür alınmayacaq. */
         TapStatusResponse: {
             /** Format: uuid */
@@ -2633,6 +2889,52 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SeriesPoint"][];
+                };
+            };
+        };
+    };
+    list_5: {
+        parameters: {
+            query?: {
+                action?: string;
+                actorId?: string;
+                from?: string;
+                to?: string;
+                before?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Entry"][];
+                };
+            };
+        };
+    };
+    actions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string[];
                 };
             };
         };
@@ -2881,7 +3183,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 q?: string;
@@ -3126,7 +3428,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -3522,6 +3824,188 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["StampDecisionResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: {
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"][];
+                };
+            };
+        };
+    };
+    register_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    disable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    enable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TapEvent"][];
+                };
+            };
+        };
+    };
+    rotate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    provisioningPackage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProvisioningPackage"];
                 };
             };
         };
@@ -3968,7 +4452,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -4639,7 +5123,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: never;
             header?: never;

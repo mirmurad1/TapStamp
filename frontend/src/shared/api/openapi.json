@@ -243,6 +243,92 @@
         "tags" : [ "Admin: analitika" ]
       }
     },
+    "/api/v1/admin/audit-logs" : {
+      "get" : {
+        "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
+        "operationId" : "list_5",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "action",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "^[A-Z_]{1,64}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "actorId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "before",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Entry"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Audit jurnalı",
+        "tags" : [ "Admin: audit jurnalı" ]
+      }
+    },
+    "/api/v1/admin/audit-logs/actions" : {
+      "get" : {
+        "operationId" : "actions",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Jurnalda olan əməliyyat adları (filtr üçün)",
+        "tags" : [ "Admin: audit jurnalı" ]
+      }
+    },
     "/api/v1/admin/auth/invitations/accept" : {
       "post" : {
         "description" : "Hesab yaradılır və istifadəçi daxil olur. Sahib üçün növbəti addım TOTP qeydiyyatıdır.",
@@ -518,7 +604,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).",
-        "operationId" : "list_3",
+        "operationId" : "list_4",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -956,7 +1042,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1422,6 +1508,251 @@
         },
         "summary" : "Möhürü rədd et",
         "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
+    "/api/v1/admin/tags" : {
+      "get" : {
+        "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.",
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TagView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Çiplərin siyahısı",
+        "tags" : [ "Admin: NFC çipləri" ]
+      },
+      "post" : {
+        "description" : "Server 3 təsadüfi açar yaradır (PENDING); ilk toxunuş onları aktivləşdirir.",
+        "operationId" : "register_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TagRegisterRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Çipin qeydiyyatı",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}" : {
+      "patch" : {
+        "operationId" : "update_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TagUpdateRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Etiket və ya filialın dəyişdirilməsi",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}/disable" : {
+      "post" : {
+        "description" : "Dərhal qüvvəyə minir: bütün toxunuşlar TAG_DISABLED alır.",
+        "operationId" : "disable",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Deaktivasiya",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}/enable" : {
+      "post" : {
+        "operationId" : "enable",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Aktivləşdirmə",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}/events" : {
+      "get" : {
+        "description" : "Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.",
+        "operationId" : "events",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TapEvent"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Çipin toxunuş jurnalı",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}/key-rotations" : {
+      "post" : {
+        "description" : "Yeni PENDING açar dəsti (step-up). Çip yeni açarlarla proqramlaşdırılandan sonra ilk toxunuşda keçid avtomatik olur; o vaxta qədər köhnə açar işləyir.",
+        "operationId" : "rotate",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Açarın yenilənməsi",
+        "tags" : [ "Admin: NFC çipləri" ]
+      }
+    },
+    "/api/v1/admin/tags/{tagId}/provisioning-package" : {
+      "post" : {
+        "description" : "Çipin proqramlaşdırılması üçün URL şablonu, SDM ofsetləri və açarlar. Step-up tələb edir; PENDING açarlar yalnız bir dəfə göstərilir (təkrar — PROVISIONING_ALREADY_EXPORTED), auditə yazılır.",
+        "operationId" : "provisioningPackage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProvisioningPackage"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Provisioning paketi",
+        "tags" : [ "Admin: NFC çipləri" ]
       }
     },
     "/api/v1/admin/team" : {
@@ -1897,7 +2228,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "responses" : {
           "200" : {
             "content" : {
@@ -2663,7 +2994,7 @@
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
-        "operationId" : "list_1",
+        "operationId" : "list_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -3107,6 +3438,44 @@
             "type" : "string"
           },
           "secret" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Entry" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actorId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "actorName" : {
+            "type" : "string"
+          },
+          "actorType" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "details" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ip" : {
+            "type" : "string"
+          },
+          "targetId" : {
+            "type" : "string"
+          },
+          "targetType" : {
             "type" : "string"
           }
         }
@@ -3862,6 +4231,45 @@
         },
         "required" : [ "defaultLanguage", "displayName", "primaryDomain", "slug", "timezone" ]
       },
+      "ProvisioningPackage" : {
+        "type" : "object",
+        "properties" : {
+          "appMasterKey" : {
+            "type" : "string"
+          },
+          "keyVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "piccDataOffset" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sdmFileReadKey" : {
+            "type" : "string"
+          },
+          "sdmMacInputOffset" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sdmMacOffset" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sdmMetaReadKey" : {
+            "type" : "string"
+          },
+          "uid" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        }
+      },
       "PublicCompanyResponse" : {
         "type" : "object",
         "description" : "Kafenin ictimai məlumatı: ad, təsvir, filiallar və mükafat qaydası",
@@ -4288,6 +4696,127 @@
             "type" : "string",
             "maxLength" : 128,
             "minLength" : 0
+          }
+        }
+      },
+      "TagRegisterRequest" : {
+        "type" : "object",
+        "description" : "Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər)",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "uid" : {
+            "type" : "string",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "branchId", "label", "uid" ]
+      },
+      "TagUpdateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 1
+          }
+        }
+      },
+      "TagView" : {
+        "type" : "object",
+        "properties" : {
+          "activeKeyVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "lastCounter" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lastTapAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "pendingExported" : {
+            "type" : "boolean"
+          },
+          "pendingKeyVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "tapsLast7Days" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "uid" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TapEvent" : {
+        "type" : "object",
+        "properties" : {
+          "counter" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "counterGap" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "outcome" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string"
+          },
+          "stage" : {
+            "type" : "string"
           }
         }
       },

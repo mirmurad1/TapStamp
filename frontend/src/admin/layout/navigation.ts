@@ -2,6 +2,7 @@ import {
   Building2,
   ClipboardList,
   LayoutDashboard,
+  Nfc,
   Settings,
   ShieldCheck,
   UserCog,
@@ -17,6 +18,7 @@ export type AdminSection =
   | 'customers'
   | 'staffConsole'
   | 'team'
+  | 'tags'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -38,6 +40,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'customers', to: '/customers', icon: Users, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'staffConsole', to: '/staff-console', icon: ClipboardList, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
   { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
+  { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },

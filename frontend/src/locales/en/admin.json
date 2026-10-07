@@ -14,7 +14,8 @@
     "team": "Team",
     "account": "My account",
     "tenants": "Companies",
-    "simulator": "NFC simulator"
+    "simulator": "NFC simulator",
+    "tags": "NFC tags"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -454,5 +455,87 @@
       "COOLDOWN_HAMMERING": "Many attempts during cooldown",
       "BINDING_MISMATCH": "Link opened on another device"
     }
+  },
+  "tags": {
+    "title": "NFC tags",
+    "subtitle": "Counter tags: registration, keys, deactivation and tap log.",
+    "empty": "No tags registered yet.",
+    "status": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "simulated": "Simulator",
+    "keys": "Keys",
+    "activeKey": "Active: v{{version}}",
+    "notActivated": "Not activated yet",
+    "pendingKey": "New key v{{version}} — package not downloaded",
+    "pendingExported": "New key v{{version}} — waiting for the first tap",
+    "lastTap": "Last tap",
+    "taps7d_one": "{{count}} tap in the last 7 days",
+    "taps7d_other": "{{count}} taps in the last 7 days",
+    "actions": {
+      "events": "Log",
+      "package": "Provisioning package",
+      "rotate": "Rotate keys",
+      "disable": "Disable",
+      "enable": "Enable"
+    },
+    "confirm": {
+      "disable": "Disable \"{{label}}\"? All taps on this tag will be rejected immediately.",
+      "rotate": "Create new keys for \"{{label}}\"? The old key keeps working until the tag is reprogrammed with the new keys."
+    },
+    "register": {
+      "open": "Add tag",
+      "title": "New NFC tag",
+      "description": "The server creates 3 random keys. Then download the provisioning package and program the tag; the first tap activates it.",
+      "uid": "UID",
+      "uidHint": "7 bytes, 14 hex characters (e.g. 04:A1:B2:C3:D4:E5:F6).",
+      "label": "Label",
+      "labelHint": "For example, \"Counter 1\".",
+      "submit": "Register",
+      "invalid": "Check the UID (14 hex characters), the label and the branch."
+    },
+    "package": {
+      "title": "Provisioning package: {{uid}} (v{{version}})",
+      "description": "Use this data to program the tag with NXP TagXplorer and an NFC reader (see docs/nfc-ntag424-programming.md).",
+      "once": "The keys are shown only now and will never be shown again. Keep the file safe and delete it after programming.",
+      "download": "Download JSON"
+    },
+    "events": {
+      "title": "\"{{label}}\" — tap log",
+      "description": "Last 100 attempts: accepted and rejected, with reasons.",
+      "empty": "No taps yet.",
+      "outcome": {
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected"
+      },
+      "stage": {
+        "VERIFY": "Tag check",
+        "CLAIM": "Stamp claim"
+      }
+    },
+    "simulatorKey": "Simulator key (dev only)"
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who did what and when. The log cannot be changed or deleted.",
+    "filters": {
+      "action": "Action",
+      "from": "From",
+      "to": "To"
+    },
+    "columns": {
+      "time": "Time",
+      "actor": "Actor",
+      "action": "Action",
+      "details": "Details"
+    },
+    "actorType": {
+      "STAFF": "Staff",
+      "CUSTOMER": "Customer",
+      "PLATFORM": "Platform",
+      "SYSTEM": "System"
+    },
+    "empty": "No entries found."
   }
 }

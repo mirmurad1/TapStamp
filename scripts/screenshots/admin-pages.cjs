@@ -13,6 +13,8 @@ const PAGES = [
   ['01-dashboard', '/admin', 'Ən sıx saatlar', true],
   ['02-dashboard-mobile', '/admin', 'Ən sıx saatlar', false, { width: 390, height: 844 }],
   ['03-customers', '/admin/customers', 'Son gəliş', false],
+  ['06-tags', '/admin/tags', 'Son toxunuş', true],
+  ['07-audit', '/admin/audit', 'İcraçı', false],
 ];
 
 function totp(step) {

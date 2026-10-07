@@ -25,7 +25,11 @@ describe('lokallaşdırılmış formatlar', () => {
   it('nisbi vaxt 3 dildə', () => {
     const now = '2026-10-06T12:00:00Z';
     const threeDaysAgo = '2026-10-03T12:00:00Z';
-    expect(formatRelative(threeDaysAgo, 'az', now)).toBe('3 gün öncə');
+    // az əl ilə qurulur (Edge-in ICU-sunda az məlumatı yoxdur)
+    expect(formatRelative(threeDaysAgo, 'az', now)).toBe('3 gün əvvəl');
+    expect(formatRelative('2026-10-06T11:16:00Z', 'az', now)).toBe('44 dəqiqə əvvəl');
+    expect(formatRelative('2026-10-05T12:00:00Z', 'az', now)).toBe('dünən');
+    expect(formatRelative('2026-10-06T11:59:50Z', 'az', now)).toBe('indicə');
     expect(formatRelative(threeDaysAgo, 'en', now)).toBe('3 days ago');
     expect(formatRelative(threeDaysAgo, 'ru', now)).toBe('3 дня назад');
   });

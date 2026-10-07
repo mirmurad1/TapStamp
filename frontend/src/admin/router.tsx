@@ -4,6 +4,7 @@ import { RequireActive, RequireState } from './auth/guards';
 import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
+import { AuditPage } from './pages/audit/AuditPage';
 import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -12,12 +13,12 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { MfaPage } from './pages/auth/MfaPage';
 import { MfaSetupPage } from './pages/auth/MfaSetupPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { SimulatorPage } from './pages/dev/SimulatorPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
+import { TagsPage } from './pages/tags/TagsPage';
 import { TeamPage } from './pages/team/TeamPage';
 import { HomePage, NotFound, RequireRole, RequireScope, RouteError } from './routes/RouteElements';
 
@@ -63,13 +64,14 @@ export const adminRouter = createBrowserRouter(
                         { path: 'team', element: <TeamPage /> },
                         { path: 'customers', element: <CustomersPage /> },
                         { path: 'customers/:customerId', element: <CustomerDetailPage /> },
+                        { path: 'tags', element: <TagsPage /> },
                       ],
                     },
                     {
                       element: <RequireRole roles={['COMPANY_OWNER']} />,
                       children: [
                         { path: 'settings/*', element: <SettingsPage /> },
-                        { path: 'audit/*', element: <PlaceholderPage section="audit" /> },
+                        { path: 'audit', element: <AuditPage /> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

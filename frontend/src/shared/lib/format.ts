@@ -63,9 +63,49 @@ const RELATIVE_UNITS: ReadonlyArray<[Intl.RelativeTimeFormatUnit, number]> = [
   ['second', 1],
 ];
 
+const AZ_UNITS: Readonly<Record<Intl.RelativeTimeFormatUnit, string>> = {
+  year: 'il',
+  years: 'il',
+  quarter: 'rüb',
+  quarters: 'rüb',
+  month: 'ay',
+  months: 'ay',
+  week: 'həftə',
+  weeks: 'həftə',
+  day: 'gün',
+  days: 'gün',
+  hour: 'saat',
+  hours: 'saat',
+  minute: 'dəqiqə',
+  minutes: 'dəqiqə',
+  second: 'saniyə',
+  seconds: 'saniyə',
+};
+
+/** Azərbaycan dili üçün nisbi vaxt əl ilə (Edge/Chromium ICU-da az məlumatı yoxdur: "-1 h" göstərir). */
+function azRelative(amount: number, unit: Intl.RelativeTimeFormatUnit): string {
+  if (unit === 'second' && Math.abs(amount) < 45) {
+    return 'indicə';
+  }
+  if (unit === 'day' && amount === -1) {
+    return 'dünən';
+  }
+  if (unit === 'day' && amount === 1) {
+    return 'sabah';
+  }
+  return amount < 0 ? `${-amount} ${AZ_UNITS[unit]} əvvəl` : `${amount} ${AZ_UNITS[unit]} sonra`;
+}
+
 /** Nisbi vaxt: "3 gün əvvəl" / "3 days ago" / "3 дня назад". */
 export function formatRelative(value: DateInput, lang: Language, now: DateInput = Date.now()): string {
   const diffSeconds = Math.round((toDate(value).getTime() - toDate(now).getTime()) / 1000);
+  if (lang === 'az') {
+    for (const [unit, seconds] of RELATIVE_UNITS) {
+      if (Math.abs(diffSeconds) >= seconds || unit === 'second') {
+        return azRelative(Math.round(diffSeconds / seconds), unit);
+      }
+    }
+  }
   const formatter = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
   for (const [unit, seconds] of RELATIVE_UNITS) {
     if (Math.abs(diffSeconds) >= seconds || unit === 'second') {

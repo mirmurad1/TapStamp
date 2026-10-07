@@ -51,3 +51,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase7-03-customers.png` | Admin: müştərilər — axtarış, filtrlər, sıralama |
 | `phase7-04-customer-detail.png` | Müştərinin detalları: göstəricilər, tarixçə, fırıldaq işarələri |
 | `phase7-05-customer-adjust.png` | Möhürlərin əl ilə düzəlişi (səbəb məcburi) |
+| `phase7-06-tags.png` | Admin: NFC çipləri — açar vəziyyəti, son toxunuş, jurnal, rotasiya |
+| `phase7-07-audit.png` | Admin: audit jurnalı |

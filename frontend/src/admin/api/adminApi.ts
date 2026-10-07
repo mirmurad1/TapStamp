@@ -320,3 +320,28 @@ export const customersApi = {
   exportCsv: (query: CustomerFilter) =>
     unwrap(api.POST('/api/v1/admin/customers/export', { params: { query }, parseAs: 'blob' })) as Promise<Blob>,
 };
+
+export type NfcTag = Schemas['TagView'];
+export type TapEvent = Schemas['TapEvent'];
+export type ProvisioningPackage = Schemas['ProvisioningPackage'];
+export type AuditEntry = Schemas['Entry'];
+
+/** NFC çipləri: sahib idarə edir, menecer baxır. Rotasiya və provisioning paketi step-up tələb edir. */
+export const tagsApi = {
+  list: () => unwrap(api.GET('/api/v1/admin/tags')),
+  register: (body: { uid: string; branchId: string; label: string }) => unwrap(api.POST('/api/v1/admin/tags', { body })),
+  update: (tagId: string, body: { label?: string; branchId?: string }) =>
+    unwrap(api.PATCH('/api/v1/admin/tags/{tagId}', { params: { path: { tagId } }, body })),
+  disable: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/disable', { params: { path: { tagId } } })),
+  enable: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/enable', { params: { path: { tagId } } })),
+  rotate: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/key-rotations', { params: { path: { tagId } } })),
+  provisioningPackage: (tagId: string) =>
+    unwrap(api.POST('/api/v1/admin/tags/{tagId}/provisioning-package', { params: { path: { tagId } } })),
+  events: (tagId: string) => unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId } } })),
+};
+
+export const auditApi = {
+  list: (query: { action?: string; from?: string; to?: string; before?: string }) =>
+    unwrap(api.GET('/api/v1/admin/audit-logs', { params: { query } })),
+  actions: () => unwrap(api.GET('/api/v1/admin/audit-logs/actions')),
+};
