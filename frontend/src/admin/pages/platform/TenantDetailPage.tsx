@@ -17,6 +17,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { useConfirm } from '@/shared/ui/ConfirmProvider';
 
 import { platformApi, type Tenant, type TenantOwner } from '../../api/adminApi';
 import { useStepUp } from '../../auth/StepUpProvider';
@@ -68,6 +69,7 @@ function TenantHeader({ tenant, onNotice }: { tenant: Tenant; onNotice: (message
   const withStepUp = useStepUp();
   const lang = currentLanguage();
   const suspended = tenant.status === 'SUSPENDED';
+  const confirm = useConfirm();
   const toggle = useMutation({
     mutationFn: () => withStepUp(() => platformApi.updateStatus(tenant.id ?? '', suspended ? 'ACTIVE' : 'SUSPENDED')),
     onSuccess: (updated) => {
@@ -78,9 +80,11 @@ function TenantHeader({ tenant, onNotice }: { tenant: Tenant; onNotice: (message
   });
 
   const onToggle = () => {
-    if (suspended || window.confirm(t('platform.detail.suspendConfirm'))) {
+    if (suspended) {
       toggle.mutate();
+      return;
     }
+    void confirm({ message: t('platform.detail.suspendConfirm'), danger: true }).then((ok) => ok && toggle.mutate());
   };
 
   return (
@@ -166,6 +170,7 @@ function OwnersCard({ tenantId, onNotice }: { tenantId: string; onNotice: (messa
       onNotice(t('admin:platform.detail.invited'));
     },
   });
+  const confirm = useConfirm();
   const resetMfa = useMutation({
     mutationFn: (owner: TenantOwner) => withStepUp(() => platformApi.resetOwnerMfa(tenantId, owner.id ?? '')),
     onSuccess: () => {
@@ -205,9 +210,9 @@ function OwnersCard({ tenantId, onNotice }: { tenantId: string; onNotice: (messa
                       size="sm"
                       disabled={resetMfa.isPending}
                       onClick={() => {
-                        if (window.confirm(t('admin:platform.detail.resetMfaConfirm', { name }))) {
-                          resetMfa.mutate(owner);
-                        }
+                        void confirm({ message: t('admin:platform.detail.resetMfaConfirm', { name }), danger: true }).then(
+                          (ok) => ok && resetMfa.mutate(owner),
+                        );
                       }}
                     >
                       {t('admin:platform.detail.resetMfa')}

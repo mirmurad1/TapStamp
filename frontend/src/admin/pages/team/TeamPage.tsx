@@ -24,6 +24,7 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
+import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Input, Select } from '@/shared/ui/input';
 
 import { contextApi, teamApi, type Member } from '../../api/adminApi';
@@ -91,10 +92,9 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
     },
   });
 
+  const confirm = useConfirm();
   const confirmAndRun = (message: string, action: () => void) => {
-    if (window.confirm(message)) {
-      action();
-    }
+    void confirm({ message, danger: true }).then((ok) => ok && action());
   };
 
   return (

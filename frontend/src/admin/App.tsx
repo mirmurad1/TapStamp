@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { RouterProvider } from 'react-router';
 
+import { ConfirmProvider } from '@/shared/ui/ConfirmProvider';
+
 import { AdminAuthProvider } from './auth/AdminAuthProvider';
 import { FullPageError, FullPageLoading } from './components/FullPageState';
 import { adminRouter } from './router';
@@ -13,7 +15,9 @@ export function App() {
       loading={<FullPageLoading />}
       renderError={(retry) => <FullPageError message={t('NETWORK_ERROR')} onRetry={retry} />}
     >
-      <RouterProvider router={adminRouter} />
+      <ConfirmProvider>
+        <RouterProvider router={adminRouter} />
+      </ConfirmProvider>
     </AdminAuthProvider>
   );
 }

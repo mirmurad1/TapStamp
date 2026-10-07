@@ -7,6 +7,7 @@ import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
+import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Input } from '@/shared/ui/input';
 
 import { settingsApi, type RewardSettings, type StampPolicy } from '../../api/adminApi';
@@ -112,6 +113,7 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
   const [nameRu, setNameRu] = useState(initial?.rewardName?.ru ?? '');
   const [validity, setValidity] = useState(initial?.validityDays ? String(initial.validityDays) : '');
   const [issued, setIssued] = useState<number>();
+  const confirm = useConfirm();
   const save = useMutation({
     mutationFn: () =>
       settingsApi.updateRewardRule({
@@ -125,11 +127,11 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
       void queryClient.invalidateQueries({ queryKey: ['public-company'] });
     },
   });
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     const lowered = initial?.stampsRequired !== undefined && Number(stamps) < initial.stampsRequired;
     // Hədd azaldılırsa, kartı artıq dolmuş müştərilərə hədiyyə kartı dərhal veriləcək — təsdiq istənilir
-    if (lowered && !window.confirm(t('admin:settings.reward.confirm', { count: Number(stamps) }))) {
+    if (lowered && !(await confirm({ message: t('admin:settings.reward.confirm', { count: Number(stamps) }) }))) {
       return;
     }
     save.mutate();
@@ -144,7 +146,7 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
         <CardDescription>{t('admin:settings.reward.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="flex flex-col gap-4" onSubmit={submit}>
+        <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
           {save.isSuccess ? (
             <Alert tone="success">
               {t('admin:settings.saved')}

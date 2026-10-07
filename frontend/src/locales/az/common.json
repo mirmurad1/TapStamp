@@ -52,5 +52,8 @@
     "slug": "Kiçik latın hərfi ilə başlamalı, yalnız kiçik hərf, rəqəm və alt xətt olmalıdır (2–31 simvol).",
     "domain": "Düzgün domen daxil edin, məs. moyka.mockcoffe.com.",
     "tooLong": "Mətn çox uzundur."
+  },
+  "confirm": {
+    "title": "Təsdiq edin"
   }
 }

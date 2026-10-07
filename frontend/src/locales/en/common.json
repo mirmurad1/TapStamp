@@ -52,5 +52,8 @@
     "slug": "Must start with a lowercase letter and contain only lowercase letters, digits and underscores (2–31 characters).",
     "domain": "Enter a valid domain, e.g. moyka.mockcoffe.com.",
     "tooLong": "The text is too long."
+  },
+  "confirm": {
+    "title": "Please confirm"
   }
 }

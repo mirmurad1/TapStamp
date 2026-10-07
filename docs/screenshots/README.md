@@ -38,3 +38,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase6-04-customer-redeemed.png` | Müştərinin ekranı: "Hədiyyəniz təhvil verildi!" |
 | `phase6-05-staff-gift-card-used.png` | Eyni kod ikinci dəfə: "İstifadə olunub" (tarix, filial) |
 | `phase6-06-customer-gift-card-history.png` | Müştəri: hədiyyə kartları tarixçəsi |
+| `phase6-08-admin-settings.png` | Admin: Parametrlər (yenilənmiş) |
+| `phase6-09-admin-confirm-dialog.png` | Tətbiqin öz təsdiq dialoqu (brauzerin `confirm` pəncərəsi əvəzinə) |

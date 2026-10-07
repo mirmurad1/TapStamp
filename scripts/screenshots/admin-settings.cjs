@@ -32,6 +32,14 @@ function totp(secret, offset = 0) {
   await page.goto('https://mockcoffee.localhost/admin/settings');
   await page.getByLabel('Hədiyyə üçün lazım olan möhür sayı').waitFor();
   await page.screenshot({ path: `${out}/${prefix}-08-admin-settings.png`, fullPage: true });
+  // Möhür sayını azaltmaq — tətbiqin öz təsdiq dialoqu (brauzerin confirm pəncərəsi yox); Ləğv et ilə heç nə dəyişmir
+  const stamps = page.getByLabel('Hədiyyə üçün lazım olan möhür sayı');
+  await stamps.fill(String(Math.max(1, Number(await stamps.inputValue()) - 1)));
+  await page.locator('form:has(#stamps-required) button[type="submit"]').click();
+  await page.getByRole('dialog').waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${out}/${prefix}-09-admin-confirm-dialog.png` });
+  await page.getByRole('button', { name: 'Ləğv et' }).click();
   await browser.close();
   console.log('done');
 })().catch((e) => {
