@@ -7,9 +7,9 @@ const badgeVariants = cva('inline-flex items-center rounded-full px-2.5 py-0.5 t
   variants: {
     tone: {
       neutral: 'bg-muted text-muted-foreground',
-      success: 'bg-success/15 text-success',
+      success: 'bg-success/15 text-[var(--success-ink)]',
       warning: 'bg-accent/20 text-foreground',
-      danger: 'bg-destructive/15 text-destructive',
+      danger: 'bg-destructive/15 text-[var(--destructive-ink)]',
     },
   },
   defaultVariants: { tone: 'neutral' },

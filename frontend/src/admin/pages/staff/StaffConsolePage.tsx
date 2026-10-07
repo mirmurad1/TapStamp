@@ -90,7 +90,7 @@ function PendingStamps({ branchId }: { branchId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Hourglass className="size-5 text-highlight" aria-hidden="true" />
+          <Hourglass className="size-5 text-[var(--highlight-ink)]" aria-hidden="true" />
           {t('staffConsole.pending.title')}
         </CardTitle>
       </CardHeader>

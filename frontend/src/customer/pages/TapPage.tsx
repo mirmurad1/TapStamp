@@ -163,7 +163,7 @@ export function TapError({ error, message }: { error?: unknown; message?: string
   return (
     <Card className="animate-fade-up">
       <CardHeader className="items-center text-center">
-        <span className="mb-2 grid size-16 place-items-center rounded-full bg-muted text-highlight">
+        <span className="mb-2 grid size-16 place-items-center rounded-full bg-muted text-[var(--highlight-ink)]">
           {cooldown ? <TimerReset className="size-8" aria-hidden="true" /> : <TriangleAlert className="size-8" aria-hidden="true" />}
         </span>
         <CardTitle>{t('tap.errorTitle')}</CardTitle>

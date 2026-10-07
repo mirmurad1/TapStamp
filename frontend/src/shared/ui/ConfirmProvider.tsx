@@ -64,7 +64,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <TriangleAlert
-                  className={cn('size-5 shrink-0', options.danger ? 'text-destructive' : 'text-highlight')}
+                  className={cn('size-5 shrink-0', options.danger ? 'text-destructive' : 'text-[var(--highlight-ink)]')}
                   aria-hidden="true"
                 />
                 {options.title ?? t('confirm.title')}

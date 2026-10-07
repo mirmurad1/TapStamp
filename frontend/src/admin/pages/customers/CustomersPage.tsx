@@ -180,7 +180,7 @@ export function CustomersPage() {
           ) : null}
 
           {data && (data.items?.length ?? 0) > 0 ? (
-            <div className="-mx-5 overflow-x-auto sm:-mx-6">
+            <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[52rem] text-left text-sm">
                 <thead className="border-b border-border text-xs tracking-wide text-muted-foreground">
                   <tr>

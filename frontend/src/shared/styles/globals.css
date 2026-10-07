@@ -14,15 +14,20 @@
   --card-foreground: #161a33;
   --muted: #eef0f7;
   --muted-foreground: #5b6280;
-  --primary: #6d28d9;
-  --primary-foreground: #ffffff;
+  /* Müştəri tətbiqində şirkətin rəngi (applyBrandColor --brand-* dəyişənlərini yazır) */
+  --primary: var(--brand-light, #6d28d9);
+  --primary-foreground: var(--brand-light-foreground, #ffffff);
   --accent: #ec4899;
   --accent-foreground: #ffffff;
   --highlight: #f59e0b;
   --success: #15803d;
+  /* Rəngli nişanlarda (badge) mətn — açıq fonda daha tünd ki, kontrast AA olsun */
+  --success-ink: #166534;
+  --destructive-ink: #b91c1c;
+  --highlight-ink: #b45309;
   --destructive: #dc2626;
   --border: #e3e6f0;
-  --ring: #8b5cf6;
+  --ring: var(--brand-light, #8b5cf6);
   --radius: 1.25rem;
   color-scheme: light;
 }
@@ -34,15 +39,18 @@
   --card-foreground: #eef0fb;
   --muted: #232842;
   --muted-foreground: #a7adc8;
-  --primary: #a78bfa;
-  --primary-foreground: #120a2a;
+  --primary: var(--brand-dark, #a78bfa);
+  --primary-foreground: var(--brand-dark-foreground, #120a2a);
   --accent: #f472b6;
   --accent-foreground: #1a0b14;
   --highlight: #fbbf24;
   --success: #4ade80;
+  --success-ink: #4ade80;
+  --destructive-ink: #f87171;
+  --highlight-ink: #fbbf24;
   --destructive: #f87171;
   --border: #2b3150;
-  --ring: #a78bfa;
+  --ring: var(--brand-dark, #a78bfa);
   color-scheme: dark;
 }
 

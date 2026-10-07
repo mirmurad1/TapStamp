@@ -365,7 +365,7 @@ function FraudFlags({ customerId }: { customerId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ShieldAlert className="size-5 text-highlight" aria-hidden="true" />
+          <ShieldAlert className="size-5 text-[var(--highlight-ink)]" aria-hidden="true" />
           {t('admin:customers.flagsTitle')}
         </CardTitle>
       </CardHeader>

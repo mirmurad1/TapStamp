@@ -40,7 +40,7 @@ export function TenantsPage() {
           {tenants.isPending ? <InlineLoading /> : null}
           {tenants.data?.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}
           {tenants.data && tenants.data.length > 0 ? (
-            <div className="-mx-5 overflow-x-auto sm:-mx-6">
+            <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[36rem] text-left text-sm">
                 <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>

@@ -103,3 +103,17 @@ export async function registerFromTap(page: Page, tapUrl: string, name: string):
 export async function phoneContext(browser: Browser) {
   return browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, locale: 'az-AZ' });
 }
+
+/** Yeni müştərinin birbaşa giriş səhifəsindən qeydiyyatı (toxunuşsuz). */
+export async function customerSignUp(page: Page, name: string): Promise<void> {
+  await page.goto('/login');
+  const number = uniquePhone();
+  await page.getByLabel('Telefon nömrəsi').fill(number);
+  await page.getByRole('button', { name: 'Kod göndər' }).click();
+  await page.getByLabel('Təsdiq kodu').fill(await latestSmsCode(page.context().request, number));
+  await page.getByRole('button', { name: 'Təsdiqlə' }).click();
+  await page.getByLabel('Adınız').fill(name);
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Qeydiyyatı tamamla' }).click();
+  await page.waitForURL((url) => !url.pathname.startsWith('/login') && !url.pathname.startsWith('/register'));
+}

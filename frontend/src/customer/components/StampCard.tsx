@@ -124,7 +124,7 @@ function StampSlot({ filled, waiting, fresh, delay }: { filled: boolean; waiting
       <span
         role="img"
         aria-label={t('card.pending', { count: 1 })}
-        className="grid size-12 place-items-center rounded-full border-2 border-dashed border-highlight text-highlight"
+        className="grid size-12 place-items-center rounded-full border-2 border-dashed border-highlight text-[var(--highlight-ink)]"
       >
         <Hourglass className="size-5" aria-hidden="true" />
       </span>

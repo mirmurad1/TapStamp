@@ -70,7 +70,7 @@ export function Celebration({ open, rewardName, onClose }: CelebrationProps) {
             <Gift className="animate-gift-bounce size-12" aria-hidden="true" />
           </div>
           <DialogTitle className="flex items-center justify-center gap-2 text-3xl font-bold">
-            <PartyPopper className="size-7 text-highlight" aria-hidden="true" />
+            <PartyPopper className="size-7 text-[var(--highlight-ink)]" aria-hidden="true" />
             {t('celebrate.title')}
           </DialogTitle>
           <DialogDescription className="text-base text-foreground">

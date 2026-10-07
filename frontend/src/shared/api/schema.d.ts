@@ -2091,6 +2091,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/icons/{name}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tətbiqin ikonu
+         * @description 180, 192, 512 və ya maskable-512 (Android adaptiv ikon).
+         */
+        get: operations["icon"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/legal": {
         parameters: {
             query?: never;
@@ -2165,6 +2185,26 @@ export interface paths {
          * @description Token 60 saniyə etibarlıdır, birdəfəlikdir və toxunuşun edildiyi brauzerə bağlıdır (`TAP_BINDING_MISMATCH`). Eyni müştəri təkrar göndərsə eyni nəticə qaytarılır (idempotent), başqa müştəri `TAP_TOKEN_USED` alır. Qaydalar: `STAMP_COOLDOWN_ACTIVE`, `STAMP_DAILY_LIMIT_REACHED` (hər ikisində `retryAfterSeconds`), `OUTSIDE_BUSINESS_HOURS`.
          */
         post: operations["claim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/manifest.webmanifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin PWA manifesti
+         * @description Ad şirkətin standart dilində, rəng — brend rəngi.
+         */
+        get: operations["manifest"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5683,6 +5723,28 @@ export interface operations {
             };
         };
     };
+    icon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+        };
+    };
     list_3: {
         parameters: {
             query?: never;
@@ -5765,6 +5827,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClaimResponse"];
+                };
+            };
+        };
+    };
+    manifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/manifest+json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

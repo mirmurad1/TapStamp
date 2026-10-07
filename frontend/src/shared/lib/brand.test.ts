@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyBrandColor, formatCountdown, readableForeground } from './brand';
+import { applyBrandColor, contrastRatio, formatCountdown, readableForeground } from './brand';
 
 describe('brend rəngi', () => {
   it('kontrasta görə mətn rəngi seçir', () => {
@@ -13,10 +13,16 @@ describe('brend rəngi', () => {
   it('düzgün rəngi tətbiq edir, yanlışı nəzərə almır', () => {
     const root = document.createElement('div');
     applyBrandColor('url(javascript:alert(1))', root);
-    expect(root.style.getPropertyValue('--primary')).toBe('');
+    expect(root.style.getPropertyValue('--brand-light')).toBe('');
+    // Tünd rəng açıq rejimdə olduğu kimi qalır, qaranlıq rejim üçün açılır
+    applyBrandColor('#6D28D9', root);
+    expect(root.style.getPropertyValue('--brand-light')).toBe('#6d28d9');
+    expect(root.style.getPropertyValue('--brand-light-foreground')).toBe('#ffffff');
+    expect(contrastRatio(root.style.getPropertyValue('--brand-dark'), '#181c33')).toBeGreaterThanOrEqual(4.5);
+    // Açıq göy rəng açıq fonda oxunmur — tündləşdirilir
     applyBrandColor('#0EA5E9', root);
-    expect(root.style.getPropertyValue('--primary')).toBe('#0EA5E9');
-    expect(root.style.getPropertyValue('--primary-foreground')).toBe('#111827');
+    expect(contrastRatio(root.style.getPropertyValue('--brand-light'), '#ffffff')).toBeGreaterThanOrEqual(4.5);
+    expect(root.style.getPropertyValue('--brand-dark')).toBe('#0ea5e9');
   });
 
   it('geri sayımı formatlayır', () => {

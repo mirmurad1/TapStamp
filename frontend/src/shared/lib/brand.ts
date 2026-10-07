@@ -19,14 +19,58 @@ export function readableForeground(hex: string): '#ffffff' | '#111827' {
   return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05 ? '#ffffff' : '#111827';
 }
 
-/** Brend rəngini CSS dəyişənlərinə yazır; yanlış dəyər nəzərə alınmır (standart tema qalır). */
+function luminance(hex: string): number {
+  const value = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [(value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff].map((channel) => {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
+}
+
+/** WCAG kontrast nisbəti (1–21). */
+export function contrastRatio(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return ((hi ?? 0) + 0.05) / ((lo ?? 0) + 0.05);
+}
+
+function mix(hex: string, target: string, amount: number): string {
+  const from = parseInt(hex.slice(1), 16);
+  const to = parseInt(target.slice(1), 16);
+  const channel = (shift: number) =>
+    Math.round(((from >> shift) & 0xff) + ((((to >> shift) & 0xff) - ((from >> shift) & 0xff)) * amount));
+  return `#${[16, 8, 0].map((shift) => channel(shift).toString(16).padStart(2, '0')).join('')}`;
+}
+
+/** Rəngi səthlər üzərində oxunaqlı edir (kontrast ≥ 4.5): lazım olduqca tündləşdirir və ya açır. */
+function readableOn(hex: string, surfaces: string[], towards: string): string {
+  for (let amount = 0; amount <= 1; amount += 0.05) {
+    const candidate = amount === 0 ? hex.toLowerCase() : mix(hex, towards, amount);
+    if (surfaces.every((surface) => contrastRatio(candidate, surface) >= 4.5)) {
+      return candidate;
+    }
+  }
+  return towards;
+}
+
+const LIGHT_SURFACES = ['#ffffff', '#f6f7fb'];
+const DARK_SURFACES = ['#181c33', '#0f1222'];
+
+/**
+ * Brend rəngini CSS dəyişənlərinə yazır; yanlış dəyər nəzərə alınmır (standart tema qalır). Açıq və qaranlıq rejim
+ * üçün ayrıca variant hesablanır: şirkətin rəngi fona qarşı zəif görünürsə (məs. açıq sarı və ya qaranlıq rejimdə
+ * tünd qırmızı), rəng tonunu saxlayaraq tündləşdirilir və ya açılır ki, mətn və düymələr oxunaqlı olsun (WCAG AA).
+ */
 export function applyBrandColor(hex: string | undefined, root: HTMLElement = document.documentElement): void {
   if (!hex || !HEX.test(hex)) {
     return;
   }
-  root.style.setProperty('--primary', hex);
-  root.style.setProperty('--ring', hex);
-  root.style.setProperty('--primary-foreground', readableForeground(hex));
+  const light = readableOn(hex, LIGHT_SURFACES, '#000000');
+  const dark = readableOn(hex, DARK_SURFACES, '#ffffff');
+  root.style.setProperty('--brand-light', light);
+  root.style.setProperty('--brand-light-foreground', readableForeground(light));
+  root.style.setProperty('--brand-dark', dark);
+  root.style.setProperty('--brand-dark-foreground', readableForeground(dark));
 }
 
 /** Saniyəni geri sayım formatına çevirir: 75 → "1:15", 3725 → "1:02:05". */

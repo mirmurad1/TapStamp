@@ -61,7 +61,7 @@ function Profile({ me }: { me: Me }) {
       <SwitchNumber />
       {card?.pendingStamps ? (
         <p className="flex items-center gap-2 rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
-          <Hourglass className="size-5 shrink-0 text-highlight" aria-hidden="true" />
+          <Hourglass className="size-5 shrink-0 text-[var(--highlight-ink)]" aria-hidden="true" />
           {t('card.pending', { count: card.pendingStamps })}
         </p>
       ) : null}

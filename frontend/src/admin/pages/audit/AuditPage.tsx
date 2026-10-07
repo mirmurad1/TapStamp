@@ -66,7 +66,7 @@ export function AuditPage() {
           {entries.isPending ? <InlineLoading /> : null}
           {entries.data && items.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">{t('admin:audit.empty')}</p> : null}
           {items.length > 0 ? (
-            <div className="-mx-5 overflow-x-auto sm:-mx-6">
+            <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[48rem] text-left text-sm">
                 <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>

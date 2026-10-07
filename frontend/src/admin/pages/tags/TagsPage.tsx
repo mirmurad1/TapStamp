@@ -108,7 +108,7 @@ export function TagsPage() {
                           ? t('admin:tags.activeKey', { version: tag.activeKeyVersion })
                           : t('admin:tags.notActivated')}
                       {tag.pendingKeyVersion ? (
-                        <span className="block text-xs text-highlight">
+                        <span className="block text-xs text-[var(--highlight-ink)]">
                           {tag.pendingExported
                             ? t('admin:tags.pendingExported', { version: tag.pendingKeyVersion })
                             : t('admin:tags.pendingKey', { version: tag.pendingKeyVersion })}

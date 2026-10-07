@@ -3396,6 +3396,35 @@
         "tags" : [ "Kafe" ]
       }
     },
+    "/api/v1/public/icons/{name}.png" : {
+      "get" : {
+        "description" : "180, 192, 512 və ya maskable-512 (Android adaptiv ikon).",
+        "operationId" : "icon",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "image/png" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Tətbiqin ikonu",
+        "tags" : [ "İctimai: PWA" ]
+      }
+    },
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
@@ -3501,6 +3530,27 @@
         },
         "summary" : "Toxunuşa görə möhür",
         "tags" : [ "Toxunuş (NFC)" ]
+      }
+    },
+    "/manifest.webmanifest" : {
+      "get" : {
+        "description" : "Ad şirkətin standart dilində, rəng — brend rəngi.",
+        "operationId" : "manifest",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/manifest+json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : { }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin PWA manifesti",
+        "tags" : [ "İctimai: PWA" ]
       }
     },
     "/t/{uid}" : {

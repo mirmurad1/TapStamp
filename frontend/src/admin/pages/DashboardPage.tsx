@@ -176,7 +176,7 @@ function Analytics() {
       </Card>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+        <Card className="min-w-0 xl:col-span-2">
           <CardHeader>
             <CardTitle>{t('admin:dashboard.heatmap.title')}</CardTitle>
             <CardDescription>{t('admin:dashboard.heatmap.description')}</CardDescription>
@@ -302,7 +302,7 @@ function Heatmap({ cells }: { cells: HeatCell[] }) {
     return <p className="text-sm text-muted-foreground">{t('dashboard.empty')}</p>;
   }
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0}>
       <table className="w-full min-w-[36rem] table-fixed border-separate border-spacing-0.5 text-[10px]">
         <thead>
           <tr>
