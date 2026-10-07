@@ -69,6 +69,9 @@ test('NFC toxunuşu: qonaq qeydiyyatdan keçir, möhür alır, link təkrar işl
 
   // Girişdən sonra toxunuş səhifəsinə qayıdır və möhür avtomatik verilir
   await expect(phone.getByRole('heading', { name: 'Möhür əlavə olundu!' })).toBeVisible();
+  // Animasiyalar bitəndən sonra kart ekranı avtomatik açılır
+  await expect(phone).toHaveURL(/\/$/, { timeout: 10_000 });
+  await expect(phone.getByRole('heading', { name: 'Salam, E2E Müştəri!' })).toBeVisible();
 
   // Eyni imzalı link ikinci dəfə — replay
   await phone.goto(tapUrl);

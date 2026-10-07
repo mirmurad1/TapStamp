@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hourglass, LoaderCircle, MapPin, Nfc, TimerReset, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 
 import { ApiError, isApiError } from '@/shared/api/client';
 import { useErrorMessage } from '@/shared/api/useErrorMessage';
@@ -74,6 +74,7 @@ function Claim({ token, branch }: { token: string; branch: string }) {
   const queryClient = useQueryClient();
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const [celebrate, setCelebrate] = useState(false);
+  const navigate = useNavigate();
   const started = useRef(false);
   const claim = useMutation({
     mutationFn: () => tapApi.claim(token),
@@ -105,17 +106,28 @@ function Claim({ token, branch }: { token: string; branch: string }) {
   return (
     <>
       <ClaimSuccess result={claim.data} branch={branch} />
-      <Celebration open={celebrate} rewardName={rewardName || undefined} onClose={() => setCelebrate(false)} />
+      <Celebration
+        open={celebrate}
+        rewardName={rewardName || undefined}
+        onClose={() => {
+          setCelebrate(false);
+          navigate('/', { replace: true });
+        }}
+      />
     </>
   );
 }
 
 /** Möhür animasiyasının uzunluğu (damğa enir, kağıza vurulur, iz qalır). */
 const STAMP_ANIMATION_MS = 2400;
+/** Möhür animasiyası (~2,4 san) və izin 2D-yə keçidi (~0,7 san) bitəndən bir az sonra kart ekranına keçid. */
+const SUCCESS_REDIRECT_MS = 3800;
+/** Təsdiq gözləyən möhürdə mətni oxumağa vaxt. */
+const PENDING_REDIRECT_MS = 4000;
 
 /**
  * Möhür vurulandan sonrakı ekran: damğa animasiyası, "Möhür əlavə olundu!" və konfeti. Kart və digər bölmələr ana
- * səhifədədir ("Kartıma bax").
+ * səhifədədir: animasiyalar bitəndən sonra ana səhifə (kart) avtomatik açılır.
  */
 function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string }) {
   const { t } = useTranslation('profile');
@@ -123,8 +135,20 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
   const completed = Boolean(result.giftCardId);
   const [impact, setImpact] = useState(false);
 
+  const navigate = useNavigate();
+
   // Damğa masaya dəyən an konfeti başlayır
   const onImpact = useCallback(() => setImpact(true), []);
+
+  // Animasiyalar bitəndən sonra kart ekranı avtomatik açılır (geri düyməsi istifadə olunmuş toxunuşa qaytarmır).
+  // Kart dolubsa, təbrik pəncərəsi açılır — keçid onu bağlayanda olur.
+  useEffect(() => {
+    if (completed) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => navigate('/', { replace: true }), pending ? PENDING_REDIRECT_MS : SUCCESS_REDIRECT_MS);
+    return () => window.clearTimeout(timer);
+  }, [completed, pending, navigate]);
 
   return (
     <div className="flex flex-col items-center gap-6 pt-6 text-center">
@@ -146,9 +170,6 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
           </p>
         ) : null}
       </section>
-      <Button asChild size="lg" className="animate-fade-up w-full" style={pending ? undefined : { animationDelay: '1.75s' }}>
-        <Link to={completed ? '/gift-cards' : '/'}>{completed ? t('celebrate.open') : t('tap.home')}</Link>
-      </Button>
     </div>
   );
 }
