@@ -81,7 +81,7 @@ describe('NFC toxunuşu səhifəsi', () => {
     expect(screen.getAllByRole('link', { name: 'Hədiyyə kartına bax' })[0]).toHaveAttribute('href', '/gift-cards');
     expect(calls.filter((call) => call === 'POST /api/v1/taps/tok-123/claim')).toHaveLength(1);
     // Brend rəngi tətbiq olunub
-    expect(document.documentElement.style.getPropertyValue('--brand-dark')).toBe('#0ea5e9');
+    expect(document.documentElement.style.getPropertyValue('--brand-light')).not.toBe('');
   });
 
   it('qonaq: girişə yönəldilir, toxunuş tokeni ilə', async () => {

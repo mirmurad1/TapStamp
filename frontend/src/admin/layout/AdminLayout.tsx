@@ -7,7 +7,6 @@ import { NavLink, Outlet } from 'react-router';
 import type { Language } from '@/shared/i18n/languages';
 import { cn } from '@/shared/lib/cn';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
-import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { accountApi, simulatorApi } from '../api/adminApi';
 import { useAdminAuth, useMe } from '../auth/AdminAuthProvider';
@@ -81,7 +80,6 @@ export function AdminLayout() {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex flex-wrap items-center justify-end gap-2 border-b border-border px-4 py-3 md:px-8">
             <LanguageSwitcher onSelect={(lang) => saveLanguage.mutate(lang)} />
-            <ThemeToggle />
             <UserMenu />
           </header>
           <main className="flex-1 px-4 py-6 md:px-8">

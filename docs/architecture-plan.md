@@ -242,7 +242,7 @@ cafe-loyalty/
 │       │   ├── i18n/                # init, dil müəyyənləşdirmə, i18next.d.ts (tip təhlükəsizliyi)
 │       │   ├── ui/                  # shadcn/ui komponentləri
 │       │   ├── lib/                 # format.ts (Intl), phone.ts, cn.ts
-│       │   └── styles/              # tema tokenləri (açıq və qaranlıq)
+│       │   └── styles/              # tema tokenləri (yalnız açıq rejim, qərar 40)
 │       └── locales/{az,en,ru}/{common,auth,profile,admin,errors}.json
 ├── e2e/                             # Playwright: playwright.config.ts, tests/, fixtures/
 └── docs/
@@ -1633,8 +1633,9 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 35 | Çip açarları | Qeydiyyatda açarlar PENDING yaranır. Provisioning paketi yalnız bir dəfə yüklənir (`provisioning_exported_at`), yükləmə step-up tələb edir. Rotasiya ixrac olunmamış PENDING dəsti əvəzləyir. İxrac olunmuş dəst varkən rotasiya bloklanır (`TAG_ROTATION_IN_PROGRESS`) | Çipdəki açarlarla serverdəkilərin uyğunsuzluğunun qarşısı alınır. Proqramlaşdırma təlimatı `docs/nfc-ntag424-programming.md`-də |
 | 36 | Domenlər | Domen əlavə etmək step-up tələb etmir. Əsas domeni dəyişmək və domeni silmək step-up tələb edir. Əsas domen silinmir (`DOMAIN_IS_PRIMARY`). Hər dəyişiklikdən sonra host→tenant keşi təmizlənir | Çiplərə yazılmış URL-lər köhnə domenə bağlıdır, ona görə köhnə domen keçid dövründə qalır |
 | 37 | PWA (Mərhələ 8) | Manifest və ikonlar backend-də şirkətə görə yaradılır (Java2D: brend rəngində fon, ağ halqa və ulduz; şrift lazım deyil). Service worker əl ilə yazılıb (Workbox yoxdur): yalnız hash-li statik fayllar və oflayn ekran keşlənir; HTML həmişə şəbəkədən gəlir; `/api`, `/t/`, `/admin` heç vaxt keşlənmir | Möhür və hədiyyə kartı oflayn işləmir. Köhnə keşlənmiş məlumat (məs. istifadə olunmuş kod) göstərmək təhlükəli olardı |
-| 38 | Brend rəngi və kontrast | Şirkətin rəngindən iki variant hesablanır: açıq və qaranlıq rejim üçün (`--brand-light`, `--brand-dark`). Rəng fona qarşı kontrastı 4.5-dən az olana qədər tündləşdirilir və ya açılır. Rəngli nişanlarda mətn üçün ayrıca `*-ink` tokenləri var | WCAG 2.1 AA. Şirkət istənilən rəngi seçə bilər (məs. açıq sarı və ya tünd qırmızı), interfeys yenə oxunaqlı qalır |
-| 39 | Keyfiyyət testləri | Playwright + axe: əsas səhifələr 2 ölçüdə × 2 rejimdə × 3 dildə yoxlanılır (üfüqi daşma və WCAG 2.1 AA). E2E ardıcıl işləyir (`workers: 1`). Dev-də yalnız IP üzrə limitlər artırılıb | Lokalda bütün trafik bir IP-dən gəlir. Dev hesablarının TOTP-si eyni addımda iki dəfə qəbul olunmur |
+| 38 | Brend rəngi və kontrast | Şirkətin rəngi ağ fona qarşı kontrastı 4.5-dən az olarsa, tonu saxlanılaraq tündləşdirilir (`--brand-light`). Rəngli nişanlarda mətn üçün ayrıca `*-ink` tokenləri var | WCAG 2.1 AA. Şirkət istənilən rəngi seçə bilər (məs. açıq sarı), interfeys yenə oxunaqlı qalır |
+| 39 | Keyfiyyət testləri | Playwright + axe: əsas səhifələr 2 ölçüdə × 3 dildə yoxlanılır (üfüqi daşma və WCAG 2.1 AA). E2E ardıcıl işləyir (`workers: 1`). Dev-də yalnız IP üzrə limitlər artırılıb | Lokalda bütün trafik bir IP-dən gəlir. Dev hesablarının TOTP-si eyni addımda iki dəfə qəbul olunmur |
+| 40 | Qaranlıq rejim (istifadəçi qərarı) | Qaranlıq rejim və onun düyməsi bütün tətbiqlərdən (müştəri, admin, platforma) çıxarıldı. Yalnız açıq (ağ) rejim var; brauzerin sistem ayarı nəzərə alınmır | Vahid, sadə görünüş. §13-dəki qaranlıq rejim palitrası və Mərhələ 1/8-dəki "qaranlıq rejim" bəndləri bu qərarla əvəz olunur |
 
 ---
 

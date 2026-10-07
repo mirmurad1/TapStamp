@@ -1,5 +1,5 @@
-// Mərhələ 8: qaranlıq rejim və digər dillər (telefon ölçüsü). Dev mühiti və Edge lazımdır; test müştərisi yaradılır.
-// İstifadə: node scripts/screenshots/themes.cjs [qovluq] [prefiks]
+// Mərhələ 8: telefon ölçüsü, rus dili və admin paneli. Dev mühiti və Edge lazımdır; test müştərisi yaradılır.
+// İstifadə: node scripts/screenshots/phone-and-languages.cjs [qovluq] [prefiks]
 const path = require('path');
 const crypto = require('crypto');
 const root = path.resolve(__dirname, '../..');
@@ -40,16 +40,16 @@ async function signUp(page, request) {
   const browser = await chromium.launch({ channel: 'msedge' });
   const phone = { ignoreHTTPSErrors: true, locale: 'az-AZ', viewport: { width: 390, height: 844 }, isMobile: true };
   try {
-    // Müştəri: qaranlıq rejim
-    const dark = await browser.newContext({ ...phone, colorScheme: 'dark' });
-    const customer = await dark.newPage();
-    await signUp(customer, dark.request);
+    // Müştəri (telefon)
+    const customerContext = await browser.newContext({ ...phone });
+    const customer = await customerContext.newPage();
+    await signUp(customer, customerContext.request);
     await customer.goto(`${base}/`);
     await customer.waitForTimeout(800);
-    await customer.screenshot({ path: `${out}/${prefix}-03-customer-home-dark.png`, fullPage: true });
+    await customer.screenshot({ path: `${out}/${prefix}-03-customer-home.png`, fullPage: true });
     await customer.goto(`${base}/settings`);
     await customer.waitForTimeout(600);
-    await customer.screenshot({ path: `${out}/${prefix}-04-customer-settings-dark.png`, fullPage: true });
+    await customer.screenshot({ path: `${out}/${prefix}-04-customer-settings.png`, fullPage: true });
 
     // Giriş səhifəsi rus dilində
     const ru = await (await browser.newContext(phone)).newPage();
@@ -58,8 +58,8 @@ async function signUp(page, request) {
     await ru.waitForTimeout(400);
     await ru.screenshot({ path: `${out}/${prefix}-05-login-ru.png` });
 
-    // Admin: qaranlıq rejim, telefon və masaüstü
-    const adminContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'az-AZ', viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
+    // Admin: masaüstü və telefon
+    const adminContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'az-AZ', viewport: { width: 1280, height: 900 } });
     const admin = await adminContext.newPage();
     await admin.goto(`${base}/admin/login`);
     await admin.getByLabel('Email').fill('owner@mockcoffee.az');
@@ -73,12 +73,12 @@ async function signUp(page, request) {
     }
     await admin.getByText('Ən sıx saatlar').waitFor();
     await admin.waitForTimeout(800);
-    await admin.screenshot({ path: `${out}/${prefix}-06-dashboard-dark.png`, fullPage: true });
+    await admin.screenshot({ path: `${out}/${prefix}-06-dashboard.png`, fullPage: true });
     await admin.setViewportSize({ width: 375, height: 812 });
     await admin.reload();
     await admin.getByText('Ən sıx saatlar').waitFor();
     await admin.waitForTimeout(800);
-    await admin.screenshot({ path: `${out}/${prefix}-07-dashboard-dark-phone.png`, fullPage: true });
+    await admin.screenshot({ path: `${out}/${prefix}-07-dashboard-phone.png`, fullPage: true });
   } finally {
     await browser.close();
   }

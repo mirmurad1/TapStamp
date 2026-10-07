@@ -10,7 +10,6 @@ import { applyBrandColor } from '@/shared/lib/brand';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
-import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { publicApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
@@ -60,7 +59,6 @@ export function CustomerLayout() {
         <div className="flex shrink-0 items-center gap-1">
           {/* Daxil olmuş müştəri dili Parametrlərdə dəyişir — dar ekranda şirkətin adına yer qalsın */}
           {status === 'signedIn' ? null : <LanguageSwitcher />}
-          <ThemeToggle />
           {status === 'signedIn' ? (
             <Button asChild variant="ghost" size="icon">
               <Link to="/gift-cards" aria-label={t('profile:nav.giftCards')}>

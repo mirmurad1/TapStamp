@@ -30,10 +30,21 @@ export async function staffLogin(page: Page, email: string): Promise<void> {
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/admin(\/mfa)?\/?$/);
   if (page.url().endsWith('/mfa')) {
-    // Eyni TOTP addımı iki dəfə qəbul olunmur — növbəti addımın kodu işlədilir (server ±1 addım qəbul edir)
-    await page.locator('input[autocomplete="one-time-code"]').fill(totp(Math.floor(Date.now() / 30_000) + 1));
-    await page.locator('form button[type="submit"]').click();
-    await page.waitForURL(/\/admin\/?$/);
+    // Eyni TOTP addımı iki dəfə qəbul olunmur — növbəti addımın kodu işlədilir (server ±1 addım qəbul edir). Kod artıq
+    // istifadə olunubsa (əvvəlki testin girişi eyni addımda), növbəti 30 saniyəlik addım gözlənilib təkrar cəhd edilir
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await page.locator('input[autocomplete="one-time-code"]').fill(totp(Math.floor(Date.now() / 30_000) + 1));
+      await page.locator('form button[type="submit"]').click();
+      const done = await page.waitForURL(/\/admin\/?$/, { timeout: 5_000 }).then(
+        () => true,
+        () => false,
+      );
+      if (done) {
+        return;
+      }
+      await page.waitForTimeout(30_000 - (Date.now() % 30_000) + 500);
+    }
+    throw new Error('TOTP login failed');
   }
 }
 

@@ -3,8 +3,6 @@
    Azərbaycan hərflərini (ə, ğ, ı, ö, ü, ş, ç) və Kiril əlifbasını dəstəkləyir — fonts.test.ts yoxlayır. */
 @import '@fontsource-variable/inter';
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 /* Tema tokenləri: müasir, açıq və rəngli universal palitra (kafe, avtoyuma, bərbər, restoran…). Müştəri tətbiqində
    --primary şirkətin brend rəngi ilə əvəz olunur (applyBrandColor). Kontrast WCAG AA-ya uyğundur. */
 :root {
@@ -32,27 +30,6 @@
   color-scheme: light;
 }
 
-.dark {
-  --background: #0f1222;
-  --foreground: #eef0fb;
-  --card: #181c33;
-  --card-foreground: #eef0fb;
-  --muted: #232842;
-  --muted-foreground: #a7adc8;
-  --primary: var(--brand-dark, #a78bfa);
-  --primary-foreground: var(--brand-dark-foreground, #120a2a);
-  --accent: #f472b6;
-  --accent-foreground: #1a0b14;
-  --highlight: #fbbf24;
-  --success: #4ade80;
-  --success-ink: #4ade80;
-  --destructive-ink: #f87171;
-  --highlight-ink: #fbbf24;
-  --destructive: #f87171;
-  --border: #2b3150;
-  --ring: var(--brand-dark, #a78bfa);
-  color-scheme: dark;
-}
 
 @theme inline {
   --color-background: var(--background);

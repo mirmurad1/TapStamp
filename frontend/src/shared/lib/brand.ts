@@ -42,7 +42,7 @@ function mix(hex: string, target: string, amount: number): string {
   return `#${[16, 8, 0].map((shift) => channel(shift).toString(16).padStart(2, '0')).join('')}`;
 }
 
-/** Rəngi səthlər üzərində oxunaqlı edir (kontrast ≥ 4.5): lazım olduqca tündləşdirir və ya açır. */
+/** Rəngi səthlər üzərində oxunaqlı edir (kontrast ≥ 4.5): lazım olduqca tündləşdirir. */
 function readableOn(hex: string, surfaces: string[], towards: string): string {
   for (let amount = 0; amount <= 1; amount += 0.05) {
     const candidate = amount === 0 ? hex.toLowerCase() : mix(hex, towards, amount);
@@ -54,23 +54,19 @@ function readableOn(hex: string, surfaces: string[], towards: string): string {
 }
 
 const LIGHT_SURFACES = ['#ffffff', '#f6f7fb'];
-const DARK_SURFACES = ['#181c33', '#0f1222'];
 
 /**
- * Brend rəngini CSS dəyişənlərinə yazır; yanlış dəyər nəzərə alınmır (standart tema qalır). Açıq və qaranlıq rejim
- * üçün ayrıca variant hesablanır: şirkətin rəngi fona qarşı zəif görünürsə (məs. açıq sarı və ya qaranlıq rejimdə
- * tünd qırmızı), rəng tonunu saxlayaraq tündləşdirilir və ya açılır ki, mətn və düymələr oxunaqlı olsun (WCAG AA).
+ * Brend rəngini CSS dəyişənlərinə yazır; yanlış dəyər nəzərə alınmır (standart tema qalır). Şirkətin rəngi ağ
+ * fona qarşı zəif görünürsə (məs. açıq sarı), rəng tonunu saxlayaraq tündləşdirilir ki, mətn və düymələr oxunaqlı
+ * olsun (WCAG AA).
  */
 export function applyBrandColor(hex: string | undefined, root: HTMLElement = document.documentElement): void {
   if (!hex || !HEX.test(hex)) {
     return;
   }
   const light = readableOn(hex, LIGHT_SURFACES, '#000000');
-  const dark = readableOn(hex, DARK_SURFACES, '#ffffff');
   root.style.setProperty('--brand-light', light);
   root.style.setProperty('--brand-light-foreground', readableForeground(light));
-  root.style.setProperty('--brand-dark', dark);
-  root.style.setProperty('--brand-dark-foreground', readableForeground(dark));
 }
 
 /** Saniyəni geri sayım formatına çevirir: 75 → "1:15", 3725 → "1:02:05". */

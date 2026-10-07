@@ -8,13 +8,6 @@
     "en": "English",
     "ru": "Русский"
   },
-  "theme": {
-    "label": "Theme",
-    "light": "Light theme",
-    "dark": "Dark theme",
-    "system": "System theme",
-    "toggle": "Change theme"
-  },
   "actions": {
     "continue": "Continue",
     "cancel": "Cancel",

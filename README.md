@@ -211,7 +211,7 @@ Playwright dəsti (`frontend/e2e`, ardıcıl işləyir — dev hesablarının TO
 | `language.spec.ts` | Dilin dəyişməsi (qonaq), müştərinin və işçinin dilinin profildə saxlanması (başqa cihazda da) |
 | `isolation.spec.ts` | Tenant izolyasiyası: sessiya cookie-ləri, hədiyyə kartı kodu və NFC linki digər şirkətdə işləmir |
 | `admin.spec.ts` | İşçi dəvəti → qəbul → giriş → silinmə; müştəriyə əl ilə möhür; NFC çipinin qeydiyyatı və deaktivasiyası |
-| `quality.spec.ts` | Bütün əsas səhifələr: açıq/qaranlıq rejim, telefon (375 px)/masaüstü, az/en/ru — üfüqi daşma yoxdur, axe (WCAG 2.1 AA) ciddi pozuntu tapmır |
+| `quality.spec.ts` | Bütün əsas səhifələr: telefon (375 px)/masaüstü, az/en/ru — üfüqi daşma yoxdur, axe (WCAG 2.1 AA) ciddi pozuntu tapmır |
 
 Dev profilində yalnız **IP üzrə** sorğu limitləri artırılıb (`application-dev.yml` → `app.rate-limits`), çünki lokalda bütün testlər bir IP-dən gəlir; nömrə və email üzrə limitlər, eləcə də prod dəyərləri dəyişmir.
 

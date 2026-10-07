@@ -7,7 +7,6 @@ import { Outlet } from 'react-router';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
-import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
 import { contextApi } from '../api/adminApi';
 import { useAdminAuth } from '../auth/AdminAuthProvider';
@@ -35,7 +34,6 @@ export function AuthLayout() {
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <LanguageSwitcher />
-          <ThemeToggle />
         </div>
       </header>
       <main className="flex flex-1 items-start justify-center px-4 pb-10 pt-6 sm:items-center sm:pt-0">

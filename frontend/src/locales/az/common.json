@@ -8,13 +8,6 @@
     "en": "English",
     "ru": "Русский"
   },
-  "theme": {
-    "label": "Mövzu",
-    "light": "Açıq mövzu",
-    "dark": "Qaranlıq mövzu",
-    "system": "Sistem mövzusu",
-    "toggle": "Mövzunu dəyiş"
-  },
   "actions": {
     "continue": "Davam et",
     "cancel": "Ləğv et",

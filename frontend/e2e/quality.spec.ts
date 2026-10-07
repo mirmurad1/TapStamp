@@ -4,14 +4,14 @@ import { expect, test, type Page } from '@playwright/test';
 import { customerSignUp, staffLogin } from './support';
 
 /**
- * Keyfiyyət yoxlaması: hər əsas səhifə açıq və qaranlıq rejimdə, telefon (375 px) və masaüstü ölçüsündə
+ * Keyfiyyət yoxlaması: hər əsas səhifə telefon (375 px) və masaüstü ölçüsündə
  * 1) üfüqi daşma yoxdur, 2) axe (WCAG 2.1 A/AA) ciddi və kritik pozuntu tapmır.
  */
 const VIEWPORTS = [
   { name: 'phone', width: 375, height: 812 },
   { name: 'desktop', width: 1280, height: 900 },
 ] as const;
-const SCHEMES = ['light', 'dark'] as const;
+const SCHEMES = ['light'] as const;
 
 const CUSTOMER_PAGES = ['/', '/gift-cards', '/settings'];
 const ADMIN_PAGES = ['/admin', '/admin/customers', '/admin/staff-console', '/admin/team', '/admin/tags', '/admin/settings', '/admin/audit', '/admin/account'];
