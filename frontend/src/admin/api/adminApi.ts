@@ -204,3 +204,16 @@ export const simulatorApi = {
   tags: () => unwrap(devApi.GET('/api/v1/dev/simulator/tags')),
   tap: (tagId: string) => unwrap(devApi.POST('/api/v1/dev/simulator/taps', { body: { tagId } })),
 };
+
+export type StampPolicy = Schemas['StampPolicyResponse'];
+export type StampPolicyRequest = Schemas['StampPolicyRequest'];
+export type RewardSettings = Schemas['RewardSettingsResponse'];
+export type RewardSettingsRequest = Schemas['RewardSettingsRequest'];
+
+/** Loyallıq parametrləri (yalnız sahib): möhür qaydası və hədiyyə. */
+export const settingsApi = {
+  stampPolicy: () => unwrap(api.GET('/api/v1/admin/settings/stamp-policy')),
+  updateStampPolicy: (body: StampPolicyRequest) => unwrap(api.PUT('/api/v1/admin/settings/stamp-policy', { body })),
+  rewardRule: () => unwrap(api.GET('/api/v1/admin/settings/reward-rule')),
+  updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
+};

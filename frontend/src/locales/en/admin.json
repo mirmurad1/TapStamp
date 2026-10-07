@@ -218,5 +218,39 @@
       "SIMULATED": "Simulated"
     },
     "disabled": "disabled"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Loyalty programme rules. Changes take effect immediately and are written to the audit log.",
+    "saved": "Saved.",
+    "stamps": {
+      "title": "Stamp rules",
+      "description": "Prevents abuse. The time limit counts from the customer’s last stamp at any location.",
+      "interval": "Minimum time between stamps (minutes)",
+      "intervalHint": "0 — no limit. E.g. 20: after a stamp at one location, the customer cannot get another at any location for 20 minutes.",
+      "maxPerDay": "Maximum stamps per day",
+      "maxPerDayHint": "The day follows the company’s time zone.",
+      "approval": "Require staff approval for stamps",
+      "approvalHint": "The stamp is not added to the card until a staff member approves it in the staff console.",
+      "timeout": "Approval waiting time (minutes)",
+      "timeoutHint": "Stamps not approved within this time are rejected automatically."
+    },
+    "reward": {
+      "title": "Reward",
+      "description": "Which reward is given at which stamp. E.g. 5 stamps → free wash, 9 stamps → free coffee.",
+      "stamps": "Stamps needed for the reward",
+      "stampsHint": "From 1 to 50. A gift card is created when the last stamp is added.",
+      "name": "Reward name",
+      "nameAz": "Azerbaijani (required)",
+      "nameEn": "English",
+      "nameRu": "Russian",
+      "translationHint": "If a translation is missing, the Azerbaijani name is shown.",
+      "validity": "Gift card validity (days)",
+      "validityHint": "Empty — no expiry.",
+      "version": "Rule version: {{version}}",
+      "issued_one": "{{count}} customer with a full card received a gift card.",
+      "issued_other": "{{count}} customers with a full card received a gift card.",
+      "confirm": "You are lowering the number of stamps: customers with {{count}} or more stamps will receive a gift card right away. Continue?"
+    }
   }
 }

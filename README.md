@@ -253,7 +253,7 @@ Real çip olmadan bütün axını yoxlamaq üçün:
 3. "Bu brauzerdə aç" — linki açın (və ya QR-ı telefonla skan edin). Daxil olmamısınızsa, telefon nömrəsi ilə girişdən sonra möhür avtomatik verilir (toxunuş 10 dəqiqə saxlanılır).
 4. "Eyni linki təkrar aç" — ikinci dəfə **"Bu link artıq istifadə olunub"** görünməlidir (replay qorunması).
 
-Kart dolanda (Mock Coffee House-da 9 möhür) təbrik animasiyası çıxır və **Hədiyyə kartları** bölməsində daimi unikal kodlu (`7K3M-9QX2` formatında) və QR-lı kart yaranır. Sui-istifadə qaydaları (standart): iki möhür arasında 20 dəqiqə, gündə ən çox 3 möhür (şirkətin saat qurşağı ilə). Qaydaların admin paneldən dəyişdirilməsi Mərhələ 7-dədir; dev-də sınamaq üçün `stamp_policies` cədvəlində dəyişin.
+Kart dolanda (Mock Coffee House-da 9 möhür) təbrik animasiyası çıxır və **Hədiyyə kartları** bölməsində daimi unikal kodlu (`7K3M-9QX2` formatında) və QR-lı kart yaranır. Sui-istifadə qaydaları (standart): iki möhür arasında 20 dəqiqə — **bütün filiallar üzrə** (bir filialda möhür alan müştəri bu müddətdə digər filialda da ala bilməz) — və gündə ən çox 3 möhür (şirkətin saat qurşağı ilə). Sahib (`owner@mockcoffee.az`) bunları, həmçinin hədiyyə üçün möhür sayını (1–50), hədiyyənin adını (3 dildə) və hədiyyə kartının müddətini admin panelin **Parametrlər** bölməsindən dəyişir.
 
 İşçi təsdiqi rejimi (`require_staff_approval`) aktiv olan filialda möhür **İşçi konsolu**nda təsdiqlənənə qədər gözləyir; 30 dəqiqə ərzində təsdiqlənməzsə, avtomatik rədd edilir.
 

@@ -102,6 +102,10 @@ public final class AdminClient {
         return perform(MockMvcRequestBuilders.post(basePath + path));
     }
 
+    public ResultActions put(String path, Object body) throws Exception {
+        return perform(withJson(MockMvcRequestBuilders.put(basePath + path), body));
+    }
+
     public ResultActions patch(String path, Object body) throws Exception {
         return perform(withJson(MockMvcRequestBuilders.patch(basePath + path), body));
     }

@@ -8,21 +8,24 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/
 
 const COLORS = ['var(--primary)', 'var(--accent)', 'var(--highlight)', '#22c55e', '#0ea5e9'];
 
-/** Konfeti: dekorativ, ekran oxuyucularından gizlidir; "azaldılmış hərəkət" rejimində animasiya söndürülür. */
-function Confetti() {
+/**
+ * Konfeti: dekorativ, ekran oxuyucularından gizlidir; "azaldılmış hərəkət" rejimində animasiya söndürülür.
+ * Hər möhürdə kiçik (az və xırda parçalar), kart dolanda böyük.
+ */
+export function Confetti({ count = 60, small = false }: { count?: number; small?: boolean }) {
   const pieces = useMemo(
     () =>
-      Array.from({ length: 60 }, (_, i) => ({
+      Array.from({ length: count }, (_, i) => ({
         left: `${(i * 37) % 100}%`,
         color: COLORS[i % COLORS.length],
-        size: 6 + ((i * 7) % 7),
+        size: (small ? 4 : 6) + ((i * 7) % (small ? 4 : 7)),
         delay: `${(i % 12) * 0.08}s`,
-        duration: `${2.2 + ((i * 13) % 10) / 10}s`,
+        duration: `${(small ? 1.6 : 2.2) + ((i * 13) % 10) / 10}s`,
         drift: `${((i * 53) % 160) - 80}px`,
         spin: `${360 + ((i * 97) % 540)}deg`,
         round: i % 3 === 0,
       })),
-    [],
+    [count, small],
   );
   return (
     <div className="pointer-events-none fixed inset-0 z-[60] overflow-hidden" aria-hidden="true">

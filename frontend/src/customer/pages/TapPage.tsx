@@ -16,7 +16,7 @@ import { publicApi, tapApi, type ClaimResult } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
 import { customerKeys } from '../auth/queryClient';
-import { Celebration } from '../components/Celebration';
+import { Celebration, Confetti } from '../components/Celebration';
 import { StampCard } from '../components/StampCard';
 import { SwitchNumber } from '../components/SwitchNumber';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
@@ -120,6 +120,8 @@ function ClaimSuccess({ result, branch, rewardName }: { result: ClaimResult; bra
   const current = result.currentStamps ?? 0;
   return (
     <div className="flex flex-col gap-4">
+      {/* Hər möhürdə kiçik konfeti; kart dolanda böyük bayram ekranı ayrıca açılır */}
+      {!pending && !completed ? <Confetti count={28} small /> : null}
       <section className="animate-fade-up flex flex-col items-center gap-2 pt-4 text-center">
         <span
           className={`grid size-16 place-items-center rounded-full ${pending ? 'bg-highlight text-white' : 'bg-success text-white'}`}

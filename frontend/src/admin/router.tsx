@@ -12,6 +12,7 @@ import { MfaSetupPage } from './pages/auth/MfaSetupPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { SimulatorPage } from './pages/dev/SimulatorPage';
+import { SettingsPage } from './pages/settings/SettingsPage';
 import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
@@ -64,7 +65,7 @@ export const adminRouter = createBrowserRouter(
                     {
                       element: <RequireRole roles={['COMPANY_OWNER']} />,
                       children: [
-                        { path: 'settings/*', element: <PlaceholderPage section="settings" /> },
+                        { path: 'settings/*', element: <SettingsPage /> },
                         { path: 'audit/*', element: <PlaceholderPage section="audit" /> },
                       ],
                     },

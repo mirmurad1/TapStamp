@@ -422,6 +422,100 @@
         "tags" : [ "Admin: hesab" ]
       }
     },
+    "/api/v1/admin/settings/reward-rule" : {
+      "get" : {
+        "operationId" : "rewardRule",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RewardSettingsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Hədiyyə qaydası",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "put" : {
+        "description" : "Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı dərhal verilir.",
+        "operationId" : "updateRewardRule",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RewardSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RewardSettingsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Hədiyyə qaydasının dəyişdirilməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
+    "/api/v1/admin/settings/stamp-policy" : {
+      "get" : {
+        "operationId" : "stampPolicy",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StampPolicyResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhür qaydası",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "put" : {
+        "description" : "Dərhal qüvvəyə minir və auditə yazılır.",
+        "operationId" : "updateStampPolicy",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StampPolicyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StampPolicyResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhür qaydasının dəyişdirilməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
     "/api/v1/admin/staff-console/pending-stamps" : {
       "get" : {
         "description" : "Yalnız işçinin öz filialı; başqa filial üçün 404.",
@@ -2732,6 +2826,60 @@
           }
         }
       },
+      "RewardSettingsRequest" : {
+        "type" : "object",
+        "description" : "Hədiyyə: neçənci möhürdə verilir, adı (az məcburi, en/ru istəyə bağlı), kartın müddəti",
+        "properties" : {
+          "rewardDescription" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 50,
+            "minimum" : 1
+          },
+          "validityDays" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Hədiyyə kartının müddəti (gün); null — müddətsiz",
+            "maximum" : 3650,
+            "minimum" : 1
+          }
+        },
+        "required" : [ "rewardName", "stampsRequired" ]
+      },
+      "RewardSettingsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "giftCardsIssued" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Yeni hədd səbəbindən dərhal verilən hədiyyə kartları"
+          },
+          "rewardDescription" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "validityDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "RoleResponse" : {
         "type" : "object",
         "properties" : {
@@ -2788,6 +2936,58 @@
           },
           "status" : {
             "type" : "string"
+          }
+        }
+      },
+      "StampPolicyRequest" : {
+        "type" : "object",
+        "description" : "Möhür qaydası (şirkət üzrə): cooldown bütün filiallar üzrə müştərinin son möhüründən hesablanır",
+        "properties" : {
+          "maxStampsPerDay" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Bir gündə ən çox möhür (şirkətin saat qurşağı ilə)",
+            "maximum" : 50,
+            "minimum" : 1
+          },
+          "minIntervalMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "İki möhür arasında ən az dəqiqə (0 — limitsiz)",
+            "maximum" : 1440,
+            "minimum" : 0
+          },
+          "pendingTimeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Təsdiqlənməyən möhür bu qədər dəqiqədən sonra rədd edilir",
+            "maximum" : 1440,
+            "minimum" : 1
+          },
+          "requireStaffApproval" : {
+            "type" : "boolean",
+            "description" : "Möhür işçi təsdiqlənənə qədər gözləyir"
+          }
+        },
+        "required" : [ "maxStampsPerDay", "minIntervalMinutes", "pendingTimeoutMinutes", "requireStaffApproval" ]
+      },
+      "StampPolicyResponse" : {
+        "type" : "object",
+        "properties" : {
+          "maxStampsPerDay" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "minIntervalMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pendingTimeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "requireStaffApproval" : {
+            "type" : "boolean"
           }
         }
       },

@@ -144,6 +144,24 @@ class StampClaimIT extends TapIntegrationTest {
     }
 
     @Test
+    void cooldownAppliesAcrossBranches() throws Exception {
+        TestTag centre = newTag(newBranch(new Policy(20, 50, false, 30, false, null)));
+        TestTag other = newTag(newBranch(new Policy(20, 50, false, 30, false, null)));
+        CustomerClient customer = signedIn(uniquePhone());
+        customer.post(claimPath(tapToken(customer, centre, 1))).andExpect(status().isOk());
+
+        // Bir filialda möhür alınıb — vaxt limiti bitməyənə qədər digər filialda da alınmır
+        clock.advance(Duration.ofMinutes(2));
+        customer.post(claimPath(tapToken(customer, other, 1))).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STAMP_COOLDOWN_ACTIVE"));
+
+        clock.advance(Duration.ofMinutes(19));
+        customer.post("/api/v1/auth/refresh").andExpect(status().isOk());
+        customer.post(claimPath(tapToken(customer, other, 2))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentStamps").value(2));
+    }
+
+    @Test
     void dailyLimitFollowsCompanyTimezoneMidnight() throws Exception {
         TestTag tag = newTag(newBranch(new Policy(0, 2, false, 30, false, null)));
         CustomerClient customer = signedIn(uniquePhone());

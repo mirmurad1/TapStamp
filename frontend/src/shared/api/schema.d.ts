@@ -322,6 +322,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/settings/reward-rule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hədiyyə qaydası */
+        get: operations["rewardRule"];
+        /**
+         * Hədiyyə qaydasının dəyişdirilməsi
+         * @description Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı dərhal verilir.
+         */
+        put: operations["updateRewardRule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/stamp-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Möhür qaydası */
+        get: operations["stampPolicy"];
+        /**
+         * Möhür qaydasının dəyişdirilməsi
+         * @description Dərhal qüvvəyə minir və auditə yazılır.
+         */
+        put: operations["updateStampPolicy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/staff-console/pending-stamps": {
         parameters: {
             query?: never;
@@ -1692,6 +1734,33 @@ export interface components {
              */
             stampsRequired?: number;
         };
+        /** @description Hədiyyə: neçənci möhürdə verilir, adı (az məcburi, en/ru istəyə bağlı), kartın müddəti */
+        RewardSettingsRequest: {
+            rewardDescription?: components["schemas"]["LocalizedText"];
+            rewardName: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            stampsRequired: number;
+            /**
+             * Format: int32
+             * @description Hədiyyə kartının müddəti (gün); null — müddətsiz
+             */
+            validityDays?: number;
+        };
+        RewardSettingsResponse: {
+            /**
+             * Format: int32
+             * @description Yeni hədd səbəbindən dərhal verilən hədiyyə kartları
+             */
+            giftCardsIssued?: number;
+            rewardDescription?: components["schemas"]["LocalizedText"];
+            rewardName?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            stampsRequired?: number;
+            /** Format: int32 */
+            validityDays?: number;
+            /** Format: int32 */
+            version?: number;
+        };
         RoleResponse: {
             /** Format: uuid */
             branchId?: string;
@@ -1716,6 +1785,35 @@ export interface components {
             /** Format: uuid */
             stampId?: string;
             status?: string;
+        };
+        /** @description Möhür qaydası (şirkət üzrə): cooldown bütün filiallar üzrə müştərinin son möhüründən hesablanır */
+        StampPolicyRequest: {
+            /**
+             * Format: int32
+             * @description Bir gündə ən çox möhür (şirkətin saat qurşağı ilə)
+             */
+            maxStampsPerDay: number;
+            /**
+             * Format: int32
+             * @description İki möhür arasında ən az dəqiqə (0 — limitsiz)
+             */
+            minIntervalMinutes: number;
+            /**
+             * Format: int32
+             * @description Təsdiqlənməyən möhür bu qədər dəqiqədən sonra rədd edilir
+             */
+            pendingTimeoutMinutes: number;
+            /** @description Möhür işçi təsdiqlənənə qədər gözləyir */
+            requireStaffApproval: boolean;
+        };
+        StampPolicyResponse: {
+            /** Format: int32 */
+            maxStampsPerDay?: number;
+            /** Format: int32 */
+            minIntervalMinutes?: number;
+            /** Format: int32 */
+            pendingTimeoutMinutes?: number;
+            requireStaffApproval?: boolean;
         };
         StatsResponse: {
             /** Format: int64 */
@@ -2140,6 +2238,94 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    rewardRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RewardSettingsResponse"];
+                };
+            };
+        };
+    };
+    updateRewardRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RewardSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RewardSettingsResponse"];
+                };
+            };
+        };
+    };
+    stampPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StampPolicyResponse"];
+                };
+            };
+        };
+    };
+    updateStampPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StampPolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StampPolicyResponse"];
+                };
             };
         };
     };

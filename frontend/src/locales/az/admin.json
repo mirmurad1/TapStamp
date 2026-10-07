@@ -218,5 +218,39 @@
       "SIMULATED": "Simulyasiya"
     },
     "disabled": "deaktiv"
+  },
+  "settings": {
+    "title": "Parametrlər",
+    "subtitle": "Loyallıq proqramının qaydaları. Dəyişikliklər dərhal qüvvəyə minir və audit jurnalına yazılır.",
+    "saved": "Yadda saxlanıldı.",
+    "stamps": {
+      "title": "Möhür qaydası",
+      "description": "Sui-istifadənin qarşısını alır. Vaxt limiti bütün filiallar üzrə müştərinin son möhüründən hesablanır.",
+      "interval": "İki möhür arasında ən az vaxt (dəqiqə)",
+      "intervalHint": "0 — limitsiz. Məs. 20: müştəri bir filialda möhür alıbsa, 20 dəqiqə heç bir filialda yenisini ala bilməz.",
+      "maxPerDay": "Gündə ən çox möhür",
+      "maxPerDayHint": "Gün şirkətin saat qurşağı ilə hesablanır.",
+      "approval": "Möhür işçi təsdiqindən sonra verilsin",
+      "approvalHint": "Möhür işçi konsolunda təsdiqlənənə qədər kartda görünmür.",
+      "timeout": "Təsdiq gözləmə müddəti (dəqiqə)",
+      "timeoutHint": "Bu müddətdə təsdiqlənməyən möhür avtomatik rədd edilir."
+    },
+    "reward": {
+      "title": "Hədiyyə",
+      "description": "Neçənci möhürdə hansı hədiyyə verilir. Məs. 5 möhür → pulsuz yuma, 9 möhür → hədiyyə qəhvə.",
+      "stamps": "Hədiyyə üçün lazım olan möhür sayı",
+      "stampsHint": "1-dən 50-yə qədər. Son möhür vurulanda hədiyyə kartı yaranır.",
+      "name": "Hədiyyənin adı",
+      "nameAz": "Azərbaycanca (məcburi)",
+      "nameEn": "İngiliscə",
+      "nameRu": "Rusca",
+      "translationHint": "Tərcümə yoxdursa, Azərbaycanca ad göstərilir.",
+      "validity": "Hədiyyə kartının müddəti (gün)",
+      "validityHint": "Boş — müddətsiz.",
+      "version": "Qaydanın versiyası: {{version}}",
+      "issued_one": "Kartı artıq dolmuş {{count}} müştəriyə hədiyyə kartı verildi.",
+      "issued_other": "Kartı artıq dolmuş {{count}} müştəriyə hədiyyə kartı verildi.",
+      "confirm": "Möhür sayı azaldılır: kartında {{count}} və daha çox möhür olan müştərilərə hədiyyə kartı dərhal veriləcək. Davam edilsin?"
+    }
   }
 }
