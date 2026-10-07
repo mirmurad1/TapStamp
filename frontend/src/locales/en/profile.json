@@ -123,5 +123,13 @@
     "version": "Version {{version}} · {{date}}",
     "back": "Back"
   },
-  "switchNumber": "Use a different number"
+  "switchNumber": "Use a different number",
+  "install": {
+    "title": "Install on your phone",
+    "description": "The app will be an icon on your home screen and open full screen, without the browser.",
+    "button": "Add to home screen",
+    "iosStep1": "In Safari, tap the",
+    "share": "Share",
+    "iosStep2": "button, then choose \"Add to Home Screen\"."
+  }
 }

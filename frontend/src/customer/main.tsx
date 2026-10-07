@@ -10,11 +10,13 @@ import { setSessionRefresher } from '@/shared/api/client';
 import { App } from './App';
 import { createCustomerQueryClient } from './auth/queryClient';
 import { refreshSession } from './auth/refresh';
+import { registerServiceWorker } from './pwa/registerServiceWorker';
 
 // 401 cavabında (access tokenin vaxtı keçib) sessiya bir dəfə yenilənir və sorğu təkrarlanır
 setSessionRefresher(refreshSession);
 
 const queryClient = createCustomerQueryClient();
+registerServiceWorker();
 
 const root = document.getElementById('root');
 if (!root) {

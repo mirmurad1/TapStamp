@@ -106,6 +106,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/api/v1/csrf", "/api/v1/context", "/api/v1/public/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/manifest.webmanifest").permitAll()
                         // Admin girişi (işçi və platforma). Domen yoxlaması TenantResolutionFilter-dədir.
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/auth/session", "/api/v1/platform/auth/session").permitAll()
                         .requestMatchers(HttpMethod.POST,

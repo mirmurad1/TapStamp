@@ -27,6 +27,7 @@ import { customerAuthApi, LEGAL_SLUGS, meApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { InstallCard } from '../pwa/InstallCard';
 
 /** Parametrlər: dil, cihazlar, hüquqi sənədlər və hesabın silinməsi (çıxış — möhür kartının altında). */
 export function SettingsPage() {
@@ -57,6 +58,8 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col gap-4 pt-2">
       <h1 className="font-display text-3xl font-semibold">{t('settings.title')}</h1>
+
+      <InstallCard />
 
       <Card>
         <CardHeader>

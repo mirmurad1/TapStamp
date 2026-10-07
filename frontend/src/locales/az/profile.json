@@ -123,5 +123,13 @@
     "version": "Versiya {{version}} · {{date}}",
     "back": "Geri"
   },
-  "switchNumber": "Fərqli nömrə ilə yoxla"
+  "switchNumber": "Fərqli nömrə ilə yoxla",
+  "install": {
+    "title": "Telefona quraşdırın",
+    "description": "Tətbiq ana ekranda ikon kimi olacaq və brauzersiz, tam ekranda açılacaq.",
+    "button": "Ana ekrana əlavə et",
+    "iosStep1": "Safari-də aşağıdakı",
+    "share": "Paylaş",
+    "iosStep2": "düyməsini basın, sonra \"Ana ekrana əlavə et\" seçin."
+  }
 }
