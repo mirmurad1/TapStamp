@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { phoneContext, putStampPolicy, registerFromTap, simulatorTap, staffLogin } from './support';
 
 /**
- * Mərhələ 6 axını: müştəri kartı doldurur (9 möhür) → bayram ekranı → hədiyyə kartının kodu → işçi kodu yoxlayır və
+ * Mərhələ 6 axını: müştəri kartı doldurur (qaydadakı möhür sayı) → bayram ekranı → hədiyyə kartının kodu → işçi kodu yoxlayır və
  * təhvil verir → müştərinin ekranında təbrik görünür; eyni kod ikinci dəfə "artıq istifadə olunub".
  * Sahib vaxt limitini müvəqqəti söndürür (9 möhür ard-arda) və sonda əvvəlki qaydanı bərpa edir.
  */
@@ -27,7 +27,12 @@ test('hədiyyə kartı: kart dolur, işçi kodu yoxlayıb təhvil verir, müşt�
     const phone = await (await phoneContext(browser)).newPage();
     await registerFromTap(phone, await simulatorTap(staff, '04A1B2C3D4E5F1'), 'Hədiyyə Testi');
     await expect(phone.getByRole('heading', { name: 'Möhür əlavə olundu!' })).toBeVisible();
-    for (let stamp = 2; stamp <= 9; stamp++) {
+    // Hədiyyə üçün möhür sayı şirkətin cari qaydasından (sahib admin paneldə dəyişə bilər)
+    const company = (await (await phone.request.get('/api/v1/public/company')).json()) as {
+      rewardRule?: { stampsRequired?: number; rewardName?: { az?: string } };
+    };
+    const required = company.rewardRule?.stampsRequired ?? 9;
+    for (let stamp = 2; stamp <= required; stamp++) {
       await phone.goto(await simulatorTap(staff, '04A1B2C3D4E5F1'));
       await expect(phone.getByRole('heading', { name: 'Möhür əlavə olundu!', includeHidden: true })).toBeAttached();
     }
@@ -42,7 +47,7 @@ test('hədiyyə kartı: kart dolur, işçi kodu yoxlayıb təhvil verir, müşt�
     await staff.locator('#gift-card-code').fill(code.replace('-', '').toLowerCase());
     await staff.locator('form:has(#gift-card-code) button[type="submit"]').click();
     const result = staff.getByTestId('gift-card-result');
-    await expect(result).toContainText('Hədiyyə qəhvə');
+    await expect(result).toContainText(company.rewardRule?.rewardName?.az ?? '');
     await result.locator('button').first().click();
     await expect(result.locator('svg.lucide-circle-check-big, svg.lucide-check-circle-2, svg.lucide-circle-check')).toBeVisible();
 

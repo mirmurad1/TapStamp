@@ -89,7 +89,10 @@ async function tap(staff) {
     await phone.getByRole('heading', { name: 'Möhür əlavə olundu!' }).waitFor();
     await phone.waitForTimeout(400);
     await phone.screenshot({ path: `${out}/${prefix}-01-stamp-confetti.png` });
-    for (let i = 2; i <= 9; i++) {
+    // Hədiyyə üçün möhür sayı şirkətin cari qaydasından (admin paneldə dəyişə bilər)
+    const company = await (await phoneContext.request.get(base + '/api/v1/public/company')).json();
+    const required = company.rewardRule?.stampsRequired ?? 9;
+    for (let i = 2; i <= required; i++) {
       await phone.goto(await tap(staff));
       await phone.getByRole('heading', { name: 'Möhür əlavə olundu!', includeHidden: true }).waitFor({ state: 'attached' });
     }

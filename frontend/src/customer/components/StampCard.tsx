@@ -50,29 +50,23 @@ export function StampCard({
         {rewardName ? <p className="text-sm font-semibold text-primary">{t('card.reward', { name: rewardName })}</p> : null}
       </CardHeader>
       <CardContent>
+        {/* N xana: sonuncu xana hədiyyənin özüdür (N-ci möhür vurulanda hədiyyə qazanılır) */}
         <ol className="grid grid-cols-5 gap-3">
           {Array.from({ length: stampsRequired }, (_, index) => {
             const filled = index < shown;
             const waiting = !filled && index < shown + pendingSlots;
             const fresh = filled && animateFrom !== undefined && index >= animateFrom;
+            const isGift = index === stampsRequired - 1;
             return (
               <li key={index} className="flex justify-center">
-                <StampSlot filled={filled} waiting={waiting} fresh={fresh} delay={fresh ? (index - (animateFrom ?? 0)) * 120 : 0} />
+                {isGift ? (
+                  <GiftSlot filled={filled} completed={Boolean(completed)} />
+                ) : (
+                  <StampSlot filled={filled} waiting={waiting} fresh={fresh} delay={fresh ? (index - (animateFrom ?? 0)) * 120 : 0} />
+                )}
               </li>
             );
           })}
-          <li className="flex justify-center">
-            <span
-              role="img"
-              aria-label={t('card.gift')}
-              className={cn(
-                'grid size-12 place-items-center rounded-full bg-linear-to-br from-accent to-highlight text-white shadow-md',
-                completed ? 'animate-gift-bounce' : 'opacity-90',
-              )}
-            >
-              <Gift className="size-6" aria-hidden="true" />
-            </span>
-          </li>
         </ol>
         <div
           className="mt-5 h-2.5 overflow-hidden rounded-full bg-muted"
@@ -100,6 +94,26 @@ export function StampCard({
         </div>
       ) : null}
     </Card>
+  );
+}
+
+/** Hədiyyə xanası: qazanılana qədər solğun, son möhürlə parlaq və canlı. */
+function GiftSlot({ filled, completed }: { filled: boolean; completed: boolean }) {
+  const { t } = useTranslation('profile');
+  return (
+    <span
+      role="img"
+      aria-label={t('card.gift')}
+      className={cn(
+        'grid size-12 place-items-center rounded-full text-white',
+        filled
+          ? 'bg-linear-to-br from-accent to-highlight shadow-md'
+          : 'border-2 border-dashed border-accent/50 bg-linear-to-br from-accent/25 to-highlight/25 text-accent/60',
+        completed && 'animate-gift-bounce',
+      )}
+    >
+      <Gift className="size-6" aria-hidden="true" />
+    </span>
   );
 }
 
