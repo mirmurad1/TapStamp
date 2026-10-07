@@ -120,7 +120,15 @@
   "legal": {
     "privacy": "Privacy policy",
     "terms": "Terms of use",
-    "back": "Back"
+    "back": "Back",
+    "rules": {
+      "interval_one": "There must be at least {{count}} minute between two stamps.",
+      "interval_other": "There must be at least {{count}} minutes between two stamps.",
+      "perDay_one": "At most {{count}} stamp is given per day.",
+      "perDay_other": "At most {{count}} stamps are given per day.",
+      "reward_one": "Collect {{count}} stamp to get a reward: {{reward}}.",
+      "reward_other": "Collect {{count}} stamps to get a reward: {{reward}}."
+    }
   },
   "switchNumber": "Use a different number",
   "install": {

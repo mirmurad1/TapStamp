@@ -4997,6 +4997,10 @@
             "$ref" : "#/components/schemas/RewardRuleResponse",
             "description" : "Aktiv mükafat qaydası; təyin olunmayıbsa null"
           },
+          "stampRules" : {
+            "$ref" : "#/components/schemas/StampRulesResponse",
+            "description" : "Şirkətin möhür qaydası (istifadə şərtlərində göstərilir)"
+          },
           "timezone" : {
             "type" : "string",
             "description" : "IANA saat qurşağı, məs. Asia/Baku"
@@ -5352,6 +5356,19 @@
           },
           "requireStaffApproval" : {
             "type" : "boolean"
+          }
+        }
+      },
+      "StampRulesResponse" : {
+        "type" : "object",
+        "properties" : {
+          "maxStampsPerDay" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "minIntervalMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },

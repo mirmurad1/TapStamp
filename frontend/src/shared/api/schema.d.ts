@@ -2787,6 +2787,8 @@ export interface components {
             name?: components["schemas"]["LocalizedText"];
             /** @description Aktiv mükafat qaydası; təyin olunmayıbsa null */
             rewardRule?: components["schemas"]["RewardRuleResponse"];
+            /** @description Şirkətin möhür qaydası (istifadə şərtlərində göstərilir) */
+            stampRules?: components["schemas"]["StampRulesResponse"];
             /** @description IANA saat qurşağı, məs. Asia/Baku */
             timezone?: string;
         };
@@ -2944,6 +2946,12 @@ export interface components {
             /** Format: int32 */
             pendingTimeoutMinutes?: number;
             requireStaffApproval?: boolean;
+        };
+        StampRulesResponse: {
+            /** Format: int32 */
+            maxStampsPerDay?: number;
+            /** Format: int32 */
+            minIntervalMinutes?: number;
         };
         StatsResponse: {
             /** Format: int64 */

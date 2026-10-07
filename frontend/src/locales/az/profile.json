@@ -120,7 +120,15 @@
   "legal": {
     "privacy": "Məxfilik siyasəti",
     "terms": "İstifadə şərtləri",
-    "back": "Geri"
+    "back": "Geri",
+    "rules": {
+      "interval_one": "İki möhür arasında ən az {{count}} dəqiqə olmalıdır.",
+      "interval_other": "İki möhür arasında ən az {{count}} dəqiqə olmalıdır.",
+      "perDay_one": "Gündə ən çox {{count}} möhür verilir.",
+      "perDay_other": "Gündə ən çox {{count}} möhür verilir.",
+      "reward_one": "{{count}} möhür toplayanda hədiyyə verilir: {{reward}}.",
+      "reward_other": "{{count}} möhür toplayanda hədiyyə verilir: {{reward}}."
+    }
   },
   "switchNumber": "Fərqli nömrə ilə yoxla",
   "install": {

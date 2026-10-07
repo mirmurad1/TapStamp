@@ -507,22 +507,30 @@ final class TenantSeedWriter {
                         в любой момент.""");
     }
 
+    /**
+     * {@code {{stampRules}}} və {@code {{rewardRule}}} — müştəri tətbiqi bunları şirkətin cari parametrləri ilə
+     * (möhürlər arası vaxt, gündəlik limit, hədiyyə) seçilmiş dildə əvəz edir; sahib parametrləri dəyişəndə mətn də
+     * dəyişir.
+     */
     private static LocalizedText termsText() {
         return LocalizedText.of("""
                         # İstifadə şərtləri
 
-                        Möhürlər yalnız kafedə alınmış içkilər üçün verilir. İki möhür arasında ən az 20 dəqiqə \
-                        olmalıdır və gündə ən çox 3 möhür verilir. Hədiyyə qəhvə nağd pula dəyişdirilmir.""",
+                        Möhürlər yalnız şirkətimizdə alınmış məhsul və xidmətlər üçün verilir. {{stampRules}}
+
+                        {{rewardRule}} Hədiyyə nağd pula dəyişdirilmir.""",
                 """
                         # Terms of use
 
-                        Stamps are given only for drinks bought at the cafe. There must be at least 20 minutes \
-                        between two stamps, and at most 3 stamps per day. The free coffee cannot be exchanged for cash.""",
+                        Stamps are given only for products and services bought from us. {{stampRules}}
+
+                        {{rewardRule}} The reward cannot be exchanged for cash.""",
                 """
                         # Условия использования
 
-                        Штампы начисляются только за напитки, купленные в кафе. Между двумя штампами должно пройти \
-                        не менее 20 минут, в день — не более 3 штампов. Подарочный кофе не обменивается на деньги.""");
+                        Штампы начисляются только за товары и услуги, приобретённые у нас. {{stampRules}}
+
+                        {{rewardRule}} Подарок не обменивается на деньги.""");
     }
 
     private void batch(String sql, List<SqlParameterSource> rows) {

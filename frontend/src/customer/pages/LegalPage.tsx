@@ -1,34 +1,43 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 
-import { publicApi } from '../api/customerApi';
+import { publicApi, type Company } from '../api/customerApi';
 import { ErrorMessage } from '../components/ErrorMessage';
 
 /**
  * Hüquqi sənəd. Mətn sadə formatdadır (# başlıq, > qeyd, abzaslar) və təhlükəsiz şəkildə — HTML kimi yox, React
- * elementləri kimi göstərilir.
+ * elementləri kimi göstərilir. {{stampRules}} və {{rewardRule}} şirkətin cari parametrləri ilə əvəz olunur (sahib
+ * Parametrlərdə dəyişəndə mətn də dəyişir).
  */
 export function LegalPage() {
   const { t } = useTranslation('profile');
   const { slug = '' } = useParams();
   const lang = currentLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
   const document = useQuery({ queryKey: ['legal', slug], queryFn: () => publicApi.legalDocument(slug) });
-  const blocks = resolveText(document.data?.content, lang).split(/\n\s*\n/).filter((block) => block.trim());
+  const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
+  const rules = useRuleSentences(company.data);
+  const blocks = resolveText(document.data?.content, lang)
+    .replace(/\{\{(stampRules|rewardRule)\}\}/g, (_, key: 'stampRules' | 'rewardRule') => rules[key])
+    .split(/\n\s*\n/)
+    .filter((block) => block.trim());
+
+  // Geri — gəldiyi səhifəyə (Parametrlər, qeydiyyat); səhifə birbaşa açılıbsa Parametrlərə
+  const back = () => (location.key === 'default' ? navigate('/settings') : navigate(-1));
 
   return (
     <div className="flex flex-col gap-4 pt-2">
-      <Button asChild variant="ghost" className="self-start">
-        <Link to="/">
-          <ArrowLeft aria-hidden="true" />
-          {t('legal.back')}
-        </Link>
+      <Button variant="ghost" className="self-start" onClick={back}>
+        <ArrowLeft aria-hidden="true" />
+        {t('legal.back')}
       </Button>
       <ErrorMessage error={document.error} />
       {document.data ? (
@@ -61,4 +70,23 @@ export function LegalPage() {
       ) : null}
     </div>
   );
+}
+
+/** Şirkətin möhür və hədiyyə qaydasının seçilmiş dildə cümlələri (istifadə şərtləri üçün). */
+function useRuleSentences(company: Company | undefined): { stampRules: string; rewardRule: string } {
+  const { t } = useTranslation('profile');
+  const lang = currentLanguage();
+  const interval = company?.stampRules?.minIntervalMinutes ?? 0;
+  const perDay = company?.stampRules?.maxStampsPerDay;
+  const stampRules = [
+    interval > 0 ? t('legal.rules.interval', { count: interval }) : '',
+    perDay ? t('legal.rules.perDay', { count: perDay }) : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const rule = company?.rewardRule;
+  const rewardRule = rule?.stampsRequired
+    ? t('legal.rules.reward', { count: rule.stampsRequired, reward: resolveText(rule.rewardName, lang) })
+    : '';
+  return { stampRules, rewardRule };
 }

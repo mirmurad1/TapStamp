@@ -20,7 +20,12 @@ public record PublicCompanyResponse(
         @Schema(description = "Şirkətin standart dili: az, en və ya ru") String defaultLanguage,
         @Schema(description = "Brend rəngi (#RRGGBB): müştəri tətbiqinin əsas rəngi") String brandColor,
         List<BranchResponse> branches,
-        @Schema(description = "Aktiv mükafat qaydası; təyin olunmayıbsa null") RewardRuleResponse rewardRule) {
+        @Schema(description = "Aktiv mükafat qaydası; təyin olunmayıbsa null") RewardRuleResponse rewardRule,
+        @Schema(description = "Şirkətin möhür qaydası (istifadə şərtlərində göstərilir)") StampRulesResponse stampRules) {
+
+    /** Möhür qaydası: iki möhür arasında ən az dəqiqə (0 — limitsiz) və gündə ən çox möhür. */
+    public record StampRulesResponse(int minIntervalMinutes, int maxStampsPerDay) {
+    }
 
     public record BranchResponse(UUID id, LocalizedText name, LocalizedText address, LocalizedText description) {
         public static BranchResponse from(Branch branch) {
