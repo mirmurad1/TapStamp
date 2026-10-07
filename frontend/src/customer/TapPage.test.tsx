@@ -74,9 +74,9 @@ describe('NFC toxunuşu səhifəsi', () => {
     });
     await renderAt('/tap/tok-123');
 
-    // Təbrik dialoqu açıqdır — arxadakı səhifə ekran oxuyucularından gizlidir
     expect(await screen.findByRole('heading', { name: 'Möhür əlavə olundu!', hidden: true })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: /Təbriklər!/ })).toBeInTheDocument();
+    // Təbrik dialoqu möhür animasiyasından (~2,2 san) sonra açılır
+    expect(await screen.findByRole('heading', { name: /Təbriklər!/ }, { timeout: 4000 })).toBeInTheDocument();
     expect(screen.getByText('Kartınız doldu — Pulsuz yuma sizindir!')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: 'Hədiyyə kartına bax' })[0]).toHaveAttribute('href', '/gift-cards');
     expect(calls.filter((call) => call === 'POST /api/v1/taps/tok-123/claim')).toHaveLength(1);

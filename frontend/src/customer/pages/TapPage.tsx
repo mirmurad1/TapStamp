@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Hourglass, LoaderCircle, MapPin, Nfc, TimerReset, TriangleAlert } from 'lucide-react';
+import { Hourglass, LoaderCircle, MapPin, Nfc, Stamp, Star, TimerReset, TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
@@ -14,11 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 
 import { publicApi, tapApi, type ClaimResult } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
-import { useJustSignedIn } from '../auth/justSignedIn';
 import { customerKeys } from '../auth/queryClient';
 import { Celebration, Confetti } from '../components/Celebration';
-import { StampCard } from '../components/StampCard';
-import { SwitchNumber } from '../components/SwitchNumber';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 
 /**
@@ -83,7 +80,8 @@ function Claim({ token, branch }: { token: string; branch: string }) {
       void queryClient.invalidateQueries({ queryKey: customerKeys.me });
       void queryClient.invalidateQueries({ queryKey: customerKeys.giftCards });
       if (result.giftCardId) {
-        setCelebrate(true);
+        // Böyük təbrik möhür animasiyası bitəndən sonra açılır
+        window.setTimeout(() => setCelebrate(true), STAMP_ANIMATION_MS);
       }
     },
   });
@@ -105,29 +103,45 @@ function Claim({ token, branch }: { token: string; branch: string }) {
   const rewardName = resolveText(company.data?.rewardRule?.rewardName, currentLanguage());
   return (
     <>
-      <ClaimSuccess result={claim.data} branch={branch} rewardName={rewardName} />
+      <ClaimSuccess result={claim.data} branch={branch} />
       <Celebration open={celebrate} rewardName={rewardName || undefined} onClose={() => setCelebrate(false)} />
     </>
   );
 }
 
-function ClaimSuccess({ result, branch, rewardName }: { result: ClaimResult; branch: string; rewardName: string }) {
-  const justSignedIn = useJustSignedIn();
+/** Möhür animasiyasının uzunluğu (damğa enir, kağıza vurulur, iz qalır). */
+const STAMP_ANIMATION_MS = 2200;
+
+/**
+ * Möhür vurulandan sonrakı ekran: damğa animasiyası, "Möhür əlavə olundu!" və konfeti. Kart və digər bölmələr ana
+ * səhifədədir ("Kartıma bax").
+ */
+function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string }) {
   const { t } = useTranslation('profile');
   const pending = result.status === 'PENDING';
-  const required = result.stampsRequired ?? 0;
   const completed = Boolean(result.giftCardId);
-  const current = result.currentStamps ?? 0;
+  const [impact, setImpact] = useState(false);
+
+  // Damğa kağıza dəyən an konfeti başlayır
+  useEffect(() => {
+    if (pending) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setImpact(true), 1100);
+    return () => window.clearTimeout(timer);
+  }, [pending]);
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Hər möhürdə kiçik konfeti; kart dolanda böyük bayram ekranı ayrıca açılır */}
-      {!pending && !completed ? <Confetti count={28} small /> : null}
-      <section className="animate-fade-up flex flex-col items-center gap-2 pt-4 text-center">
-        <span
-          className={`grid size-16 place-items-center rounded-full ${pending ? 'bg-highlight text-white' : 'bg-success text-white'}`}
-        >
-          {pending ? <Hourglass className="size-8" aria-hidden="true" /> : <CheckCircle2 className="size-8" aria-hidden="true" />}
+    <div className="flex flex-col items-center gap-6 pt-6 text-center">
+      {impact && !completed ? <Confetti count={28} small /> : null}
+      {pending ? (
+        <span className="animate-fade-up grid size-20 place-items-center rounded-full bg-highlight text-white">
+          <Hourglass className="size-10" aria-hidden="true" />
         </span>
+      ) : (
+        <StampImpression />
+      )}
+      <section className="animate-fade-up flex flex-col items-center gap-2" style={pending ? undefined : { animationDelay: '1.3s' }}>
         <h1 className="text-2xl font-bold">{pending ? t('tap.pending') : t('tap.stamped')}</h1>
         {pending ? <p className="text-muted-foreground">{t('tap.pendingHint')}</p> : null}
         {branch ? (
@@ -137,26 +151,35 @@ function ClaimSuccess({ result, branch, rewardName }: { result: ClaimResult; bra
           </p>
         ) : null}
       </section>
-      {required > 0 ? (
-        <StampCard
-          stampsRequired={required}
-          current={current}
-          pending={pending ? 1 : 0}
-          animateFrom={pending || completed ? undefined : Math.max(current - 1, 0)}
-          completed={completed}
-          showReturnHint={justSignedIn}
-          rewardName={rewardName || undefined}
-        />
-      ) : null}
-      <SwitchNumber />
-      <Button asChild size="lg">
+      <Button asChild size="lg" className="animate-fade-up w-full" style={pending ? undefined : { animationDelay: '1.6s' }}>
         <Link to={completed ? '/gift-cards' : '/'}>{completed ? t('celebrate.open') : t('tap.home')}</Link>
       </Button>
     </div>
   );
 }
 
-/** Toxunuş xətası: istifadəçinin dilində mesaj; cooldown-da geri sayım. */
+/**
+ * Damğa animasiyası (~2,2 san): möhür yuxarıdan enir, kağıza vurulur (kiçik silkələnmə və mürəkkəb dalğası),
+ * qalxıb gedir, yerində şirkətin rəngində möhür izi qalır.
+ */
+function StampImpression() {
+  return (
+    <div className="animate-stamp-shake relative grid size-40 place-items-center" aria-hidden="true">
+      {/* Kağızda qalan iz */}
+      <span className="animate-stamp-imprint absolute inset-3 grid place-items-center rounded-full border-4 border-primary text-primary">
+        <span className="absolute inset-2 rounded-full border-2 border-dashed border-primary/70" />
+        <Star className="size-14" fill="currentColor" />
+      </span>
+      {/* Mürəkkəb dalğası */}
+      <span className="animate-stamp-ink absolute inset-3 rounded-full border-4 border-primary" />
+      {/* Damğanın özü */}
+      <span className="animate-stamp-press absolute inset-0 grid place-items-center text-foreground">
+        <Stamp className="size-24 drop-shadow-lg" strokeWidth={1.5} />
+      </span>
+    </div>
+  );
+}
+
 export function TapError({ error, message }: { error?: unknown; message?: string }) {
   const { t } = useTranslation('profile');
   const errorMessage = useErrorMessage();

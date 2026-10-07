@@ -12,6 +12,7 @@ node scripts/screenshots/admin-settings.cjs
 node scripts/screenshots/account-team.cjs
 node scripts/screenshots/admin-pages.cjs
 node scripts/screenshots/platform-pages.cjs
+node scripts/screenshots/stamp-animation.cjs
 ```
 
 `customer-flow.cjs` test müştərisi yaradır və kartını dev bazasında doldurur — yalnız dev mühiti üçündür.
@@ -58,3 +59,6 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase7-09-branch-dialog.png` | Filialın düzəlişi: ad/ünvan 3 dildə, iş saatları |
 | `phase7-10-platform-tenant-domains.png` | Platforma: şirkətin səhifəsi — göstəricilər, sahiblər, domenlər |
 | `phase7-11-platform-audit.png` | Platforma audit jurnalı |
+| `phase7-12-stamp-animation-1.png` | Möhür ekranı: damğa enir |
+| `phase7-13-stamp-animation-2.png` | Damğa vurulur (mürəkkəb dalğası, konfeti) |
+| `phase7-14-stamp-animation-3.png` | Son vəziyyət: möhür izi, "Möhür əlavə olundu!" |
