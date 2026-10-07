@@ -4,6 +4,8 @@ import { RequireActive, RequireState } from './auth/guards';
 import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
+import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
+import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { InvitationPage } from './pages/auth/InvitationPage';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -59,7 +61,8 @@ export const adminRouter = createBrowserRouter(
                       element: <RequireRole roles={['COMPANY_OWNER', 'BRANCH_MANAGER']} />,
                       children: [
                         { path: 'team', element: <TeamPage /> },
-                        { path: 'customers/*', element: <PlaceholderPage section="customers" /> },
+                        { path: 'customers', element: <CustomersPage /> },
+                        { path: 'customers/:customerId', element: <CustomerDetailPage /> },
                       ],
                     },
                     {

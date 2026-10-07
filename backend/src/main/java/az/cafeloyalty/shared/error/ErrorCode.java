@@ -88,6 +88,10 @@ public enum ErrorCode {
     /** Hədiyyə kartı ləğv edilib (məs. hesab silinib). */
     GIFT_CARD_REVOKED(HttpStatus.CONFLICT),
     /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
+    IDEMPOTENCY_KEY_REUSED(HttpStatus.CONFLICT),
+    STAMP_ADJUSTMENT_TOO_LARGE(HttpStatus.CONFLICT),
+    TAG_ROTATION_IN_PROGRESS(HttpStatus.CONFLICT),
+    PROVISIONING_ALREADY_EXPORTED(HttpStatus.CONFLICT),
     TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
 

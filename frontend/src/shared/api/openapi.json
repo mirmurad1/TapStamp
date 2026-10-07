@@ -515,6 +515,426 @@
         "tags" : [ "Admin: autentifikasiya" ]
       }
     },
+    "/api/v1/admin/customers" : {
+      "get" : {
+        "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).",
+        "operationId" : "list_3",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "language",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "inactiveDays",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "registeredFrom",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "registeredTo",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "REGISTERED_AT",
+            "enum" : [ "REGISTERED_AT", "LAST_VISIT_AT", "NAME", "TOTAL_STAMPS" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "direction",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "desc",
+            "pattern" : "asc|desc"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Page"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Müştərilərin siyahısı",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/export" : {
+      "post" : {
+        "description" : "Siyahı ilə eyni filtrlər. Yalnız sahib, step-up tələb edir. Başlıqlar adminin dilində, UTF-8 (BOM), formula yeridilməsindən qorunur; tam telefon nömrəsi daxil deyil. Auditə yazılır.",
+        "operationId" : "export",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "language",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "inactiveDays",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "registeredFrom",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "registeredTo",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "CSV ixracı",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/fraud-flags/{flagId}/resolve" : {
+      "post" : {
+        "description" : "Qeyd məcburidir; auditə yazılır.",
+        "operationId" : "resolve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "flagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Fırıldaq işarəsini bağlamaq",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}" : {
+      "get" : {
+        "operationId" : "get_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Row"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Müştərinin detalları",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}/fraud-flags" : {
+      "get" : {
+        "operationId" : "fraudFlags",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FraudFlag"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Fırıldaq işarələri",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}/phone-reveal" : {
+      "post" : {
+        "description" : "Yalnız sahib; step-up tələb edir, hər baxış auditə yazılır.",
+        "operationId" : "revealPhone",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PhoneResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Tam telefon nömrəsi",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}/stamp-adjustments" : {
+      "post" : {
+        "description" : "`Idempotency-Key` başlığı məcburidir (8–100 simvol): eyni açarla təkrar sorğu eyni nəticəni qaytarır. Silmə kartdakı saydan çox olarsa, istifadə olunmamış son hədiyyə kartı ləğv edilir; təhvil verilmiş hədiyyəni geri almaq olmaz (`STAMP_ADJUSTMENT_TOO_LARGE`).",
+        "operationId" : "adjust",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "description" : "Təkrar göndərişdən qorunma açarı",
+          "in" : "header",
+          "name" : "Idempotency-Key",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AdjustmentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdjustmentResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhürlərin əl ilə düzəlişi",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}/status" : {
+      "patch" : {
+        "description" : "Bloklananda müştərinin bütün sessiyaları bağlanır.",
+        "operationId" : "updateStatus_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StatusRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Bloklamaq və ya blokdan çıxarmaq",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/customers/{customerId}/timeline" : {
+      "get" : {
+        "description" : "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
+        "operationId" : "timeline",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "customerId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "before",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TimelineItem"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhür və hədiyyə tarixçəsi",
+        "tags" : [ "Admin: müştərilər" ]
+      }
+    },
     "/api/v1/admin/me" : {
       "get" : {
         "description" : "Rollar, filiallar, dil və 2FA vəziyyəti.",
@@ -2406,6 +2826,49 @@
         },
         "required" : [ "displayName", "password", "token" ]
       },
+      "AdjustmentRequest" : {
+        "type" : "object",
+        "description" : "Əl ilə düzəliş: delta müsbət — əlavə (filial məcburidir), mənfi — silmə",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "delta" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 50,
+            "minimum" : -50
+          },
+          "reason" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 5
+          }
+        },
+        "required" : [ "delta", "reason" ]
+      },
+      "AdjustmentResult" : {
+        "type" : "object",
+        "properties" : {
+          "currentStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "giftCardsIssued" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "giftCardsRevoked" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "AuthStatusResponse" : {
         "type" : "object",
         "properties" : {
@@ -2654,6 +3117,35 @@
           "devTools" : {
             "type" : "boolean",
             "description" : "Dev alətləri (simulyator, outbox) — yalnız dev mühitində"
+          }
+        }
+      },
+      "FraudFlag" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "details" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "resolutionNote" : {
+            "type" : "string"
+          },
+          "resolvedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
           }
         }
       },
@@ -3227,6 +3719,29 @@
           }
         }
       },
+      "Page" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Row"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "PasswordConfirmRequest" : {
         "type" : "object",
         "properties" : {
@@ -3303,6 +3818,14 @@
             "format" : "uuid"
           },
           "phoneMasked" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PhoneResponse" : {
+        "type" : "object",
+        "properties" : {
+          "phone" : {
             "type" : "string"
           }
         }
@@ -3425,6 +3948,17 @@
         },
         "required" : [ "reason" ]
       },
+      "ResolveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "note" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 3
+          }
+        },
+        "required" : [ "note" ]
+      },
       "Retention" : {
         "type" : "object",
         "properties" : {
@@ -3546,6 +4080,55 @@
           },
           "role" : {
             "type" : "string"
+          }
+        }
+      },
+      "Row" : {
+        "type" : "object",
+        "properties" : {
+          "currentStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "lastVisitAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "openFraudFlags" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "phoneMasked" : {
+            "type" : "string"
+          },
+          "registeredAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "rewardsEarned" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "rewardsRedeemed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "totalStamps" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -3682,6 +4265,16 @@
           }
         }
       },
+      "StatusRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "pattern" : "ACTIVE|BLOCKED"
+          }
+        },
+        "required" : [ "status" ]
+      },
       "StepUpRequest" : {
         "type" : "object",
         "description" : "2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir",
@@ -3778,6 +4371,42 @@
           }
         },
         "required" : [ "status" ]
+      },
+      "TimelineItem" : {
+        "type" : "object",
+        "properties" : {
+          "at" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string"
+          },
+          "redeemedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "rewardName" : {
+            "type" : "string"
+          },
+          "source" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
       },
       "UpdateProfileRequest" : {
         "type" : "object",

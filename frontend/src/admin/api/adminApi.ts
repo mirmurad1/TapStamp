@@ -275,3 +275,48 @@ export const analyticsApi = {
   languages: (query: AnalyticsFilter) =>
     unwrap(api.GET('/api/v1/admin/analytics/languages', { params: { query: { branchId: query.branchId } } })),
 };
+
+export type CustomerRow = Schemas['Row'];
+export type CustomerPage = Schemas['Page'];
+export type TimelineItem = Schemas['TimelineItem'];
+export type FraudFlag = Schemas['FraudFlag'];
+export type AdjustmentResult = Schemas['AdjustmentResult'];
+
+export interface CustomerFilter {
+  q?: string;
+  language?: string;
+  status?: string;
+  inactiveDays?: number;
+  branchId?: string;
+  registeredFrom?: string;
+  registeredTo?: string;
+}
+
+export type CustomerSort = 'REGISTERED_AT' | 'LAST_VISIT_AT' | 'NAME' | 'TOTAL_STAMPS';
+
+/** Müştərilər (sahib və menecer). Tam nömrə, bloklama və CSV yalnız sahibə açıqdır. */
+export const customersApi = {
+  list: (query: CustomerFilter & { sort: CustomerSort; direction: 'asc' | 'desc'; page: number; size: number }) =>
+    unwrap(api.GET('/api/v1/admin/customers', { params: { query } })),
+  get: (customerId: string) => unwrap(api.GET('/api/v1/admin/customers/{customerId}', { params: { path: { customerId } } })),
+  timeline: (customerId: string, before?: string) =>
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/timeline', { params: { path: { customerId }, query: { before } } })),
+  revealPhone: (customerId: string) =>
+    unwrap(api.POST('/api/v1/admin/customers/{customerId}/phone-reveal', { params: { path: { customerId } } })),
+  adjust: (customerId: string, body: { delta: number; reason: string; branchId?: string }, idempotencyKey: string) =>
+    unwrap(
+      api.POST('/api/v1/admin/customers/{customerId}/stamp-adjustments', {
+        params: { path: { customerId }, header: { 'Idempotency-Key': idempotencyKey } },
+        body,
+      }),
+    ),
+  updateStatus: (customerId: string, status: 'ACTIVE' | 'BLOCKED') =>
+    unwrap(api.PATCH('/api/v1/admin/customers/{customerId}/status', { params: { path: { customerId } }, body: { status } })),
+  fraudFlags: (customerId: string) =>
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/fraud-flags', { params: { path: { customerId } } })),
+  resolveFlag: (flagId: string, note: string) =>
+    unwrap(api.POST('/api/v1/admin/customers/fraud-flags/{flagId}/resolve', { params: { path: { flagId } }, body: { note } })),
+  /** CSV faylı (Blob); step-up tələb edir. */
+  exportCsv: (query: CustomerFilter) =>
+    unwrap(api.POST('/api/v1/admin/customers/export', { params: { query }, parseAs: 'blob' })) as Promise<Blob>,
+};

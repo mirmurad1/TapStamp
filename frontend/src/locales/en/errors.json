@@ -48,5 +48,9 @@
   "GIFT_CARD_NOT_FOUND": "There is no such gift card. Check the code and try again.",
   "GIFT_CARD_ALREADY_REDEEMED": "This gift card has already been used.",
   "GIFT_CARD_EXPIRED": "This gift card has expired.",
-  "GIFT_CARD_REVOKED": "This gift card has been cancelled."
+  "GIFT_CARD_REVOKED": "This gift card has been cancelled.",
+  "IDEMPOTENCY_KEY_REUSED": "This operation was already sent with different data. Refresh the page.",
+  "STAMP_ADJUSTMENT_TOO_LARGE": "Cannot remove that many stamps: the card and unused gift cards do not have enough.",
+  "TAG_ROTATION_IN_PROGRESS": "Key rotation in progress: tap the reprogrammed tag first.",
+  "PROVISIONING_ALREADY_EXPORTED": "Keys are shown only once. Rotate the keys if needed."
 }

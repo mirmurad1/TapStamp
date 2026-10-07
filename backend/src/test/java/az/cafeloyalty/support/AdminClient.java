@@ -98,6 +98,11 @@ public final class AdminClient {
         return perform(withJson(MockMvcRequestBuilders.post(basePath + path), body));
     }
 
+    /** POST əlavə başlıqla (məs. {@code Idempotency-Key}). */
+    public ResultActions post(String path, Object body, String header, String value) throws Exception {
+        return perform(withJson(MockMvcRequestBuilders.post(basePath + path), body).header(header, value));
+    }
+
     public ResultActions post(String path) throws Exception {
         return perform(MockMvcRequestBuilders.post(basePath + path));
     }

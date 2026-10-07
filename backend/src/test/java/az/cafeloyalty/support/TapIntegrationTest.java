@@ -175,17 +175,23 @@ public abstract class TapIntegrationTest extends CustomerIntegrationTest {
     }
 
     protected AdminClient signedInBarista(String host, UUID branchId) throws Exception {
+        return signedInStaff(host, AdminRole.STAFF, branchId);
+    }
+
+    /** İstənilən rolda işçi (TOTP-siz; step-up şifrə ilə olur). Sahib üçün {@code branchId} null-dur. */
+    protected AdminClient signedInStaff(String host, AdminRole role, UUID branchId) throws Exception {
         TenantInfo tenant = directory.findByHost(host).orElseThrow();
-        String email = "barista-" + UUID.randomUUID().toString().substring(0, 8) + "@example.test";
+        String email = role.name().toLowerCase(java.util.Locale.ROOT) + "-" + UUID.randomUUID().toString().substring(0, 8)
+                + "@example.test";
         TenantContext.runAs(tenant, () -> realms.tx(AdminRealm.STAFF).executeWithoutResult(status -> {
-            UUID id = realms.accounts(AdminRealm.STAFF).insert(email, hasher.hash(STAFF_PASSWORD), "Test Barista",
+            UUID id = realms.accounts(AdminRealm.STAFF).insert(email, hasher.hash(STAFF_PASSWORD), "Test " + role,
                     Language.AZ, AdminAccount.AccountStatus.ACTIVE, clock.instant());
             tenantJdbc.sql("""
                             INSERT INTO staff_roles (id, staff_user_id, role, branch_id, created_at)
                             VALUES (:id, :userId, :role, :branchId, now())""")
                     .param("id", Ids.newId())
                     .param("userId", id)
-                    .param("role", AdminRole.STAFF.name())
+                    .param("role", role.name())
                     .param("branchId", branchId)
                     .update();
         }));

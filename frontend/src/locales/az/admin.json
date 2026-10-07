@@ -361,5 +361,98 @@
     "anotherCode": "Başqa kod",
     "recent": "Son təhvillər (24 saat)",
     "recentEmpty": "Bu gün hələ təhvil yoxdur."
+  },
+  "customers": {
+    "title": "Müştərilər",
+    "subtitle": "Axtarış, filtrlər, hər müştərinin möhür tarixçəsi və əl ilə düzəliş.",
+    "export": "CSV ixrac",
+    "search": "Axtarış",
+    "searchPlaceholder": "Ad və ya telefon nömrəsi",
+    "filters": {
+      "language": "Dil",
+      "status": "Status",
+      "inactive": "Gəlməyib",
+      "any": "Hamısı",
+      "inactiveDays_one": "{{count}} gündən çox",
+      "inactiveDays_other": "{{count}} gündən çox"
+    },
+    "status": {
+      "ACTIVE": "Aktiv",
+      "BLOCKED": "Bloklanıb"
+    },
+    "columns": {
+      "customer": "Müştəri",
+      "language": "Dil",
+      "stamps": "Möhürlər",
+      "rewards": "Hədiyyələr",
+      "lastVisit": "Son gəliş",
+      "registered": "Qeydiyyat"
+    },
+    "stampsValue": "{{current}} kartda · {{total}} cəmi",
+    "flags_one": "{{count}} işarə",
+    "flags_other": "{{count}} işarə",
+    "noName": "Adsız müştəri",
+    "empty": "Heç bir müştəri tapılmadı.",
+    "range": "{{from}}–{{to}} / {{total}}",
+    "previous": "Əvvəlki",
+    "next": "Növbəti",
+    "detail": {
+      "currentStamps": "Kartdakı möhürlər",
+      "totalStamps": "Cəmi möhürlər",
+      "rewardsEarned": "Qazanılan hədiyyələr",
+      "rewardsRedeemed": "Təhvil verilən hədiyyələr",
+      "registered": "Qeydiyyat: {{date}}",
+      "lastVisit": "Son gəliş: {{date}}",
+      "noVisits": "Hələ gəlməyib",
+      "revealPhone": "Tam nömrəni göstər",
+      "revealAudited": "Tam nömrəyə baxış audit jurnalına yazıldı.",
+      "block": "Blokla",
+      "unblock": "Blokdan çıxar",
+      "blockConfirm": "{{name}} bloklansın? Hesabından dərhal çıxış ediləcək və yeni möhür ala bilməyəcək."
+    },
+    "adjust": {
+      "open": "Möhürü düzəlt",
+      "title": "Möhürlərin əl ilə düzəlişi",
+      "description": "Məsələn, çip işləmədikdə möhür əlavə edin və ya səhvən vurulanı silin. Hər düzəliş audit jurnalına yazılır.",
+      "add": "Əlavə et",
+      "remove": "Sil",
+      "count": "Say (1–50)",
+      "reason": "Səbəb",
+      "reasonHint": "Ən azı 5 simvol.",
+      "removeHint": "Son möhürlər ləğv olunur. Kartdakından çox silinərsə, istifadə olunmamış son hədiyyə kartı da ləğv edilir.",
+      "invalid": "Sayı (1–50), səbəbi (ən azı 5 simvol) və filialı yoxlayın."
+    },
+    "timeline": {
+      "title": "Tarixçə",
+      "empty": "Hələ möhür yoxdur.",
+      "more": "Daha çox göstər",
+      "reward": "Hədiyyə kartı: {{name}}",
+      "stamp": {
+        "NFC_TAP": "Möhür (NFC)",
+        "MANUAL": "Möhür (əl ilə)"
+      },
+      "status": {
+        "PENDING": "Təsdiq gözləyir",
+        "CONFIRMED": "Təsdiqlənib",
+        "REJECTED": "Rədd edilib",
+        "REVOKED": "Ləğv olunub",
+        "AVAILABLE": "İstifadə olunmayıb",
+        "REDEEMED": "Təhvil verilib",
+        "EXPIRED": "Müddəti bitib"
+      }
+    },
+    "flagsTitle": "Fırıldaq işarələri",
+    "noFlags": "İşarə yoxdur.",
+    "flagOpen": "Açıq",
+    "flagResolved": "Həll olunub",
+    "resolveNote": "Qeyd (məs. yoxlandı, problem yoxdur)",
+    "resolve": "Bağla",
+    "flagType": {
+      "REPLAY_ATTEMPT": "Köhnə linkin təkrar istifadəsi",
+      "COUNTER_GAP": "Sayğacda böyük boşluq",
+      "RAPID_MULTI_ACCOUNT": "Bir cihazdan çoxlu hesab",
+      "COOLDOWN_HAMMERING": "Gözləmə müddətində çoxlu cəhd",
+      "BINDING_MISMATCH": "Link başqa cihazda açılıb"
+    }
   }
 }

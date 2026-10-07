@@ -126,6 +126,25 @@ public class StampLedger {
         return id;
     }
 
+    /** Admin tərəfindən əl ilə əlavə olunan təsdiqlənmiş möhür (səbəb və icraçı məcburidir). */
+    public UUID insertManualStamp(UUID branchId, UUID customerId, UUID staffId, String reason, LocalDate localDate,
+                                  Instant at) {
+        UUID id = Ids.newId();
+        jdbc.sql("""
+                        INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason,
+                                            created_by_staff_id, confirmed_at, confirmed_by, created_at)
+                        VALUES (:id, :branchId, :customerId, 'MANUAL', 'CONFIRMED', :day, :reason, :staff, :at, :staff, :at)""")
+                .param("id", id)
+                .param("branchId", branchId)
+                .param("customerId", customerId)
+                .param("day", localDate)
+                .param("reason", reason)
+                .param("staff", staffId)
+                .param("at", ts(at))
+                .update();
+        return id;
+    }
+
     public Optional<Stamp> findByTapToken(UUID tapTokenId) {
         return jdbc.sql("SELECT id, branch_id, customer_id, status, reward_id, created_at FROM stamps WHERE tap_token_id = :id")
                 .param("id", tapTokenId)

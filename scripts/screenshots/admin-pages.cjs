@@ -12,6 +12,7 @@ const base = 'https://mockcoffee.localhost';
 const PAGES = [
   ['01-dashboard', '/admin', 'Ən sıx saatlar', true],
   ['02-dashboard-mobile', '/admin', 'Ən sıx saatlar', false, { width: 390, height: 844 }],
+  ['03-customers', '/admin/customers', 'Son gəliş', false],
 ];
 
 function totp(step) {
@@ -44,6 +45,18 @@ function totp(step) {
       await page.waitForTimeout(800);
       await page.screenshot({ path: `${out}/${prefix}-${name}.png`, fullPage });
     }
+    // Müştərinin detalları və əl ilə düzəliş dialoqu
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(base + '/admin/customers');
+    await page.locator('tbody a').first().click();
+    await page.getByText('Tarixçə').first().waitFor();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${out}/${prefix}-04-customer-detail.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Möhürü düzəlt' }).click();
+    await page.getByRole('dialog').waitFor();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${out}/${prefix}-05-customer-adjust.png` });
+    await page.keyboard.press('Escape');
   } finally {
     await browser.close();
   }

@@ -48,5 +48,9 @@
   "GIFT_CARD_NOT_FOUND": "Belə hədiyyə kartı yoxdur. Kodu yoxlayıb yenidən daxil edin.",
   "GIFT_CARD_ALREADY_REDEEMED": "Bu hədiyyə kartı artıq istifadə olunub.",
   "GIFT_CARD_EXPIRED": "Bu hədiyyə kartının müddəti bitib.",
-  "GIFT_CARD_REVOKED": "Bu hədiyyə kartı ləğv edilib."
+  "GIFT_CARD_REVOKED": "Bu hədiyyə kartı ləğv edilib.",
+  "IDEMPOTENCY_KEY_REUSED": "Bu əməliyyat artıq fərqli məlumatla göndərilib. Səhifəni yeniləyin.",
+  "STAMP_ADJUSTMENT_TOO_LARGE": "Bu qədər möhür silmək olmaz: kartda və istifadə olunmamış hədiyyələrdə kifayət qədər möhür yoxdur.",
+  "TAG_ROTATION_IN_PROGRESS": "Açar yenilənməsi davam edir: əvvəlcə yeni proqramlaşdırılmış çipə toxunun.",
+  "PROVISIONING_ALREADY_EXPORTED": "Açarlar yalnız bir dəfə göstərilir. Lazımdırsa, açarı yeniləyin."
 }

@@ -321,6 +321,180 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Müştərilərin siyahısı
+         * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).
+         */
+        get: operations["list_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * CSV ixracı
+         * @description Siyahı ilə eyni filtrlər. Yalnız sahib, step-up tələb edir. Başlıqlar adminin dilində, UTF-8 (BOM), formula yeridilməsindən qorunur; tam telefon nömrəsi daxil deyil. Auditə yazılır.
+         */
+        post: operations["export"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/fraud-flags/{flagId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fırıldaq işarəsini bağlamaq
+         * @description Qeyd məcburidir; auditə yazılır.
+         */
+        post: operations["resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Müştərinin detalları */
+        get: operations["get_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}/fraud-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fırıldaq işarələri */
+        get: operations["fraudFlags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}/phone-reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tam telefon nömrəsi
+         * @description Yalnız sahib; step-up tələb edir, hər baxış auditə yazılır.
+         */
+        post: operations["revealPhone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}/stamp-adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Möhürlərin əl ilə düzəlişi
+         * @description `Idempotency-Key` başlığı məcburidir (8–100 simvol): eyni açarla təkrar sorğu eyni nəticəni qaytarır. Silmə kartdakı saydan çox olarsa, istifadə olunmamış son hədiyyə kartı ləğv edilir; təhvil verilmiş hədiyyəni geri almaq olmaz (`STAMP_ADJUSTMENT_TOO_LARGE`).
+         */
+        post: operations["adjust"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Bloklamaq və ya blokdan çıxarmaq
+         * @description Bloklananda müştərinin bütün sessiyaları bağlanır.
+         */
+        patch: operations["updateStatus_2"];
+        trace?: never;
+    };
+    "/api/v1/admin/customers/{customerId}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Möhür və hədiyyə tarixçəsi
+         * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
+         */
+        get: operations["timeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/me": {
         parameters: {
             query?: never;
@@ -1677,6 +1851,24 @@ export interface components {
             password: string;
             token: string;
         };
+        /** @description Əl ilə düzəliş: delta müsbət — əlavə (filial məcburidir), mənfi — silmə */
+        AdjustmentRequest: {
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: int32 */
+            delta: number;
+            reason: string;
+        };
+        AdjustmentResult: {
+            /** Format: int32 */
+            currentStamps?: number;
+            /** Format: int32 */
+            giftCardsIssued?: number;
+            /** Format: int32 */
+            giftCardsRevoked?: number;
+            /** Format: int32 */
+            totalStamps?: number;
+        };
         AuthStatusResponse: {
             /** @enum {string} */
             status?: "AUTHENTICATED";
@@ -1782,6 +1974,18 @@ export interface components {
         Features: {
             /** @description Dev alətləri (simulyator, outbox) — yalnız dev mühitində */
             devTools?: boolean;
+        };
+        FraudFlag: {
+            /** Format: date-time */
+            createdAt?: string;
+            details?: string;
+            /** Format: uuid */
+            id?: string;
+            resolutionNote?: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+            severity?: string;
+            type?: string;
         };
         GiftCardCheckRequest: {
             /** @description Kartın kodu (tire və boşluqlar nəzərə alınmır), QR-dakı mətn eynidir */
@@ -2014,6 +2218,15 @@ export interface components {
             status?: string;
             totpEnabled?: boolean;
         };
+        Page: {
+            items?: components["schemas"]["Row"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
         PasswordConfirmRequest: {
             password: string;
         };
@@ -2043,6 +2256,9 @@ export interface components {
             /** Format: uuid */
             id?: string;
             phoneMasked?: string;
+        };
+        PhoneResponse: {
+            phone?: string;
         };
         ProvisionRequest: {
             defaultLanguage: string;
@@ -2079,6 +2295,9 @@ export interface components {
         };
         RejectStampRequest: {
             reason: string;
+        };
+        ResolveRequest: {
+            note: string;
         };
         Retention: {
             /** Format: int64 */
@@ -2139,6 +2358,28 @@ export interface components {
             /** Format: uuid */
             branchId?: string;
             role?: string;
+        };
+        Row: {
+            /** Format: int32 */
+            currentStamps?: number;
+            /** Format: uuid */
+            id?: string;
+            language?: string;
+            /** Format: date-time */
+            lastVisitAt?: string;
+            name?: string;
+            /** Format: int32 */
+            openFraudFlags?: number;
+            phoneMasked?: string;
+            /** Format: date-time */
+            registeredAt?: string;
+            /** Format: int32 */
+            rewardsEarned?: number;
+            /** Format: int32 */
+            rewardsRedeemed?: number;
+            status?: string;
+            /** Format: int32 */
+            totalStamps?: number;
         };
         SeriesPoint: {
             /** Format: date */
@@ -2205,6 +2446,9 @@ export interface components {
             /** Format: int32 */
             branches?: number;
         };
+        StatusRequest: {
+            status: string;
+        };
         /** @description 2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir */
         StepUpRequest: {
             code?: string;
@@ -2239,6 +2483,21 @@ export interface components {
         };
         TenantStatusRequest: {
             status: string;
+        };
+        TimelineItem: {
+            /** Format: date-time */
+            at?: string;
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: uuid */
+            id?: string;
+            kind?: string;
+            reason?: string;
+            /** Format: date-time */
+            redeemedAt?: string;
+            rewardName?: string;
+            source?: string;
+            status?: string;
         };
         UpdateProfileRequest: {
             displayName?: string;
@@ -2619,6 +2878,231 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: {
+                q?: string;
+                language?: string;
+                status?: string;
+                inactiveDays?: number;
+                branchId?: string;
+                registeredFrom?: string;
+                registeredTo?: string;
+                sort?: "REGISTERED_AT" | "LAST_VISIT_AT" | "NAME" | "TOTAL_STAMPS";
+                direction?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Page"];
+                };
+            };
+        };
+    };
+    export: {
+        parameters: {
+            query?: {
+                q?: string;
+                language?: string;
+                status?: string;
+                inactiveDays?: number;
+                branchId?: string;
+                registeredFrom?: string;
+                registeredTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                flagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Row"];
+                };
+            };
+        };
+    };
+    fraudFlags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FraudFlag"][];
+                };
+            };
+        };
+    };
+    revealPhone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PhoneResponse"];
+                };
+            };
+        };
+    };
+    adjust: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Təkrar göndərişdən qorunma açarı */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdjustmentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdjustmentResult"];
+                };
+            };
+        };
+    };
+    updateStatus_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    timeline: {
+        parameters: {
+            query?: {
+                before?: string;
+            };
+            header?: never;
+            path: {
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TimelineItem"][];
+                };
             };
         };
     };

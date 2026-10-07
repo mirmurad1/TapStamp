@@ -361,5 +361,98 @@
     "anotherCode": "Another code",
     "recent": "Recent redemptions (24 hours)",
     "recentEmpty": "No redemptions yet today."
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Search, filters, each customer’s stamp history and manual adjustments.",
+    "export": "Export CSV",
+    "search": "Search",
+    "searchPlaceholder": "Name or phone number",
+    "filters": {
+      "language": "Language",
+      "status": "Status",
+      "inactive": "Not visited",
+      "any": "All",
+      "inactiveDays_one": "over {{count}} day",
+      "inactiveDays_other": "over {{count}} days"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "BLOCKED": "Blocked"
+    },
+    "columns": {
+      "customer": "Customer",
+      "language": "Language",
+      "stamps": "Stamps",
+      "rewards": "Rewards",
+      "lastVisit": "Last visit",
+      "registered": "Registered"
+    },
+    "stampsValue": "{{current}} on card · {{total}} total",
+    "flags_one": "{{count}} flag",
+    "flags_other": "{{count}} flags",
+    "noName": "Unnamed customer",
+    "empty": "No customers found.",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "detail": {
+      "currentStamps": "Stamps on card",
+      "totalStamps": "Total stamps",
+      "rewardsEarned": "Rewards earned",
+      "rewardsRedeemed": "Rewards handed over",
+      "registered": "Registered: {{date}}",
+      "lastVisit": "Last visit: {{date}}",
+      "noVisits": "No visits yet",
+      "revealPhone": "Show full number",
+      "revealAudited": "Viewing the full number was recorded in the audit log.",
+      "block": "Block",
+      "unblock": "Unblock",
+      "blockConfirm": "Block {{name}}? They will be signed out immediately and cannot collect new stamps."
+    },
+    "adjust": {
+      "open": "Adjust stamps",
+      "title": "Manual stamp adjustment",
+      "description": "For example, add a stamp when the tag did not work, or remove one given by mistake. Every adjustment is recorded in the audit log.",
+      "add": "Add",
+      "remove": "Remove",
+      "count": "Count (1–50)",
+      "reason": "Reason",
+      "reasonHint": "At least 5 characters.",
+      "removeHint": "The latest stamps are revoked. If you remove more than are on the card, the latest unused gift card is revoked too.",
+      "invalid": "Check the count (1–50), the reason (at least 5 characters) and the branch."
+    },
+    "timeline": {
+      "title": "History",
+      "empty": "No stamps yet.",
+      "more": "Show more",
+      "reward": "Gift card: {{name}}",
+      "stamp": {
+        "NFC_TAP": "Stamp (NFC)",
+        "MANUAL": "Stamp (manual)"
+      },
+      "status": {
+        "PENDING": "Awaiting approval",
+        "CONFIRMED": "Confirmed",
+        "REJECTED": "Rejected",
+        "REVOKED": "Revoked",
+        "AVAILABLE": "Not used yet",
+        "REDEEMED": "Handed over",
+        "EXPIRED": "Expired"
+      }
+    },
+    "flagsTitle": "Fraud flags",
+    "noFlags": "No flags.",
+    "flagOpen": "Open",
+    "flagResolved": "Resolved",
+    "resolveNote": "Note (e.g. checked, all fine)",
+    "resolve": "Close",
+    "flagType": {
+      "REPLAY_ATTEMPT": "Old link reused",
+      "COUNTER_GAP": "Large counter gap",
+      "RAPID_MULTI_ACCOUNT": "Many accounts from one device",
+      "COOLDOWN_HAMMERING": "Many attempts during cooldown",
+      "BINDING_MISMATCH": "Link opened on another device"
+    }
   }
 }
