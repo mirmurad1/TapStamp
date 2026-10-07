@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Hourglass, LoaderCircle, MapPin, Nfc, Star, TimerReset, TriangleAlert } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Hourglass, LoaderCircle, MapPin, Nfc, TimerReset, TriangleAlert } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
 
@@ -16,6 +16,7 @@ import { publicApi, tapApi, type ClaimResult } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
 import { Celebration, Confetti } from '../components/Celebration';
+import { StampScene } from '../components/stamp3d/StampScene';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 
 /**
@@ -122,14 +123,8 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
   const completed = Boolean(result.giftCardId);
   const [impact, setImpact] = useState(false);
 
-  // Damğa kağıza dəyən an konfeti başlayır
-  useEffect(() => {
-    if (pending) {
-      return undefined;
-    }
-    const timer = window.setTimeout(() => setImpact(true), 1250);
-    return () => window.clearTimeout(timer);
-  }, [pending]);
+  // Damğa masaya dəyən an konfeti başlayır
+  const onImpact = useCallback(() => setImpact(true), []);
 
   return (
     <div className="flex flex-col items-center gap-6 pt-6 text-center">
@@ -139,9 +134,9 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
           <Hourglass className="size-10" aria-hidden="true" />
         </span>
       ) : (
-        <StampImpression />
+        <StampScene onImpact={onImpact} />
       )}
-      <section className="animate-fade-up flex flex-col items-center gap-2" style={pending ? undefined : { animationDelay: '1.45s' }}>
+      <section className="animate-fade-up flex flex-col items-center gap-2" style={pending ? undefined : { animationDelay: '1.4s' }}>
         <h1 className="text-2xl font-bold">{pending ? t('tap.pending') : t('tap.stamped')}</h1>
         {pending ? <p className="text-muted-foreground">{t('tap.pendingHint')}</p> : null}
         {branch ? (
@@ -154,39 +149,6 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
       <Button asChild size="lg" className="animate-fade-up w-full" style={pending ? undefined : { animationDelay: '1.75s' }}>
         <Link to={completed ? '/gift-cards' : '/'}>{completed ? t('celebrate.open') : t('tap.home')}</Link>
       </Button>
-    </div>
-  );
-}
-
-/**
- * 3D damğa animasiyası (~2,4 san, yalnız CSS): şirkətin rəngində möhür perspektivdə enir, kağıza vurulur (sıxılır,
- * kölgə böyüyür, mürəkkəb dalğası), qalxıb gedir; masanın üstündə rəngli möhür izi qalır. Bütün hərəkət öz
- * sahəsinin içindədir — header-ə çıxmır.
- */
-function StampImpression() {
-  return (
-    <div className="animate-stamp-shake relative h-64 w-60 [perspective:800px]" aria-hidden="true">
-      {/* Kağız (perspektivdə yatıq) və onun üstündə qalan iz */}
-      <div className="absolute inset-x-0 bottom-0 h-32 [transform-style:preserve-3d]">
-        <div className="absolute left-1/2 top-1/2 size-40 -translate-x-1/2 -translate-y-1/2 [transform:rotateX(58deg)]">
-          <span className="animate-stamp-imprint absolute inset-0 grid place-items-center rounded-full border-[6px] border-primary text-primary">
-            <span className="absolute inset-3 rounded-full border-2 border-dashed border-primary/70" />
-            <Star className="size-16" fill="currentColor" />
-          </span>
-          <span className="animate-stamp-ink absolute inset-0 rounded-full border-4 border-primary" />
-        </div>
-      </div>
-      {/* Damğanın kağızdakı kölgəsi */}
-      <span className="animate-stamp-shadow absolute bottom-10 left-1/2 h-8 w-36 rounded-[50%] bg-black/40 blur-md" />
-      {/* Damğa: tutacaq, boyun, gövdə, rezin altlıq */}
-      <div className="animate-stamp-press3d absolute left-1/2 top-0 -ml-16 flex w-32 flex-col items-center [transform-style:preserve-3d]">
-        <span className="stamp-knob size-14 rounded-full shadow-lg" />
-        <span className="stamp-neck -mt-2 h-9 w-7 rounded-b-md" />
-        <span className="stamp-body relative -mt-1 h-14 w-32 rounded-2xl shadow-xl">
-          <span className="absolute inset-x-3 top-1.5 h-2 rounded-full bg-white/35" />
-        </span>
-        <span className="stamp-pad -mt-1 h-4 w-36 rounded-md" />
-      </div>
     </div>
   );
 }

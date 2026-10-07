@@ -88,7 +88,7 @@ async function tap(staff) {
 
     // İkinci möhür — animasiyanın kadrları
     await phone.goto(await tap(staff));
-    await phone.locator('.animate-stamp-press3d').waitFor({ state: 'attached' });
+    await phone.locator('main canvas').waitFor({ state: 'attached' });
     await phone.waitForTimeout(450);
     await phone.screenshot({ path: `${out}/${prefix}-12-stamp-animation-1.png` });
     await phone.waitForTimeout(750);
