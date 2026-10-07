@@ -7,7 +7,7 @@
  * - API (/api/), NFC toxunuşu (/t/), manifest və admin paneli (/admin) HEÇ VAXT keşlənmir: möhür, giriş və hədiyyə
  *   kartı həmişə serverdən gəlir.
  */
-const VERSION = 'cl-v2';
+const VERSION = 'cl-v3';
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 const OFFLINE_URLS = ['/offline.html', '/offline.css', '/favicon.svg'];

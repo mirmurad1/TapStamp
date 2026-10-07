@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Coffee, ShieldCheck } from 'lucide-react';
+import { LayoutGrid, ShieldCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router';
@@ -22,7 +22,7 @@ export function AuthLayout() {
     document.title = title ? `${title} · ${t('shell.title')}` : t('shell.title');
   }, [title, t, i18n.language]);
 
-  const Icon = scope === 'PLATFORM' ? ShieldCheck : Coffee;
+  const Icon = scope === 'PLATFORM' ? ShieldCheck : LayoutGrid;
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="flex items-center justify-between gap-2 px-4 py-3 sm:px-6">
