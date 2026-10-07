@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import az.cafeloyalty.security.ratelimit.RateLimitPolicy;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -95,6 +96,15 @@ public class ProdSafetyGuard implements BeanFactoryPostProcessor, EnvironmentAwa
                 "springdoc.api-docs.enabled", "springdoc.swagger-ui.enabled")) {
             if (env.getProperty(key, Boolean.class, false)) {
                 violations.add(key + " aktivdir");
+            }
+        }
+
+        // Sorğu limitləri prod-da yalnız azaldıla bilər (dev-də IP limitləri testlər üçün artırılıb)
+        for (RateLimitPolicy policy : RateLimitPolicy.values()) {
+            String key = "app.rate-limits." + policy.name().toLowerCase(Locale.ROOT).replace('_', '-');
+            Integer capacity = env.getProperty(key, Integer.class);
+            if (capacity != null && capacity > policy.defaultCapacity()) {
+                violations.add(key + " standartdan (" + policy.defaultCapacity() + ") yüksəkdir");
             }
         }
 

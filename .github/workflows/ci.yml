@@ -83,3 +83,23 @@ jobs:
       - name: npm audit (kritik)
         working-directory: frontend
         run: npm audit --audit-level=critical
+
+  images:
+    name: Docker image-lərinin skanı (Trivy)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Image-lərin qurulması
+        run: |
+          docker build -t cafe-loyalty-backend:ci backend
+          docker build -t cafe-loyalty-frontend:ci frontend
+          docker build -t cafe-loyalty-nginx:ci infra/nginx
+      # Öz image-lərimizdə yüksək və kritik zəiflik olarsa CI dayanır. postgres image-indəki gosu (Go stdlib)
+      # nəticələri qəbul edilmiş riskdir (docs/security-review.md), ona görə o, skan olunmur.
+      - name: Trivy
+        run: |
+          for image in cafe-loyalty-backend:ci cafe-loyalty-frontend:ci cafe-loyalty-nginx:ci; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image \
+              --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image"
+          done

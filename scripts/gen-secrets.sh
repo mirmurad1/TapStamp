@@ -26,6 +26,7 @@ declare -A GENERATED=(
   [APP_PHONE_HMAC_KEY]="$(key)"
   [APP_OTP_PEPPER]="$(key)"
   [APP_REDEMPTION_CODE_KEY]="$(key)"
+  [APP_INTERNAL_TOKEN]="$(password)"
   [APP_DEV_SIMULATOR_KEY]="$(key)"
 )
 

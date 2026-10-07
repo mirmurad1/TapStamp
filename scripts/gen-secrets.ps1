@@ -38,6 +38,7 @@ $generated = @{
     'APP_OTP_PEPPER'             = New-Key
     'APP_REDEMPTION_CODE_KEY'    = New-Key
     'APP_DEV_SIMULATOR_KEY'      = New-Key
+    'APP_INTERNAL_TOKEN'         = New-Password
 }
 
 $lines = Get-Content -Path $example -Encoding UTF8 | ForEach-Object {

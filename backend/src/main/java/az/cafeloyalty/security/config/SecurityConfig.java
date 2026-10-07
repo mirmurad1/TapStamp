@@ -105,6 +105,8 @@ public class SecurityConfig {
                         .accessDeniedHandler(problemHandlers))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        // Daxili TLS domen siyahısı: nginx xaricə açmır, endpoint özü sirr token tələb edir
+                        .requestMatchers(HttpMethod.GET, "/internal/tls/domains").permitAll()
                         .requestMatchers("/api/v1/csrf", "/api/v1/context", "/api/v1/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/manifest.webmanifest").permitAll()
                         // Admin girişi (işçi və platforma). Domen yoxlaması TenantResolutionFilter-dədir.

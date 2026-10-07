@@ -76,6 +76,15 @@ class ProdSafetyGuardTest {
     }
 
     @Test
+    void raisedRateLimitsAreRejectedButLowerOnesAllowed() {
+        MockEnvironment env = safeProdEnvironment();
+        env.setProperty("app.rate-limits.otp-request-per-ip", "300");
+        env.setProperty("app.rate-limits.admin-login-per-ip", "5");
+        assertThat(ProdSafetyGuard.checkEnvironment(env))
+                .containsExactly("app.rate-limits.otp-request-per-ip standartdan (20) yüksəkdir");
+    }
+
+    @Test
     void missingOrPlaceholderSecretsAreRejectedWithoutLeakingValues() {
         MockEnvironment env = safeProdEnvironment();
         env.setProperty("app.crypto.phone-hmac-key", "");

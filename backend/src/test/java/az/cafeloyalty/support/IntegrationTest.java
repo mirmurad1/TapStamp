@@ -25,5 +25,6 @@ public abstract class IntegrationTest {
         registry.add("app.rate-limits.otp-request-global", () -> 100_000);
         // Fon işləri (token və möhür müddətləri) testlərdə birbaşa çağırılır — paralel işləyib nəticəni pozmasın
         registry.add("app.jobs.enabled", () -> false);
+        registry.add("app.internal-token", () -> TestTenants.INTERNAL_TOKEN);
     }
 }

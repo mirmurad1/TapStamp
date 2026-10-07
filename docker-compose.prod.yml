@@ -1,0 +1,49 @@
+# Prod üçün əlavə (docker-compose.yml-in üzərinə):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Ətraflı: docs/deployment.md
+#  * backend prod profili ilə; dev imkanları bağlıdır (ProdSafetyGuard yoxlayır, səhv olarsa başlamır);
+#  * certbot hər domen üçün Let's Encrypt sertifikatı alır və yeniləyir;
+#  * nginx sertifikatları müntəzəm yenidən oxuyur (yeni domen ~10 dəqiqəyə HTTPS ilə açılır).
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DEV_SEED_ENABLED: "false"
+      APP_INTERNAL_TOKEN: ${APP_INTERNAL_TOKEN:?APP_INTERNAL_TOKEN .env-də təyin olunmalıdır}
+
+  nginx:
+    environment:
+      NGINX_HSTS_HEADER: ${NGINX_HSTS_HEADER:-max-age=63072000; includeSubDomains}
+    volumes:
+      # Dev sertifikatları əvəzinə certbot-un yazdığı qovluq
+      - tls-certs:/etc/nginx/certs:ro
+    command:
+      - /bin/sh
+      - -c
+      - |
+        (while :; do sleep 600; nginx -s reload 2>/dev/null; done) &
+        exec /docker-entrypoint.sh nginx -g 'daemon off;'
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - nginx
+    entrypoint: ["/bin/sh", "/renew.sh"]
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL .env-də təyin olunmalıdır}
+      APP_INTERNAL_TOKEN: ${APP_INTERNAL_TOKEN:?}
+    volumes:
+      - ./infra/certbot/renew.sh:/renew.sh:ro
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+      - tls-certs:/certs
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - edge
+
+volumes:
+  letsencrypt:
+  tls-certs:

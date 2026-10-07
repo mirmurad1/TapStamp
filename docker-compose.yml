@@ -86,7 +86,8 @@ services:
       - edge
 
   nginx:
-    image: nginx:stable-alpine
+    # Rəsmi image + Alpine təhlükəsizlik yamaqları (infra/nginx/Dockerfile)
+    build: ./infra/nginx
     restart: unless-stopped
     depends_on:
       - backend

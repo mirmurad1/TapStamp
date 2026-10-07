@@ -43,7 +43,7 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
 
     /** Domendən asılı olmayan yollar (konteyner health check-i Host: localhost ilə gəlir). */
     private static final List<String> HOST_INDEPENDENT_PREFIXES = List.of(
-            "/actuator/health", "/swagger-ui/", "/api/v1/docs", "/api/v1/openapi.json");
+            "/actuator/health", "/swagger-ui/", "/api/v1/docs", "/api/v1/openapi.json", "/internal/");
     /** Platforma domenində açıq olan yollar; qalanları (şirkət API-si) orada mövcud deyil. */
     private static final List<String> PLATFORM_PREFIXES = List.of(
             "/api/v1/platform/", "/api/v1/csrf", "/api/v1/context", "/api/v1/dev/");
