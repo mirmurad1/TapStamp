@@ -4,6 +4,103 @@
  */
 
 export interface paths {
+    "/api/v1/admin/analytics/heatmap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Həftənin günü × saat üzrə möhürlər
+         * @description Gün ISO nömrəsi ilə (1 — bazar ertəsi).
+         */
+        get: operations["heatmap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/analytics/languages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Müştərilərin dil üzrə bölgüsü */
+        get: operations["languages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/analytics/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Əsas göstəricilər
+         * @description Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.
+         */
+        get: operations["overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/analytics/retention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Geri qayıtma
+         * @description Dövrdə qeydiyyatdan keçənlərdən ilk möhürdən sonrakı 30 gün ərzində başqa bir gündə yenidən gələnlərin payı.
+         */
+        get: operations["retention"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/analytics/stamps-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Möhürlər və təhvil verilən hədiyyələr (zaman sırası)
+         * @description Günlük və ya həftəlik (bazar ertəsindən); boş dövrlər 0 ilə qaytarılır.
+         */
+        get: operations["series"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/auth/invitations/accept": {
         parameters: {
             query?: never;
@@ -1731,6 +1828,14 @@ export interface components {
             /** @enum {string} */
             status?: "AVAILABLE" | "REDEEMED" | "REVOKED" | "EXPIRED";
         };
+        HeatCell: {
+            /** Format: int32 */
+            dayOfWeek?: number;
+            /** Format: int32 */
+            hour?: number;
+            /** Format: int64 */
+            stamps?: number;
+        };
         /** @description Dəvətin məzmunu (qəbul səhifəsində göstərilir) */
         InvitationDetailsResponse: {
             branchName?: string;
@@ -1763,6 +1868,11 @@ export interface components {
             language: string;
             /** @enum {string} */
             role: "SUPER_ADMIN" | "COMPANY_OWNER" | "BRANCH_MANAGER" | "STAFF";
+        };
+        LanguageShare: {
+            /** Format: int64 */
+            customers?: number;
+            language?: string;
         };
         LegalDocumentResponse: {
             content?: components["schemas"]["LocalizedText"];
@@ -1858,6 +1968,30 @@ export interface components {
             /** @enum {string} */
             status?: "AUTHENTICATED" | "REGISTRATION_REQUIRED";
         };
+        Overview: {
+            /** Format: int64 */
+            active30?: number;
+            /** Format: int64 */
+            active7?: number;
+            /** Format: int64 */
+            active90?: number;
+            /** Format: int64 */
+            newCustomersInPeriod?: number;
+            /** Format: int64 */
+            newThisMonth?: number;
+            /** Format: int64 */
+            newThisWeek?: number;
+            /** Format: double */
+            redemptionRate?: number;
+            /** Format: int64 */
+            rewardsEarned?: number;
+            /** Format: int64 */
+            rewardsRedeemed?: number;
+            /** Format: int64 */
+            stampsInPeriod?: number;
+            /** Format: int64 */
+            totalCustomers?: number;
+        };
         OwnerInvitationRequest: {
             /** Format: email */
             email: string;
@@ -1946,6 +2080,14 @@ export interface components {
         RejectStampRequest: {
             reason: string;
         };
+        Retention: {
+            /** Format: int64 */
+            cohort?: number;
+            /** Format: double */
+            rate?: number;
+            /** Format: int64 */
+            returned?: number;
+        };
         RevokedResponse: {
             /** Format: int32 */
             revoked?: number;
@@ -1997,6 +2139,14 @@ export interface components {
             /** Format: uuid */
             branchId?: string;
             role?: string;
+        };
+        SeriesPoint: {
+            /** Format: date */
+            date?: string;
+            /** Format: int64 */
+            rewardsRedeemed?: number;
+            /** Format: int64 */
+            stamps?: number;
         };
         SessionResponse: {
             /** Format: date-time */
@@ -2108,6 +2258,126 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    heatmap: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HeatCell"][];
+                };
+            };
+        };
+    };
+    languages: {
+        parameters: {
+            query?: {
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LanguageShare"][];
+                };
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Overview"];
+                };
+            };
+        };
+    };
+    retention: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Retention"];
+                };
+            };
+        };
+    };
+    series: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                branchId?: string;
+                /** @description DAY və ya WEEK */
+                granularity?: "DAY" | "WEEK";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SeriesPoint"][];
+                };
+            };
+        };
+    };
     accept: {
         parameters: {
             query?: never;

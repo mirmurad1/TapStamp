@@ -18,7 +18,56 @@
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
-    "subtitle": "Müştərilər, möhürlər və mükafatlar üzrə əsas göstəricilər."
+    "subtitle": "Müştərilər, möhürlər və hədiyyələr üzrə əsas göstəricilər.",
+    "staff": {
+      "title": "Xoş gəldiniz!",
+      "description": "Möhürləri təsdiqləmək və hədiyyə kartlarını yoxlamaq üçün işçi konsolunu açın."
+    },
+    "filters": {
+      "period": "Dövr",
+      "lastDays_one": "Son {{count}} gün",
+      "lastDays_other": "Son {{count}} gün",
+      "branch": "Filial",
+      "allBranches": "Bütün filiallar"
+    },
+    "kpi": {
+      "customers": "Müştərilər",
+      "active": "Aktiv: 7 gün — {{d7}}, 30 gün — {{d30}}, 90 gün — {{d90}}",
+      "newCustomers": "Yeni müştərilər (dövrdə)",
+      "newDetail": "Bu həftə — {{week}}, bu ay — {{month}}",
+      "stamps": "Möhürlər (dövrdə)",
+      "stampsDetail": "Yalnız təsdiqlənmiş möhürlər",
+      "rewards": "Təhvil verilən hədiyyələr",
+      "rewardsDetail": "Qazanılan — {{earned}}, istifadə faizi — {{rate}}",
+      "retention": "Geri qayıtma",
+      "retentionDetail": "{{cohort}} yeni müştəridən {{returned}} nəfəri 30 gün ərzində yenidən gəlib"
+    },
+    "series": {
+      "title": "Möhürlər və hədiyyələr",
+      "daily": "Günlər üzrə",
+      "weekly": "Həftələr üzrə",
+      "stamps": "Möhürlər",
+      "rewards": "Təhvil verilən hədiyyələr",
+      "tooltip": "{{stamps}} möhür, {{rewards}} hədiyyə"
+    },
+    "heatmap": {
+      "title": "Ən sıx saatlar",
+      "description": "Həftənin günü və saat üzrə möhürlər (şirkətin yerli vaxtı ilə).",
+      "cell": "{{day}}, {{hour}}:00 — {{count}} möhür",
+      "days": {
+        "1": "B.e.",
+        "2": "Ç.a.",
+        "3": "Çər.",
+        "4": "C.a.",
+        "5": "Cüm.",
+        "6": "Şən.",
+        "7": "Baz."
+      }
+    },
+    "languages": {
+      "title": "Müştərilərin dili"
+    },
+    "empty": "Bu dövr üçün məlumat yoxdur."
   },
   "userMenu": {
     "label": "İstifadəçi menyusu",

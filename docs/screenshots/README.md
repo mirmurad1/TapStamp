@@ -10,6 +10,7 @@ node scripts/screenshots/customer-flow.cjs
 ```bash
 node scripts/screenshots/admin-settings.cjs
 node scripts/screenshots/account-team.cjs
+node scripts/screenshots/admin-pages.cjs
 ```
 
 `customer-flow.cjs` test müştərisi yaradır və kartını dev bazasında doldurur — yalnız dev mühiti üçündür.
@@ -45,3 +46,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase6-11-account-2fa-remove-dialog.png` | 2FA-nın silinməsi: cari şifrə ilə təsdiq |
 | `phase6-12-team-delete.png` | Komanda: "Sil" düyməsi |
 | `phase6-13-team-delete-confirm.png` | İşçinin silinməsinin təsdiqi (soft delete) |
+| `phase7-01-dashboard.png` | Admin: idarəetmə paneli — göstəricilər, qrafik, istilik xəritəsi, dillər |
+| `phase7-02-dashboard-mobile.png` | İdarəetmə paneli telefonda |

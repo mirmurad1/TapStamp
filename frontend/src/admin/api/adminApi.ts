@@ -252,3 +252,26 @@ export const giftCardConsoleApi = {
   recent: (branchId: string) =>
     unwrap(api.GET('/api/v1/admin/staff-console/gift-cards/recent', { params: { query: { branchId } } })),
 };
+
+export interface AnalyticsFilter {
+  from?: string;
+  to?: string;
+  branchId?: string;
+}
+
+export type AnalyticsOverview = Schemas['Overview'];
+export type SeriesPoint = Schemas['SeriesPoint'];
+export type HeatCell = Schemas['HeatCell'];
+export type Retention = Schemas['Retention'];
+export type LanguageShare = Schemas['LanguageShare'];
+
+/** Analitika (sahib və menecer); boş filtr — son 30 gün, bütün icazəli filiallar. */
+export const analyticsApi = {
+  overview: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/overview', { params: { query } })),
+  series: (query: AnalyticsFilter & { granularity: 'DAY' | 'WEEK' }) =>
+    unwrap(api.GET('/api/v1/admin/analytics/stamps-series', { params: { query } })),
+  heatmap: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/heatmap', { params: { query } })),
+  retention: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/retention', { params: { query } })),
+  languages: (query: AnalyticsFilter) =>
+    unwrap(api.GET('/api/v1/admin/analytics/languages', { params: { query: { branchId: query.branchId } } })),
+};

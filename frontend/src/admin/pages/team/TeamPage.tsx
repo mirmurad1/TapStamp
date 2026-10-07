@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
-import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatDateTime } from '@/shared/lib/format';
 import { Alert } from '@/shared/ui/alert';
@@ -27,25 +26,18 @@ import { Field } from '@/shared/ui/field';
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Input, Select } from '@/shared/ui/input';
 
-import { contextApi, teamApi, type Member } from '../../api/adminApi';
+import { teamApi, type Member } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
 import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { RoleLabel } from '../../components/RoleLabel';
 import { hasAnyRole } from '../../layout/navigation';
+import { useBranchNames } from '../../lib/branches';
 import { emailField, useValidationMessage } from '../../lib/forms';
 
 const TEAM_KEY = ['team'] as const;
 const INVITATIONS_KEY = ['team-invitations'] as const;
-
-function useBranchNames() {
-  const company = useQuery({ queryKey: ['public-company'], queryFn: contextApi.company });
-  const lang = currentLanguage();
-  const branches = (company.data?.branches ?? []).map((branch) => ({ id: branch.id ?? '', name: resolveText(branch.name, lang) }));
-  const nameOf = (id: string | undefined) => branches.find((branch) => branch.id === id)?.name;
-  return { branches, nameOf };
-}
 
 export function TeamPage() {
   const { t } = useTranslation('admin');

@@ -16,6 +16,233 @@
     "name" : "Kafe"
   } ],
   "paths" : {
+    "/api/v1/admin/analytics/heatmap" : {
+      "get" : {
+        "description" : "Gün ISO nömrəsi ilə (1 — bazar ertəsi).",
+        "operationId" : "heatmap",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/HeatCell"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Həftənin günü × saat üzrə möhürlər",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
+    "/api/v1/admin/analytics/languages" : {
+      "get" : {
+        "operationId" : "languages",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LanguageShare"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Müştərilərin dil üzrə bölgüsü",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
+    "/api/v1/admin/analytics/overview" : {
+      "get" : {
+        "description" : "Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.",
+        "operationId" : "overview",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Overview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Əsas göstəricilər",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
+    "/api/v1/admin/analytics/retention" : {
+      "get" : {
+        "description" : "Dövrdə qeydiyyatdan keçənlərdən ilk möhürdən sonrakı 30 gün ərzində başqa bir gündə yenidən gələnlərin payı.",
+        "operationId" : "retention",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Retention"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Geri qayıtma",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
+    "/api/v1/admin/analytics/stamps-series" : {
+      "get" : {
+        "description" : "Günlük və ya həftəlik (bazar ertəsindən); boş dövrlər 0 ilə qaytarılır.",
+        "operationId" : "series",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "description" : "DAY və ya WEEK",
+          "in" : "query",
+          "name" : "granularity",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "DAY",
+            "enum" : [ "DAY", "WEEK" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SeriesPoint"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Möhürlər və təhvil verilən hədiyyələr (zaman sırası)",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
     "/api/v1/admin/auth/invitations/accept" : {
       "post" : {
         "description" : "Hesab yaradılır və istifadəçi daxil olur. Sahib üçün növbəti addım TOTP qeydiyyatıdır.",
@@ -2531,6 +2758,23 @@
           }
         }
       },
+      "HeatCell" : {
+        "type" : "object",
+        "properties" : {
+          "dayOfWeek" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "hour" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "stamps" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "InvitationDetailsResponse" : {
         "type" : "object",
         "description" : "Dəvətin məzmunu (qəbul səhifəsində göstərilir)",
@@ -2617,6 +2861,18 @@
           }
         },
         "required" : [ "email", "language", "role" ]
+      },
+      "LanguageShare" : {
+        "type" : "object",
+        "properties" : {
+          "customers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "language" : {
+            "type" : "string"
+          }
+        }
       },
       "LegalDocumentResponse" : {
         "type" : "object",
@@ -2861,6 +3117,55 @@
           "status" : {
             "type" : "string",
             "enum" : [ "AUTHENTICATED", "REGISTRATION_REQUIRED" ]
+          }
+        }
+      },
+      "Overview" : {
+        "type" : "object",
+        "properties" : {
+          "active30" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "active7" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "active90" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "newCustomersInPeriod" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "newThisMonth" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "newThisWeek" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "redemptionRate" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "rewardsEarned" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rewardsRedeemed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "stampsInPeriod" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalCustomers" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
@@ -3120,6 +3425,23 @@
         },
         "required" : [ "reason" ]
       },
+      "Retention" : {
+        "type" : "object",
+        "properties" : {
+          "cohort" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rate" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "returned" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "RevokedResponse" : {
         "type" : "object",
         "properties" : {
@@ -3224,6 +3546,23 @@
           },
           "role" : {
             "type" : "string"
+          }
+        }
+      },
+      "SeriesPoint" : {
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "rewardsRedeemed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "stamps" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

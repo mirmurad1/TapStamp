@@ -18,7 +18,56 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Key figures for customers, stamps and rewards."
+    "subtitle": "Key numbers for customers, stamps and rewards.",
+    "staff": {
+      "title": "Welcome!",
+      "description": "Open the staff console to confirm stamps and check gift cards."
+    },
+    "filters": {
+      "period": "Period",
+      "lastDays_one": "Last {{count}} day",
+      "lastDays_other": "Last {{count}} days",
+      "branch": "Branch",
+      "allBranches": "All branches"
+    },
+    "kpi": {
+      "customers": "Customers",
+      "active": "Active: 7 days — {{d7}}, 30 days — {{d30}}, 90 days — {{d90}}",
+      "newCustomers": "New customers (period)",
+      "newDetail": "This week — {{week}}, this month — {{month}}",
+      "stamps": "Stamps (period)",
+      "stampsDetail": "Confirmed stamps only",
+      "rewards": "Rewards handed over",
+      "rewardsDetail": "Earned — {{earned}}, redemption rate — {{rate}}",
+      "retention": "Retention",
+      "retentionDetail": "{{returned}} of {{cohort}} new customers came back within 30 days"
+    },
+    "series": {
+      "title": "Stamps and rewards",
+      "daily": "By day",
+      "weekly": "By week",
+      "stamps": "Stamps",
+      "rewards": "Rewards handed over",
+      "tooltip": "{{stamps}} stamps, {{rewards}} rewards"
+    },
+    "heatmap": {
+      "title": "Busiest hours",
+      "description": "Stamps by day of week and hour (company local time).",
+      "cell": "{{day}}, {{hour}}:00 — {{count}} stamps",
+      "days": {
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat",
+        "7": "Sun"
+      }
+    },
+    "languages": {
+      "title": "Customer languages"
+    },
+    "empty": "No data for this period."
   },
   "userMenu": {
     "label": "User menu",
