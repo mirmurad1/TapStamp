@@ -690,6 +690,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/settings/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filiallar
+         * @description Bağlanmış (CLOSED) filiallar da daxil.
+         */
+        get: operations["branches"];
+        put?: never;
+        /** Yeni filial */
+        post: operations["createBranch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/branches/{branchId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Filialın dəyişdirilməsi
+         * @description Boş sahələr dəyişmir. Sonuncu aktiv filialı bağlamaq olmaz.
+         */
+        patch: operations["updateBranch"];
+        trace?: never;
+    };
+    "/api/v1/admin/settings/branches/{branchId}/stamp-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filialın möhür qaydası
+         * @description overridden=false — şirkətin standart qaydası tətbiq olunur.
+         */
+        get: operations["branchPolicy"];
+        /**
+         * Filial üçün ayrıca möhür qaydası
+         * @description Şirkətin standart qaydasını bu filial üçün əvəz edir. Möhürlər arası vaxt yenə də müştərinin bütün filiallardakı son möhüründən hesablanır.
+         */
+        put: operations["overrideBranchPolicy"];
+        post?: never;
+        /**
+         * Filialın ayrıca qaydasını silmək
+         * @description Filial yenidən şirkətin standart qaydası ilə işləyir.
+         */
+        delete: operations["resetBranchPolicy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/company": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Şirkətin məzmunu */
+        get: operations["company"];
+        /**
+         * Şirkətin məzmununun dəyişdirilməsi
+         * @description Ad və təsvir 3 dildə, saat qurşağı, standart dil, brend rəngi.
+         */
+        put: operations["updateCompany"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/settings/reward-rule": {
         parameters: {
             query?: never;
@@ -1908,7 +1998,7 @@ export interface paths {
          * Kafe haqqında ictimai məlumat
          * @description Domenə görə müəyyən olunan kafenin adı, təsviri, aktiv filialları və mükafat qaydası. Autentifikasiya tələb etmir. Platforma domenində 404 qaytarır.
          */
-        get: operations["company"];
+        get: operations["company_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2048,12 +2138,55 @@ export interface components {
             /** @enum {string} */
             status?: "AUTHENTICATED";
         };
+        BranchPolicy: {
+            enforceBusinessHours?: boolean;
+            /** Format: int32 */
+            maxStampsPerDay?: number;
+            /** Format: int32 */
+            minIntervalMinutes?: number;
+            overridden?: boolean;
+            /** Format: int32 */
+            pendingTimeoutMinutes?: number;
+            requireStaffApproval?: boolean;
+        };
+        BranchPolicyRequest: {
+            enforceBusinessHours: boolean;
+            /** Format: int32 */
+            maxStampsPerDay: number;
+            /** Format: int32 */
+            minIntervalMinutes: number;
+            /** Format: int32 */
+            pendingTimeoutMinutes: number;
+            requireStaffApproval: boolean;
+        };
+        /** @description İş saatları: {"mon": [["08:00","22:00"]], …}; günlər mon…sun */
+        BranchRequest: {
+            address?: components["schemas"]["LocalizedText"];
+            businessHours?: {
+                [key: string]: string[][];
+            };
+            /** @description true — iş saatları silinir (hər zaman açıq) */
+            clearBusinessHours?: boolean;
+            name?: components["schemas"]["LocalizedText"];
+            status?: string;
+        };
         BranchResponse: {
             address?: components["schemas"]["LocalizedText"];
             description?: components["schemas"]["LocalizedText"];
             /** Format: uuid */
             id?: string;
             name?: components["schemas"]["LocalizedText"];
+        };
+        BranchView: {
+            address?: components["schemas"]["LocalizedText"];
+            businessHours?: {
+                [key: string]: string[][];
+            };
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
+            policyOverridden?: boolean;
+            status?: string;
         };
         CardResponse: {
             /** Format: int32 */
@@ -2097,6 +2230,24 @@ export interface components {
         CodeRequest: {
             /** @description 6 rəqəmli TOTP kodu və ya bərpa kodu (xxxxx-xxxxx) */
             code: string;
+        };
+        Company: {
+            brandColor?: string;
+            defaultLanguage?: string;
+            description?: components["schemas"]["LocalizedText"];
+            name?: components["schemas"]["LocalizedText"];
+            smsSenderName?: string;
+            timezone?: string;
+        };
+        /** @description Şirkətin məzmunu: ad və təsvir 3 dildə (az məcburi) */
+        CompanyRequest: {
+            brandColor: string;
+            defaultLanguage: string;
+            description?: components["schemas"]["LocalizedText"];
+            name: components["schemas"]["LocalizedText"];
+            /** @description SMS göndərən adı (latın hərfləri, rəqəm, boşluq; 11 simvola qədər) */
+            smsSenderName?: string;
+            timezone: string;
         };
         ConsentRequest: {
             acceptedDocuments: components["schemas"]["DocumentAcceptance"][];
@@ -3597,6 +3748,190 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    branches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchView"][];
+                };
+            };
+        };
+    };
+    createBranch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BranchRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchView"];
+                };
+            };
+        };
+    };
+    updateBranch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                branchId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BranchRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchView"];
+                };
+            };
+        };
+    };
+    branchPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                branchId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchPolicy"];
+                };
+            };
+        };
+    };
+    overrideBranchPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                branchId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BranchPolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchPolicy"];
+                };
+            };
+        };
+    };
+    resetBranchPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                branchId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BranchPolicy"];
+                };
+            };
+        };
+    };
+    company: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Company"];
+                };
+            };
+        };
+    };
+    updateCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Company"];
+                };
             };
         };
     };
@@ -5103,7 +5438,7 @@ export interface operations {
             };
         };
     };
-    company: {
+    company_1: {
         parameters: {
             query?: never;
             header?: never;

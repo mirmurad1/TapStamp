@@ -345,3 +345,29 @@ export const auditApi = {
     unwrap(api.GET('/api/v1/admin/audit-logs', { params: { query } })),
   actions: () => unwrap(api.GET('/api/v1/admin/audit-logs/actions')),
 };
+
+export type CompanyContent = Schemas['Company'];
+export type BranchSettings = Schemas['BranchView'];
+export type BranchPolicy = Schemas['BranchPolicy'];
+export type BusinessHours = Record<string, string[][]>;
+export interface Localized {
+  az: string;
+  en?: string;
+  ru?: string;
+}
+
+/** Şirkətin məzmunu, filiallar və filial üzrə qayda (yalnız sahib). */
+export const companyApi = {
+  get: () => unwrap(api.GET('/api/v1/admin/settings/company')),
+  update: (body: Schemas['CompanyRequest']) => unwrap(api.PUT('/api/v1/admin/settings/company', { body })),
+  branches: () => unwrap(api.GET('/api/v1/admin/settings/branches')),
+  createBranch: (body: Schemas['BranchRequest']) => unwrap(api.POST('/api/v1/admin/settings/branches', { body })),
+  updateBranch: (branchId: string, body: Schemas['BranchRequest']) =>
+    unwrap(api.PATCH('/api/v1/admin/settings/branches/{branchId}', { params: { path: { branchId } }, body })),
+  branchPolicy: (branchId: string) =>
+    unwrap(api.GET('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } } })),
+  overridePolicy: (branchId: string, body: Schemas['BranchPolicyRequest']) =>
+    unwrap(api.PUT('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } }, body })),
+  resetPolicy: (branchId: string) =>
+    unwrap(api.DELETE('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } } })),
+};

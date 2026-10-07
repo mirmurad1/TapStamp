@@ -1224,6 +1224,235 @@
         "tags" : [ "Admin: hesab" ]
       }
     },
+    "/api/v1/admin/settings/branches" : {
+      "get" : {
+        "description" : "Bağlanmış (CLOSED) filiallar da daxil.",
+        "operationId" : "branches",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/BranchView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filiallar",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "post" : {
+        "operationId" : "createBranch",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BranchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BranchView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Yeni filial",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
+    "/api/v1/admin/settings/branches/{branchId}" : {
+      "patch" : {
+        "description" : "Boş sahələr dəyişmir. Sonuncu aktiv filialı bağlamaq olmaz.",
+        "operationId" : "updateBranch",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BranchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BranchView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filialın dəyişdirilməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
+    "/api/v1/admin/settings/branches/{branchId}/stamp-policy" : {
+      "delete" : {
+        "description" : "Filial yenidən şirkətin standart qaydası ilə işləyir.",
+        "operationId" : "resetBranchPolicy",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BranchPolicy"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filialın ayrıca qaydasını silmək",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "get" : {
+        "description" : "overridden=false — şirkətin standart qaydası tətbiq olunur.",
+        "operationId" : "branchPolicy",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BranchPolicy"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filialın möhür qaydası",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "put" : {
+        "description" : "Şirkətin standart qaydasını bu filial üçün əvəz edir. Möhürlər arası vaxt yenə də müştərinin bütün filiallardakı son möhüründən hesablanır.",
+        "operationId" : "overrideBranchPolicy",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BranchPolicyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BranchPolicy"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filial üçün ayrıca möhür qaydası",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
+    "/api/v1/admin/settings/company" : {
+      "get" : {
+        "operationId" : "company",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Company"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin məzmunu",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "put" : {
+        "description" : "Ad və təsvir 3 dildə, saat qurşağı, standart dil, brend rəngi.",
+        "operationId" : "updateCompany",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CompanyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Company"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin məzmununun dəyişdirilməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
     "/api/v1/admin/settings/reward-rule" : {
       "get" : {
         "operationId" : "rewardRule",
@@ -2974,7 +3203,7 @@
     "/api/v1/public/company" : {
       "get" : {
         "description" : "Domenə görə müəyyən olunan kafenin adı, təsviri, aktiv filialları və mükafat qaydası. Autentifikasiya tələb etmir. Platforma domenində 404 qaytarır.",
-        "operationId" : "company",
+        "operationId" : "company_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -3209,6 +3438,94 @@
           }
         }
       },
+      "BranchPolicy" : {
+        "type" : "object",
+        "properties" : {
+          "enforceBusinessHours" : {
+            "type" : "boolean"
+          },
+          "maxStampsPerDay" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "minIntervalMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "overridden" : {
+            "type" : "boolean"
+          },
+          "pendingTimeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "requireStaffApproval" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "BranchPolicyRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enforceBusinessHours" : {
+            "type" : "boolean"
+          },
+          "maxStampsPerDay" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 50,
+            "minimum" : 1
+          },
+          "minIntervalMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1440,
+            "minimum" : 0
+          },
+          "pendingTimeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1440,
+            "minimum" : 1
+          },
+          "requireStaffApproval" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "enforceBusinessHours", "maxStampsPerDay", "minIntervalMinutes", "pendingTimeoutMinutes", "requireStaffApproval" ]
+      },
+      "BranchRequest" : {
+        "type" : "object",
+        "description" : "İş saatları: {\"mon\": [[\"08:00\",\"22:00\"]], …}; günlər mon…sun",
+        "properties" : {
+          "address" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "businessHours" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "clearBusinessHours" : {
+            "type" : "boolean",
+            "description" : "true — iş saatları silinir (hər zaman açıq)"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "status" : {
+            "type" : "string",
+            "pattern" : "ACTIVE|CLOSED"
+          }
+        }
+      },
       "BranchResponse" : {
         "type" : "object",
         "properties" : {
@@ -3224,6 +3541,39 @@
           },
           "name" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
+      },
+      "BranchView" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "businessHours" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "policyOverridden" : {
+            "type" : "boolean"
+          },
+          "status" : {
+            "type" : "string"
           }
         }
       },
@@ -3317,6 +3667,61 @@
           }
         },
         "required" : [ "code" ]
+      },
+      "Company" : {
+        "type" : "object",
+        "properties" : {
+          "brandColor" : {
+            "type" : "string"
+          },
+          "defaultLanguage" : {
+            "type" : "string"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "smsSenderName" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CompanyRequest" : {
+        "type" : "object",
+        "description" : "Şirkətin məzmunu: ad və təsvir 3 dildə (az məcburi)",
+        "properties" : {
+          "brandColor" : {
+            "type" : "string",
+            "pattern" : "^#[0-9A-Fa-f]{6}$"
+          },
+          "defaultLanguage" : {
+            "type" : "string",
+            "pattern" : "az|en|ru"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "smsSenderName" : {
+            "type" : "string",
+            "description" : "SMS göndərən adı (latın hərfləri, rəqəm, boşluq; 11 simvola qədər)",
+            "maxLength" : 11,
+            "minLength" : 0
+          },
+          "timezone" : {
+            "type" : "string",
+            "maxLength" : 64,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "brandColor", "defaultLanguage", "name", "timezone" ]
       },
       "ConsentRequest" : {
         "type" : "object",

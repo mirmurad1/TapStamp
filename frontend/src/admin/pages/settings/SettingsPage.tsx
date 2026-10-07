@@ -13,11 +13,13 @@ import { Input } from '@/shared/ui/input';
 import { settingsApi, type RewardSettings, type StampPolicy } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
+import { BranchesCard } from './BranchesCard';
+import { CompanyCard } from './CompanyForm';
 
 const POLICY_KEY = ['settings-stamp-policy'] as const;
 const REWARD_KEY = ['settings-reward-rule'] as const;
 
-/** Sahibin loyallıq parametrləri: möhür qaydası və hədiyyə (möhür sayı, adı 3 dildə, kartın müddəti). */
+/** Sahibin parametrləri: möhür qaydası, hədiyyə, şirkətin məzmunu (3 dildə) və filiallar. */
 export function SettingsPage() {
   const { t } = useTranslation('admin');
   const policy = useQuery({ queryKey: POLICY_KEY, queryFn: settingsApi.stampPolicy });
@@ -33,6 +35,10 @@ export function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         {policy.data ? <StampPolicyForm initial={policy.data} /> : null}
         {reward.isSuccess ? <RewardForm initial={reward.data ?? undefined} /> : null}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <CompanyCard />
+        <BranchesCard />
       </div>
     </div>
   );

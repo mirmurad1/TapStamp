@@ -26,7 +26,8 @@
     "copied": "Copied",
     "confirm": "Confirm",
     "delete": "Delete",
-    "download": "Download"
+    "download": "Download",
+    "edit": "Edit"
   },
   "states": {
     "loading": "Loading…",

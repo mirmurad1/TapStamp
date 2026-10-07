@@ -15,6 +15,7 @@ const PAGES = [
   ['03-customers', '/admin/customers', 'Son gəliş', false],
   ['06-tags', '/admin/tags', 'Son toxunuş', true],
   ['07-audit', '/admin/audit', 'İcraçı', false],
+  ['08-settings', '/admin/settings', 'Filiallar', true],
 ];
 
 function totp(step) {
@@ -58,6 +59,14 @@ function totp(step) {
     await page.getByRole('dialog').waitFor();
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${out}/${prefix}-05-customer-adjust.png` });
+    await page.keyboard.press('Escape');
+    // Filialın düzəlişi: ad/ünvan 3 dildə, iş saatları
+    await page.goto(base + '/admin/settings');
+    await page.getByRole('button', { name: 'Düzəlt' }).first().click();
+    await page.getByRole('dialog').waitFor();
+    await page.getByLabel('İş saatlarını göstər').check();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${out}/${prefix}-09-branch-dialog.png` });
     await page.keyboard.press('Escape');
   } finally {
     await browser.close();

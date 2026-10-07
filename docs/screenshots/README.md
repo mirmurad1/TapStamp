@@ -53,3 +53,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase7-05-customer-adjust.png` | Möhürlərin əl ilə düzəlişi (səbəb məcburi) |
 | `phase7-06-tags.png` | Admin: NFC çipləri — açar vəziyyəti, son toxunuş, jurnal, rotasiya |
 | `phase7-07-audit.png` | Admin: audit jurnalı |
+| `phase7-08-settings.png` | Parametrlər: möhür qaydası, hədiyyə, şirkət (3 dil, brend rəngi), filiallar |
+| `phase7-09-branch-dialog.png` | Filialın düzəlişi: ad/ünvan 3 dildə, iş saatları |

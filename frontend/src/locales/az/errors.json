@@ -52,5 +52,6 @@
   "IDEMPOTENCY_KEY_REUSED": "Bu əməliyyat artıq fərqli məlumatla göndərilib. Səhifəni yeniləyin.",
   "STAMP_ADJUSTMENT_TOO_LARGE": "Bu qədər möhür silmək olmaz: kartda və istifadə olunmamış hədiyyələrdə kifayət qədər möhür yoxdur.",
   "TAG_ROTATION_IN_PROGRESS": "Açar yenilənməsi davam edir: əvvəlcə yeni proqramlaşdırılmış çipə toxunun.",
-  "PROVISIONING_ALREADY_EXPORTED": "Açarlar yalnız bir dəfə göstərilir. Lazımdırsa, açarı yeniləyin."
+  "PROVISIONING_ALREADY_EXPORTED": "Açarlar yalnız bir dəfə göstərilir. Lazımdırsa, açarı yeniləyin.",
+  "DOMAIN_IS_PRIMARY": "Əsas domen silinə bilməz: əvvəlcə başqa domeni əsas edin."
 }
