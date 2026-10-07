@@ -32,7 +32,7 @@ export function PlatformAuditPage() {
         <p className="mt-1 text-muted-foreground">{t('platform.audit.subtitle')}</p>
       </div>
       <Card>
-        <CardContent className="flex flex-col gap-3 pt-5">
+        <CardContent className="flex flex-col gap-3 pt-5 sm:pt-6">
           <ApiErrorAlert error={entries.error} />
           {entries.isPending ? <InlineLoading /> : null}
           {entries.data && items.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">{t('audit.empty')}</p> : null}

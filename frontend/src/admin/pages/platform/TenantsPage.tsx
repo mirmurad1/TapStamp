@@ -35,7 +35,7 @@ export function TenantsPage() {
         </Button>
       </div>
       <Card>
-        <CardContent className="pt-5 sm:pt-6">
+        <CardContent className="pt-5 sm:pt-6 sm:pt-6">
           <ApiErrorAlert error={tenants.error} />
           {tenants.isPending ? <InlineLoading /> : null}
           {tenants.data?.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}

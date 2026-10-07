@@ -83,8 +83,8 @@ export function TagsPage() {
           const active = tag.status === 'ACTIVE';
           return (
             <Card key={tag.id}>
-              <CardContent className="flex flex-col gap-4 pt-5">
-                <div className="flex items-start gap-3">
+              <CardContent className="flex flex-col gap-4 pt-5 sm:pt-6">
+                <div className="flex items-center gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary" aria-hidden="true">
                     <Nfc className="size-5" />
                   </span>

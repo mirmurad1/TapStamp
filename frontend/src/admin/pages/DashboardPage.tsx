@@ -209,7 +209,7 @@ function Kpi({
 }) {
   return (
     <Card>
-      <CardContent className="flex items-start gap-4 pt-5">
+      <CardContent className="flex items-center gap-4 pt-5 sm:pt-6">
         <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary [&>svg]:size-5" aria-hidden="true">
           {icon}
         </span>

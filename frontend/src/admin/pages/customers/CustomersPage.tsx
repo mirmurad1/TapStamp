@@ -107,7 +107,7 @@ export function CustomersPage() {
       </div>
 
       <Card>
-        <CardContent className="flex flex-col gap-4 pt-5">
+        <CardContent className="flex flex-col gap-4 pt-5 sm:pt-6">
           <form onSubmit={submitSearch} className="flex flex-wrap items-end gap-3" role="search">
             <label className="flex min-w-60 flex-1 flex-col gap-1 text-sm font-medium">
               {t('admin:customers.search')}

@@ -40,7 +40,7 @@ export function AuditPage() {
         <p className="mt-1 text-muted-foreground">{t('admin:audit.subtitle')}</p>
       </div>
       <Card>
-        <CardContent className="flex flex-col gap-4 pt-5">
+        <CardContent className="flex flex-col gap-4 pt-5 sm:pt-6">
           <div className="flex flex-wrap items-end gap-3">
             <label className="flex flex-col gap-1 text-sm font-medium">
               {t('admin:audit.filters.action')}

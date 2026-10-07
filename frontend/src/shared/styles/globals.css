@@ -184,3 +184,9 @@
 @utility animate-fade-up {
   animation: fade-up 0.45s ease-out both;
 }
+
+/* Edge/IE öz "şifrəni göstər" və "təmizlə" ikonlarını əlavə edir — bizim göz düyməmiz var, ikinci ikon gizlədilir */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

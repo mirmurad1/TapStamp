@@ -75,7 +75,7 @@ function BackLink() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <Card>
-      <CardContent className="pt-5">
+      <CardContent className="pt-5 sm:pt-6">
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="font-display text-3xl font-semibold tabular-nums">{value}</p>
       </CardContent>
