@@ -47,6 +47,12 @@ check_status "platforma API şirkət domenində mövcud deyil" mockcoffee.localh
 check_status "platforma API sessiyasız bağlıdır" platform.localhost /api/v1/platform/tenants 401
 check_status "şirkət API-si platforma domenində mövcud deyil" platform.localhost /api/v1/admin/me 404
 
+echo "Müştəri girişi"
+check_body "müştəri sessiyası yoxdur" mockcoffee.localhost /api/v1/auth/session '"NONE"'
+check_status "müştəri profili sessiyasız bağlıdır" mockcoffee.localhost /api/v1/me 401
+check_body "hüquqi sənədlər açıqdır" mockcoffee.localhost /api/v1/public/legal '"PRIVACY_POLICY"'
+check_status "müştəri API-si platforma domenində mövcud deyil" platform.localhost /api/v1/auth/session 404
+
 echo "TLS qatı"
 code=$(curl -s -o /dev/null -w '%{http_code}' "${CURL_OPTS[@]}" -H "Host: demo-cay.localhost" "$(url mockcoffee.localhost /api/v1/public/company)")
 [[ "$code" == "421" ]] && pass "Host və SNI uyğunsuzluğu rədd edilir (421)" || fail "Host/SNI uyğunsuzluğu: alınan $code"

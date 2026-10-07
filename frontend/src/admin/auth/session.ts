@@ -17,7 +17,7 @@ export function consumeExpiredNotice(): boolean {
 /** İstifadəçi çıxanda: sessiya NONE olur, profil və istifadəçiyə aid bütün keşlənmiş məlumat silinir. */
 export function clearUserData(client: QueryClient): void {
   client.setQueryData(sessionKeys.session, 'NONE');
-  void client.resetQueries({ queryKey: sessionKeys.me });
+  client.getQueryCache().findAll({ queryKey: sessionKeys.me }).forEach((query) => query.reset());
   const kept = new Set<unknown>([sessionKeys.context[0], sessionKeys.session[0], sessionKeys.me[0]]);
   client.removeQueries({ predicate: (query) => !kept.has(query.queryKey[0]) });
 }
@@ -31,9 +31,9 @@ export const sessionKeys = {
 function onError(client: QueryClient, error: unknown) {
   if (error instanceof ApiError && error.status === 401 && SESSION_LOST_CODES.has(error.code)) {
     expiredNotice = error.code === 'SESSION_EXPIRED';
-    // Müşahidə olunan sorğular silinmir, yenilənir: provayder dərhal yeni vəziyyəti görür
+    // Müşahidə olunan sorğular silinmir, sıfırlanır (yenidən sorğulanmadan — əks halda 401 sonsuz dövr yaradar)
     client.setQueryData(sessionKeys.session, 'NONE');
-    void client.resetQueries({ queryKey: sessionKeys.me });
+    client.getQueryCache().findAll({ queryKey: sessionKeys.me }).forEach((query) => query.reset());
   }
 }
 

@@ -82,6 +82,7 @@ public class DevDataSeeder implements ApplicationRunner {
             }
             // Hesablar ayrıca və idempotent yaradılır (əvvəlki mərhələdə doldurulmuş bazalara da əlavə olunur)
             accounts.seedStaff(tenant.slug());
+            accounts.seedDemoCustomer(tenant.slug());
         });
     }
 }

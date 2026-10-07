@@ -10,7 +10,7 @@ import az.cafeloyalty.security.admin.AdminPrincipal;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminRealms;
 import az.cafeloyalty.security.admin.AdminSessionCookies;
-import az.cafeloyalty.security.admin.ClientInfo;
+import az.cafeloyalty.shared.web.ClientInfo;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.ChangePasswordRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.MeResponse;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.RecoveryCodesResponse;

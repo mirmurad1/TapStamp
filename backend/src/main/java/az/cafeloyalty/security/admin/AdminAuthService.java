@@ -26,6 +26,7 @@ import az.cafeloyalty.shared.error.ApiException;
 import az.cafeloyalty.shared.error.ErrorCode;
 import az.cafeloyalty.shared.i18n.Language;
 import az.cafeloyalty.shared.pii.EmailMasker;
+import az.cafeloyalty.shared.web.ClientInfo;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 

@@ -109,7 +109,7 @@
     "/api/v1/admin/auth/logout" : {
       "post" : {
         "description" : "Cari sessiyanı ləğv edir və cookie-ni silir. Sessiya artıq bitibsə də 204 qaytarır.",
-        "operationId" : "logout_1",
+        "operationId" : "logout_2",
         "responses" : {
           "204" : {
             "description" : "No Content"
@@ -248,7 +248,7 @@
     "/api/v1/admin/auth/session" : {
       "get" : {
         "description" : "Frontend səhifə yenilənəndə hansı addımı göstərəcəyini bununla bilir (giriş, TOTP, TOTP qeydiyyatı və ya panel). Sessiya yoxdursa və ya bitibsə NONE qaytarır.",
-        "operationId" : "session_1",
+        "operationId" : "session_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -291,7 +291,7 @@
     "/api/v1/admin/me" : {
       "get" : {
         "description" : "Rollar, filiallar, dil və 2FA vəziyyəti.",
-        "operationId" : "me_1",
+        "operationId" : "me_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -309,7 +309,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -381,7 +381,7 @@
     },
     "/api/v1/admin/me/sessions" : {
       "get" : {
-        "operationId" : "sessions_1",
+        "operationId" : "sessions_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -570,6 +570,214 @@
         "tags" : [ "Admin: komanda" ]
       }
     },
+    "/api/v1/auth/consents" : {
+      "post" : {
+        "operationId" : "consent",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ConsentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Sənədlərin yeni versiyasına razılıq",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "description" : "Cari sessiya ləğv olunur, cookie-lər silinir. Sessiya yoxdursa da 204.",
+        "operationId" : "logout_1",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Çıxış",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/otp/request" : {
+      "post" : {
+        "description" : "Kod 5 dəqiqə etibarlıdır, yenisi 60 saniyədən sonra istənilə bilər. Limitlər: nömrə üzrə 15 dəqiqədə 3 və gündə 10, IP üzrə saatda 20. Yalnız mobil nömrələr və şirkətin icazə verdiyi ölkələr qəbul olunur.",
+        "operationId" : "requestOtp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OtpRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OtpChallengeResponse"
+                }
+              }
+            },
+            "description" : "Accepted"
+          }
+        },
+        "summary" : "SMS kodunun göndərilməsi",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/otp/verify" : {
+      "post" : {
+        "description" : "Bir kod üçün 5 cəhd; yanlış kodda cavabda `attemptsRemaining` var. Mövcud müştəri dərhal daxil olur (HttpOnly cookie-lər), yeni nömrə üçün qeydiyyat tokeni qaytarılır.",
+        "operationId" : "verifyOtp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OtpVerifyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OtpVerifyResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "SMS kodunun yoxlanılması",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/refresh" : {
+      "post" : {
+        "description" : "Yeni access və refresh cookie-ləri qoyulur. Eyni anda iki tabdan gələn yeniləmədə ikincisi 409 `REFRESH_RACE` alır (sorğunu təkrarlamaq kifayətdir). Köhnə refresh tokenin təkrar istifadəsi sessiyanı ləğv edir.",
+        "operationId" : "refresh",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuthStatusResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sessiyanın yenilənməsi (refresh token rotasiyası)",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/register" : {
+      "post" : {
+        "description" : "Ad istəyə bağlıdır. Məxfilik siyasəti və istifadə şərtlərinin cari versiyalarına razılıq məcburidir (`CONSENT_REQUIRED`). Razılığın dili, vaxtı, IP-si və brauzeri qeyd olunur.",
+        "operationId" : "register",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuthStatusResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Qeydiyyatın tamamlanması",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/session" : {
+      "get" : {
+        "description" : "Səhifə açılanda frontend bununla bilir: müştəri daxil olubmu, yoxsa əvvəlcə tokeni yeniləmək lazımdır. Qonaq üçün xəta qaytarılmır.",
+        "operationId" : "session_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerSessionStateResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sessiyanın vəziyyəti",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/step-up/otp/request" : {
+      "post" : {
+        "description" : "Hesabın silinməsindən əvvəl kimliyin təkrar təsdiqi.",
+        "operationId" : "requestStepUp",
+        "responses" : {
+          "202" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OtpChallengeResponse"
+                }
+              }
+            },
+            "description" : "Accepted"
+          }
+        },
+        "summary" : "Həssas əməliyyat üçün SMS kodu",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
+    "/api/v1/auth/step-up/otp/verify" : {
+      "post" : {
+        "description" : "Təsdiq 10 dəqiqə etibarlıdır.",
+        "operationId" : "verifyStepUp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OtpVerifyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Həssas əməliyyat üçün kodun yoxlanılması",
+        "tags" : [ "Müştəri: autentifikasiya" ]
+      }
+    },
     "/api/v1/context" : {
       "get" : {
         "description" : "Frontend bu cavaba görə rejimi seçir: şirkətin domenində (`TENANT`) müştəri və işçi tətbiqi, platformanın domenində (`PLATFORM`) platforma paneli işləyir. Gizli məlumat qaytarılmır.",
@@ -601,6 +809,127 @@
         },
         "summary" : "CSRF tokenini təmin edir",
         "tags" : [ "Təhlükəsizlik" ]
+      }
+    },
+    "/api/v1/me" : {
+      "delete" : {
+        "description" : "Əvvəlcə SMS kodu ilə təkrar təsdiq lazımdır (`/api/v1/auth/step-up/otp/*`), əks halda `STEP_UP_REQUIRED`. Şəxsi məlumat silinir, bütün sessiyalar bağlanır; anonim statistika qalır.",
+        "operationId" : "delete",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Hesabın silinməsi",
+        "tags" : [ "Müştəri: profil" ]
+      },
+      "get" : {
+        "description" : "Kart, mövcud mükafatlar və razılıq gözləyən sənədlər.",
+        "operationId" : "me_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerMeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Profil və möhür kartı",
+        "tags" : [ "Müştəri: profil" ]
+      },
+      "patch" : {
+        "description" : "Dil SMS-lərə və bütün cihazlara tətbiq olunur.",
+        "operationId" : "update_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerMeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Ad və dilin dəyişdirilməsi",
+        "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/sessions" : {
+      "get" : {
+        "operationId" : "sessions_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeviceResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Aktiv cihazlar",
+        "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/sessions/revoke-others" : {
+      "post" : {
+        "operationId" : "revokeOthers",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RevokedResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Digər bütün cihazlardan çıxış",
+        "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/sessions/{sessionId}" : {
+      "delete" : {
+        "operationId" : "revoke",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sessionId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Cihazdan çıxış",
+        "tags" : [ "Müştəri: profil" ]
       }
     },
     "/api/v1/platform/auth/login" : {
@@ -1214,6 +1543,57 @@
         "summary" : "Kafe haqqında ictimai məlumat",
         "tags" : [ "Kafe" ]
       }
+    },
+    "/api/v1/public/legal" : {
+      "get" : {
+        "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
+        "operationId" : "list_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalDocumentSummary"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cari hüquqi sənədlər",
+        "tags" : [ "İctimai" ]
+      }
+    },
+    "/api/v1/public/legal/{slug}" : {
+      "get" : {
+        "description" : "`privacy` — məxfilik siyasəti, `terms` — istifadə şərtləri (3 dildə).",
+        "operationId" : "document",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalDocumentResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sənədin mətni",
+        "tags" : [ "İctimai" ]
+      }
     }
   },
   "components" : {
@@ -1239,6 +1619,15 @@
         },
         "required" : [ "displayName", "password", "token" ]
       },
+      "AuthStatusResponse" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "AUTHENTICATED" ]
+          }
+        }
+      },
       "BranchResponse" : {
         "type" : "object",
         "properties" : {
@@ -1254,6 +1643,29 @@
           },
           "name" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
+      },
+      "CardResponse" : {
+        "type" : "object",
+        "properties" : {
+          "currentStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "rewardDescription" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalStamps" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -1285,6 +1697,20 @@
         },
         "required" : [ "code" ]
       },
+      "ConsentRequest" : {
+        "type" : "object",
+        "properties" : {
+          "acceptedDocuments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DocumentAcceptance"
+            },
+            "maxItems" : 10,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "acceptedDocuments" ]
+      },
       "ContextResponse" : {
         "type" : "object",
         "properties" : {
@@ -1296,6 +1722,92 @@
             "$ref" : "#/components/schemas/Tenant"
           }
         }
+      },
+      "CustomerMeResponse" : {
+        "type" : "object",
+        "description" : "Müştərinin profili. Telefon yalnız maskalı göstərilir.",
+        "properties" : {
+          "availableRewards" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RewardResponse"
+            }
+          },
+          "card" : {
+            "$ref" : "#/components/schemas/CardResponse"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "pendingConsents" : {
+            "type" : "array",
+            "description" : "Razılıq verilməli sənədlər (yeni versiya dərc olunubsa)",
+            "items" : {
+              "$ref" : "#/components/schemas/PendingConsentResponse"
+            }
+          },
+          "phoneMasked" : {
+            "type" : "string"
+          },
+          "preferredLanguage" : {
+            "type" : "string"
+          },
+          "registeredAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "CustomerSessionStateResponse" : {
+        "type" : "object",
+        "description" : "ACTIVE — access token etibarlıdır; REFRESH_REQUIRED — yalnız refresh token var, əvvəlcə /refresh çağırılmalıdır; NONE — daxil olmayıb",
+        "properties" : {
+          "state" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "REFRESH_REQUIRED", "NONE" ]
+          }
+        }
+      },
+      "DeviceResponse" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "current" : {
+            "type" : "boolean"
+          },
+          "deviceLabel" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "lastSeenAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "DocumentAcceptance" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "PRIVACY_POLICY", "TERMS" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "type", "version" ]
       },
       "EnrollmentStartResponse" : {
         "type" : "object",
@@ -1404,6 +1916,46 @@
           }
         },
         "required" : [ "email", "language", "role" ]
+      },
+      "LegalDocumentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "publishedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "PRIVACY_POLICY", "TERMS" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "LegalDocumentSummary" : {
+        "type" : "object",
+        "properties" : {
+          "publishedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "PRIVACY_POLICY", "TERMS" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
       },
       "LocalizedText" : {
         "type" : "object",
@@ -1533,6 +2085,74 @@
         },
         "required" : [ "status" ]
       },
+      "OtpChallengeResponse" : {
+        "type" : "object",
+        "description" : "Kod göndərildi. Cavab nömrənin qeydiyyatda olub-olmamasından asılı deyil.",
+        "properties" : {
+          "challengeId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "resendAvailableAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "OtpRequest" : {
+        "type" : "object",
+        "properties" : {
+          "language" : {
+            "type" : "string",
+            "description" : "SMS-in dili",
+            "minLength" : 1,
+            "pattern" : "az|en|ru"
+          },
+          "phone" : {
+            "type" : "string",
+            "description" : "Telefon nömrəsi istənilən formatda: 050 123 45 67, +994501234567 və s.",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "language", "phone" ]
+      },
+      "OtpVerifyRequest" : {
+        "type" : "object",
+        "properties" : {
+          "challengeId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "code" : {
+            "type" : "string",
+            "maxLength" : 12,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "challengeId", "code" ]
+      },
+      "OtpVerifyResponse" : {
+        "type" : "object",
+        "description" : "AUTHENTICATED — mövcud müştəri, sessiya cookie-ləri qoyulub; REGISTRATION_REQUIRED — yeni nömrə, registrationToken ilə 10 dəqiqə ərzində qeydiyyatı tamamlamaq lazımdır.",
+        "properties" : {
+          "registrationExpiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "registrationToken" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "AUTHENTICATED", "REGISTRATION_REQUIRED" ]
+          }
+        }
+      },
       "OwnerInvitationRequest" : {
         "type" : "object",
         "properties" : {
@@ -1619,6 +2239,19 @@
         },
         "required" : [ "newPassword", "token" ]
       },
+      "PendingConsentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "PRIVACY_POLICY", "TERMS" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "ProvisionRequest" : {
         "type" : "object",
         "properties" : {
@@ -1690,6 +2323,60 @@
             "items" : {
               "type" : "string"
             }
+          }
+        }
+      },
+      "RegisterRequest" : {
+        "type" : "object",
+        "properties" : {
+          "acceptedDocuments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DocumentAcceptance"
+            },
+            "maxItems" : 10,
+            "minItems" : 0
+          },
+          "language" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "az|en|ru"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "registrationToken" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "acceptedDocuments", "language", "registrationToken" ]
+      },
+      "RevokedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "revoked" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "RewardResponse" : {
+        "type" : "object",
+        "properties" : {
+          "earnedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
           }
         }
       },
@@ -1837,6 +2524,21 @@
             "type" : "string",
             "maxLength" : 80,
             "minLength" : 1
+          },
+          "preferredLanguage" : {
+            "type" : "string",
+            "pattern" : "az|en|ru"
+          }
+        }
+      },
+      "UpdateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "Ad; boş sətir adı silir, göndərilməzsə dəyişmir",
+            "maxLength" : 80,
+            "minLength" : 0
           },
           "preferredLanguage" : {
             "type" : "string",

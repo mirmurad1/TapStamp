@@ -3,7 +3,7 @@ package az.cafeloyalty.security.admin.api;
 import az.cafeloyalty.security.admin.AdminAuthService;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminSessionCookies;
-import az.cafeloyalty.security.admin.ClientInfo;
+import az.cafeloyalty.shared.web.ClientInfo;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.LoginResponse;
 import az.cafeloyalty.staff.service.InvitationService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -25,6 +25,8 @@ class ProdSafetyGuardTest {
         MockEnvironment env = new MockEnvironment();
         env.setActiveProfiles("prod");
         env.setProperty("app.notifications.sms-provider", "http");
+        env.setProperty("app.notifications.sms-http.url", "https://sms.example.az/api/send");
+        env.setProperty("app.notifications.sms-http.api-key", "Kx7pQ2mN9vR4tY8wK3nB6cH1");
         env.setProperty("app.notifications.mail-provider", "smtp");
         env.setProperty("app.notifications.mail-from", "no-reply@cafe.az");
         env.setProperty("app.crypto.keks", "kek-2026-10:" + STRONG_SECRET);
@@ -46,6 +48,13 @@ class ProdSafetyGuardTest {
         MockEnvironment env = safeProdEnvironment();
         env.setActiveProfiles("prod", "dev");
         assertThat(ProdSafetyGuard.checkEnvironment(env)).anySatisfy(v -> assertThat(v).contains("'dev'"));
+    }
+
+    @Test
+    void httpSmsProviderRequiresEndpointAndKey() {
+        MockEnvironment env = safeProdEnvironment();
+        env.setProperty("app.notifications.sms-http.api-key", "");
+        assertThat(ProdSafetyGuard.checkEnvironment(env)).anySatisfy(v -> assertThat(v).contains("sms-http.api-key"));
     }
 
     @Test

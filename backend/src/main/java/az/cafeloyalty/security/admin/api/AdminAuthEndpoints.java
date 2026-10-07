@@ -4,7 +4,7 @@ import az.cafeloyalty.security.admin.AdminAuthService;
 import az.cafeloyalty.security.admin.AdminPrincipal;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminSessionCookies;
-import az.cafeloyalty.security.admin.ClientInfo;
+import az.cafeloyalty.shared.web.ClientInfo;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.CodeRequest;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.EnrollmentStartResponse;
 import az.cafeloyalty.security.admin.api.AdminAuthDtos.LoginRequest;

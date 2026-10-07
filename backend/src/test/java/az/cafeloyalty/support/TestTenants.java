@@ -39,6 +39,25 @@ public final class TestTenants {
                         .param("name", "{\"az\": \"" + name + " — Mərkəz\"}")
                         .update();
             }
+            // Hüquqi sənədlər (qeydiyyatda razılıq tələb olunur) və mükafat qaydası (möhür kartı üçün)
+            Integer documents = tenantJdbc.sql("SELECT count(*) FROM legal_documents").query(Integer.class).single();
+            if (documents == 0) {
+                for (String type : new String[] {"PRIVACY_POLICY", "TERMS"}) {
+                    tenantJdbc.sql("""
+                                    INSERT INTO legal_documents (id, type, doc_version, content, published_at, is_current)
+                                    VALUES (:id, :type, 1, CAST(:content AS jsonb), now(), true)""")
+                            .param("id", Ids.newId())
+                            .param("type", type)
+                            .param("content", "{\"az\": \"" + type + " v1\", \"en\": \"" + type + " v1 EN\"}")
+                            .update();
+                }
+                tenantJdbc.sql("""
+                                INSERT INTO reward_rules (id, rule_version, stamps_required, reward_name, active, created_at)
+                                VALUES (:id, 1, 9, CAST(:name AS jsonb), true, now())""")
+                        .param("id", Ids.newId())
+                        .param("name", "{\"az\": \"Hədiyyə qəhvə\", \"en\": \"Free coffee\"}")
+                        .update();
+            }
         });
     }
 }

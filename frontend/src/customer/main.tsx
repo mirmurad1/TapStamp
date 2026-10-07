@@ -1,18 +1,20 @@
 import '@/shared/styles/globals.css';
 import './i18n';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RouterProvider } from 'react-router/dom';
 
-import { customerRouter } from './router';
+import { setSessionRefresher } from '@/shared/api/client';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 30_000 },
-  },
-});
+import { App } from './App';
+import { createCustomerQueryClient } from './auth/queryClient';
+import { refreshSession } from './auth/refresh';
+
+// 401 cavabında (access tokenin vaxtı keçib) sessiya bir dəfə yenilənir və sorğu təkrarlanır
+setSessionRefresher(refreshSession);
+
+const queryClient = createCustomerQueryClient();
 
 const root = document.getElementById('root');
 if (!root) {
@@ -22,7 +24,7 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={customerRouter} />
+      <App />
     </QueryClientProvider>
   </StrictMode>,
 );

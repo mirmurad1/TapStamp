@@ -20,5 +20,8 @@ public abstract class IntegrationTest {
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
         TestDatabase.register(registry);
+        // Bütün test sinifləri eyni şirkətdə çoxlu OTP göndərir: şirkət və qlobal limitlər testlər arasında paylaşılmasın
+        registry.add("app.rate-limits.otp-request-per-tenant", () -> 100_000);
+        registry.add("app.rate-limits.otp-request-global", () -> 100_000);
     }
 }

@@ -1,4 +1,4 @@
-package az.cafeloyalty.security.admin;
+package az.cafeloyalty.shared.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 

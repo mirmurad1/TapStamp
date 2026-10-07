@@ -17,6 +17,7 @@ export interface ProblemDetail {
   code?: string;
   traceId?: string;
   retryAfterSeconds?: number;
+  attemptsRemaining?: number;
   violations?: string[];
   errors?: { field: string; code: string; message: string }[];
 }
@@ -79,12 +80,36 @@ const csrfMiddleware: Middleware = {
   },
 };
 
+/**
+ * Müştəri tətbiqi: access token-in vaxtı keçəndə (401) sessiya bir dəfə yenilənir və sorğu təkrarlanır. Admin tətbiqi
+ * bunu qoşmur (orada 401 giriş səhifəsinə aparır). Funksiya {@code true} qaytarırsa, yeni cookie-lər brauzerdədir.
+ */
+type SessionRefresher = () => Promise<boolean>;
+let sessionRefresher: SessionRefresher | undefined;
+
+export function setSessionRefresher(refresher: SessionRefresher | undefined): void {
+  sessionRefresher = refresher;
+}
+
+/** Bu yollarda 401 təkrar yeniləməyə səbəb olmur (giriş axınının özü və işçi panelləri). */
+const NO_REFRESH = /^\/api\/v1\/(auth\/(refresh|otp|register|logout|session)|admin\/|platform\/)/;
+
+async function fetchWithRefresh(request: Request): Promise<Response> {
+  const path = new URL(request.url).pathname;
+  const retry = sessionRefresher && !NO_REFRESH.test(path) ? request.clone() : undefined;
+  const response = await globalThis.fetch(request);
+  if (response.status === 401 && retry && sessionRefresher && (await sessionRefresher())) {
+    return globalThis.fetch(retry);
+  }
+  return response;
+}
+
 export const api = createClient<paths>({
   // Nisbi ünvan: sorğu həmişə səhifənin öz domeninə gedir (tenant domendən müəyyən olunur)
   baseUrl: typeof window === 'undefined' ? '' : window.location.origin,
   credentials: 'same-origin',
   // fetch çağırış anında götürülür (testlərdə əvəz etmək üçün)
-  fetch: (request) => globalThis.fetch(request),
+  fetch: fetchWithRefresh,
 });
 api.use(csrfMiddleware);
 

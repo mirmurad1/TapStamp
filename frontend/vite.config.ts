@@ -57,6 +57,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Tətbiq səviyyəli UI testləri (tam giriş axını) yüklü CI maşınında 5 saniyədən uzun çəkə bilər
+    testTimeout: 20_000,
     css: false,
   },
 });

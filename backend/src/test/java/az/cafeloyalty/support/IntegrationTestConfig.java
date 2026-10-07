@@ -36,6 +36,11 @@ public class IntegrationTestConfig {
     }
 
     @Bean
+    TestSmsInbox testSmsInbox() {
+        return new TestSmsInbox();
+    }
+
+    @Bean
     ApplicationRunner testTenants(TenantProvisioner provisioner, @Qualifier("tenantJdbc") JdbcClient tenantJdbc) {
         return args -> TestTenants.provisionAll(provisioner, tenantJdbc);
     }

@@ -25,6 +25,7 @@
         <cyclonedx.version>2.9.3</cyclonedx.version>
         <bouncycastle.version>1.86</bouncycastle.version>
         <bucket4j.version>8.21.0</bucket4j.version>
+        <libphonenumber.version>9.0.40</libphonenumber.version>
     </properties>
 
     <dependencies>
@@ -88,6 +89,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!-- Telefon nömrələrinin yoxlanması və E.164 formatına salınması -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>${libphonenumber.version}</version>
         </dependency>
 
         <!-- OpenAPI sənədləri (Swagger UI yalnız dev profilində açılır) -->

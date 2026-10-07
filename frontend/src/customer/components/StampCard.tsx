@@ -9,10 +9,12 @@ interface StampCardProps {
   stampsRequired: number;
   /** Cari kartdakı möhürlər. */
   current: number;
+  /** Hədiyyənin adı (cari dildə). */
+  rewardName?: string;
 }
 
 /** Möhür kartı: N fincan + hədiyyə fincanı. Animasiyalar Mərhələ 5-də əlavə olunur. */
-export function StampCard({ stampsRequired, current }: StampCardProps) {
+export function StampCard({ stampsRequired, current, rewardName }: StampCardProps) {
   const { t } = useTranslation('profile');
   const remaining = Math.max(stampsRequired - current, 0);
 
@@ -21,6 +23,7 @@ export function StampCard({ stampsRequired, current }: StampCardProps) {
       <CardHeader>
         <CardTitle>{t('card.title')}</CardTitle>
         <p className="text-sm text-muted-foreground">{t('card.progress', { count: remaining })}</p>
+        {rewardName ? <p className="text-sm font-medium text-accent">{t('card.reward', { name: rewardName })}</p> : null}
       </CardHeader>
       <CardContent>
         <ol className="grid grid-cols-5 gap-3">

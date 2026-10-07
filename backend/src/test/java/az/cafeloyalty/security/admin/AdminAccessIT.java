@@ -104,12 +104,38 @@ class AdminAccessIT extends AdminIntegrationTest {
         }
     }
 
+    /** Müştərinin sessiyasız açıq endpoint-ləri. */
+    private static final Set<String> PUBLIC_CUSTOMER_ENDPOINTS = Set.of(
+            "GET /api/v1/auth/session",
+            "POST /api/v1/auth/otp/request",
+            "POST /api/v1/auth/otp/verify",
+            "POST /api/v1/auth/register",
+            "POST /api/v1/auth/refresh",
+            "POST /api/v1/auth/logout");
+
+    @Test
+    void everyCustomerEndpointRejectsAnonymousRequests() throws Exception {
+        List<Endpoint> customer = new ArrayList<>(endpoints("/api/v1/auth/"));
+        customer.addAll(endpoints("/api/v1/me"));
+        assertThat(customer).hasSizeGreaterThan(10);
+        for (Endpoint endpoint : customer) {
+            if (!PUBLIC_CUSTOMER_ENDPOINTS.contains(endpoint.key())) {
+                AdminClient.staff(mvc, TestTenants.ALPHA_HOST)
+                        .perform(MockMvcRequestBuilders.request(endpoint.method(), endpoint.concretePath())
+                                .contentType("application/json").content("{}"))
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+    }
+
     @Test
     void everyEndpointIsUnderAKnownPrefix() {
         List<String> unexpected = new ArrayList<>();
         for (RequestMappingInfo info : handlerMapping.getHandlerMethods().keySet()) {
             for (String pattern : info.getPatternValues()) {
                 boolean known = pattern.startsWith("/api/v1/admin/") || pattern.equals("/api/v1/admin")
+                        || pattern.startsWith("/api/v1/auth/") || pattern.equals("/api/v1/me")
+                        || pattern.startsWith("/api/v1/me/")
                         || pattern.startsWith("/api/v1/platform/") || pattern.startsWith("/api/v1/public/")
                         || pattern.equals("/api/v1/csrf") || pattern.equals("/api/v1/context")
                         || pattern.startsWith("/api/v1/docs") || pattern.startsWith("/api/v1/openapi.json")

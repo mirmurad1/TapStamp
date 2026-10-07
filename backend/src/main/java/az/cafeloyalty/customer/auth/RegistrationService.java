@@ -1,0 +1,87 @@
+package az.cafeloyalty.customer.auth;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import az.cafeloyalty.audit.AuditLogger;
+import az.cafeloyalty.customer.CustomerStore;
+import az.cafeloyalty.customer.consent.LegalDocumentService;
+import az.cafeloyalty.customer.consent.LegalDocumentService.DocumentRef;
+import az.cafeloyalty.security.crypto.Aad;
+import az.cafeloyalty.security.crypto.EnvelopeCipher;
+import az.cafeloyalty.security.crypto.KeyPurpose;
+import az.cafeloyalty.security.token.SecureTokens;
+import az.cafeloyalty.shared.error.ApiException;
+import az.cafeloyalty.shared.error.ErrorCode;
+import az.cafeloyalty.shared.i18n.Language;
+import az.cafeloyalty.shared.id.Ids;
+import az.cafeloyalty.shared.pii.PhoneMasker;
+import az.cafeloyalty.shared.web.ClientInfo;
+import az.cafeloyalty.tenancy.TenantContext;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+/**
+ * Yeni müştərinin qeydiyyatı: OTP ilə təsdiqlənmiş nömrə (qeydiyyat tokeni, 10 dəqiqə, bir dəfə), istəyə bağlı ad,
+ * məcburi razılıqlar və dil. Hamısı bir tranzaksiyada; razılıq çatışmırsa, heç nə yaradılmır və token qüvvədə qalır.
+ */
+@Service
+public class RegistrationService {
+
+    private final OtpChallengeStore challenges;
+    private final CustomerStore customers;
+    private final LegalDocumentService legal;
+    private final EnvelopeCipher cipher;
+    private final AuditLogger audit;
+    private final TransactionTemplate tx;
+    private final Clock clock;
+
+    public RegistrationService(OtpChallengeStore challenges, CustomerStore customers, LegalDocumentService legal,
+                               @Qualifier("tenantCipher") EnvelopeCipher cipher, AuditLogger audit,
+                               PlatformTransactionManager transactionManager, Clock clock) {
+        this.challenges = challenges;
+        this.customers = customers;
+        this.legal = legal;
+        this.cipher = cipher;
+        this.audit = audit;
+        this.tx = new TransactionTemplate(transactionManager);
+        this.clock = clock;
+    }
+
+    public UUID register(String registrationToken, String name, Collection<DocumentRef> acceptedDocuments,
+                         Language language, ClientInfo client) {
+        Instant now = clock.instant();
+        UUID tenantId = TenantContext.require().id();
+        return tx.execute(status -> {
+            OtpChallengeStore.Registration registration = challenges
+                    .consumeRegistrationToken(SecureTokens.hash(registrationToken == null ? "" : registrationToken), now)
+                    .orElseThrow(() -> new ApiException(ErrorCode.TOKEN_INVALID));
+            // Eyni nömrə bu arada başqa tabdan qeydiyyatdan keçibsə — nömrəyə sahiblik sübut olunub, həmin hesaba daxil olur
+            Optional<CustomerStore.Customer> existing = customers.findByPhoneHash(registration.phoneHash());
+            if (existing.isPresent()) {
+                if (existing.get().status() == CustomerStore.Status.BLOCKED) {
+                    throw new ApiException(ErrorCode.CUSTOMER_BLOCKED);
+                }
+                legal.accept(existing.get().id(), acceptedDocuments, language, client);
+                return existing.get().id();
+            }
+            String phone = cipher.decryptString(registration.phoneEnc(),
+                    Aad.tenantField(tenantId, "otp_challenges", "phone_enc", registration.challengeId()));
+            UUID id = Ids.newId();
+            customers.insert(id,
+                    cipher.encryptString(KeyPurpose.PII, phone, Aad.tenantField(tenantId, "customers", "phone_enc", id)),
+                    registration.phoneHash(), PhoneMasker.mask(phone), name == null || name.isBlank() ? null : name.strip(),
+                    language, now);
+            legal.accept(id, acceptedDocuments, language, client);
+            audit.tenant("CUSTOMER_REGISTERED", AuditLogger.ActorType.CUSTOMER, id, "customer", id,
+                    Map.of("language", language.tag()));
+            return id;
+        });
+    }
+}

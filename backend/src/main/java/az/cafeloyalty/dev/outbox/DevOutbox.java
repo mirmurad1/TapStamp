@@ -10,14 +10,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import az.cafeloyalty.notification.mail.MailSentEvent;
+import az.cafeloyalty.notification.sms.SmsSentEvent;
 import az.cafeloyalty.shared.id.Ids;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Dev "poçt qutusu": konsol provayderinin "göndərdiyi" son mesajlar yaddaşda saxlanılır ki, dəvət və şifrə bərpası
- * linklərini real email olmadan açmaq mümkün olsun. Yalnız dev profilində mövcuddur.
+ * Dev "poçt qutusu": konsol provayderlərinin "göndərdiyi" son email və SMS-lər yaddaşda saxlanılır ki, dəvət və şifrə
+ * bərpası linklərini və OTP kodlarını real provayder olmadan görmək mümkün olsun (Playwright testləri də oxuyur).
+ * Yalnız dev profilində mövcuddur.
  */
 @Component
 @Profile("dev")
@@ -39,8 +41,18 @@ public class DevOutbox {
     @EventListener
     public void onMail(MailSentEvent event) {
         var message = event.message();
-        entries.addFirst(new Entry(Ids.newId(), "EMAIL", message.to(), message.subject(), message.textBody(),
-                message.tenantId(), clock.instant()));
+        add(new Entry(Ids.newId(), "EMAIL", message.to(), message.subject(), message.textBody(), message.tenantId(),
+                clock.instant()));
+    }
+
+    @EventListener
+    public void onSms(SmsSentEvent event) {
+        var message = event.message();
+        add(new Entry(Ids.newId(), "SMS", message.to(), null, message.text(), message.tenantId(), clock.instant()));
+    }
+
+    private void add(Entry entry) {
+        entries.addFirst(entry);
         while (entries.size() > CAPACITY) {
             entries.pollLast();
         }

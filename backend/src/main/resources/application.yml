@@ -84,6 +84,18 @@ app:
     sms-provider: ${APP_SMS_PROVIDER:console}
     mail-provider: ${APP_MAIL_PROVIDER:console}
     mail-from: ${APP_MAIL_FROM:}
+    # Yalnız APP_SMS_PROVIDER=http olanda: real SMS provayderinin ünvanı və açarı
+    sms-http:
+      url: ${APP_SMS_HTTP_URL:}
+      api-key: ${APP_SMS_HTTP_API_KEY:}
+      timeout: 10s
+  customer-auth:
+    otp-ttl: 5m
+    otp-resend-cooldown: 60s
+    otp-max-attempts: 5
+    access-ttl: 15m
+    refresh-ttl: 180d
+    refresh-race-window: 10s
   admin-auth:
     session-absolute: 8h
     session-idle: 30m

@@ -23,5 +23,13 @@
   "CURRENT_PASSWORD_INVALID": "The current password is incorrect.",
   "TOKEN_INVALID": "The link has expired or has already been used. Please request a new one.",
   "ALREADY_EXISTS": "A record with these details already exists.",
-  "PROVISIONING_DISABLED": "Creating companies is disabled on this server."
+  "PROVISIONING_DISABLED": "Creating companies is disabled on this server.",
+  "PHONE_INVALID": "Enter a valid mobile number, for example: 050 123 45 67.",
+  "PHONE_REGION_NOT_ALLOWED": "Numbers from this country are not accepted.",
+  "OTP_INVALID": "Invalid code.",
+  "OTP_EXPIRED": "The code has expired. Please request a new one.",
+  "OTP_ATTEMPTS_EXCEEDED": "Too many wrong attempts. Request a new code a bit later.",
+  "CONSENT_REQUIRED": "Please accept the terms to continue.",
+  "REFRESH_RACE": "Your session is being refreshed. Please try again.",
+  "CUSTOMER_BLOCKED": "Your account has been blocked. Please contact the cafe."
 }

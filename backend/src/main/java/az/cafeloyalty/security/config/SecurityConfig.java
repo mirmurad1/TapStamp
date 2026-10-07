@@ -3,6 +3,10 @@ package az.cafeloyalty.security.config;
 import java.time.Clock;
 
 import az.cafeloyalty.config.AppProperties;
+import az.cafeloyalty.customer.auth.CustomerCookies;
+import az.cafeloyalty.customer.auth.CustomerPrincipal;
+import az.cafeloyalty.customer.auth.CustomerSessionFilter;
+import az.cafeloyalty.customer.auth.CustomerSessionService;
 import az.cafeloyalty.security.admin.AdminAuthProperties;
 import az.cafeloyalty.security.admin.AdminAuthentication;
 import az.cafeloyalty.security.admin.AdminRealm;
@@ -49,6 +53,7 @@ public class SecurityConfig {
     static final String API_CSP = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
     private static final String STAFF = AdminRealm.STAFF.sessionAuthority();
     private static final String PLATFORM = AdminRealm.PLATFORM.sessionAuthority();
+    private static final String CUSTOMER = CustomerPrincipal.AUTHORITY;
 
     static final String PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=(), usb=()";
 
@@ -70,7 +75,8 @@ public class SecurityConfig {
     @Order(10)
     SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http, AppProperties properties, ProblemSecurityHandlers problemHandlers, AdminRealms realms,
-            AdminSessionCookies sessionCookies, AdminAuthProperties authProperties, Clock clock) throws Exception {
+            AdminSessionCookies sessionCookies, AdminAuthProperties authProperties, Clock clock,
+            CustomerSessionService customerSessions, CustomerCookies customerCookies) throws Exception {
         boolean secureCookies = properties.security().cookieSecure();
 
         CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
@@ -85,6 +91,8 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                 .addFilterBefore(new OriginCheckFilter(problemHandlers), CsrfFilter.class)
                 .addFilterBefore(new AdminSessionFilter(realms, sessionCookies, authProperties, clock),
+                        AnonymousAuthenticationFilter.class)
+                .addFilterBefore(new CustomerSessionFilter(customerSessions, customerCookies),
                         AnonymousAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -112,6 +120,13 @@ public class SecurityConfig {
                         .hasAnyAuthority(AdminAuthentication.MFA_ENROLLMENT, STAFF)
                         .requestMatchers(HttpMethod.POST, "/api/v1/platform/auth/mfa/enrollment", "/api/v1/platform/auth/mfa/enrollment/confirm")
                         .hasAnyAuthority(AdminAuthentication.MFA_ENROLLMENT, PLATFORM)
+                        // Müştəri girişi (yalnız şirkət domenində)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/session").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/otp/request", "/api/v1/auth/otp/verify",
+                                "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/consents", "/api/v1/auth/step-up/otp/request",
+                                "/api/v1/auth/step-up/otp/verify").hasAuthority(CUSTOMER)
+                        .requestMatchers("/api/v1/me", "/api/v1/me/**").hasAuthority(CUSTOMER)
                         .requestMatchers("/api/v1/admin/**").hasAuthority(STAFF)
                         .requestMatchers("/api/v1/platform/**").hasAuthority(PLATFORM)
                         // Dev alətləri (outbox): controller-lər yalnız dev profilində mövcuddur, prod-da simulyator söndürülüb

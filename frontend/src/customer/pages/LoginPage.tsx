@@ -1,0 +1,297 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { useForm } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link, Navigate, useNavigate } from 'react-router';
+import { z } from 'zod';
+
+import { isApiError } from '@/shared/api/client';
+import { currentLanguage } from '@/shared/i18n/setup';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Field } from '@/shared/ui/field';
+import { Input } from '@/shared/ui/input';
+
+import { customerAuthApi, publicApi } from '../api/customerApi';
+import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { ErrorMessage } from '../components/ErrorMessage';
+
+type Step =
+  | { name: 'phone' }
+  | { name: 'code'; phone: string; challengeId: string; resendAt: number }
+  | { name: 'register'; registrationToken: string };
+
+/** Giriş: telefon → SMS kodu → (yeni nömrədirsə) qeydiyyatın tamamlanması. Dil dəyişəndə daxil edilmiş məlumat qalır. */
+export function LoginPage() {
+  const { status, refresh } = useCustomerSession();
+  const navigate = useNavigate();
+  const [step, setStep] = useState<Step>({ name: 'phone' });
+
+  if (status === 'signedIn') {
+    return <Navigate to="/" replace />;
+  }
+
+  const finish = async () => {
+    await refresh();
+    void navigate('/', { replace: true });
+  };
+
+  return (
+    <div className="flex flex-col gap-4 pt-2">
+      {step.name === 'phone' ? (
+        <PhoneStep
+          onSent={(phone, challengeId, resendAt) => setStep({ name: 'code', phone, challengeId, resendAt })}
+        />
+      ) : null}
+      {step.name === 'code' ? (
+        <CodeStep
+          key={step.challengeId}
+          phone={step.phone}
+          challengeId={step.challengeId}
+          resendAt={step.resendAt}
+          onResent={(challengeId, resendAt) => setStep({ ...step, challengeId, resendAt })}
+          onChangePhone={() => setStep({ name: 'phone' })}
+          onAuthenticated={() => void finish()}
+          onRegistrationRequired={(registrationToken) => setStep({ name: 'register', registrationToken })}
+        />
+      ) : null}
+      {step.name === 'register' ? (
+        <RegisterStep registrationToken={step.registrationToken} onRegistered={() => void finish()} />
+      ) : null}
+    </div>
+  );
+}
+
+const phoneSchema = z.object({ phone: z.string().trim().min(1, 'required').max(32, 'tooLong') });
+
+function PhoneStep({ onSent }: { onSent: (phone: string, challengeId: string, resendAt: number) => void }) {
+  const { t } = useTranslation(['auth', 'common']);
+  const form = useForm<z.infer<typeof phoneSchema>>({ resolver: zodResolver(phoneSchema), defaultValues: { phone: '' } });
+  const request = useMutation({
+    mutationFn: (phone: string) => customerAuthApi.requestOtp(phone, currentLanguage()),
+    onSuccess: (challenge, phone) =>
+      onSent(phone, challenge.challengeId ?? '', Date.parse(challenge.resendAvailableAt ?? '') || Date.now() + 60_000),
+  });
+  const error = form.formState.errors.phone?.message;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('auth:login.title')}</CardTitle>
+        <CardDescription>{t('auth:login.subtitle')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={form.handleSubmit(({ phone }) => request.mutate(phone))} className="flex flex-col gap-4" noValidate>
+          <ErrorMessage error={request.error} />
+          <Field
+            id="phone"
+            label={t('auth:phone.label')}
+            hint={t('auth:phone.hint')}
+            error={error ? t(`common:validation.${error === 'tooLong' ? 'tooLong' : 'required'}`) : undefined}
+          >
+            <Input
+              {...form.register('phone')}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder={t('auth:login.phonePlaceholder')}
+              className="text-lg"
+              autoFocus
+            />
+          </Field>
+          <Button type="submit" size="lg" disabled={request.isPending}>
+            {t('auth:login.sendCode')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+const codeSchema = z.object({ code: z.string().trim().regex(/^\d{6}$/, 'code') });
+
+interface CodeStepProps {
+  phone: string;
+  challengeId: string;
+  resendAt: number;
+  onResent: (challengeId: string, resendAt: number) => void;
+  onChangePhone: () => void;
+  onAuthenticated: () => void;
+  onRegistrationRequired: (registrationToken: string) => void;
+}
+
+function useCountdown(until: number): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return Math.max(0, Math.min(120, Math.ceil((until - now) / 1000)));
+}
+
+function CodeStep({ phone, challengeId, resendAt, onResent, onChangePhone, onAuthenticated, onRegistrationRequired }: CodeStepProps) {
+  const { t } = useTranslation(['auth', 'common']);
+  const [resendUntil, setResendUntil] = useState(resendAt);
+  const secondsLeft = useCountdown(resendUntil);
+  const form = useForm<z.infer<typeof codeSchema>>({ resolver: zodResolver(codeSchema), defaultValues: { code: '' } });
+  const verify = useMutation({
+    mutationFn: (code: string) => customerAuthApi.verifyOtp(challengeId, code),
+    onSuccess: (result) => {
+      if (result.status === 'REGISTRATION_REQUIRED' && result.registrationToken) {
+        onRegistrationRequired(result.registrationToken);
+      } else {
+        onAuthenticated();
+      }
+    },
+    onError: () => form.reset({ code: '' }),
+  });
+  const resend = useMutation({
+    mutationFn: () => customerAuthApi.requestOtp(phone, currentLanguage()),
+    onSuccess: (challenge) =>
+      onResent(challenge.challengeId ?? challengeId, Date.parse(challenge.resendAvailableAt ?? '') || Date.now() + 60_000),
+    onError: (error) => {
+      if (isApiError(error, 'RATE_LIMITED') && error.problem.retryAfterSeconds) {
+        setResendUntil(Date.now() + error.problem.retryAfterSeconds * 1000);
+      }
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('auth:login.codeTitle')}</CardTitle>
+        <CardDescription>{t('auth:login.codeSent', { phone })}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={form.handleSubmit(({ code }) => verify.mutate(code))} className="flex flex-col gap-4" noValidate>
+          <ErrorMessage error={verify.error ?? resend.error} />
+          <Field
+            id="otp"
+            label={t('auth:otp.label')}
+            error={form.formState.errors.code ? t('common:validation.code') : undefined}
+          >
+            <Input
+              {...form.register('code')}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              className="text-center font-mono text-2xl tracking-[0.5em]"
+              autoFocus
+            />
+          </Field>
+          <Button type="submit" size="lg" disabled={verify.isPending}>
+            {t('auth:login.verify')}
+          </Button>
+          <Button variant="ghost" disabled={secondsLeft > 0 || resend.isPending} onClick={() => resend.mutate()}>
+            {secondsLeft > 0 ? t('auth:otp.resendIn', { count: secondsLeft }) : t('auth:otp.resend')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onChangePhone}>
+            <ArrowLeft aria-hidden="true" />
+            {t('auth:login.changePhone')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+const registerSchema = z.object({
+  name: z.string().trim().max(80, 'tooLong'),
+  consent: z.boolean().refine((accepted) => accepted, 'consentRequired'),
+});
+type RegisterValues = z.infer<typeof registerSchema>;
+
+function RegisterStep({ registrationToken, onRegistered }: { registrationToken: string; onRegistered: () => void }) {
+  const { t } = useTranslation(['auth', 'common']);
+  const documents = useQuery({ queryKey: ['legal-documents'], queryFn: publicApi.legalDocuments });
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', consent: false },
+  });
+  const register = useMutation({
+    mutationFn: (values: RegisterValues) =>
+      customerAuthApi.register({
+        registrationToken,
+        name: values.name || undefined,
+        acceptedDocuments: (documents.data ?? []).map((document) => ({
+          type: document.type ?? 'TERMS',
+          version: document.version ?? 1,
+        })),
+        language: currentLanguage(),
+      }),
+    onSuccess: onRegistered,
+  });
+  const tokenExpired = isApiError(register.error, 'TOKEN_INVALID');
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('auth:register.title')}</CardTitle>
+        <CardDescription>{t('auth:register.subtitle')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={form.handleSubmit((values) => register.mutate(values))} className="flex flex-col gap-4" noValidate>
+          <ErrorMessage error={register.error} />
+          {tokenExpired ? (
+            <Button asChild>
+              <Link to="/login" reloadDocument>
+                {t('auth:login.title')}
+              </Link>
+            </Button>
+          ) : null}
+          <Field
+            id="name"
+            label={t('auth:register.name')}
+            error={form.formState.errors.name ? t('common:validation.tooLong') : undefined}
+          >
+            <Input {...form.register('name')} autoComplete="given-name" maxLength={80} autoFocus />
+          </Field>
+          <div className="flex flex-col gap-1.5">
+            <label className="flex items-start gap-3 text-sm leading-relaxed">
+              <input
+                type="checkbox"
+                {...form.register('consent')}
+                aria-invalid={form.formState.errors.consent ? true : undefined}
+                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
+              />
+              <span>
+                <Trans
+                  ns="auth"
+                  i18nKey="register.consent"
+                  components={{
+                    privacy: <LegalLink slug="privacy" />,
+                    terms: <LegalLink slug="terms" />,
+                  }}
+                />
+              </span>
+            </label>
+            {form.formState.errors.consent ? (
+              <p role="alert" className="text-xs font-medium text-destructive">
+                {t('auth:register.consentRequired')}
+              </p>
+            ) : null}
+          </div>
+          <Button type="submit" size="lg" disabled={register.isPending || documents.isPending}>
+            {t('auth:register.submit')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Hüquqi sənəd yeni tabda açılır — doldurulmuş forma itmir. */
+function LegalLink({ slug, children }: { slug: string; children?: ReactNode }) {
+  return (
+    <a
+      href={`/legal/${slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium text-foreground underline underline-offset-4"
+    >
+      {children}
+    </a>
+  );
+}

@@ -1,0 +1,54 @@
+import { api, unwrap } from '@/shared/api/client';
+import type { components } from '@/shared/api/schema';
+
+type Schemas = components['schemas'];
+
+export type Me = Schemas['CustomerMeResponse'];
+export type Device = Schemas['DeviceResponse'];
+export type Company = Schemas['PublicCompanyResponse'];
+export type LegalSummary = Schemas['LegalDocumentSummary'];
+export type LegalDocument = Schemas['LegalDocumentResponse'];
+export type OtpChallenge = Schemas['OtpChallengeResponse'];
+export type OtpVerifyResult = Schemas['OtpVerifyResponse'];
+export type DocumentAcceptance = Schemas['DocumentAcceptance'];
+export type CustomerSessionState = 'ACTIVE' | 'REFRESH_REQUIRED' | 'NONE';
+
+/** Hüquqi sənədlərin URL adları (/legal/privacy, /legal/terms). */
+export const LEGAL_SLUGS = ['privacy', 'terms'] as const;
+export type LegalSlug = (typeof LEGAL_SLUGS)[number];
+
+export function legalSlug(type: string | undefined): LegalSlug {
+  return type === 'PRIVACY_POLICY' ? 'privacy' : 'terms';
+}
+
+export const publicApi = {
+  company: () => unwrap(api.GET('/api/v1/public/company')),
+  legalDocuments: () => unwrap(api.GET('/api/v1/public/legal')),
+  legalDocument: (slug: string) => unwrap(api.GET('/api/v1/public/legal/{slug}', { params: { path: { slug } } })),
+};
+
+export const customerAuthApi = {
+  session: async (): Promise<CustomerSessionState> =>
+    ((await unwrap(api.GET('/api/v1/auth/session'))).state ?? 'NONE') as CustomerSessionState,
+  requestOtp: (phone: string, language: string) =>
+    unwrap(api.POST('/api/v1/auth/otp/request', { body: { phone, language } })),
+  verifyOtp: (challengeId: string, code: string) =>
+    unwrap(api.POST('/api/v1/auth/otp/verify', { body: { challengeId, code } })),
+  register: (body: Schemas['RegisterRequest']) => unwrap(api.POST('/api/v1/auth/register', { body })),
+  acceptConsents: (acceptedDocuments: DocumentAcceptance[]) =>
+    unwrap(api.POST('/api/v1/auth/consents', { body: { acceptedDocuments } })),
+  logout: () => unwrap(api.POST('/api/v1/auth/logout')),
+  requestStepUp: () => unwrap(api.POST('/api/v1/auth/step-up/otp/request')),
+  verifyStepUp: (challengeId: string, code: string) =>
+    unwrap(api.POST('/api/v1/auth/step-up/otp/verify', { body: { challengeId, code } })),
+};
+
+export const meApi = {
+  me: () => unwrap(api.GET('/api/v1/me')),
+  update: (body: Schemas['UpdateRequest']) => unwrap(api.PATCH('/api/v1/me', { body })),
+  deleteAccount: () => unwrap(api.DELETE('/api/v1/me')),
+  devices: () => unwrap(api.GET('/api/v1/me/sessions')),
+  revokeDevice: (sessionId: string) =>
+    unwrap(api.DELETE('/api/v1/me/sessions/{sessionId}', { params: { path: { sessionId } } })),
+  revokeOtherDevices: () => unwrap(api.POST('/api/v1/me/sessions/revoke-others')),
+};

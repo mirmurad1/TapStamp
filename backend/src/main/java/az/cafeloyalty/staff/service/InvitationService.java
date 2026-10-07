@@ -22,7 +22,7 @@ import az.cafeloyalty.security.admin.AdminPrincipal;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminRealms;
 import az.cafeloyalty.security.admin.AdminRole;
-import az.cafeloyalty.security.admin.ClientInfo;
+import az.cafeloyalty.shared.web.ClientInfo;
 import az.cafeloyalty.security.password.PasswordHasher;
 import az.cafeloyalty.security.ratelimit.RateLimitPolicy;
 import az.cafeloyalty.security.ratelimit.RateLimiter;

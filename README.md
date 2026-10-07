@@ -106,7 +106,19 @@ Bütün hesabların şifrəsi: **`Kofe-Dev-Parol-2026`** (`.env` faylında `DEV_
 
 **Dev TOTP sirri** (sahib və platforma admini üçün): `MNQW MZJN NRXX SYLM OR4S 2ZDF OYWW WZLZ`. Autentifikator tətbiqinə (Google Authenticator, Microsoft Authenticator, 1Password və s.) "açarı əl ilə daxil et" ilə əlavə edin: növ — vaxta əsaslanan (TOTP), 6 rəqəm, 30 saniyə. Hər kod yalnız bir dəfə qəbul olunur — eyni kodla ikinci giriş üçün növbəti kodu gözləyin.
 
-**Dev poçt qutusu.** Dev-də email göndərilmir: dəvət və şifrə bərpası məktubları yaddaşda saxlanılır və cari domen üzrə göstərilir — məsələn, https://mockcoffee.localhost/api/v1/dev/outbox (platforma üçün https://platform.localhost/api/v1/dev/outbox). Məktubdakı linki brauzerdə açın. Bu endpoint prod-da mövcud deyil.
+**Dev poçt qutusu.** Dev-də email və SMS göndərilmir: dəvət və şifrə bərpası məktubları, müştərilərin OTP kodları yaddaşda saxlanılır və cari domen üzrə göstərilir — məsələn, https://mockcoffee.localhost/api/v1/dev/outbox (yalnız SMS: `?channel=SMS`, platforma üçün https://platform.localhost/api/v1/dev/outbox). SMS mətni backend-in loguna da yazılır (`docker compose logs backend | grep SMS`). Bu endpoint və konsol provayderi prod-da mövcud deyil.
+
+### Müştəri girişi (dev)
+
+Müştəri tətbiqi: https://mockcoffee.localhost (və ya Vite ilə http://mockcoffee.localhost:5173). Giriş telefon nömrəsi və SMS kodu ilədir:
+
+- **İstənilən yeni nömrə** (məs. `055 123 45 67`) — kod təsdiqlənəndən sonra qeydiyyat ekranı açılır (ad istəyə bağlıdır, məxfilik siyasəti və şərtlərlə razılıq məcburidir).
+- **Qayıdan müştəri:** `050 123 45 67` — Mock Coffee House-un seed müştərilərindən biridir, kartında möhürlər və tarixçəsi var.
+- Kodu dev poçt qutusundan və ya backend logundan götürün. Kod 5 dəqiqə etibarlıdır, 5 yanlış cəhddən sonra bloklanır; yeni kod 60 saniyədən sonra istənilə bilər (nömrə üzrə 15 dəqiqədə 3, gündə 10).
+
+Sessiya: access token 15 dəqiqə, refresh token 180 gün (hər istifadədə yenilənir); hər ikisi HttpOnly cookie-dədir, JavaScript onları oxuya bilmir. "Parametrlər" səhifəsində cihazlar, dil, hüquqi sənədlər və hesabın silinməsi (SMS kodu ilə təsdiq) var.
+
+> iOS qeydi: iOS-da ana ekrana əlavə olunmuş PWA-nın cookie-ləri Safari-dən ayrıdır, NFC linki isə həmişə Safari-də açılır. Müştəri ən azı bir dəfə Safari-də daxil olmalıdır.
 
 ## Yeni şirkətin yaradılması (provisioning)
 

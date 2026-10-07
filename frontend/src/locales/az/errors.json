@@ -23,5 +23,13 @@
   "CURRENT_PASSWORD_INVALID": "Cari şifrə yanlışdır.",
   "TOKEN_INVALID": "Linkin vaxtı keçib və ya artıq istifadə olunub. Yenisini istəyin.",
   "ALREADY_EXISTS": "Bu məlumatla qeyd artıq mövcuddur.",
-  "PROVISIONING_DISABLED": "Bu serverdə yeni şirkət yaratmaq söndürülüb."
+  "PROVISIONING_DISABLED": "Bu serverdə yeni şirkət yaratmaq söndürülüb.",
+  "PHONE_INVALID": "Mobil nömrənizi düzgün daxil edin, məsələn: 050 123 45 67.",
+  "PHONE_REGION_NOT_ALLOWED": "Bu ölkənin nömrələri qəbul edilmir.",
+  "OTP_INVALID": "Kod yanlışdır.",
+  "OTP_EXPIRED": "Kodun vaxtı keçib. Yeni kod istəyin.",
+  "OTP_ATTEMPTS_EXCEEDED": "Çox sayda yanlış cəhd oldu. Bir az sonra yeni kod istəyin.",
+  "CONSENT_REQUIRED": "Davam etmək üçün şərtlərlə razılaşın.",
+  "REFRESH_RACE": "Sessiya yenilənir. Yenidən cəhd edin.",
+  "CUSTOMER_BLOCKED": "Hesabınız bloklanıb. Kafe ilə əlaqə saxlayın."
 }

@@ -1,5 +1,8 @@
 {
-  "greeting": { "guest": "Xoş gəlmisiniz!", "named": "Salam, {{name}}!" },
+  "greeting": {
+    "guest": "Xoş gəlmisiniz!",
+    "named": "Salam, {{name}}!"
+  },
   "intro": "Hər qəhvə sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu piştaxtadakı NFC nişanına toxundurun.",
   "card": {
     "title": "Möhür kartı",
@@ -9,6 +12,60 @@
     "filledCup": "Doldurulmuş fincan",
     "emptyCup": "Boş fincan",
     "stampedToast": "Qəhvən qeydə alındı ☕",
-    "claimReward": "Hədiyyə qəhvəni al"
+    "claimReward": "Hədiyyə qəhvəni al",
+    "reward": "Hədiyyə: {{name}}"
+  },
+  "nav": {
+    "home": "Ana səhifə",
+    "settings": "Parametrlər",
+    "signIn": "Daxil ol"
+  },
+  "guest": {
+    "cta": "Daxil ol və möhür topla",
+    "branches": "Filiallarımız",
+    "rule_one": "{{count}} möhür toplayın — {{reward}} bizdən!",
+    "rule_other": "{{count}} möhür toplayın — {{reward}} bizdən!"
+  },
+  "rewards": {
+    "title": "Hədiyyələriniz",
+    "ready": "Hazırdır",
+    "hint": "Hədiyyəni almaq üçün baristaya yaxınlaşın."
+  },
+  "settings": {
+    "title": "Parametrlər",
+    "account": "Hesab",
+    "phone": "Telefon",
+    "language": "Dil",
+    "languageHint": "SMS-lər də bu dildə göndəriləcək.",
+    "signOut": "Hesabdan çıx",
+    "devices": {
+      "title": "Cihazlarım",
+      "subtitle": "Hesabınıza daxil olmuş cihazlar. Tanımadığınız cihazdan çıxış edin.",
+      "current": "Bu cihaz",
+      "unknown": "Naməlum cihaz",
+      "lastActive": "Son aktivlik: {{time}}",
+      "signOut": "Çıxış et",
+      "signOutOthers": "Digər bütün cihazlardan çıx",
+      "signedOutOthers_one": "{{count}} cihazdan çıxış edildi.",
+      "signedOutOthers_other": "{{count}} cihazdan çıxış edildi."
+    },
+    "legal": {
+      "title": "Hüquqi sənədlər"
+    },
+    "delete": {
+      "title": "Hesabı sil",
+      "description": "Telefon nömrəniz, adınız və bütün möhürləriniz silinəcək. Bu əməliyyat geri qaytarılmır.",
+      "open": "Hesabı sil",
+      "sendCode": "SMS kodu göndər",
+      "codeHint": "Təsdiq üçün telefonunuza göndərilən kodu daxil edin.",
+      "confirm": "Hesabı birdəfəlik sil",
+      "done": "Hesabınız silindi. Sizi yenidən gözləyirik!"
+    }
+  },
+  "legal": {
+    "privacy": "Məxfilik siyasəti",
+    "terms": "İstifadə şərtləri",
+    "version": "Versiya {{version}} · {{date}}",
+    "back": "Geri"
   }
 }

@@ -38,6 +38,22 @@ public enum ErrorCode {
     ALREADY_EXISTS(HttpStatus.CONFLICT),
     /** Bu instansiyada yeni şirkət yaratmaq söndürülüb (prod-da standart). */
     PROVISIONING_DISABLED(HttpStatus.CONFLICT),
+    /** Telefon nömrəsi düzgün deyil və ya mobil nömrə deyil. */
+    PHONE_INVALID(HttpStatus.BAD_REQUEST),
+    /** Bu ölkənin nömrələri şirkət tərəfindən qəbul edilmir (SMS pumping-in qarşısı). */
+    PHONE_REGION_NOT_ALLOWED(HttpStatus.BAD_REQUEST),
+    /** OTP kodu yanlışdır; cavabda {@code attemptsRemaining} var. */
+    OTP_INVALID(HttpStatus.BAD_REQUEST),
+    /** OTP kodunun vaxtı keçib və ya yenisi istənilib — yeni kod lazımdır. */
+    OTP_EXPIRED(HttpStatus.BAD_REQUEST),
+    /** Çox sayda yanlış kod daxil edilib; bu kod artıq qəbul olunmur. */
+    OTP_ATTEMPTS_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS),
+    /** Hüquqi sənədlərin (cari versiyalarına) razılıq tələb olunur. */
+    CONSENT_REQUIRED(HttpStatus.FORBIDDEN),
+    /** Eyni refresh token-i iki tab eyni anda istifadə edib; yeni cookie artıq brauzerdədir — sorğunu təkrarlayın. */
+    REFRESH_RACE(HttpStatus.CONFLICT),
+    /** Müştəri hesabı şirkət tərəfindən bloklanıb. */
+    CUSTOMER_BLOCKED(HttpStatus.FORBIDDEN),
     /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
     TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);

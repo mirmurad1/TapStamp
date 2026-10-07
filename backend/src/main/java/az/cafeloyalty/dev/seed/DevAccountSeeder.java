@@ -13,10 +13,15 @@ import az.cafeloyalty.security.admin.AdminAccountStore;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminRealms;
 import az.cafeloyalty.security.admin.AdminRole;
+import az.cafeloyalty.security.crypto.Aad;
+import az.cafeloyalty.security.crypto.EnvelopeCipher;
 import az.cafeloyalty.security.crypto.KeyPurpose;
+import az.cafeloyalty.security.crypto.PhoneHasher;
 import az.cafeloyalty.security.password.PasswordHasher;
 import az.cafeloyalty.shared.i18n.Language;
 import az.cafeloyalty.shared.id.Ids;
+import az.cafeloyalty.shared.pii.PhoneMasker;
+import az.cafeloyalty.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,6 +43,9 @@ public class DevAccountSeeder {
 
     public static final String PLATFORM_ADMIN_EMAIL = "superadmin@platform.localhost";
 
+    /** Qayıdan müştəri demosu (Mock Coffee House): mövcud seed müştərilərindən birinə verilən məlum nömrə. */
+    public static final String DEMO_CUSTOMER_PHONE = "+994501234567";
+
     record AccountSeed(String email, String displayName, Language language, AdminRole role, String branchNameAz,
                        boolean totp) {
     }
@@ -58,15 +66,55 @@ public class DevAccountSeeder {
     private final PasswordHasher hasher;
     private final JdbcClient tenantJdbc;
     private final AppProperties properties;
+    private final EnvelopeCipher tenantCipher;
+    private final PhoneHasher phoneHasher;
     private final Clock clock;
 
     public DevAccountSeeder(AdminRealms realms, PasswordHasher hasher, @Qualifier("tenantJdbc") JdbcClient tenantJdbc,
-                            AppProperties properties, Clock clock) {
+                            AppProperties properties, @Qualifier("tenantCipher") EnvelopeCipher tenantCipher,
+                            PhoneHasher phoneHasher, Clock clock) {
         this.realms = realms;
         this.hasher = hasher;
         this.tenantJdbc = tenantJdbc;
         this.properties = properties;
+        this.tenantCipher = tenantCipher;
+        this.phoneHasher = phoneHasher;
         this.clock = clock;
+    }
+
+    /**
+     * Mock Coffee House-da {@link #DEMO_CUSTOMER_PHONE} nömrəsini kartında bir neçə möhür olan mövcud seed müştərisinə
+     * verir (yeni müştəri yaradılmır — seed-in tarixçəsi və saylar dəyişmir). İdempotentdir.
+     */
+    public void seedDemoCustomer(String slug) {
+        if (!"mockcoffee".equals(slug)) {
+            return;
+        }
+        UUID tenantId = TenantContext.require().id();
+        byte[] phoneHash = phoneHasher.hash(tenantId, DEMO_CUSTOMER_PHONE);
+        boolean exists = tenantJdbc.sql("SELECT count(*) FROM customers WHERE phone_hash = :hash")
+                .param("hash", phoneHash).query(Integer.class).single() > 0;
+        if (exists) {
+            return;
+        }
+        tenantJdbc.sql("""
+                        SELECT c.id FROM customers c JOIN loyalty_accounts la ON la.customer_id = c.id
+                        WHERE c.status = 'ACTIVE' AND la.current_stamps BETWEEN 4 AND 7
+                        ORDER BY la.total_stamps DESC, c.id LIMIT 1""")
+                .query(UUID.class)
+                .optional()
+                .ifPresent(id -> {
+                    tenantJdbc.sql("""
+                                    UPDATE customers SET phone_enc = :enc, phone_hash = :hash, phone_masked = :masked
+                                    WHERE id = :id""")
+                            .param("enc", tenantCipher.encryptString(KeyPurpose.PII, DEMO_CUSTOMER_PHONE,
+                                    Aad.tenantField(tenantId, "customers", "phone_enc", id)))
+                            .param("hash", phoneHash)
+                            .param("masked", PhoneMasker.mask(DEMO_CUSTOMER_PHONE))
+                            .param("id", id)
+                            .update();
+                    log.info("Dev demo müştərisi: {} → {}", PhoneMasker.mask(DEMO_CUSTOMER_PHONE), id);
+                });
     }
 
     /** Cari tenant-ın (TenantContext) işçiləri. */

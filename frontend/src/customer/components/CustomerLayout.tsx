@@ -1,38 +1,74 @@
-import { Coffee } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Coffee, Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Outlet } from 'react-router';
+import { Link, Outlet, useLocation } from 'react-router';
 
+import type { Language } from '@/shared/i18n/languages';
+import { resolveText } from '@/shared/i18n/localized';
+import { currentLanguage } from '@/shared/i18n/setup';
+import { Alert } from '@/shared/ui/alert';
+import { Button } from '@/shared/ui/button';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 import { ThemeToggle } from '@/shared/ui/ThemeToggle';
 
-/** Müştəri tətbiqinin çərçivəsi: mobil üçün dar sütun, header-də həmişə görünən dil seçicisi. */
+import { meApi, publicApi } from '../api/customerApi';
+import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { customerKeys } from '../auth/queryClient';
+import { ConsentPage } from '../pages/ConsentPage';
+
+/** Müştəri tətbiqinin çərçivəsi: mobil üçün dar sütun, header-də dil seçicisi və parametrlər. */
 export function CustomerLayout() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation(['common', 'profile']);
+  const { status, me } = useCustomerSession();
+  const queryClient = useQueryClient();
+  const location = useLocation();
+  const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
+  const companyName = resolveText(company.data?.name, currentLanguage());
+  const accountDeleted = Boolean((location.state as { accountDeleted?: boolean } | null)?.accountDeleted);
+
+  // Daxil olmuş müştərinin dil seçimi profilə yazılır (SMS-lər də bu dildə gəlir)
+  const saveLanguage = useMutation({
+    mutationFn: (lang: Language) => meApi.update({ preferredLanguage: lang }),
+    onSuccess: (updated) => queryClient.setQueryData(customerKeys.me, updated),
+  });
 
   useEffect(() => {
-    document.title = t('app.loyaltyCard');
-  }, [t]);
+    document.title = companyName ? `${companyName} · ${t('common:app.loyaltyCard')}` : t('common:app.loyaltyCard');
+  }, [companyName, t, i18n.language]);
+
+  // Yeni versiyalı sənədlərə razılıq verilməyibsə — əvvəlcə razılıq (hüquqi sənədlər açıq qalır)
+  const pendingConsents = me?.pendingConsents ?? [];
+  const consentGate = status === 'signedIn' && pendingConsents.length > 0 && !location.pathname.startsWith('/legal/');
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 bg-background/85 px-4 py-3 backdrop-blur">
         <Link
           to="/"
-          className="flex min-h-11 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={t('app.loyaltyCard')}
+          className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={t('profile:nav.home')}
         >
-          <span className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
             <Coffee className="size-5" aria-hidden="true" />
           </span>
+          {companyName ? <span className="truncate font-display font-semibold">{companyName}</span> : null}
         </Link>
-        <div className="flex items-center gap-1">
-          <LanguageSwitcher />
+        <div className="flex shrink-0 items-center gap-1">
+          <LanguageSwitcher onSelect={status === 'signedIn' ? (lang) => saveLanguage.mutate(lang) : undefined} />
           <ThemeToggle />
+          {status === 'signedIn' ? (
+            <Button asChild variant="ghost" size="icon">
+              <Link to="/settings" aria-label={t('profile:nav.settings')}>
+                <Settings aria-hidden="true" />
+              </Link>
+            </Button>
+          ) : null}
         </div>
       </header>
       <main className="flex flex-1 flex-col gap-4 pt-2">
-        <Outlet />
+        {accountDeleted ? <Alert tone="success">{t('profile:settings.delete.done')}</Alert> : null}
+        {consentGate ? <ConsentPage pending={pendingConsents} /> : <Outlet />}
       </main>
     </div>
   );

@@ -77,7 +77,7 @@ export interface paths {
          * Çıxış
          * @description Cari sessiyanı ləğv edir və cookie-ni silir. Sessiya artıq bitibsə də 204 qaytarır.
          */
-        post: operations["logout_1"];
+        post: operations["logout_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -195,7 +195,7 @@ export interface paths {
          * Sessiyanın vəziyyəti
          * @description Frontend səhifə yenilənəndə hansı addımı göstərəcəyini bununla bilir (giriş, TOTP, TOTP qeydiyyatı və ya panel). Sessiya yoxdursa və ya bitibsə NONE qaytarır.
          */
-        get: operations["session_1"];
+        get: operations["session_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -235,7 +235,7 @@ export interface paths {
          * Daxil olmuş adminin profili
          * @description Rollar, filiallar, dil və 2FA vəziyyəti.
          */
-        get: operations["me_1"];
+        get: operations["me_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -245,7 +245,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_1"];
+        patch: operations["update_2"];
         trace?: never;
     };
     "/api/v1/admin/me/mfa/recovery-codes": {
@@ -296,7 +296,7 @@ export interface paths {
             cookie?: never;
         };
         /** Aktiv sessiyalar (cihazlar) */
-        get: operations["sessions_1"];
+        get: operations["sessions_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -420,6 +420,183 @@ export interface paths {
         patch: operations["updateStatus_1"];
         trace?: never;
     };
+    "/api/v1/auth/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sənədlərin yeni versiyasına razılıq */
+        post: operations["consent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Çıxış
+         * @description Cari sessiya ləğv olunur, cookie-lər silinir. Sessiya yoxdursa da 204.
+         */
+        post: operations["logout_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * SMS kodunun göndərilməsi
+         * @description Kod 5 dəqiqə etibarlıdır, yenisi 60 saniyədən sonra istənilə bilər. Limitlər: nömrə üzrə 15 dəqiqədə 3 və gündə 10, IP üzrə saatda 20. Yalnız mobil nömrələr və şirkətin icazə verdiyi ölkələr qəbul olunur.
+         */
+        post: operations["requestOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * SMS kodunun yoxlanılması
+         * @description Bir kod üçün 5 cəhd; yanlış kodda cavabda `attemptsRemaining` var. Mövcud müştəri dərhal daxil olur (HttpOnly cookie-lər), yeni nömrə üçün qeydiyyat tokeni qaytarılır.
+         */
+        post: operations["verifyOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sessiyanın yenilənməsi (refresh token rotasiyası)
+         * @description Yeni access və refresh cookie-ləri qoyulur. Eyni anda iki tabdan gələn yeniləmədə ikincisi 409 `REFRESH_RACE` alır (sorğunu təkrarlamaq kifayətdir). Köhnə refresh tokenin təkrar istifadəsi sessiyanı ləğv edir.
+         */
+        post: operations["refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qeydiyyatın tamamlanması
+         * @description Ad istəyə bağlıdır. Məxfilik siyasəti və istifadə şərtlərinin cari versiyalarına razılıq məcburidir (`CONSENT_REQUIRED`). Razılığın dili, vaxtı, IP-si və brauzeri qeyd olunur.
+         */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sessiyanın vəziyyəti
+         * @description Səhifə açılanda frontend bununla bilir: müştəri daxil olubmu, yoxsa əvvəlcə tokeni yeniləmək lazımdır. Qonaq üçün xəta qaytarılmır.
+         */
+        get: operations["session_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/step-up/otp/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Həssas əməliyyat üçün SMS kodu
+         * @description Hesabın silinməsindən əvvəl kimliyin təkrar təsdiqi.
+         */
+        post: operations["requestStepUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/step-up/otp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Həssas əməliyyat üçün kodun yoxlanılması
+         * @description Təsdiq 10 dəqiqə etibarlıdır.
+         */
+        post: operations["verifyStepUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/context": {
         parameters: {
             query?: never;
@@ -455,6 +632,85 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Profil və möhür kartı
+         * @description Kart, mövcud mükafatlar və razılıq gözləyən sənədlər.
+         */
+        get: operations["me_1"];
+        put?: never;
+        post?: never;
+        /**
+         * Hesabın silinməsi
+         * @description Əvvəlcə SMS kodu ilə təkrar təsdiq lazımdır (`/api/v1/auth/step-up/otp/*`), əks halda `STEP_UP_REQUIRED`. Şəxsi məlumat silinir, bütün sessiyalar bağlanır; anonim statistika qalır.
+         */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Ad və dilin dəyişdirilməsi
+         * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
+         */
+        patch: operations["update_1"];
+        trace?: never;
+    };
+    "/api/v1/me/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aktiv cihazlar */
+        get: operations["sessions_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/sessions/revoke-others": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Digər bütün cihazlardan çıxış */
+        post: operations["revokeOthers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cihazdan çıxış */
+        delete: operations["revoke"];
         options?: never;
         head?: never;
         patch?: never;
@@ -893,6 +1149,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/legal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cari hüquqi sənədlər
+         * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
+         */
+        get: operations["list_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/legal/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sənədin mətni
+         * @description `privacy` — məxfilik siyasəti, `terms` — istifadə şərtləri (3 dildə).
+         */
+        get: operations["document"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -902,12 +1198,26 @@ export interface components {
             password: string;
             token: string;
         };
+        AuthStatusResponse: {
+            /** @enum {string} */
+            status?: "AUTHENTICATED";
+        };
         BranchResponse: {
             address?: components["schemas"]["LocalizedText"];
             description?: components["schemas"]["LocalizedText"];
             /** Format: uuid */
             id?: string;
             name?: components["schemas"]["LocalizedText"];
+        };
+        CardResponse: {
+            /** Format: int32 */
+            currentStamps?: number;
+            rewardDescription?: components["schemas"]["LocalizedText"];
+            rewardName?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            stampsRequired?: number;
+            /** Format: int32 */
+            totalStamps?: number;
         };
         ChangePasswordRequest: {
             currentPassword: string;
@@ -917,10 +1227,48 @@ export interface components {
             /** @description 6 rəqəmli TOTP kodu və ya bərpa kodu (xxxxx-xxxxx) */
             code: string;
         };
+        ConsentRequest: {
+            acceptedDocuments: components["schemas"]["DocumentAcceptance"][];
+        };
         ContextResponse: {
             /** @enum {string} */
             scope?: "TENANT" | "PLATFORM" | "NONE";
             tenant?: components["schemas"]["Tenant"];
+        };
+        /** @description Müştərinin profili. Telefon yalnız maskalı göstərilir. */
+        CustomerMeResponse: {
+            availableRewards?: components["schemas"]["RewardResponse"][];
+            card?: components["schemas"]["CardResponse"];
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            /** @description Razılıq verilməli sənədlər (yeni versiya dərc olunubsa) */
+            pendingConsents?: components["schemas"]["PendingConsentResponse"][];
+            phoneMasked?: string;
+            preferredLanguage?: string;
+            /** Format: date-time */
+            registeredAt?: string;
+        };
+        /** @description ACTIVE — access token etibarlıdır; REFRESH_REQUIRED — yalnız refresh token var, əvvəlcə /refresh çağırılmalıdır; NONE — daxil olmayıb */
+        CustomerSessionStateResponse: {
+            /** @enum {string} */
+            state?: "ACTIVE" | "REFRESH_REQUIRED" | "NONE";
+        };
+        DeviceResponse: {
+            /** Format: date-time */
+            createdAt?: string;
+            current?: boolean;
+            deviceLabel?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            lastSeenAt?: string;
+        };
+        DocumentAcceptance: {
+            /** @enum {string} */
+            type: "PRIVACY_POLICY" | "TERMS";
+            /** Format: int32 */
+            version: number;
         };
         /** @description TOTP qeydiyyatı: sirr autentifikator tətbiqinə əl ilə və ya QR kod ilə əlavə olunur */
         EnrollmentStartResponse: {
@@ -963,6 +1311,24 @@ export interface components {
             language: string;
             /** @enum {string} */
             role: "SUPER_ADMIN" | "COMPANY_OWNER" | "BRANCH_MANAGER" | "STAFF";
+        };
+        LegalDocumentResponse: {
+            content?: components["schemas"]["LocalizedText"];
+            /** Format: date-time */
+            publishedAt?: string;
+            /** @enum {string} */
+            type?: "PRIVACY_POLICY" | "TERMS";
+            /** Format: int32 */
+            version?: number;
+        };
+        LegalDocumentSummary: {
+            /** Format: date-time */
+            publishedAt?: string;
+            slug?: string;
+            /** @enum {string} */
+            type?: "PRIVACY_POLICY" | "TERMS";
+            /** Format: int32 */
+            version?: number;
         };
         LocalizedText: {
             az: string;
@@ -1008,6 +1374,34 @@ export interface components {
         MemberStatusRequest: {
             status: string;
         };
+        /** @description Kod göndərildi. Cavab nömrənin qeydiyyatda olub-olmamasından asılı deyil. */
+        OtpChallengeResponse: {
+            /** Format: uuid */
+            challengeId?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: date-time */
+            resendAvailableAt?: string;
+        };
+        OtpRequest: {
+            /** @description SMS-in dili */
+            language: string;
+            /** @description Telefon nömrəsi istənilən formatda: 050 123 45 67, +994501234567 və s. */
+            phone: string;
+        };
+        OtpVerifyRequest: {
+            /** Format: uuid */
+            challengeId: string;
+            code: string;
+        };
+        /** @description AUTHENTICATED — mövcud müştəri, sessiya cookie-ləri qoyulub; REGISTRATION_REQUIRED — yeni nömrə, registrationToken ilə 10 dəqiqə ərzində qeydiyyatı tamamlamaq lazımdır. */
+        OtpVerifyResponse: {
+            /** Format: date-time */
+            registrationExpiresAt?: string;
+            registrationToken?: string;
+            /** @enum {string} */
+            status?: "AUTHENTICATED" | "REGISTRATION_REQUIRED";
+        };
         OwnerInvitationRequest: {
             /** Format: email */
             email: string;
@@ -1038,6 +1432,12 @@ export interface components {
             newPassword: string;
             token: string;
         };
+        PendingConsentResponse: {
+            /** @enum {string} */
+            type?: "PRIVACY_POLICY" | "TERMS";
+            /** Format: int32 */
+            version?: number;
+        };
         ProvisionRequest: {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
@@ -1062,6 +1462,23 @@ export interface components {
         /** @description Bərpa kodları yalnız bir dəfə göstərilir; hər biri bir dəfə istifadə oluna bilər */
         RecoveryCodesResponse: {
             recoveryCodes?: string[];
+        };
+        RegisterRequest: {
+            acceptedDocuments: components["schemas"]["DocumentAcceptance"][];
+            language: string;
+            name?: string;
+            registrationToken: string;
+        };
+        RevokedResponse: {
+            /** Format: int32 */
+            revoked?: number;
+        };
+        RewardResponse: {
+            /** Format: date-time */
+            earnedAt?: string;
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
         };
         RewardRuleResponse: {
             rewardDescription?: components["schemas"]["LocalizedText"];
@@ -1121,6 +1538,11 @@ export interface components {
         };
         UpdateProfileRequest: {
             displayName?: string;
+            preferredLanguage?: string;
+        };
+        UpdateRequest: {
+            /** @description Ad; boş sətir adı silir, göndərilməzsə dəyişmir */
+            name?: string;
             preferredLanguage?: string;
         };
     };
@@ -1204,7 +1626,7 @@ export interface operations {
             };
         };
     };
-    logout_1: {
+    logout_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1334,7 +1756,7 @@ export interface operations {
             };
         };
     };
-    session_1: {
+    session_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1376,7 +1798,7 @@ export interface operations {
             };
         };
     };
-    me_1: {
+    me_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1396,7 +1818,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1462,7 +1884,7 @@ export interface operations {
             };
         };
     };
-    sessions_1: {
+    sessions_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1630,6 +2052,200 @@ export interface operations {
             };
         };
     };
+    consent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    logout_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    requestOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OtpChallengeResponse"];
+                };
+            };
+        };
+    };
+    verifyOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OtpVerifyResponse"];
+                };
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthStatusResponse"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthStatusResponse"];
+                };
+            };
+        };
+    };
+    session_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CustomerSessionStateResponse"];
+                };
+            };
+        };
+    };
+    requestStepUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OtpChallengeResponse"];
+                };
+            };
+        };
+    };
+    verifyStepUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     context: {
         parameters: {
             query?: never;
@@ -1661,6 +2277,128 @@ export interface operations {
         responses: {
             /** @description OK */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CustomerMeResponse"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CustomerMeResponse"];
+                };
+            };
+        };
+    };
+    sessions_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeviceResponse"][];
+                };
+            };
+        };
+    };
+    revokeOthers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RevokedResponse"];
+                };
+            };
+        };
+    };
+    revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2189,6 +2927,48 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicCompanyResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LegalDocumentSummary"][];
+                };
+            };
+        };
+    };
+    document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LegalDocumentResponse"];
                 };
             };
         };

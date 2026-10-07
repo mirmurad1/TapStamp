@@ -1609,6 +1609,10 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 11 | SPA üçün sessiyanın vəziyyəti (Mərhələ 3) | `GET /api/v1/{admin,platform}/auth/session` → `NONE / PENDING_MFA / MFA_ENROLLMENT / ACTIVE` | Səhifə yenilənəndə frontend hansı addımı (giriş, TOTP, TOTP qeydiyyatı, panel) göstərəcəyini bilir. Tam olmayan sessiya panel API-sinə 403 alır |
 | 12 | İkinci faktor uğursuzluqları (Mərhələ 3) | Yanlış TOTP/bərpa kodu həm sessiyanın sayğacını (5-dən sonra sessiya ləğv olunur), həm də hesabın bloklanma sayğacını artırır | Bir neçə sessiya açaraq TOTP-ni sınamaq hesabın bloklanması ilə nəticələnir |
 | 13 | OpenAPI tipləri (Mərhələ 3) | Sənəd `OpenApiContractIT` ilə ixrac olunur, `openapi-typescript` ilə tiplər yaradılır; CI hər ikisinin aktual olduğunu yoxlayır | `openapi-typescript` 7.x rəsmi olaraq TypeScript 5 tələb edir — `package.json`-da yalnız bu paket üçün `overrides` ilə TS 6 qəbul edilib. springdoc cavab sahələrini "məcburi" kimi işarələmir, ona görə TS tiplərində sahələr istəyə bağlıdır |
+| 14 | Müştəri sessiyasının vəziyyəti (Mərhələ 4) | `GET /api/v1/auth/session` → `ACTIVE / REFRESH_REQUIRED / NONE` | Səhifə açılanda qonaq üçün 401 xətaları yaranmır; access token-in vaxtı keçibsə, frontend əvvəlcə bir dəfə yeniləmə edir. Refresh cookie-si yalnız `/api/v1/auth` yollarına getdiyi üçün bu endpoint onun mövcudluğunu görür |
+| 15 | Step-up OTP (Mərhələ 4) | `otp_challenges.purpose` (`LOGIN` / `STEP_UP`) və `customer_id`, `customer_sessions.step_up_at` (V3 miqrasiyası) | Giriş kodu step-up üçün, step-up kodu giriş üçün keçərli deyil; step-up 10 dəqiqə etibarlıdır |
+| 16 | Qayıdan müştəri demosu (Mərhələ 4) | Dev seed yeni müştəri yaratmır, Mock Coffee House-un kartında 4–7 möhür olan seed müştərisinə `+994501234567` nömrəsini verir | Seed-in sayları və invariantları (möhür = toxunuş və s.) dəyişmir |
+| 17 | SMS mətni (Mərhələ 4) | Şirkətin adı uzundursa qısaldılır, lazım gələrsə adsız qısa şablon işlədilir; Web OTP sətri yalnız yer qalanda əlavə olunur | OTP SMS-i həmişə 1 seqmentdir (az və ru — UCS-2, 70 simvol); `SmsSegmentsTest` uzun adlarla yoxlayır. `sms_sender_name` varsa, ad əvəzinə o işlədilir |
 
 ---
 

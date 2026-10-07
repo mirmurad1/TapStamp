@@ -1,5 +1,8 @@
 {
-  "greeting": { "guest": "Welcome!", "named": "Hi, {{name}}!" },
+  "greeting": {
+    "guest": "Welcome!",
+    "named": "Hi, {{name}}!"
+  },
   "intro": "Every coffee brings you one step closer to a free one. Tap your phone on the NFC tag at the counter to collect a stamp.",
   "card": {
     "title": "Stamp card",
@@ -9,6 +12,60 @@
     "filledCup": "Stamped cup",
     "emptyCup": "Empty cup",
     "stampedToast": "Your coffee is stamped ☕",
-    "claimReward": "Claim your free coffee"
+    "claimReward": "Claim your free coffee",
+    "reward": "Reward: {{name}}"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings",
+    "signIn": "Sign in"
+  },
+  "guest": {
+    "cta": "Sign in and collect stamps",
+    "branches": "Our branches",
+    "rule_one": "Collect {{count}} stamp — {{reward}} is on us!",
+    "rule_other": "Collect {{count}} stamps — {{reward}} is on us!"
+  },
+  "rewards": {
+    "title": "Your rewards",
+    "ready": "Ready",
+    "hint": "Ask the barista to redeem your reward."
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "phone": "Phone",
+    "language": "Language",
+    "languageHint": "Text messages will also be sent in this language.",
+    "signOut": "Sign out",
+    "devices": {
+      "title": "My devices",
+      "subtitle": "Devices signed in to your account. Sign out of any device you don't recognise.",
+      "current": "This device",
+      "unknown": "Unknown device",
+      "lastActive": "Last active: {{time}}",
+      "signOut": "Sign out",
+      "signOutOthers": "Sign out of all other devices",
+      "signedOutOthers_one": "Signed out of {{count}} device.",
+      "signedOutOthers_other": "Signed out of {{count}} devices."
+    },
+    "legal": {
+      "title": "Legal documents"
+    },
+    "delete": {
+      "title": "Delete account",
+      "description": "Your phone number, name and all your stamps will be deleted. This cannot be undone.",
+      "open": "Delete account",
+      "sendCode": "Send SMS code",
+      "codeHint": "Enter the code we sent to your phone to confirm.",
+      "confirm": "Delete my account permanently",
+      "done": "Your account has been deleted. Hope to see you again!"
+    }
+  },
+  "legal": {
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "version": "Version {{version}} · {{date}}",
+    "back": "Back"
   }
 }

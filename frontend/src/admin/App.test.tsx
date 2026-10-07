@@ -30,10 +30,11 @@ function mockBackend(routes: Record<string, Handler>) {
 
 let App: typeof import('./App').App;
 
+// Modulun ilk yüklənməsi yavaş maşında 10 saniyədən uzun çəkə bilər
 beforeAll(async () => {
   window.history.replaceState(null, '', '/admin/');
   ({ App } = await import('./App'));
-});
+}, 60_000);
 
 describe('admin girişi', () => {
   let session: string;

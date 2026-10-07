@@ -25,7 +25,7 @@ export default defineConfig([
       // Kontekst provayderi ilə birlikdə ixrac olunan hook-lar (standart React nümunəsi)
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true, allowExportNames: ['useAdminAuth', 'useMe', 'useStepUp'] },
+        { allowConstantExport: true, allowExportNames: ['useAdminAuth', 'useMe', 'useStepUp', 'useCustomerSession'] },
       ],
       // React avtomatik escape edir; xam HTML yalnız sanitizasiya ilə və heç vaxt istifadəçi məzmunu üçün
       'no-restricted-syntax': [
