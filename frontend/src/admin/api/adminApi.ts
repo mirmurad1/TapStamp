@@ -217,3 +217,14 @@ export const settingsApi = {
   rewardRule: () => unwrap(api.GET('/api/v1/admin/settings/reward-rule')),
   updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
 };
+
+export type GiftCardCheck = Schemas['GiftCardCheckResponse'];
+
+/** İşçi konsolu: hədiyyə kartının yoxlanması və təhvili. */
+export const giftCardConsoleApi = {
+  check: (code: string) => unwrap(api.POST('/api/v1/admin/staff-console/gift-cards/check', { body: { code } })),
+  redeem: (code: string, branchId: string) =>
+    unwrap(api.POST('/api/v1/admin/staff-console/gift-cards/redeem', { body: { code, branchId } })),
+  recent: (branchId: string) =>
+    unwrap(api.GET('/api/v1/admin/staff-console/gift-cards/recent', { params: { query: { branchId } } })),
+};

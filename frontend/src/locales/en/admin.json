@@ -182,7 +182,7 @@
   },
   "staffConsole": {
     "title": "Staff console",
-    "subtitle": "Stamps waiting for approval at your location. The list refreshes every 5 seconds.",
+    "subtitle": "Gift card redemptions and stamps awaiting approval at your location.",
     "branch": "Location",
     "pending": {
       "title": "Stamps awaiting approval",
@@ -252,5 +252,35 @@
       "issued_other": "{{count}} customers with a full card received a gift card.",
       "confirm": "You are lowering the number of stamps: customers with {{count}} or more stamps will receive a gift card right away. Continue?"
     }
+  },
+  "giftDesk": {
+    "title": "Gift card",
+    "subtitle": "Type the customer’s code or scan the QR.",
+    "code": "Card code",
+    "codePlaceholder": "E.g. Q85J-QMJW",
+    "check": "Check",
+    "scan": "Scan QR",
+    "scanTitle": "Point the camera at the QR code",
+    "scanHint": "The card is checked automatically once the code is recognised.",
+    "cameraError": "Could not open the camera. Allow access or type the code.",
+    "close": "Close",
+    "valid": "Valid — ready to redeem",
+    "redeem": "Hand over the reward",
+    "redeemed": "Reward handed over.",
+    "status": {
+      "AVAILABLE": "Ready",
+      "REDEEMED": "Used",
+      "REVOKED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "customer": "Customer",
+    "reward": "Reward",
+    "earned": "Earned",
+    "expires": "Valid until",
+    "noExpiry": "No expiry",
+    "usedAt": "Used: {{date}} · {{branch}}",
+    "anotherCode": "Another code",
+    "recent": "Recent redemptions (24 hours)",
+    "recentEmpty": "No redemptions yet today."
   }
 }

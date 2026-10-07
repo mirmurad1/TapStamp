@@ -516,6 +516,98 @@
         "tags" : [ "Admin: parametrlər" ]
       }
     },
+    "/api/v1/admin/staff-console/gift-cards/check" : {
+      "post" : {
+        "description" : "Kart tapılırsa statusu ilə qaytarılır (yan təsiri yoxdur), tapılmırsa `GIFT_CARD_NOT_FOUND`. İşçi üzrə dəqiqədə 30 cəhd; uğursuz cəhdlər audit jurnalına yazılır.",
+        "operationId" : "check",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GiftCardCheckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GiftCardCheckResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Hədiyyə kartının yoxlanması",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
+    "/api/v1/admin/staff-console/gift-cards/recent" : {
+      "get" : {
+        "description" : "Filialda son 24 saatda təhvil verilmiş hədiyyə kartları.",
+        "operationId" : "recent",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GiftCardCheckResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Son təhvillər",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
+    "/api/v1/admin/staff-console/gift-cards/redeem" : {
+      "post" : {
+        "description" : "Kart birdəfəlik istifadə olunmuş sayılır (filial və işçi qeyd olunur). Eyni işçinin təkrar basışı eyni nəticəni qaytarır; başqa təhvil cəhdi `GIFT_CARD_ALREADY_REDEEMED`. Müddəti bitmiş kart `GIFT_CARD_EXPIRED`.",
+        "operationId" : "redeem",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GiftCardRedeemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GiftCardCheckResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Hədiyyənin təhvili",
+        "tags" : [ "Admin: işçi konsolu" ]
+      }
+    },
     "/api/v1/admin/staff-console/pending-stamps" : {
       "get" : {
         "description" : "Yalnız işçinin öz filialı; başqa filial üçün 404.",
@@ -2177,6 +2269,74 @@
             "description" : "Dev alətləri (simulyator, outbox) — yalnız dev mühitində"
           }
         }
+      },
+      "GiftCardCheckRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "Kartın kodu (tire və boşluqlar nəzərə alınmır), QR-dakı mətn eynidir",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "code" ]
+      },
+      "GiftCardCheckResponse" : {
+        "type" : "object",
+        "description" : "Hədiyyə kartı: status AVAILABLE olduqda təhvil verilə bilər. Telefon yalnız maskalıdır.",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "customerName" : {
+            "type" : "string"
+          },
+          "earnedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phoneMasked" : {
+            "type" : "string"
+          },
+          "redeemedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "redeemedBranchName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "rewardName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "AVAILABLE", "REDEEMED", "REVOKED", "EXPIRED" ]
+          }
+        }
+      },
+      "GiftCardRedeemRequest" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "code" : {
+            "type" : "string",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "branchId", "code" ]
       },
       "GiftCardResponse" : {
         "type" : "object",

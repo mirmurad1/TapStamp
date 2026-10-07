@@ -32,7 +32,9 @@ public enum RateLimitPolicy {
      * Çip üzrə dəqiqədə toxunuş — həcm filialın sui-istifadə qaydasından gəlir ({@code max_taps_per_tag_per_minute}).
      * Yalnız imzası doğru toxunuşlar sayılır: saxta sorğularla həqiqi müştərilərin limitini tükətmək olmur.
      */
-    TAP_PER_TAG(10, Duration.ofMinutes(1));
+    TAP_PER_TAG(10, Duration.ofMinutes(1)),
+    /** Hədiyyə kartı kodunun yoxlanması — işçi üzrə (kodları təxminlə tapmağın qarşısı). */
+    GIFT_CARD_LOOKUP_PER_STAFF(30, Duration.ofMinutes(1));
 
     private final int defaultCapacity;
     private final Duration window;

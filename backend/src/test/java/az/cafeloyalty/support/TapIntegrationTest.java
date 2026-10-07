@@ -171,8 +171,13 @@ public abstract class TapIntegrationTest extends CustomerIntegrationTest {
 
     /** Barista hesabı (TOTP-siz) və onun admin klienti. */
     protected AdminClient signedInBarista(UUID branchId) throws Exception {
+        return signedInBarista(HOST, branchId);
+    }
+
+    protected AdminClient signedInBarista(String host, UUID branchId) throws Exception {
+        TenantInfo tenant = directory.findByHost(host).orElseThrow();
         String email = "barista-" + UUID.randomUUID().toString().substring(0, 8) + "@example.test";
-        TenantContext.runAs(alpha(), () -> realms.tx(AdminRealm.STAFF).executeWithoutResult(status -> {
+        TenantContext.runAs(tenant, () -> realms.tx(AdminRealm.STAFF).executeWithoutResult(status -> {
             UUID id = realms.accounts(AdminRealm.STAFF).insert(email, hasher.hash(STAFF_PASSWORD), "Test Barista",
                     Language.AZ, AdminAccount.AccountStatus.ACTIVE, clock.instant());
             tenantJdbc.sql("""
@@ -184,7 +189,7 @@ public abstract class TapIntegrationTest extends CustomerIntegrationTest {
                     .param("branchId", branchId)
                     .update();
         }));
-        AdminClient client = AdminClient.staff(mvc, HOST);
+        AdminClient client = AdminClient.staff(mvc, host);
         client.login(email, STAFF_PASSWORD);
         return client;
     }

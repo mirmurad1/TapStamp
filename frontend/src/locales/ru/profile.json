@@ -63,7 +63,13 @@
       "REDEEMED": "Использована",
       "REVOKED": "Отменена",
       "EXPIRED": "Срок истёк"
-    }
+    },
+    "redeemedTitle": "Подарок выдан! 🎉",
+    "redeemedHint": "Ждём вас снова!",
+    "expiresSoon_one": "Остался {{count}} день",
+    "expiresSoon_few": "Осталось {{count}} дня",
+    "expiresSoon_many": "Осталось {{count}} дней",
+    "expiresSoon_other": "Осталось {{count}} дня"
   },
   "celebrate": {
     "title": "Поздравляем!",

@@ -1622,6 +1622,8 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 24 | `RAPID_MULTI_ACCOUNT` (Mərhələ 5) | Bir brauzerdən 24 saatda 3+ fərqli hesab | Bir çipdə çoxlu müştəri normaldır (növbə), ona görə çip əsaslı siqnal işlədilmir |
 | 25 | Möhür claim cavabı | `200` (təkrar göndərişdə də eyni nəticə) | İdempotent əməliyyat üçün sadə müqavilə |
 | 26 | Dizayn (Mərhələ 5) | Lora şrifti çıxarıldı, başlıqlar da Inter-dir; palitra müasir və rəngli, `--primary` şirkətin `brand_color`-undan gəlir (kontrasta görə mətn rəngi avtomatik) | Universal məhsul (qərar 18) |
+| 27 | Hədiyyə kartının təhvili (Mərhələ 6) | İşçi kodu `POST /api/v1/admin/staff-console/gift-cards/check` ilə yoxlayır (yan təsiri yoxdur, status qaytarılır), `/redeem` ilə təhvil verir (sətir kilidi; eyni işçi + filial təkrarı idempotent, fərqli cəhd `GIFT_CARD_ALREADY_REDEEMED`). `redemptions` cədvəli istifadə olunmur | Daimi kod modelində (qərar 19) ayrıca 2 dəqiqəlik kod lazım deyil; müştərinin ekranı siyahını 2,5 saniyədən bir yoxlayır |
+| 28 | Tarix formatı (Mərhələ 6) | Azərbaycan dilində tarix əl ilə qurulur ("7 oktyabr 2026") | Chromium/Edge-in ICU məlumatında az formatı natamamdır ("2026 M10 7") |
 
 ---
 

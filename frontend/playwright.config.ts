@@ -21,5 +21,7 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
     locale: 'az-AZ',
     trace: 'retain-on-failure',
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
   },
 });

@@ -57,7 +57,11 @@
       "REDEEMED": "İstifadə olunub",
       "REVOKED": "Ləğv edilib",
       "EXPIRED": "Müddəti bitib"
-    }
+    },
+    "redeemedTitle": "Hədiyyəniz təhvil verildi! 🎉",
+    "redeemedHint": "Yenidən gözləyirik!",
+    "expiresSoon_one": "{{count}} gün qalıb",
+    "expiresSoon_other": "{{count}} gün qalıb"
   },
   "celebrate": {
     "title": "Təbriklər!",

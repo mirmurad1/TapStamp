@@ -78,6 +78,14 @@ public enum ErrorCode {
     OUTSIDE_BUSINESS_HOURS(HttpStatus.CONFLICT),
     /** Möhür artıq təsdiqlənib, rədd edilib və ya vaxtı keçib. */
     STAMP_NOT_PENDING(HttpStatus.CONFLICT),
+    /** Belə hədiyyə kartı yoxdur (və ya başqa şirkətindir). */
+    GIFT_CARD_NOT_FOUND(HttpStatus.NOT_FOUND),
+    /** Hədiyyə kartı artıq istifadə olunub; cavabda {@code redeemedAt}. */
+    GIFT_CARD_ALREADY_REDEEMED(HttpStatus.CONFLICT),
+    /** Hədiyyə kartının müddəti bitib. */
+    GIFT_CARD_EXPIRED(HttpStatus.GONE),
+    /** Hədiyyə kartı ləğv edilib (məs. hesab silinib). */
+    GIFT_CARD_REVOKED(HttpStatus.CONFLICT),
     /** Şirkət dayandırılıb və ya bazası hazır deyil (məs. miqrasiya uğursuz olub). */
     TENANT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);

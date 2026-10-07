@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Gift, LoaderCircle, QrCode as QrIcon } from 'lucide-react';
+import { Gift, LoaderCircle, PartyPopper, QrCode as QrIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
@@ -16,14 +16,23 @@ import { QrCode } from '@/shared/ui/QrCode';
 import { giftCardApi, type GiftCard } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
+import { Confetti } from '../components/Celebration';
 import { ErrorMessage } from '../components/ErrorMessage';
 
 /** Hədiyyə kartları: istifadəyə hazır olanlar (kod və QR ilə) və tarixçə. */
 export function GiftCardsPage() {
   const { t } = useTranslation('profile');
   const { status } = useCustomerSession();
-  const cards = useQuery({ queryKey: customerKeys.giftCards, queryFn: giftCardApi.list, enabled: status === 'signedIn' });
   const [shown, setShown] = useState<GiftCard>();
+  // Kod işçiyə göstərilərkən status hər 2,5 saniyədən bir yoxlanılır — təhvil olunan kimi təbrik görünür
+  const cards = useQuery({
+    queryKey: customerKeys.giftCards,
+    queryFn: giftCardApi.list,
+    enabled: status === 'signedIn',
+    refetchInterval: shown ? 2_500 : false,
+  });
+  const live = cards.data?.find((card) => card.id === shown?.id) ?? shown;
+  const redeemed = live?.status === 'REDEEMED';
 
   if (status === 'guest') {
     return <Navigate to="/login" replace />;
@@ -66,7 +75,19 @@ export function GiftCardsPage() {
         </section>
       ) : null}
       <Dialog open={shown !== undefined} onOpenChange={(open) => (open ? undefined : setShown(undefined))}>
-        {shown ? (
+        {live && redeemed ? (
+          <DialogContent className="text-center">
+            <Confetti count={50} />
+            <div className="mx-auto grid size-20 place-items-center rounded-full bg-success text-white">
+              <PartyPopper className="size-10" aria-hidden="true" />
+            </div>
+            <DialogTitle className="text-2xl font-bold">{t('giftCards.redeemedTitle')}</DialogTitle>
+            <DialogDescription className="text-base">
+              {resolveText(live.name, currentLanguage())} · {t('giftCards.redeemedHint')}
+            </DialogDescription>
+            <Button onClick={() => setShown(undefined)}>{t('giftCards.close')}</Button>
+          </DialogContent>
+        ) : shown ? (
           <DialogContent className="text-center">
             <DialogTitle className="text-2xl font-bold">{resolveText(shown.name, currentLanguage())}</DialogTitle>
             <DialogDescription>{t('giftCards.showHint')}</DialogDescription>
@@ -89,6 +110,10 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
   const active = card.status === 'AVAILABLE';
+  // Müddəti bitməyə 7 gün və daha az qalıbsa — xatırlatma
+  const daysLeft = card.expiresAt
+    ? Math.max(0, Math.ceil((Date.parse(card.expiresAt) - Date.now()) / 86_400_000))
+    : undefined;
   return (
     <article
       className={cn(
@@ -102,7 +127,14 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
           <p className="mt-1 font-mono text-sm tracking-widest opacity-90">{card.code}</p>
         </div>
         {active ? (
-          <Gift className="size-8 shrink-0 opacity-90" aria-hidden="true" />
+          <span className="flex flex-col items-end gap-2">
+            <Gift className="size-8 shrink-0 opacity-90" aria-hidden="true" />
+            {daysLeft !== undefined && daysLeft <= 7 ? (
+              <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-primary">
+                {t('giftCards.expiresSoon', { count: daysLeft })}
+              </span>
+            ) : null}
+          </span>
         ) : (
           <Badge>{t(`giftCards.status.${card.status ?? 'EXPIRED'}`)}</Badge>
         )}

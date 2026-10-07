@@ -43,5 +43,9 @@
   "STAMP_COOLDOWN_ACTIVE": "Növbəti möhür üçün bir az gözləyin.",
   "STAMP_DAILY_LIMIT_REACHED": "Bu günün möhür limiti doldu. Sabah yenidən gəlin!",
   "OUTSIDE_BUSINESS_HOURS": "Möhürlər yalnız iş saatlarında verilir.",
-  "STAMP_NOT_PENDING": "Bu möhür artıq emal olunub."
+  "STAMP_NOT_PENDING": "Bu möhür artıq emal olunub.",
+  "GIFT_CARD_NOT_FOUND": "Belə hədiyyə kartı yoxdur. Kodu yoxlayıb yenidən daxil edin.",
+  "GIFT_CARD_ALREADY_REDEEMED": "Bu hədiyyə kartı artıq istifadə olunub.",
+  "GIFT_CARD_EXPIRED": "Bu hədiyyə kartının müddəti bitib.",
+  "GIFT_CARD_REVOKED": "Bu hədiyyə kartı ləğv edilib."
 }

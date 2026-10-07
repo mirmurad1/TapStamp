@@ -18,8 +18,9 @@ import { useMe } from '../../auth/AdminAuthProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { hasAnyRole } from '../../layout/navigation';
+import { GiftCardDesk } from './GiftCardDesk';
 
-/** İşçi konsolu: filialın təsdiq gözləyən möhürləri (5 saniyədən bir yenilənir). */
+/** İşçi konsolu: hədiyyə kartının yoxlanması və təhvili, filialın təsdiq gözləyən möhürləri. */
 export function StaffConsolePage() {
   const { t } = useTranslation('admin');
   const me = useMe();
@@ -51,7 +52,14 @@ export function StaffConsolePage() {
           </Field>
         ) : null}
       </div>
-      {branchId ? <PendingStamps branchId={branchId} /> : company.isPending ? <InlineLoading /> : null}
+      {branchId ? (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <GiftCardDesk key={branchId} branchId={branchId} />
+          <PendingStamps branchId={branchId} />
+        </div>
+      ) : company.isPending ? (
+        <InlineLoading />
+      ) : null}
     </div>
   );
 }

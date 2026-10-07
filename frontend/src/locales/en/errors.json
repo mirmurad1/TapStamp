@@ -43,5 +43,9 @@
   "STAMP_COOLDOWN_ACTIVE": "Please wait a little before your next stamp.",
   "STAMP_DAILY_LIMIT_REACHED": "You have reached today’s stamp limit. Come back tomorrow!",
   "OUTSIDE_BUSINESS_HOURS": "Stamps are only given during opening hours.",
-  "STAMP_NOT_PENDING": "This stamp has already been processed."
+  "STAMP_NOT_PENDING": "This stamp has already been processed.",
+  "GIFT_CARD_NOT_FOUND": "There is no such gift card. Check the code and try again.",
+  "GIFT_CARD_ALREADY_REDEEMED": "This gift card has already been used.",
+  "GIFT_CARD_EXPIRED": "This gift card has expired.",
+  "GIFT_CARD_REVOKED": "This gift card has been cancelled."
 }

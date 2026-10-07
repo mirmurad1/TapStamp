@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCurrency, formatDateTime, formatRelative, formatTime } from './format';
+import { formatCurrency, formatDate, formatDateTime, formatRelative, formatTime } from './format';
 
 // Intl çıxışında adi boşluq əvəzinə NBSP və ya dar NBSP ola bilər — müqayisə üçün normallaşdırırıq
 const normalize = (value: string) => value.replace(/[\u00a0\u202f]/g, ' ');
@@ -17,6 +17,9 @@ describe('lokallaşdırılmış formatlar', () => {
   it('tarix dilə uyğun formatlanır', () => {
     expect(normalize(formatDateTime(utcMorning, 'ru'))).toContain('2026');
     expect(normalize(formatDateTime(utcMorning, 'az'))).toContain('2026');
+    // Brauzerin ICU məlumatından asılı olmayaraq ayın adı ilə ("2026 M10 7" yox)
+    expect(formatDate('2026-10-06T21:30:00Z', 'az')).toBe('7 oktyabr 2026');
+    expect(formatDate('2026-01-31T12:00:00Z', 'az')).toBe('31 yanvar 2026');
   });
 
   it('nisbi vaxt 3 dildə', () => {

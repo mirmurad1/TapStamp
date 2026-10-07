@@ -182,7 +182,7 @@
   },
   "staffConsole": {
     "title": "İşçi konsolu",
-    "subtitle": "Filialınızın təsdiq gözləyən möhürləri. Siyahı hər 5 saniyədən bir yenilənir.",
+    "subtitle": "Hədiyyə kartlarının təhvili və filialınızın təsdiq gözləyən möhürləri.",
     "branch": "Filial",
     "pending": {
       "title": "Təsdiq gözləyən möhürlər",
@@ -252,5 +252,35 @@
       "issued_other": "Kartı artıq dolmuş {{count}} müştəriyə hədiyyə kartı verildi.",
       "confirm": "Möhür sayı azaldılır: kartında {{count}} və daha çox möhür olan müştərilərə hədiyyə kartı dərhal veriləcək. Davam edilsin?"
     }
+  },
+  "giftDesk": {
+    "title": "Hədiyyə kartı",
+    "subtitle": "Müştərinin kodunu yazın və ya QR-ı skan edin.",
+    "code": "Kartın kodu",
+    "codePlaceholder": "Məs. Q85J-QMJW",
+    "check": "Yoxla",
+    "scan": "QR-ı skan et",
+    "scanTitle": "QR kodu kameraya tutun",
+    "scanHint": "Kod tanınan kimi kart avtomatik yoxlanılır.",
+    "cameraError": "Kameranı açmaq mümkün olmadı. İcazə verin və ya kodu əl ilə yazın.",
+    "close": "Bağla",
+    "valid": "Həqiqidir — təhvil verilə bilər",
+    "redeem": "Hədiyyəni təhvil ver",
+    "redeemed": "Hədiyyə təhvil verildi.",
+    "status": {
+      "AVAILABLE": "Hazırdır",
+      "REDEEMED": "İstifadə olunub",
+      "REVOKED": "Ləğv edilib",
+      "EXPIRED": "Müddəti bitib"
+    },
+    "customer": "Müştəri",
+    "reward": "Hədiyyə",
+    "earned": "Qazanılıb",
+    "expires": "Son tarix",
+    "noExpiry": "Müddətsiz",
+    "usedAt": "İstifadə olunub: {{date}} · {{branch}}",
+    "anotherCode": "Başqa kod",
+    "recent": "Son təhvillər (24 saat)",
+    "recentEmpty": "Bu gün hələ təhvil yoxdur."
   }
 }

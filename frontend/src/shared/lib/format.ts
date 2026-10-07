@@ -9,11 +9,43 @@ function toDate(value: DateInput): Date {
   return value instanceof Date ? value : new Date(value);
 }
 
+/**
+ * Bəzi brauzerlərin (Chromium, Edge) ICU məlumatında Azərbaycan dili üçün tarix formatı natamamdır və "2026 M10 7"
+ * kimi nəticə verir. Ona görə az dilində tarix əl ilə qurulur: "7 oktyabr 2026".
+ */
+const AZ_MONTHS = [
+  'yanvar',
+  'fevral',
+  'mart',
+  'aprel',
+  'may',
+  'iyun',
+  'iyul',
+  'avqust',
+  'sentyabr',
+  'oktyabr',
+  'noyabr',
+  'dekabr',
+] as const;
+
+function azDate(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone })
+    .formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  return `${part('day')} ${AZ_MONTHS[part('month') - 1] ?? ''} ${part('year')}`;
+}
+
 export function formatDate(value: DateInput, lang: Language, timeZone = DEFAULT_TIME_ZONE): string {
+  if (lang === 'az') {
+    return azDate(toDate(value), timeZone);
+  }
   return new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeZone }).format(toDate(value));
 }
 
 export function formatDateTime(value: DateInput, lang: Language, timeZone = DEFAULT_TIME_ZONE): string {
+  if (lang === 'az') {
+    return `${azDate(toDate(value), timeZone)}, ${formatTime(value, lang, timeZone)}`;
+  }
   return new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(toDate(value));
 }
 

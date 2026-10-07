@@ -364,6 +364,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/staff-console/gift-cards/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hədiyyə kartının yoxlanması
+         * @description Kart tapılırsa statusu ilə qaytarılır (yan təsiri yoxdur), tapılmırsa `GIFT_CARD_NOT_FOUND`. İşçi üzrə dəqiqədə 30 cəhd; uğursuz cəhdlər audit jurnalına yazılır.
+         */
+        post: operations["check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff-console/gift-cards/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Son təhvillər
+         * @description Filialda son 24 saatda təhvil verilmiş hədiyyə kartları.
+         */
+        get: operations["recent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff-console/gift-cards/redeem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hədiyyənin təhvili
+         * @description Kart birdəfəlik istifadə olunmuş sayılır (filial və işçi qeyd olunur). Eyni işçinin təkrar basışı eyni nəticəni qaytarır; başqa təhvil cəhdi `GIFT_CARD_ALREADY_REDEEMED`. Müddəti bitmiş kart `GIFT_CARD_EXPIRED`.
+         */
+        post: operations["redeem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/staff-console/pending-stamps": {
         parameters: {
             query?: never;
@@ -1486,6 +1546,33 @@ export interface components {
             /** @description Dev alətləri (simulyator, outbox) — yalnız dev mühitində */
             devTools?: boolean;
         };
+        GiftCardCheckRequest: {
+            /** @description Kartın kodu (tire və boşluqlar nəzərə alınmır), QR-dakı mətn eynidir */
+            code: string;
+        };
+        /** @description Hədiyyə kartı: status AVAILABLE olduqda təhvil verilə bilər. Telefon yalnız maskalıdır. */
+        GiftCardCheckResponse: {
+            code?: string;
+            customerName?: string;
+            /** Format: date-time */
+            earnedAt?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: uuid */
+            id?: string;
+            phoneMasked?: string;
+            /** Format: date-time */
+            redeemedAt?: string;
+            redeemedBranchName?: components["schemas"]["LocalizedText"];
+            rewardName?: components["schemas"]["LocalizedText"];
+            /** @enum {string} */
+            status?: "AVAILABLE" | "REDEEMED" | "REVOKED" | "EXPIRED";
+        };
+        GiftCardRedeemRequest: {
+            /** Format: uuid */
+            branchId: string;
+            code: string;
+        };
         /** @description Hədiyyə kartı. code — daimi unikal kod: işçiyə göstərilir (QR-da da eyni kod var). */
         GiftCardResponse: {
             code?: string;
@@ -2325,6 +2412,76 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["StampPolicyResponse"];
+                };
+            };
+        };
+    };
+    check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GiftCardCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GiftCardCheckResponse"];
+                };
+            };
+        };
+    };
+    recent: {
+        parameters: {
+            query: {
+                branchId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GiftCardCheckResponse"][];
+                };
+            };
+        };
+    };
+    redeem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GiftCardRedeemRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GiftCardCheckResponse"];
                 };
             };
         };
