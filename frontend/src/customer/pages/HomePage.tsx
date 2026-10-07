@@ -11,7 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 
 import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { useJustSignedIn } from '../auth/justSignedIn';
 import { StampCard } from '../components/StampCard';
+import { SwitchNumber } from '../components/SwitchNumber';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 
 /** Ana səhifə: daxil olmuş müştəri üçün möhür kartı, qonaq üçün kafe haqqında qısa məlumat və giriş düyməsi. */
@@ -34,6 +36,7 @@ function Loading() {
 }
 
 function Profile({ me }: { me: Me }) {
+  const justSignedIn = useJustSignedIn();
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
   const card = me.card;
@@ -51,9 +54,11 @@ function Profile({ me }: { me: Me }) {
           stampsRequired={card.stampsRequired ?? 9}
           current={card.currentStamps ?? 0}
           pending={card.pendingStamps ?? 0}
+          showReturnHint={justSignedIn}
           rewardName={resolveText(card.rewardName, lang)}
         />
       ) : null}
+      <SwitchNumber />
       {card?.pendingStamps ? (
         <p className="flex items-center gap-2 rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
           <Hourglass className="size-5 shrink-0 text-highlight" aria-hidden="true" />

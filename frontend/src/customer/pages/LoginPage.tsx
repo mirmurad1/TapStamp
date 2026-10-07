@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 
 import { isApiError } from '@/shared/api/client';
@@ -16,6 +16,7 @@ import { Input } from '@/shared/ui/input';
 
 import { customerAuthApi, publicApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { markJustSignedIn } from '../auth/justSignedIn';
 import { ErrorMessage } from '../components/ErrorMessage';
 
 type Step =
@@ -27,16 +28,19 @@ type Step =
 export function LoginPage() {
   const { status, refresh } = useCustomerSession();
   const navigate = useNavigate();
+  const switchingNumber = Boolean((useLocation().state as { switchNumber?: boolean } | null)?.switchNumber);
   const tapToken = useTapToken();
   // NFC toxunuşundan gəlibsə — girişdən sonra möhürü almaq üçün toxunuş səhifəsinə qayıdır
   const afterLogin = tapToken ? `/tap/${encodeURIComponent(tapToken)}` : '/';
   const [step, setStep] = useState<Step>({ name: 'phone' });
 
   if (status === 'signedIn') {
-    return <Navigate to={afterLogin} replace />;
+    // 'Fərqli nömrə ilə yoxla': çıxış bitənə qədər bir an daxil olmuş görünür — geri yönləndirilmir
+    return switchingNumber ? null : <Navigate to={afterLogin} replace />;
   }
 
   const finish = async () => {
+    markJustSignedIn();
     await refresh();
     void navigate(afterLogin, { replace: true });
   };

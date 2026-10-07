@@ -32,7 +32,7 @@ export function StampCard({
   pending = 0,
   animateFrom,
   completed,
-  showReturnHint = true,
+  showReturnHint = false,
 }: StampCardProps) {
   const { t } = useTranslation('profile');
   const shown = completed ? stampsRequired : Math.min(current, stampsRequired);

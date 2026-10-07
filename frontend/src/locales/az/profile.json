@@ -89,7 +89,6 @@
     "phone": "Telefon",
     "language": "Dil",
     "languageHint": "SMS-lər də bu dildə göndəriləcək.",
-    "signOut": "Hesabdan çıx",
     "devices": {
       "title": "Cihazlarım",
       "subtitle": "Hesabınıza daxil olmuş cihazlar. Tanımadığınız cihazdan çıxış edin.",
@@ -119,5 +118,6 @@
     "terms": "İstifadə şərtləri",
     "version": "Versiya {{version}} · {{date}}",
     "back": "Geri"
-  }
+  },
+  "switchNumber": "Fərqli nömrə ilə yoxla"
 }

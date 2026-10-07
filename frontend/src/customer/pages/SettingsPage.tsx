@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, LogOut, Smartphone, Trash2 } from 'lucide-react';
+import { FileText, Smartphone, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router';
@@ -28,13 +28,13 @@ import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
 import { ErrorMessage } from '../components/ErrorMessage';
 
-/** Parametrlər: dil, cihazlar, hüquqi sənədlər, çıxış və hesabın silinməsi. */
+/** Parametrlər: dil, cihazlar, hüquqi sənədlər və hesabın silinməsi (çıxış — möhür kartının altında). */
 export function SettingsPage() {
   const { t } = useTranslation('profile');
   const { status, me, clear } = useCustomerSession();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  // Çıxış və silinmə: naviqasiya transition kimi gedir, keşin təmizlənməsi isə təcili yeniləmədir — bu səhifə qısa
+  // Silinmə: naviqasiya transition kimi gedir, keşin təmizlənməsi isə təcili yeniləmədir — bu səhifə qısa
   // müddət "qonaq" kimi render oluna bilər. O zaman öz yönləndirməsi naviqasiyanın state-ini (bildirişi) əvəz etməsin.
   const leaving = useRef(false);
   const leave = async (state?: { accountDeleted: boolean }) => {
@@ -42,10 +42,6 @@ export function SettingsPage() {
     await navigate('/', { replace: true, state });
     clear();
   };
-  const logout = useMutation({
-    mutationFn: customerAuthApi.logout,
-    onSettled: () => leave(),
-  });
   const saveLanguage = useMutation({
     mutationFn: (lang: string) => meApi.update({ preferredLanguage: lang }),
     onSuccess: (updated) => queryClient.setQueryData(customerKeys.me, updated),
@@ -102,11 +98,6 @@ export function SettingsPage() {
           ))}
         </CardContent>
       </Card>
-
-      <Button variant="outline" size="lg" onClick={() => logout.mutate()} disabled={logout.isPending}>
-        <LogOut aria-hidden="true" />
-        {t('settings.signOut')}
-      </Button>
 
       <DeleteAccount onDeleted={() => void leave({ accountDeleted: true })} />
     </div>

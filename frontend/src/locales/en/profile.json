@@ -89,7 +89,6 @@
     "phone": "Phone",
     "language": "Language",
     "languageHint": "Text messages will also be sent in this language.",
-    "signOut": "Sign out",
     "devices": {
       "title": "My devices",
       "subtitle": "Devices signed in to your account. Sign out of any device you don't recognise.",
@@ -119,5 +118,6 @@
     "terms": "Terms of use",
     "version": "Version {{version}} · {{date}}",
     "back": "Back"
-  }
+  },
+  "switchNumber": "Use a different number"
 }

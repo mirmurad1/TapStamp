@@ -14,9 +14,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 
 import { publicApi, tapApi, type ClaimResult } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { useJustSignedIn } from '../auth/justSignedIn';
 import { customerKeys } from '../auth/queryClient';
 import { Celebration } from '../components/Celebration';
 import { StampCard } from '../components/StampCard';
+import { SwitchNumber } from '../components/SwitchNumber';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 
 /**
@@ -110,6 +112,7 @@ function Claim({ token, branch }: { token: string; branch: string }) {
 }
 
 function ClaimSuccess({ result, branch, rewardName }: { result: ClaimResult; branch: string; rewardName: string }) {
+  const justSignedIn = useJustSignedIn();
   const { t } = useTranslation('profile');
   const pending = result.status === 'PENDING';
   const required = result.stampsRequired ?? 0;
@@ -139,9 +142,11 @@ function ClaimSuccess({ result, branch, rewardName }: { result: ClaimResult; bra
           pending={pending ? 1 : 0}
           animateFrom={pending || completed ? undefined : Math.max(current - 1, 0)}
           completed={completed}
+          showReturnHint={justSignedIn}
           rewardName={rewardName || undefined}
         />
       ) : null}
+      <SwitchNumber />
       <Button asChild size="lg">
         <Link to={completed ? '/gift-cards' : '/'}>{completed ? t('celebrate.open') : t('tap.home')}</Link>
       </Button>

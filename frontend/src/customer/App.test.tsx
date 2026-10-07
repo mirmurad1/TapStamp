@@ -106,6 +106,9 @@ describe('müştəri tətbiqi', () => {
     await screen.findByRole('heading', { name: 'Salam, Aysel!' });
     expect(screen.getByText('Hədiyyəyə 6 möhür qalıb')).toBeInTheDocument();
     expect(screen.getAllByRole('img', { name: 'Möhür vurulub' })).toHaveLength(3);
+    // İlk girişdən sonra: nömrə bir daha soruşulmayacaq; çıxış möhür kartının altındadır
+    expect(screen.getByText('Nömrənizi bir daha soruşmayacağıq.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Fərqli nömrə ilə yoxla' })).toBeInTheDocument();
     await waitFor(() => expect(window.location.pathname).toBe('/'));
 
     const register = requests.find((request) => request.path === 'POST /api/v1/auth/register');
@@ -168,5 +171,45 @@ describe('müştəri tətbiqi', () => {
     expect(window.location.pathname).toBe('/');
     expect(screen.getByRole('link', { name: 'Daxil ol və möhür topla' })).toBeInTheDocument();
     expect(calls.indexOf('POST /api/v1/auth/step-up/otp/verify')).toBeLessThan(calls.indexOf('DELETE /api/v1/me'));
+  });
+
+  it('səhifə yenidən açılanda izah görünmür; "Fərqli nömrə ilə yoxla" çıxış edib girişə aparır', async () => {
+    const user = userEvent.setup();
+    let signedIn = true;
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: Request) => {
+      const key = `${input.method} ${new URL(input.url).pathname}`;
+      calls.push(key);
+      switch (key) {
+        case 'GET /api/v1/public/company':
+          return json(COMPANY);
+        case 'GET /api/v1/auth/session':
+          return json({ state: signedIn ? 'ACTIVE' : 'NONE' });
+        case 'GET /api/v1/me':
+          return json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', card: { currentStamps: 2, stampsRequired: 9 },
+            availableRewards: [], pendingConsents: [] });
+        case 'POST /api/v1/auth/logout':
+          signedIn = false;
+          return new Response(null, { status: 204 });
+        default:
+          return json({ code: 'NOT_FOUND' }, 404);
+      }
+    }));
+    const { customerRouter } = await import('./router');
+    await customerRouter.navigate('/');
+
+    render(
+      <QueryClientProvider client={createCustomerQueryClient()}>
+        <App />
+      </QueryClientProvider>,
+    );
+
+    await screen.findByRole('heading', { name: 'Salam, Aysel!' });
+    expect(screen.queryByText('Nömrənizi bir daha soruşmayacağıq.')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Fərqli nömrə ilə yoxla' }));
+
+    expect(await screen.findByLabelText('Telefon nömrəsi')).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/login');
+    expect(calls).toContain('POST /api/v1/auth/logout');
   });
 });
