@@ -55,7 +55,7 @@ export function CustomerLayout() {
               <Sparkles className="size-5" aria-hidden="true" />
             )}
           </span>
-          {companyName ? <span className="truncate font-display font-bold">{companyName}</span> : null}
+          {companyName ? <span className="line-clamp-2 break-words font-display leading-tight font-bold">{companyName}</span> : null}
         </Link>
         <div className="flex shrink-0 items-center gap-1">
           {/* Daxil olmuş müştəri dili Parametrlərdə dəyişir — dar ekranda şirkətin adına yer qalsın */}

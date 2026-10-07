@@ -13,6 +13,8 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
+  // Bir işçi: dev hesablarının TOTP kodu eyni 30 saniyəlik addımda iki dəfə qəbul olunmur (paralel girişlər toqquşur)
+  workers: 1,
   retries: 0,
   reporter: [['list']],
   use: {

@@ -21,6 +21,13 @@ app:
     seed-admin-password: ${DEV_SEED_ADMIN_PASSWORD:Kofe-Dev-Parol-2026}
     # Simulyasiya olunan çiplərin imza açarı (scripts/gen-secrets yaradır); boşdursa hər başlanğıcda təsadüfi
     simulator-key: ${APP_DEV_SIMULATOR_KEY:}
+  # Lokalda bütün sorğular (E2E testləri, ekran görüntüsü skriptləri) bir IP-dən gəlir — yalnız IP üzrə limitlər
+  # dev-də artırılır. Nömrə və email üzrə limitlər (kobud güc qorunması) dəyişmir; prod standart dəyərlərlə işləyir.
+  rate-limits:
+    admin-login-per-ip: 300
+    otp-request-per-ip: 300
+    otp-verify-per-ip: 600
+    token-redeem-per-ip: 200
 
 logging:
   level:

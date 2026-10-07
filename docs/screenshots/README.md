@@ -13,6 +13,7 @@ node scripts/screenshots/account-team.cjs
 node scripts/screenshots/admin-pages.cjs
 node scripts/screenshots/platform-pages.cjs
 node scripts/screenshots/stamp-animation.cjs
+node scripts/screenshots/themes.cjs
 ```
 
 `customer-flow.cjs` test müştərisi yaradır və kartını dev bazasında doldurur — yalnız dev mühiti üçündür.
@@ -62,3 +63,10 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase7-12-stamp-animation-1.png` | Möhür ekranı: damğa enir |
 | `phase7-13-stamp-animation-2.png` | Damğa vurulur (mürəkkəb dalğası, konfeti) |
 | `phase7-14-stamp-animation-3.png` | Son vəziyyət: möhür izi, "Möhür əlavə olundu!" |
+| `phase8-01-app-icon.png` | PWA: şirkətin brend rəngində yaradılan tətbiq ikonu |
+| `phase8-02-offline.png` | Oflayn ekran (3 dildə) |
+| `phase8-03-customer-home-dark.png` | Müştəri: ana səhifə, qaranlıq rejim (brend rəngi oxunaqlı tona açılıb) |
+| `phase8-04-customer-settings-dark.png` | Müştəri: parametrlər, qaranlıq rejim |
+| `phase8-05-login-ru.png` | Giriş səhifəsi rus dilində (telefon) |
+| `phase8-06-dashboard-dark.png` | Admin paneli, qaranlıq rejim |
+| `phase8-07-dashboard-dark-phone.png` | Admin paneli, qaranlıq rejim, telefon (üfüqi daşma yoxdur) |

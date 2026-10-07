@@ -203,6 +203,20 @@ npm run build
 npm run e2e          # Playwright: işləyən dev mühitinə qarşı (docker compose), sistemdəki Edge ilə
 ```
 
+Playwright dəsti (`frontend/e2e`, ardıcıl işləyir — dev hesablarının TOTP kodu eyni 30 saniyədə iki dəfə qəbul olunmur):
+
+| Fayl | Nə yoxlanılır |
+|---|---|
+| `nfc-tap.spec.ts`, `gift-card.spec.ts` | NFC toxunuşu → qeydiyyat → möhür, replay qorunması; kartın dolması, hədiyyə kartının təhvili |
+| `language.spec.ts` | Dilin dəyişməsi (qonaq), müştərinin və işçinin dilinin profildə saxlanması (başqa cihazda da) |
+| `isolation.spec.ts` | Tenant izolyasiyası: sessiya cookie-ləri, hədiyyə kartı kodu və NFC linki digər şirkətdə işləmir |
+| `admin.spec.ts` | İşçi dəvəti → qəbul → giriş → silinmə; müştəriyə əl ilə möhür; NFC çipinin qeydiyyatı və deaktivasiyası |
+| `quality.spec.ts` | Bütün əsas səhifələr: açıq/qaranlıq rejim, telefon (375 px)/masaüstü, az/en/ru — üfüqi daşma yoxdur, axe (WCAG 2.1 AA) ciddi pozuntu tapmır |
+
+Dev profilində yalnız **IP üzrə** sorğu limitləri artırılıb (`application-dev.yml` → `app.rate-limits`), çünki lokalda bütün testlər bir IP-dən gəlir; nömrə və email üzrə limitlər, eləcə də prod dəyərləri dəyişmir.
+
+**PWA (telefona quraşdırma).** Hər şirkətin öz manifesti (`/manifest.webmanifest`: ad, brend rəngi) və ikonları (`/api/v1/public/icons/{180,192,512,maskable-512}.png`) var. Service worker yalnız prod build-də qeydiyyat olunur, yalnız statik faylları keşləyir (API, NFC linkləri və admin paneli heç vaxt keşlənmir), internet olmayanda 3 dildə oflayn ekran göstərir. Lokalda service worker-in işləməsi üçün dev CA sertifikatı brauzerdə etibarlı olmalıdır (`scripts/gen-dev-certs.sh`). Müştərinin **Parametrlər** səhifəsində "Ana ekrana əlavə et" (Android) və ya iPhone üçün təlimat görünür.
+
 ## API müqaviləsi (OpenAPI → TypeScript)
 
 Frontend-in API klienti backend-in OpenAPI sənədindən yaradılan tiplərlə işləyir (`openapi-fetch`): mövcud olmayan endpoint və ya səhv sahə build zamanı xəta verir.
