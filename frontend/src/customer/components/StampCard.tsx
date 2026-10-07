@@ -1,4 +1,4 @@
-import { Gift, Hourglass, Star } from 'lucide-react';
+import { Gift, Hourglass, Nfc, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/cn';
@@ -15,6 +15,8 @@ interface StampCardProps {
   pending?: number;
   /** Bu indeksdən başlayan möhürlər yeni vurulub — animasiya ilə görünür. */
   animateFrom?: number;
+  /** Alt hissədə "nömrə bir daha soruşulmayacaq" izahı (daxil olmuş müştəri üçün). */
+  showReturnHint?: boolean;
   /** Kart dolub (hədiyyə kartı yaranıb) — hədiyyə xanası canlanır. */
   completed?: boolean;
 }
@@ -23,7 +25,15 @@ interface StampCardProps {
  * Möhür kartı: N xana + hədiyyə xanası. İkon bütün şirkətlər üçün eynidir (ulduz), rəng şirkətin brend rəngidir —
  * kafe, avtoyuma, bərbər və s. üçün eyni dərəcədə uyğundur.
  */
-export function StampCard({ stampsRequired, current, rewardName, pending = 0, animateFrom, completed }: StampCardProps) {
+export function StampCard({
+  stampsRequired,
+  current,
+  rewardName,
+  pending = 0,
+  animateFrom,
+  completed,
+  showReturnHint = true,
+}: StampCardProps) {
   const { t } = useTranslation('profile');
   const shown = completed ? stampsRequired : Math.min(current, stampsRequired);
   const remaining = Math.max(stampsRequired - shown, 0);
@@ -78,6 +88,17 @@ export function StampCard({ stampsRequired, current, rewardName, pending = 0, an
           />
         </div>
       </CardContent>
+      {showReturnHint ? (
+        <div className="flex items-start gap-3 border-t border-border bg-muted/60 px-5 py-4 sm:px-6">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <Nfc className="size-5" aria-hidden="true" />
+          </span>
+          <p className="text-sm">
+            <span className="block font-semibold">{t('card.returnTitle')}</span>
+            <span className="block text-muted-foreground">{t('card.returnHint')}</span>
+          </p>
+        </div>
+      ) : null}
     </Card>
   );
 }

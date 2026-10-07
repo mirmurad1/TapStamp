@@ -15,7 +15,9 @@
     "reward": "Hədiyyə: {{name}}",
     "pending_one": "{{count}} möhür işçi təsdiqini gözləyir",
     "pending_other": "{{count}} möhür işçi təsdiqini gözləyir",
-    "nextStampIn": "Növbəti möhür {{time}} sonra"
+    "nextStampIn": "Növbəti möhür {{time}} sonra",
+    "returnTitle": "Nömrənizi bir daha soruşmayacağıq.",
+    "returnHint": "Növbəti gəlişinizdə NFC nişanına toxunun — möhürünüz birbaşa kartınıza düşəcək."
   },
   "nav": {
     "home": "Ana səhifə",
