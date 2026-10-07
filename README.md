@@ -259,12 +259,12 @@ Kart dolanda (Mock Coffee House-da 9 möhür) təbrik animasiyası çıxır və 
 
 ### Hədiyyə kartının təhvili (dev)
 
-1. Müştəri **Hədiyyə kartları** bölməsində "Kodu göstər" basır — kod (məs. ) və QR görünür.
+1. Müştəri **Hədiyyə kartları** bölməsində "Kodu göstər" basır — kod (məs. `Q85J-QMJW`) və QR görünür.
 2. İşçi https://mockcoffee.localhost/admin/staff-console səhifəsində kodu yazır (kiçik hərf, boşluq və tiresiz də olar) və ya **QR-ı skan et** ilə kameradan oxuyur. Kartın həqiqiliyi, müştərinin adı və maskalı nömrəsi, hədiyyə və tarixlər görünür.
 3. **Hədiyyəni təhvil ver** — kart birdəfəlik istifadə olunmuş sayılır (filial və işçi qeyd olunur). Müştərinin açıq ekranında 2–3 saniyə ərzində "Hədiyyəniz təhvil verildi!" çıxır.
 4. Eyni kodu yenidən yoxlasanız — "İstifadə olunub" (tarix və filial ilə).
 
-Kodu yalnız daxil olmuş işçi yoxlaya bilər; işçi üzrə dəqiqədə 30 cəhd, uğursuz cəhdlər audit jurnalına yazılır. Kameradan istifadə yalnız  səhifələrində icazəlidir (Permissions-Policy).
+Kodu yalnız daxil olmuş işçi yoxlaya bilər; işçi üzrə dəqiqədə 30 cəhd, uğursuz cəhdlər audit jurnalına yazılır. Kameradan istifadə yalnız `/admin` səhifələrində icazəlidir (Permissions-Policy).
 
 ## Növbəti bölmələr
 
