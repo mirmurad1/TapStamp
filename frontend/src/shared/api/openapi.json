@@ -246,7 +246,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
-        "operationId" : "list_5",
+        "operationId" : "list_7",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -604,7 +604,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).",
-        "operationId" : "list_4",
+        "operationId" : "list_6",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1742,7 +1742,7 @@
     "/api/v1/admin/tags" : {
       "get" : {
         "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.",
-        "operationId" : "list_1",
+        "operationId" : "list_2",
         "parameters" : [ {
           "in" : "query",
           "name" : "branchId",
@@ -2457,7 +2457,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_3",
+        "operationId" : "list_5",
         "responses" : {
           "200" : {
             "content" : {
@@ -2537,6 +2537,46 @@
         },
         "summary" : "Cihazdan çıxış",
         "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/platform/audit-logs" : {
+      "get" : {
+        "description" : "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.",
+        "operationId" : "list_4",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "action",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "^[A-Z_]{1,64}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "before",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlatformAuditEntry"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Platforma audit jurnalı",
+        "tags" : [ "Platforma: audit jurnalı" ]
       }
     },
     "/api/v1/platform/auth/login" : {
@@ -3032,6 +3072,142 @@
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/domains" : {
+      "get" : {
+        "description" : "Əsas domen birinci; TLS sertifikatının vəziyyəti ilə.",
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Domain"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin domenləri",
+        "tags" : [ "Platforma: domenlər" ]
+      },
+      "post" : {
+        "description" : "Məs. gloriyajeans.mockcoffe.com. Sertifikat avtomatik alınır (PENDING → ISSUED).",
+        "operationId" : "add",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DomainRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Domain"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Domen əlavə etmək",
+        "tags" : [ "Platforma: domenlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/domains/{domainId}" : {
+      "delete" : {
+        "description" : "Step-up tələb edir; əsas domen silinə bilməz (DOMAIN_IS_PRIMARY).",
+        "operationId" : "remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "domainId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Domeni silmək",
+        "tags" : [ "Platforma: domenlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/domains/{domainId}/primary" : {
+      "post" : {
+        "description" : "Step-up tələb edir. Dəvət və bərpa linkləri, yeni çiplərin URL-i bu domenə yazılır; köhnə domen işləməyə davam edir (artıq proqramlaşdırılmış çiplər üçün).",
+        "operationId" : "makePrimary",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "domainId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Domain"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Əsas domen etmək",
+        "tags" : [ "Platforma: domenlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/owner-invitations" : {
       "post" : {
         "description" : "Dəvət linki şirkətin öz domenində açılır, 72 saat etibarlıdır.",
@@ -3223,7 +3399,7 @@
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "responses" : {
           "200" : {
             "content" : {
@@ -3834,6 +4010,39 @@
           }
         },
         "required" : [ "type", "version" ]
+      },
+      "Domain" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "hostname" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "primary" : {
+            "type" : "boolean"
+          },
+          "tlsStatus" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DomainRequest" : {
+        "type" : "object",
+        "properties" : {
+          "hostname" : {
+            "type" : "string",
+            "maxLength" : 253,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "hostname" ]
       },
       "EnrollmentStartResponse" : {
         "type" : "object",
@@ -4600,6 +4809,41 @@
         "type" : "object",
         "properties" : {
           "phone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PlatformAuditEntry" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actorId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "actorName" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "details" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ip" : {
+            "type" : "string"
+          },
+          "targetId" : {
+            "type" : "string"
+          },
+          "targetType" : {
             "type" : "string"
           }
         }

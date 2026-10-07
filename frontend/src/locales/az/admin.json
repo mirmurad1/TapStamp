@@ -258,6 +258,25 @@
       "resetMfaConfirm": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Bu, sahib telefonunu və bərpa kodlarını itirəndə edilir və audit jurnalına yazılır.",
       "mfaReset": "2FA sıfırlandı.",
       "unavailable": "Şirkət aktiv deyil — məlumatlar əlçatmazdır."
+    },
+    "domains": {
+      "title": "Domenlər",
+      "description": "Şirkətin ünvanları (məs. moyka.mockcoffe.com). Müştəri və admin paneli domenə görə müəyyən olunur.",
+      "primary": "Əsas",
+      "tls": {
+        "PENDING": "Sertifikat gözlənilir",
+        "ISSUED": "Sertifikat var",
+        "FAILED": "Sertifikat xətası"
+      },
+      "makePrimary": "Əsas et",
+      "confirmPrimary": "{{host}} əsas domen olsun? Dəvət linkləri və yeni çiplər bu domenə yazılacaq. Köhnə domen işləməyə davam edəcək.",
+      "confirmRemove": "{{host}} silinsin? Bu ünvana yazılmış çiplər işləməyəcək.",
+      "placeholder": "yeni-domen.mockcoffe.com",
+      "add": "Domen əlavə et"
+    },
+    "audit": {
+      "title": "Platforma audit jurnalı",
+      "subtitle": "Şirkətlərin yaradılması, dayandırılması, domenlər və sahiblərin 2FA-sı."
     }
   },
   "staffConsole": {

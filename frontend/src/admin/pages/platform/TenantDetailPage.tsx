@@ -24,6 +24,7 @@ import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { emailField, useValidationMessage } from '../../lib/forms';
+import { DomainsCard } from './DomainsCard';
 import { TENANTS_KEY } from './keys';
 import { TenantStatusBadge } from './TenantStatusBadge';
 
@@ -57,6 +58,7 @@ export function TenantDetailPage() {
           ) : (
             <Alert tone="info">{t('platform.detail.unavailable')}</Alert>
           )}
+          <DomainsCard tenantId={tenantId} />
         </>
       ) : null}
     </div>

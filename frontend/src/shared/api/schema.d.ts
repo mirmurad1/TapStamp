@@ -112,7 +112,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
          */
-        get: operations["list_5"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -369,7 +369,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).
          */
-        get: operations["list_4"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -953,7 +953,7 @@ export interface paths {
          * Çiplərin siyahısı
          * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         /**
          * Çipin qeydiyyatı
@@ -1454,7 +1454,7 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_3"];
+        get: operations["list_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1509,6 +1509,26 @@ export interface paths {
         post?: never;
         /** Cihazdan çıxış */
         delete: operations["revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platforma audit jurnalı
+         * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.
+         */
+        get: operations["list_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1890,6 +1910,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/domains": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin domenləri
+         * @description Əsas domen birinci; TLS sertifikatının vəziyyəti ilə.
+         */
+        get: operations["list_1"];
+        put?: never;
+        /**
+         * Domen əlavə etmək
+         * @description Məs. gloriyajeans.mockcoffe.com. Sertifikat avtomatik alınır (PENDING → ISSUED).
+         */
+        post: operations["add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/domains/{domainId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Domeni silmək
+         * @description Step-up tələb edir; əsas domen silinə bilməz (DOMAIN_IS_PRIMARY).
+         */
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/domains/{domainId}/primary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Əsas domen etmək
+         * @description Step-up tələb edir. Dəvət və bərpa linkləri, yeni çiplərin URL-i bu domenə yazılır; köhnə domen işləməyə davam edir (artıq proqramlaşdırılmış çiplər üçün).
+         */
+        post: operations["makePrimary"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/owner-invitations": {
         parameters: {
             query?: never;
@@ -2018,7 +2102,7 @@ export interface paths {
          * Cari hüquqi sənədlər
          * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
          */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2291,6 +2375,18 @@ export interface components {
             type: "PRIVACY_POLICY" | "TERMS";
             /** Format: int32 */
             version: number;
+        };
+        Domain: {
+            /** Format: date-time */
+            createdAt?: string;
+            hostname?: string;
+            /** Format: uuid */
+            id?: string;
+            primary?: boolean;
+            tlsStatus?: string;
+        };
+        DomainRequest: {
+            hostname: string;
         };
         /** @description TOTP qeydiyyatı: sirr autentifikator tətbiqinə əl ilə və ya QR kod ilə əlavə olunur */
         EnrollmentStartResponse: {
@@ -2600,6 +2696,20 @@ export interface components {
         };
         PhoneResponse: {
             phone?: string;
+        };
+        PlatformAuditEntry: {
+            action?: string;
+            /** Format: uuid */
+            actorId?: string;
+            actorName?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            details?: string;
+            /** Format: uuid */
+            id?: string;
+            ip?: string;
+            targetId?: string;
+            targetType?: string;
         };
         ProvisionRequest: {
             defaultLanguage: string;
@@ -3044,7 +3154,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_7: {
         parameters: {
             query?: {
                 action?: string;
@@ -3334,7 +3444,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_6: {
         parameters: {
             query?: {
                 q?: string;
@@ -4163,7 +4273,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: {
                 branchId?: string;
@@ -4787,7 +4897,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -4864,6 +4974,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: {
+                action?: string;
+                before?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformAuditEntry"][];
+                };
             };
         };
     };
@@ -5321,6 +5454,98 @@ export interface operations {
             };
         };
     };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Domain"][];
+                };
+            };
+        };
+    };
+    add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DomainRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Domain"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                domainId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    makePrimary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                domainId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Domain"];
+                };
+            };
+        };
+    };
     inviteOwner: {
         parameters: {
             query?: never;
@@ -5458,7 +5683,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;

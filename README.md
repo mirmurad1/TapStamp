@@ -132,7 +132,7 @@ java -jar app.jar --spring.main.web-application-type=none \
 
 Proses ayrıca baza (`loyalty_t_<slug>`), iki DB rolu (sxem sahibi və yalnız DML hüquqlu tətbiq rolu) yaradır, miqrasiyaları işə salır və domeni qeydiyyata alır. Yarımçıq qalsa, eyni əmri təkrar işə salmaq kifayətdir.
 
-Platforma panelindən (https://platform.localhost/admin → "Yeni şirkət") yaratmaq da mümkündür: bu, step-up (TOTP ilə təkrar təsdiq) tələb edir və prod-da standart olaraq söndürülüb (`APP_PROVISIONING_ENABLED=false`). Şirkət yaradılandan sonra platforma admini sahibə dəvət göndərir — link şirkətin öz domenində açılır, sahib hesab yaradır və ilk girişdə 2FA qurur.
+Platforma panelindən (https://platform.localhost/admin → "Yeni şirkət") yaratmaq da mümkündür: bu, step-up (TOTP ilə təkrar təsdiq) tələb edir və prod-da standart olaraq söndürülüb (`APP_PROVISIONING_ENABLED=false`). Şirkət yaradılandan sonra platforma admini sahibə dəvət göndərir — link şirkətin öz domenində açılır, sahib hesab yaradır. 2FA (iki addımlı yoxlama) könüllüdür, amma **Hesabım** səhifəsindən qurmaq tövsiyə olunur.
 
 ### İlk platforma admini (prod)
 
@@ -266,9 +266,25 @@ Kart dolanda (Mock Coffee House-da 9 möhür) təbrik animasiyası çıxır və 
 
 Kodu yalnız daxil olmuş işçi yoxlaya bilər; işçi üzrə dəqiqədə 30 cəhd, uğursuz cəhdlər audit jurnalına yazılır. Kameradan istifadə yalnız `/admin` səhifələrində icazəlidir (Permissions-Policy).
 
+### Admin paneli (Mərhələ 7)
+
+Sahib (`owner@mockcoffee.az`) və filial meneceri (`manager@mockcoffee.az`, yalnız öz filialı) üçün:
+
+| Bölmə | Nə var |
+|---|---|
+| **İdarəetmə paneli** | Ümumi/aktiv müştərilər, yeni müştərilər, möhürlər, hədiyyələr, geri qayıtma; günlük/həftəlik qrafik, istilik xəritəsi (gün × saat), dil bölgüsü; dövr və filial filtri. Təriflər: `docs/metrics.md` |
+| **Müştərilər** | Ad və ya telefonla axtarış, filtrlər (dil, status, gəlməyənlər, filial), sıralama; detallar, tarixçə, fırıldaq işarələri; möhürün əl ilə düzəlişi (səbəb məcburi, təkrar göndərişdən qorunur). Sahib üçün: tam nömrə və CSV ixracı (kimliyin təsdiqi ilə, auditə yazılır), bloklama |
+| **NFC çipləri** | Qeydiyyat, birdəfəlik provisioning paketi, açar rotasiyası, deaktivasiya, toxunuş jurnalı. Təlimat: `docs/nfc-ntag424-programming.md` |
+| **Parametrlər** | Möhür qaydası, hədiyyə, şirkətin adı/təsviri (3 dildə), brend rəngi, saat qurşağı; filiallar (ad, ünvan, iş saatları) və filial üzrə ayrıca qayda |
+| **Komanda** | Dəvət, bloklama, silmə (bazada yumşaq silinmə), 2FA-nın sıfırlanması |
+| **Audit jurnalı** | Kim, nə vaxt, nə etdi (yalnız sahib) |
+
+Platforma panelində (`superadmin@platform.localhost`) şirkətin səhifəsində **Domenlər** (əlavə etmək, əsas etmək, silmək) və ayrıca **Audit jurnalı** var.
+
+Ekran görüntüləri: `docs/screenshots/phase7-*`.
+
 ## Növbəti bölmələr
 
 Aşağıdakı bölmələr müvafiq mərhələlərdə əlavə olunacaq:
 
-- Real NTAG 424 DNA çipinin SUN ilə proqramlaşdırılması (Mərhələ 9, `docs/nfc-ntag424-programming.md`)
 - Yeni şirkətin və domenin qoşulması (Mərhələ 9, `docs/tenant-onboarding.md`)

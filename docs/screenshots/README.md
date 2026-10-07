@@ -11,6 +11,7 @@ node scripts/screenshots/customer-flow.cjs
 node scripts/screenshots/admin-settings.cjs
 node scripts/screenshots/account-team.cjs
 node scripts/screenshots/admin-pages.cjs
+node scripts/screenshots/platform-pages.cjs
 ```
 
 `customer-flow.cjs` test müştərisi yaradır və kartını dev bazasında doldurur — yalnız dev mühiti üçündür.
@@ -55,3 +56,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase7-07-audit.png` | Admin: audit jurnalı |
 | `phase7-08-settings.png` | Parametrlər: möhür qaydası, hədiyyə, şirkət (3 dil, brend rəngi), filiallar |
 | `phase7-09-branch-dialog.png` | Filialın düzəlişi: ad/ünvan 3 dildə, iş saatları |
+| `phase7-10-platform-tenant-domains.png` | Platforma: şirkətin səhifəsi — göstəricilər, sahiblər, domenlər |
+| `phase7-11-platform-audit.png` | Platforma audit jurnalı |

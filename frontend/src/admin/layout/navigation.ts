@@ -48,6 +48,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
 
 const PLATFORM_ITEMS: readonly NavItem[] = [
   { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'] },
+  { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'] },
 ];
 

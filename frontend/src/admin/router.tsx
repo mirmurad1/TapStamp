@@ -16,6 +16,7 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { SimulatorPage } from './pages/dev/SimulatorPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { StaffConsolePage } from './pages/staff/StaffConsolePage';
+import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
 import { TagsPage } from './pages/tags/TagsPage';
@@ -83,6 +84,7 @@ export const adminRouter = createBrowserRouter(
                   children: [
                     { path: 'tenants/new', element: <ProvisionTenantPage /> },
                     { path: 'tenants/:tenantId', element: <TenantDetailPage /> },
+                    { path: 'platform-audit', element: <PlatformAuditPage /> },
                   ],
                 },
                 { path: '*', element: <NotFound /> },

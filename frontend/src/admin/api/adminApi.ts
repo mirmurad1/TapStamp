@@ -371,3 +371,23 @@ export const companyApi = {
   resetPolicy: (branchId: string) =>
     unwrap(api.DELETE('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } } })),
 };
+
+export type TenantDomain = Schemas['Domain'];
+export type PlatformAuditEntry = Schemas['PlatformAuditEntry'];
+
+/** Platforma: şirkətin domenləri (əsas domen və silmə step-up tələb edir) və platforma audit jurnalı. */
+export const platformDomainsApi = {
+  list: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/domains', { params: { path: { tenantId } } })),
+  add: (tenantId: string, hostname: string) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/domains', { params: { path: { tenantId } }, body: { hostname } })),
+  makePrimary: (tenantId: string, domainId: string) =>
+    unwrap(
+      api.POST('/api/v1/platform/tenants/{tenantId}/domains/{domainId}/primary', { params: { path: { tenantId, domainId } } }),
+    ),
+  remove: (tenantId: string, domainId: string) =>
+    unwrap(api.DELETE('/api/v1/platform/tenants/{tenantId}/domains/{domainId}', { params: { path: { tenantId, domainId } } })),
+};
+
+export const platformAuditApi = {
+  list: (query: { action?: string; before?: string }) => unwrap(api.GET('/api/v1/platform/audit-logs', { params: { query } })),
+};

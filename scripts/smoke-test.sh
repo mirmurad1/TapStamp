@@ -35,8 +35,13 @@ check_body "müştəri tətbiqi HTML" mockcoffee.localhost / '<div id="root">'
 check_body "admin paneli (dərin link)" mockcoffee.localhost /admin/customers '<div id="root">'
 
 echo "Domenə görə tenant seçimi"
-check_body "Mock Coffee House öz məlumatını görür" mockcoffee.localhost /api/v1/public/company '"Mock Coffee House"'
-check_body "Demo Çay Evi öz məlumatını görür" demo-cay.localhost /api/v1/public/company 'Demo Çay Evi'
+# Şirkətin adını sahib Parametrlərdən dəyişə bilər, ona görə hər domenin öz cavabı və bir-birindən fərqi yoxlanılır
+MOCK=$(curl -s "${CURL_OPTS[@]}" "$(url mockcoffee.localhost /api/v1/public/company)")
+CAY=$(curl -s "${CURL_OPTS[@]}" "$(url demo-cay.localhost /api/v1/public/company)")
+[[ "$MOCK" == *'"branches"'* && "$MOCK" != *'Demo Çay Evi'* ]] && pass "mockcoffee öz məlumatını görür" \
+  || fail "mockcoffee öz məlumatını görmür"
+[[ "$CAY" == *'Demo Çay Evi'* && "$CAY" != "$MOCK" ]] && pass "Demo Çay Evi öz məlumatını görür" \
+  || fail "Demo Çay Evi öz məlumatını görmür"
 check_body "platforma domeni tenant deyil" platform.localhost /api/v1/context '"PLATFORM"'
 check_status "platforma domenində şirkət məlumatı yoxdur" platform.localhost /api/v1/public/company 404
 

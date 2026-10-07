@@ -258,6 +258,25 @@
       "resetMfaConfirm": "Reset two-step verification for {{name}}? Do this only when the owner has lost both the phone and the recovery codes. The action is recorded in the audit log.",
       "mfaReset": "2FA reset.",
       "unavailable": "The company is not active — its data is unavailable."
+    },
+    "domains": {
+      "title": "Domains",
+      "description": "The company’s addresses (e.g. moyka.mockcoffe.com). Customer and admin apps are resolved by domain.",
+      "primary": "Primary",
+      "tls": {
+        "PENDING": "Certificate pending",
+        "ISSUED": "Certificate issued",
+        "FAILED": "Certificate error"
+      },
+      "makePrimary": "Make primary",
+      "confirmPrimary": "Make {{host}} the primary domain? Invitation links and new tags will use it. The old domain keeps working.",
+      "confirmRemove": "Remove {{host}}? Tags programmed with this address will stop working.",
+      "placeholder": "new-domain.mockcoffe.com",
+      "add": "Add domain"
+    },
+    "audit": {
+      "title": "Platform audit log",
+      "subtitle": "Company creation and suspension, domains and owners’ 2FA."
     }
   },
   "staffConsole": {
