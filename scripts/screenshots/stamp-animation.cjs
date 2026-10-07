@@ -93,7 +93,7 @@ async function tap(staff) {
     await phone.screenshot({ path: `${out}/${prefix}-12-stamp-animation-1.png` });
     await phone.waitForTimeout(750);
     await phone.screenshot({ path: `${out}/${prefix}-13-stamp-animation-2.png` });
-    await phone.waitForTimeout(1500);
+    await phone.waitForTimeout(2300);
     await phone.screenshot({ path: `${out}/${prefix}-14-stamp-animation-3.png` });
   } finally {
     await policy(owner, original);

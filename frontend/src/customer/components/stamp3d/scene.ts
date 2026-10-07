@@ -3,22 +3,22 @@ import {
   CanvasTexture,
   Color,
   CylinderGeometry,
+  LatheGeometry,
   DirectionalLight,
   Group,
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
-  MeshPhysicalMaterial,
   MeshStandardMaterial,
   PCFSoftShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
+  RepeatWrapping,
   RingGeometry,
   Scene,
   ShadowMaterial,
-  SphereGeometry,
   SRGBColorSpace,
-  TorusGeometry,
+  Vector2,
   WebGLRenderer,
 } from 'three';
 
@@ -26,13 +26,15 @@ import {
  * Möhür ekranının real 3D səhnəsi (Three.js / WebGL). Bu modul yalnız möhür ekranında dinamik yüklənir (ayrıca
  * paket hissəsi), əsas tətbiqin ölçüsünə təsir etmir.
  *
- * Damğa şirkətin brend rəngindədir (CSS dəyişənləri --primary və --accent). Ssenari (~2,4 san): damğa havada
+ * Damğa klassik taxta möhürdür; rezin altlıq və iz şirkətin brend rəngindədir (CSS dəyişəni --primary). Ssenari (~2,4 san): damğa havada
  * yellənir, qalxır, zərblə masaya vurulur (sıxılır, kamera silkələnir, mürəkkəb dalğası), fırlanaraq kiçilib yox olur.
  * Masada rəngli möhür izi qalır.
  */
 export interface StampSceneOptions {
   reducedMotion: boolean;
   onImpact: () => void;
+  /** Animasiya bitdi — 3D səhnə 2D izə keçə bilər. */
+  onDone: () => void;
 }
 
 const DURATION = 2.4;
@@ -92,16 +94,31 @@ export function startStampScene(canvas: HTMLCanvasElement, options: StampSceneOp
   ink.position.y = 0.01;
   scene.add(ink);
 
-  // Damğa: rezin altlıq, parlaq gövdə, metal halqa, boyun, kürə tutacaq
+  // Damğa (klassik taxta möhür): rezin altlıq (mürəkkəb rəngində, tünd), taxta blok, mis halqa, yonulmuş taxta tutacaq
   const stamp = new Group();
-  const glossy = (color: Color) =>
-    new MeshPhysicalMaterial({ color, roughness: 0.28, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.15 });
+  const woodTexture = new CanvasTexture(drawWood());
+  woodTexture.colorSpace = SRGBColorSpace;
+  woodTexture.wrapS = RepeatWrapping;
+  woodTexture.wrapT = RepeatWrapping;
+  const wood = new MeshStandardMaterial({ map: woodTexture, roughness: 0.55, metalness: 0 });
+  const darkWood = new MeshStandardMaterial({ map: woodTexture, color: 0xb98a63, roughness: 0.6 });
+  const rubber = new MeshStandardMaterial({ color: primary.clone().lerp(new Color(0x1a1a1a), 0.72), roughness: 0.9 });
+  const brass = new MeshStandardMaterial({ color: 0xc9a227, metalness: 0.85, roughness: 0.35 });
+  const handle = new LatheGeometry(
+    [
+      [0.001, 0], [0.24, 0], [0.2, 0.18], [0.19, 0.42], [0.27, 0.72], [0.44, 1.02], [0.5, 1.2],
+      [0.47, 1.38], [0.36, 1.52], [0.18, 1.6], [0.001, 1.62],
+    ].map(([x, y]) => new Vector2(x, y)),
+    48,
+  );
+  const handleMesh = new Mesh(handle, wood);
+  handleMesh.position.y = 0.76;
   const parts: Mesh[] = [
-    placed(new Mesh(new CylinderGeometry(1.15, 1.15, 0.18, 64), new MeshStandardMaterial({ color: 0x1d1d28, roughness: 0.9 })), 0.09),
-    placed(new Mesh(new CylinderGeometry(1.02, 1.1, 0.55, 64), glossy(accent)), 0.455),
-    placed(new Mesh(new TorusGeometry(1.03, 0.055, 16, 64), new MeshStandardMaterial({ color: 0xdadae6, metalness: 1, roughness: 0.3 })), 0.73, true),
-    placed(new Mesh(new CylinderGeometry(0.2, 0.3, 0.75, 32), glossy(primary)), 1.1),
-    placed(new Mesh(new SphereGeometry(0.55, 48, 32), glossy(primary)), 1.88),
+    placed(new Mesh(new CylinderGeometry(1.0, 1.0, 0.1, 64), rubber), 0.05),
+    placed(new Mesh(new CylinderGeometry(1.06, 1.06, 0.4, 64), darkWood), 0.3),
+    placed(new Mesh(new CylinderGeometry(0.9, 1.06, 0.12, 64), darkWood), 0.56),
+    placed(new Mesh(new CylinderGeometry(0.26, 0.28, 0.14, 32), brass), 0.69),
+    handleMesh,
   ];
   parts.forEach((part) => {
     part.castShadow = true;
@@ -131,6 +148,8 @@ export function startStampScene(canvas: HTMLCanvasElement, options: StampSceneOp
     renderer.render(scene, camera);
     if (t < DURATION) {
       frame = requestAnimationFrame(render);
+    } else {
+      options.onDone();
     }
   };
   frame = requestAnimationFrame(render);
@@ -144,6 +163,7 @@ export function startStampScene(canvas: HTMLCanvasElement, options: StampSceneOp
       }
     });
     imprintTexture.dispose();
+    woodTexture.dispose();
     renderer.dispose();
   };
 }
@@ -234,6 +254,42 @@ function drawImprint(color: string): HTMLCanvasElement {
     ctx.beginPath();
     ctx.arc(Math.random() * size, Math.random() * size, Math.random() * 4 + 1, 0, Math.PI * 2);
     ctx.fill();
+  }
+  return canvas;
+}
+
+/** Prosedur taxta faktura: isti qəhvəyi fon üzərində dalğalı damarlar. */
+function drawWood(): HTMLCanvasElement {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return canvas;
+  }
+  const base = ctx.createLinearGradient(0, 0, size, 0);
+  base.addColorStop(0, '#a8692f');
+  base.addColorStop(0.5, '#c4864a');
+  base.addColorStop(1, '#a3642c');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+  for (let i = 0; i < 70; i++) {
+    const x0 = Math.random() * size;
+    const amplitude = 4 + Math.random() * 10;
+    const frequency = 0.01 + Math.random() * 0.02;
+    ctx.strokeStyle = Math.random() < 0.7 ? 'rgba(92, 51, 18, 0.35)' : 'rgba(230, 180, 120, 0.25)';
+    ctx.lineWidth = 0.6 + Math.random() * 2.2;
+    ctx.beginPath();
+    for (let y = 0; y <= size; y += 8) {
+      const x = x0 + Math.sin(y * frequency + i) * amplitude;
+      if (y === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.stroke();
   }
   return canvas;
 }
