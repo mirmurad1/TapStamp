@@ -5,7 +5,6 @@ import { Link, useParams } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { formatDate } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 
@@ -57,14 +56,6 @@ export function LegalPage() {
                 </p>
               );
             })}
-            {document.data.publishedAt ? (
-              <p className="pt-2 text-xs text-muted-foreground">
-                {t('legal.version', {
-                  version: document.data.version,
-                  date: formatDate(document.data.publishedAt, lang),
-                })}
-              </p>
-            ) : null}
           </CardContent>
         </Card>
       ) : null}

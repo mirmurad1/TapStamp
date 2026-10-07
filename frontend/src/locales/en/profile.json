@@ -120,7 +120,6 @@
   "legal": {
     "privacy": "Privacy policy",
     "terms": "Terms of use",
-    "version": "Version {{version}} · {{date}}",
     "back": "Back"
   },
   "switchNumber": "Use a different number",

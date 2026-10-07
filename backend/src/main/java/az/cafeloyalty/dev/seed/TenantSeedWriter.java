@@ -488,53 +488,41 @@ final class TenantSeedWriter {
 
     private static LocalizedText privacyText() {
         return LocalizedText.of("""
-                        # Məxfilik siyasəti (nümunə)
+                        # Məxfilik siyasəti
 
                         Biz yalnız loyallıq proqramı üçün lazım olan məlumatları toplayırıq: telefon nömrəniz, \
                         istəyə bağlı adınız və ziyarətlərinizin tarixçəsi. Telefon nömrəniz şifrələnmiş saxlanılır. \
-                        Hesabınızı istənilən vaxt silə bilərsiniz.
-
-                        > Bu, nümunə mətndir və hüquqşünas tərəfindən yoxlanılmalıdır.""",
+                        Hesabınızı istənilən vaxt silə bilərsiniz.""",
                 """
-                        # Privacy policy (sample)
+                        # Privacy policy
 
                         We only collect what the loyalty programme needs: your phone number, your name (optional) \
                         and your visit history. Your phone number is stored encrypted. You can delete your account \
-                        at any time.
-
-                        > This is sample text and must be reviewed by a lawyer.""",
+                        at any time.""",
                 """
-                        # Политика конфиденциальности (образец)
+                        # Политика конфиденциальности
 
                         Мы собираем только то, что нужно для программы лояльности: номер телефона, имя (по желанию) \
                         и историю посещений. Номер телефона хранится в зашифрованном виде. Вы можете удалить аккаунт \
-                        в любой момент.
-
-                        > Это образец текста, его должен проверить юрист.""");
+                        в любой момент.""");
     }
 
     private static LocalizedText termsText() {
         return LocalizedText.of("""
-                        # İstifadə şərtləri (nümunə)
+                        # İstifadə şərtləri
 
                         Möhürlər yalnız kafedə alınmış içkilər üçün verilir. İki möhür arasında ən az 20 dəqiqə \
-                        olmalıdır və gündə ən çox 3 möhür verilir. Hədiyyə qəhvə nağd pula dəyişdirilmir.
-
-                        > Bu, nümunə mətndir və hüquqşünas tərəfindən yoxlanılmalıdır.""",
+                        olmalıdır və gündə ən çox 3 möhür verilir. Hədiyyə qəhvə nağd pula dəyişdirilmir.""",
                 """
-                        # Terms of use (sample)
+                        # Terms of use
 
                         Stamps are given only for drinks bought at the cafe. There must be at least 20 minutes \
-                        between two stamps, and at most 3 stamps per day. The free coffee cannot be exchanged for cash.
-
-                        > This is sample text and must be reviewed by a lawyer.""",
+                        between two stamps, and at most 3 stamps per day. The free coffee cannot be exchanged for cash.""",
                 """
-                        # Условия использования (образец)
+                        # Условия использования
 
                         Штампы начисляются только за напитки, купленные в кафе. Между двумя штампами должно пройти \
-                        не менее 20 минут, в день — не более 3 штампов. Подарочный кофе не обменивается на деньги.
-
-                        > Это образец текста, его должен проверить юрист.""");
+                        не менее 20 минут, в день — не более 3 штампов. Подарочный кофе не обменивается на деньги.""");
     }
 
     private void batch(String sql, List<SqlParameterSource> rows) {
