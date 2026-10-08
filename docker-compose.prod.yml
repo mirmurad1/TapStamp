@@ -25,6 +25,11 @@ services:
         exec /docker-entrypoint.sh nginx -g 'daemon off;'
 
   certbot:
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     image: certbot/certbot:latest
     restart: unless-stopped
     depends_on:
