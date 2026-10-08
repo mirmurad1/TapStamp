@@ -51,7 +51,7 @@ public record TenancyProperties(
     }
 
     public record Pool(
-            @DefaultValue("5") int maxSize,
+            @DefaultValue("3") int maxSize,
             @DefaultValue("5m") Duration idleTimeout,
             @DefaultValue("5s") Duration connectionTimeout) {
     }

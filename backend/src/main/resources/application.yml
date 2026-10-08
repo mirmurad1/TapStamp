@@ -115,6 +115,9 @@ app:
   tenancy:
     db-host: ${DB_HOST:localhost}
     db-port: ${DB_PORT:5432}
+    # Hər şirkətin bazasına ən çox neçə bağlantı (cəmi bağlantılar PostgreSQL max_connections-dan az olmalıdır)
+    pool:
+      max-size: ${APP_TENANT_POOL_MAX:3}
     platform:
       app-password: ${DB_PLATFORM_APP_PASSWORD:}
       owner-password: ${DB_PLATFORM_OWNER_PASSWORD:}

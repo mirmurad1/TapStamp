@@ -5,6 +5,8 @@ name: cafe-loyalty
 services:
   postgres:
     image: postgres:16-alpine
+    # Hər şirkətin ayrıca bazası və bağlantı hovuzu var: 50 aktiv şirkət × 3 bağlantı + platforma və ehtiyat
+    command: ["postgres", "-c", "max_connections=${POSTGRES_MAX_CONNECTIONS:-300}"]
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -49,6 +51,7 @@ services:
       HTTPS_PORT: ${HTTPS_PORT:-443}
       APP_PROVISIONING_ENABLED: ${APP_PROVISIONING_ENABLED:-false}
       APP_NFC_FREE_TAGS: ${APP_NFC_FREE_TAGS:-1}
+      APP_TENANT_POOL_MAX: ${APP_TENANT_POOL_MAX:-3}
       DEV_SEED_ENABLED: ${DEV_SEED_ENABLED:-true}
       DEV_SEED_ADMIN_PASSWORD: ${DEV_SEED_ADMIN_PASSWORD:-Kofe-Dev-Parol-2026}
       APP_CRYPTO_KEKS: ${APP_CRYPTO_KEKS:?}
