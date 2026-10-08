@@ -2,6 +2,7 @@
 # Dev domenləri üçün lokal sertifikat mərkəzi (CA) və TLS sertifikatları yaradır.
 # Windows-da Git Bash ilə işə salın: bash scripts/gen-dev-certs.sh
 # Brauzer xəbərdarlığı olmasın deyə yaradılan dev-ca.pem faylını etibarlı kimi əlavə edin (README-yə bax).
+# Yeni şirkətin dev domeni üçün: bash scripts/gen-dev-certs.sh yeni.localhost (yalnız göstərilən domenlər yaradılır)
 # Alternativ: mkcert (https://github.com/FiloSottile/mkcert) — eyni qovluq strukturu ilə.
 set -euo pipefail
 trap 'echo "Xəta: sertifikat yaradıla bilmədi (sətir $LINENO). Ətraflı: bash -x scripts/gen-dev-certs.sh" >&2' ERR
@@ -12,7 +13,11 @@ case "$(uname -s)" in
   *) SUBJ_PREFIX="/" ;;
 esac
 
-DOMAINS=("mockcoffee.localhost" "demo-cay.localhost" "platform.localhost")
+if [[ $# -gt 0 ]]; then
+  DOMAINS=("$@")
+else
+  DOMAINS=("mockcoffee.localhost" "demo-cay.localhost" "platform.localhost")
+fi
 CERT_DIR="$(cd "$(dirname "$0")/.." && pwd)/infra/nginx/certs"
 mkdir -p "$CERT_DIR"
 umask 077
