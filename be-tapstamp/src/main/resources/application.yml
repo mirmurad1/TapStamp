@@ -1,7 +1,7 @@
 # Ümumi konfiqurasiya. Sirlər burada YOXDUR — yalnız env dəyişənlərindən gəlir (.env.example-a bax).
 spring:
   application:
-    name: cafe-loyalty
+    name: tapstamp
   jackson:
     deserialization:
       # Naməlum JSON sahələri rədd edilir (mass assignment qorunması)

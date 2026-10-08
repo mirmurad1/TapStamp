@@ -26,7 +26,7 @@ function totp(secret, offset = 0) {
   await page.locator('input[type="password"]').fill('Kofe-Dev-Parol-2026');
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/admin\/mfa/);
-  await page.getByLabel('Təsdiq kodu').fill(totp(Buffer.from('cafe-loyalty-dev-key', 'ascii'), 1));
+  await page.getByLabel('Təsdiq kodu').fill(totp(Buffer.from('tapstamp-dev-totpkey', 'ascii'), 1));
   await page.getByRole('button', { name: 'Təsdiqlə' }).click();
   await page.waitForURL(/\/admin\/?$/);
   await page.goto('https://mockcoffee.localhost/admin/settings');

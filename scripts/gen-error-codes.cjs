@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
-const java = fs.readFileSync(path.join(root, 'be-tapstamp/src/main/java/az/cafeloyalty/shared/error/ErrorCode.java'), 'utf8');
+const java = fs.readFileSync(path.join(root, 'be-tapstamp/src/main/java/az/tapstamp/shared/error/ErrorCode.java'), 'utf8');
 const props = fs.readFileSync(path.join(root, 'be-tapstamp/src/main/resources/i18n/messages_az.properties'), 'utf8');
 
 const messages = {};
@@ -34,7 +34,7 @@ API xətaları **Problem Details** (RFC 9457) formatında qaytarılır:
 
 \`\`\`json
 {
-  "type": "urn:cafe-loyalty:problem:stamp-cooldown-active",
+  "type": "urn:tapstamp:problem:stamp-cooldown-active",
   "title": "Bir az gözləyin",
   "status": 409,
   "detail": "Növbəti möhürü 14 dəqiqədən sonra ala bilərsiniz.",

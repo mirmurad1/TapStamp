@@ -1,6 +1,6 @@
-# Kafe Loyallıq Platforması
+# TapStamp
 
-NFC əsaslı kafe loyallıq sistemi. Müştəri telefonunu piştaxtadakı NFC çipinə toxundurur, qəhvə möhürü qazanır və kart dolanda hədiyyə qəhvə alır. Kafe sahibləri və işçiləri üçün idarəetmə paneli var. Platforma multi-tenant-dır: hər şirkətin öz domeni və ayrıca verilənlər bazası olur.
+NFC əsaslı universal loyallıq platforması: kafe, avtoyuma, bərbər, mağaza və istənilən xidmət üçün. Müştəri telefonunu piştaxtadakı NFC çipinə toxundurur, möhür qazanır və kart dolanda hədiyyə alır. Tətbiq quraşdırmaq lazım deyil. Şirkət sahibləri və işçiləri üçün idarəetmə paneli var. Platforma multi-tenant-dır: hər şirkətin öz domeni və ayrıca verilənlər bazası olur.
 
 > **Vəziyyət:** Mərhələ 2 — multi-tenancy (hər şirkətə ayrıca baza), şifrələmə və test məlumatları. Tam plan: [docs/architecture-plan.md](docs/architecture-plan.md).
 
@@ -104,7 +104,7 @@ Bütün hesabların şifrəsi: **`Kofe-Dev-Parol-2026`** (`.env` faylında `DEV_
 | Demo Çay Evi | https://demo-cay.localhost/admin | `owner@democay.az` | Sahib | ilk girişdə qurulur (QR kod) |
 | Platforma | https://platform.localhost/admin | `superadmin@platform.localhost` | Platforma admini | ✅ dev TOTP sirri |
 
-**Dev TOTP sirri** (sahib və platforma admini üçün): `MNQW MZJN NRXX SYLM OR4S 2ZDF OYWW WZLZ`. Autentifikator tətbiqinə (Google Authenticator, Microsoft Authenticator, 1Password və s.) "açarı əl ilə daxil et" ilə əlavə edin: növ — vaxta əsaslanan (TOTP), 6 rəqəm, 30 saniyə. Hər kod yalnız bir dəfə qəbul olunur — eyni kodla ikinci giriş üçün növbəti kodu gözləyin.
+**Dev TOTP sirri** (sahib və platforma admini üçün): `ORQX A43U MFWX ALLE MV3C 25DP ORYG WZLZ`. Autentifikator tətbiqinə (Google Authenticator, Microsoft Authenticator, 1Password və s.) "açarı əl ilə daxil et" ilə əlavə edin: növ — vaxta əsaslanan (TOTP), 6 rəqəm, 30 saniyə. Hər kod yalnız bir dəfə qəbul olunur — eyni kodla ikinci giriş üçün növbəti kodu gözləyin.
 
 **Dev poçt qutusu.** Dev-də email və SMS göndərilmir: dəvət və şifrə bərpası məktubları, müştərilərin OTP kodları yaddaşda saxlanılır və cari domen üzrə göstərilir — məsələn, https://mockcoffee.localhost/api/v1/dev/outbox (yalnız SMS: `?channel=SMS`, platforma üçün https://platform.localhost/api/v1/dev/outbox). SMS mətni backend-in loguna da yazılır (`docker compose logs backend | grep SMS`). Bu endpoint və konsol provayderi prod-da mövcud deyil.
 
@@ -249,7 +249,7 @@ Terminologiya (möhür / stamp / штамп və s.) üçün plana baxın: `docs/
 ## Layihə strukturu
 
 ```
-be-tapstamp/ Spring Boot tətbiqi (az.cafeloyalty.*)
+be-tapstamp/ Spring Boot tətbiqi (az.tapstamp.*)
 fe-tapstamp/ Vite: müştəri PWA (/) və admin paneli (/admin)
 infra/      nginx və PostgreSQL konfiqurasiyası
 scripts/    sirlərin və dev sertifikatlarının yaradılması

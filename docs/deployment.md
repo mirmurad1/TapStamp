@@ -35,7 +35,7 @@ curl -fsSL https://get.docker.com | sh
 ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
 
 # Kod
-git clone <repo> /opt/cafe-loyalty && cd /opt/cafe-loyalty
+git clone <repo> /opt/tapstamp && cd /opt/tapstamp
 ```
 
 Firewall-da yalnız SSH, 80 və 443 portları açıq olmalıdır. PostgreSQL xaricə açılmır: o, Docker-in daxili şəbəkəsindədir.
@@ -108,7 +108,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs certbot
 ```bash
 crontab -e
 # hər gün 03:00-da
-0 3 * * * cd /opt/cafe-loyalty && ./scripts/backup.sh >> /var/log/cafe-loyalty-backup.log 2>&1
+0 3 * * * cd /opt/tapstamp && ./scripts/backup.sh >> /var/log/tapstamp-backup.log 2>&1
 ```
 
 - Nüsxələr `backups/<tarix>/` qovluğunda saxlanılır, 14 gündən köhnələri silinir.
@@ -119,7 +119,7 @@ crontab -e
 ## 9. Yeniləmə
 
 ```bash
-cd /opt/cafe-loyalty && git pull
+cd /opt/tapstamp && git pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 

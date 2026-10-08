@@ -1,6 +1,6 @@
 import { CSRF_HEADER, readCookie, CSRF_COOKIE } from '@/shared/api/client';
 
-const LOCK_NAME = 'cafe-loyalty:session-refresh';
+const LOCK_NAME = 'tapstamp:session-refresh';
 
 let inflight: Promise<boolean> | undefined;
 

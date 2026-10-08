@@ -4,7 +4,7 @@ import { expect, type APIRequestContext, type Browser, type Page } from '@playwr
 
 /** E2E köməkçiləri: dev hesabları (README-dəki), TOTP, SMS kodu, simulyator. Yalnız dev mühiti üçün. */
 export const DEV_PASSWORD = process.env.DEV_SEED_ADMIN_PASSWORD ?? 'Kofe-Dev-Parol-2026';
-const DEV_TOTP_SECRET = Buffer.from('cafe-loyalty-dev-key', 'ascii');
+const DEV_TOTP_SECRET = Buffer.from('tapstamp-dev-totpkey', 'ascii');
 
 export function uniquePhone(): string {
   return `055${String(Math.floor(Math.random() * 10_000_000)).padStart(7, '0')}`;

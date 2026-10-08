@@ -11,7 +11,7 @@ const base = 'https://mockcoffee.localhost';
 function totp(step) {
   const counter = Buffer.alloc(8);
   counter.writeBigUInt64BE(BigInt(step));
-  const hmac = crypto.createHmac('sha1', Buffer.from('cafe-loyalty-dev-key', 'ascii')).update(counter).digest();
+  const hmac = crypto.createHmac('sha1', Buffer.from('tapstamp-dev-totpkey', 'ascii')).update(counter).digest();
   const o = hmac[19] & 0xf;
   return String((((hmac[o] & 0x7f) << 24) | (hmac[o + 1] << 16) | (hmac[o + 2] << 8) | hmac[o + 3]) % 1e6).padStart(6, '0');
 }

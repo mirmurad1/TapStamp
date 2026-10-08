@@ -24,7 +24,7 @@ umask 077
 
 if [[ ! -f "$CERT_DIR/dev-ca.key" ]]; then
   openssl req -x509 -new -nodes -newkey rsa:2048 -sha256 -days 825 \
-    -subj "${SUBJ_PREFIX}CN=Cafe Loyalty Dev CA" \
+    -subj "${SUBJ_PREFIX}CN=TapStamp Dev CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" \
     -keyout "$CERT_DIR/dev-ca.key" -out "$CERT_DIR/dev-ca.pem" 2>/dev/null

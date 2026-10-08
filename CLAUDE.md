@@ -1,4 +1,4 @@
-# Layihə qaydaları (Kafe Loyallıq)
+# Layihə qaydaları (TapStamp)
 
 ## Dil
 - İstifadəçi ilə ünsiyyət, planlar, mərhələ hesabatları: **Azərbaycan dili**.
@@ -9,7 +9,7 @@
 ## Arxitektura
 - Əsas sənəd: `docs/architecture-plan.md` (qərarlar jurnalı §18). Plandan kənarlaşma olarsa, sənəd yenilənir.
 - Hər şirkətin ayrıca bazası var (database-per-tenant); tenant yalnız `Host` başlığından müəyyən olunur.
-- Backend: Spring Boot 4.1 / Java 21, package-by-feature (`az.cafeloyalty.<modul>`), controller-lər `api` və ya `web` paketində.
+- Backend: Spring Boot 4.1 / Java 21, package-by-feature (`az.tapstamp.<modul>`), controller-lər `api` və ya `web` paketində.
 - `dev` paketi yalnız `@Profile("dev")`; başqa paketlər ona istinad edə bilməz (ArchUnit).
 - Texniki sətirlərdə `toUpperCase/toLowerCase` yalnız `Locale.ROOT` ilə.
 

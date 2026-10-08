@@ -9,7 +9,7 @@ RUN chmod +x mvnw
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -ntp dependency:go-offline
 COPY src/ src/
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -ntp -DskipTests package \
-    && cp target/cafe-loyalty-backend-*.jar target/app.jar
+    && cp target/tapstamp-backend-*.jar target/app.jar
 
 FROM eclipse-temurin:21-jre
 RUN groupadd --system app && useradd --system --gid app --no-create-home --shell /usr/sbin/nologin app

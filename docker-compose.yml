@@ -1,6 +1,6 @@
-# Kafe Loyallıq — lokal mühit. İşə salmaq: README.md-dəki "Quraşdırma" bölməsinə bax.
+# TapStamp — lokal mühit. İşə salmaq: README.md-dəki "Quraşdırma" bölməsinə bax.
 # Sirlər .env faylından gəlir (scripts/gen-secrets ilə yaradılır); bu faylda heç bir sirr yoxdur.
-name: cafe-loyalty
+name: tapstamp
 
 # Konteyner logları: hər fayl ən çox 20 MB, 5 fayl (köhnələr silinir) — disk dolmasın
 x-logging: &logging

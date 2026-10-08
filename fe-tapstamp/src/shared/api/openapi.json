@@ -1,8 +1,8 @@
 {
   "openapi" : "3.1.0",
   "info" : {
-    "description" : "Kafe loyallıq platformasının REST API-si.\n\n* Tenant (şirkət) sorğunun domenindən müəyyən olunur.\n* Autentifikasiya HttpOnly cookie-lərlə aparılır; dəyişdirici sorğular `X-XSRF-TOKEN` başlığı tələb edir.\n* Xətalar RFC 7807 (Problem Details) formatındadır və dildən asılı olmayan `code` sahəsi daşıyır.\n* Mətnlər `lang` cookie-si və ya `Accept-Language` başlığına görə az, en və ya ru dilində qaytarılır.\n",
-    "title" : "Kafe Loyallıq API",
+    "description" : "TapStamp platformasının REST API-si.\n\n* Tenant (şirkət) sorğunun domenindən müəyyən olunur.\n* Autentifikasiya HttpOnly cookie-lərlə aparılır; dəyişdirici sorğular `X-XSRF-TOKEN` başlığı tələb edir.\n* Xətalar RFC 7807 (Problem Details) formatındadır və dildən asılı olmayan `code` sahəsi daşıyır.\n* Mətnlər `lang` cookie-si və ya `Accept-Language` başlığına görə az, en və ya ru dilində qaytarılır.\n",
+    "title" : "TapStamp API",
     "version" : "v1"
   },
   "tags" : [ {

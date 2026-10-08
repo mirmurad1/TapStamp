@@ -13,7 +13,7 @@ Bu sənəddə üç şey var:
 |---|---|---|
 | Frontend paketləri | `npm audit`, Trivy (SBOM) | **0** zəiflik |
 | Backend kitabxanaları | Trivy (CycloneDX SBOM) | Əvvəl: **3 kritik, 10 yüksək** (aşağıdakı cədvəl). Yeniləmədən sonra **0** |
-| `cafe-loyalty-backend`, `-frontend` image-ləri | Trivy | **0** yüksək/kritik |
+| `tapstamp-backend`, `-frontend` image-ləri | Trivy | **0** yüksək/kritik |
 | nginx image | Trivy | Əvvəl 2 yüksək (libexpat, pcre2). `apk upgrade` əlavə olundu (`infra/nginx/Dockerfile`), indi **0** |
 | postgres:16-alpine | Trivy | 22 tapıntı, hamısı `gosu` utilitində (Go stdlib). Qəbul edilmiş risk, bax §4 |
 

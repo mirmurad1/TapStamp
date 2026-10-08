@@ -6,7 +6,7 @@ API xətaları **Problem Details** (RFC 9457) formatında qaytarılır:
 
 ```json
 {
-  "type": "urn:cafe-loyalty:problem:stamp-cooldown-active",
+  "type": "urn:tapstamp:problem:stamp-cooldown-active",
   "title": "Bir az gözləyin",
   "status": 409,
   "detail": "Növbəti möhürü 14 dəqiqədən sonra ala bilərsiniz.",

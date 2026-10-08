@@ -1,4 +1,4 @@
-# Kafe Loyallıq Platforması — Arxitektura Planı
+# TapStamp — Arxitektura Planı
 
 > **Status:** təsdiq olunub (v1.1) · **Tarix:** 06.10.2026
 >
@@ -185,7 +185,7 @@ Tenant zəncirləri platforma domenində, platforma zənciri isə tenant domenin
 ## 4. Qovluq strukturu
 
 ```
-cafe-loyalty/
+tapstamp/
 ├── README.md                        # Azərbaycanca: quraşdırma, diaqram, simulyasiya, NFC, tərcümələr
 ├── CLAUDE.md                        # layihə qaydaları (dil, konvensiyalar)
 ├── .env.example                     # bütün konfiqurasiya; sirr dəyərləri boşdur
@@ -206,8 +206,8 @@ cafe-loyalty/
 ├── be-tapstamp/
 │   ├── pom.xml, mvnw, mvnw.cmd, Dockerfile
 │   └── src/
-│       ├── main/java/az/cafeloyalty/
-│       │   ├── CafeLoyaltyApplication.java
+│       ├── main/java/az/tapstamp/
+│       │   ├── TapStampApplication.java
 │       │   ├── shared/              # error, i18n, time, web, persistence, idempotency
 │       │   ├── security/            # config, csrf, headers, ratelimit, crypto
 │       │   ├── tenancy/             # registry, resolution, hibernate, provisioning, migration
@@ -228,7 +228,7 @@ cafe-loyalty/
 │       │   ├── db/migration/tenant/     # tenant bazalarının Flyway miqrasiyaları
 │       │   ├── i18n/messages_az.properties, messages_en.properties, messages_ru.properties
 │       │   └── security/common-passwords.txt
-│       └── test/java/az/cafeloyalty/    # unit, *IT (Testcontainers), arch (ArchUnit)
+│       └── test/java/az/tapstamp/    # unit, *IT (Testcontainers), arch (ArchUnit)
 ├── fe-tapstamp/
 │   ├── package.json, vite.config.ts, tsconfig.json, eslint.config.js
 │   ├── index.html                   # müştəri giriş nöqtəsi (/)
@@ -1149,7 +1149,7 @@ Göstəricilərin dəqiq tərifləri `docs/metrics.md` faylında olacaq. Məsəl
 
 ```json
 {
-  "type": "https://docs.cafe-loyalty.example/problems/stamp-cooldown-active",
+  "type": "https://docs.tapstamp.example/problems/stamp-cooldown-active",
   "title": "Bir az gözləyin",
   "status": 409,
   "detail": "Növbəti möhürü 14 dəqiqədən sonra ala bilərsiniz.",

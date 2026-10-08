@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bütün bazaların (platforma + hər şirkət) ehtiyat nüsxəsi: pg_dump (custom format, sıxılmış).
 # Serverdə cron ilə gündə bir dəfə işlədin (docs/deployment.md):
-#   0 3 * * * cd /opt/cafe-loyalty && ./scripts/backup.sh >> /var/log/cafe-loyalty-backup.log 2>&1
+#   0 3 * * * cd /opt/tapstamp && ./scripts/backup.sh >> /var/log/tapstamp-backup.log 2>&1
 #
 # Nüsxələr BACKUP_DIR qovluğuna yazılır (standart ./backups), BACKUP_KEEP_DAYS gündən köhnələri silinir.
 #
