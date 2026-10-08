@@ -238,7 +238,8 @@ export type RewardSettingsRequest = Schemas['RewardSettingsRequest'];
 export const settingsApi = {
   stampPolicy: () => unwrap(api.GET('/api/v1/admin/settings/stamp-policy')),
   updateStampPolicy: (body: StampPolicyRequest) => unwrap(api.PUT('/api/v1/admin/settings/stamp-policy', { body })),
-  rewardRule: () => unwrap(api.GET('/api/v1/admin/settings/reward-rule')),
+  /** Yeni şirkətdə hədiyyə qaydası hələ yoxdur: boş cavab null olur (react-query undefined-i xəta sayır). */
+  rewardRule: async () => (await unwrap(api.GET('/api/v1/admin/settings/reward-rule'))) ?? null,
   updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
 };
 
