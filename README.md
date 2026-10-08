@@ -98,13 +98,13 @@ Bütün hesabların şifrəsi: **`Kofe-Dev-Parol-2026`** (`.env` faylında `DEV_
 
 | Panel | Ünvan | Email | Rol | 2FA |
 |---|---|---|---|---|
-| Mock Coffee House | https://mockcoffee.localhost/admin | `owner@mockcoffee.az` | Sahib (bütün filiallar) | ✅ dev TOTP sirri |
+| Mock Coffee House | https://mockcoffee.localhost/admin | `owner@mockcoffee.az` | Sahib (bütün filiallar) | — |
 | Mock Coffee House | https://mockcoffee.localhost/admin | `manager@mockcoffee.az` | Filial meneceri (Gənclik) | — |
 | Mock Coffee House | https://mockcoffee.localhost/admin | `barista@mockcoffee.az` | İşçi (Mərkəz), interfeys dili rus | — |
-| Demo Çay Evi | https://demo-cay.localhost/admin | `owner@democay.az` | Sahib | ilk girişdə qurulur (QR kod) |
-| Platforma | https://platform.localhost/admin | `superadmin@platform.localhost` | Platforma admini | ✅ dev TOTP sirri |
+| Demo Çay Evi | https://demo-cay.localhost/admin | `owner@democay.az` | Sahib | — |
+| Platforma | https://platform.localhost/admin | `superadmin@platform.localhost` | Platforma admini | — |
 
-**Dev TOTP sirri** (sahib və platforma admini üçün): `ORQX A43U MFWX ALLE MV3C 25DP ORYG WZLZ`. Autentifikator tətbiqinə (Google Authenticator, Microsoft Authenticator, 1Password və s.) "açarı əl ilə daxil et" ilə əlavə edin: növ — vaxta əsaslanan (TOTP), 6 rəqəm, 30 saniyə. Hər kod yalnız bir dəfə qəbul olunur — eyni kodla ikinci giriş üçün növbəti kodu gözləyin.
+Dev hesablarında 2FA qurulmayıb — hamısı yalnız şifrə ilə daxil olur. 2FA axınını sınamaq üçün daxil olduqdan sonra **Hesabım → İki addımlı yoxlama** bölməsindən qurun.
 
 **Dev poçt qutusu.** Dev-də email və SMS göndərilmir: dəvət və şifrə bərpası məktubları, müştərilərin OTP kodları yaddaşda saxlanılır və cari domen üzrə göstərilir — məsələn, https://mockcoffee.localhost/api/v1/dev/outbox (yalnız SMS: `?channel=SMS`, platforma üçün https://platform.localhost/api/v1/dev/outbox). SMS mətni backend-in loguna da yazılır (`docker compose logs backend | grep SMS`). Bu endpoint və konsol provayderi prod-da mövcud deyil.
 
@@ -203,7 +203,7 @@ npm run build
 npm run e2e          # Playwright: işləyən dev mühitinə qarşı (docker compose), sistemdəki Edge ilə
 ```
 
-Playwright dəsti (`fe-tapstamp/e2e`, ardıcıl işləyir — dev hesablarının TOTP kodu eyni 30 saniyədə iki dəfə qəbul olunmur):
+Playwright dəsti (`fe-tapstamp/e2e`, ardıcıl işləyir):
 
 | Fayl | Nə yoxlanılır |
 |---|---|

@@ -1,6 +1,5 @@
 package az.tapstamp.dev.seed;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -31,34 +30,30 @@ import org.springframework.stereotype.Component;
 
 /**
  * Dev test hesabları (README-də göstərilir). İdempotentdir: email artıq varsa hesab yenidən yaradılmır.
- * Sahib və platforma admini üçün TOTP məlum dev sirri ilə qurulur ki, autentifikator tətbiqinə əlavə etmək mümkün olsun;
- * Demo Çay Evinin sahibində TOTP yoxdur — ilk girişdə qeydiyyat axını göstərilir.
+ * Dev hesablarında 2FA (TOTP) qurulmur — giriş yalnız şifrə ilə. 2FA axını istənilən vaxt "Hesabım" bölməsindən
+ * qurulub sınana bilər.
  */
 @Component
 @Profile("dev")
 public class DevAccountSeeder {
-
-    /** Dev TOTP sirri (20 bayt, Base32: {@code MNQWMZJNNRXXSYLMOR4S2ZDFOYWWWZLZ}). Yalnız dev. */
-    public static final byte[] DEV_TOTP_SECRET = "tapstamp-dev-totpkey".getBytes(StandardCharsets.US_ASCII);
 
     public static final String PLATFORM_ADMIN_EMAIL = "superadmin@platform.localhost";
 
     /** Qayıdan müştəri demosu (Mock Coffee House): mövcud seed müştərilərindən birinə verilən məlum nömrə. */
     public static final String DEMO_CUSTOMER_PHONE = "+994501234567";
 
-    record AccountSeed(String email, String displayName, Language language, AdminRole role, String branchNameAz,
-                       boolean totp) {
+    record AccountSeed(String email, String displayName, Language language, AdminRole role, String branchNameAz) {
     }
 
     static final Map<String, List<AccountSeed>> STAFF = Map.of(
             "mockcoffee", List.of(
-                    new AccountSeed("owner@mockcoffee.az", "Leyla Məmmədova", Language.AZ, AdminRole.COMPANY_OWNER, null, true),
+                    new AccountSeed("owner@mockcoffee.az", "Leyla Məmmədova", Language.AZ, AdminRole.COMPANY_OWNER, null),
                     new AccountSeed("manager@mockcoffee.az", "Rəşad Əliyev", Language.AZ, AdminRole.BRANCH_MANAGER,
-                            "Gənclik filialı", false),
+                            "Gənclik filialı"),
                     new AccountSeed("barista@mockcoffee.az", "Anna Petrova", Language.RU, AdminRole.STAFF,
-                            "Mərkəz filialı", false)),
+                            "Mərkəz filialı")),
             "democay", List.of(
-                    new AccountSeed("owner@democay.az", "Elçin Quliyev", Language.AZ, AdminRole.COMPANY_OWNER, null, false)));
+                    new AccountSeed("owner@democay.az", "Elçin Quliyev", Language.AZ, AdminRole.COMPANY_OWNER, null)));
 
     private static final Logger log = LoggerFactory.getLogger(DevAccountSeeder.class);
 
@@ -141,9 +136,6 @@ public class DevAccountSeeder {
                         .param("role", seed.role().name())
                         .param("branchId", branchId)
                         .update();
-                if (seed.totp()) {
-                    enableDevTotp(AdminRealm.STAFF, id, now);
-                }
             });
             log.info("Dev hesabı yaradıldı: {} ({})", seed.email(), seed.role());
         }
@@ -156,18 +148,12 @@ public class DevAccountSeeder {
         }
         Instant now = clock.instant();
         realms.tx(AdminRealm.PLATFORM).executeWithoutResult(status -> {
-            UUID id = accounts.insert(PLATFORM_ADMIN_EMAIL, hasher.hash(password()), "Platforma Admini", Language.AZ,
+            accounts.insert(PLATFORM_ADMIN_EMAIL, hasher.hash(password()), "Platforma Admini", Language.AZ,
                     AdminAccount.AccountStatus.ACTIVE, now);
-            enableDevTotp(AdminRealm.PLATFORM, id, now);
         });
         log.info("Dev platforma admini yaradıldı: {}", PLATFORM_ADMIN_EMAIL);
     }
 
-    private void enableDevTotp(AdminRealm realm, UUID userId, Instant now) {
-        byte[] encrypted = realms.cipher(realm).encrypt(KeyPurpose.TOTP, DEV_TOTP_SECRET, realms.totpAad(realm, userId));
-        realms.accounts(realm).storePendingTotp(userId, encrypted, now);
-        realms.accounts(realm).enableTotp(userId, 0, now);
-    }
 
     private String password() {
         String password = properties.dev().seedAdminPassword();
