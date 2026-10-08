@@ -52,6 +52,7 @@ nano .env
 | Dəyişən | Dəyər |
 |---|---|
 | `APP_PLATFORM_DOMAIN` | `platform.sizinbrend.az` |
+| `APP_PROVISIONING_ENABLED` | **`true`** — platforma panelindən yeni şirkət yaratmaq üçün (domeni yazmaq kifayətdir: baza, miqrasiyalar, domen və HTTPS avtomatik). Standart `false`-dur |
 | `ACME_EMAIL` | sertifikat bildirişləri üçün email |
 | `APP_SMS_PROVIDER`, `APP_SMS_HTTP_URL`, `APP_SMS_HTTP_API_KEY` | `http` və provayderin məlumatları |
 | `APP_MAIL_PROVIDER`, `APP_MAIL_FROM`, `SMTP_*` | `smtp` və poçt serverinin məlumatları |
