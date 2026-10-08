@@ -304,6 +304,7 @@ Ekran görüntüləri: `docs/screenshots/phase7-*`.
 | [docs/deployment.md](docs/deployment.md) | Prod-a yerləşdirmə: server, DNS, sirlər, HTTPS (certbot), ehtiyat nüsxə, yeniləmə |
 | [docs/tenant-onboarding.md](docs/tenant-onboarding.md) | Yeni şirkətin və domenin qoşulması, sahibin ilk addımları |
 | [docs/nfc-ntag424-programming.md](docs/nfc-ntag424-programming.md) | NTAG 424 DNA çipinin proqramlaşdırılması və açar rotasiyası |
+| [docs/load-test.md](docs/load-test.md) | Yük testi: 50 şirkət, metodologiya və nəticələr |
 | [docs/i18n.md](docs/i18n.md) | Çoxdillilik: dilin seçilməsi, yeni mətn və yeni dil |
 | [docs/error-codes.md](docs/error-codes.md) | API xəta kodları (avtomatik yaradılır: `node scripts/gen-error-codes.cjs`) |
 | [docs/metrics.md](docs/metrics.md) | Analitika göstəricilərinin tərifləri |

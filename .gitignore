@@ -35,3 +35,4 @@ e2e/blob-report/
 .DS_Store
 Thumbs.db
 *.log
+scripts/load-test/last-result.json
