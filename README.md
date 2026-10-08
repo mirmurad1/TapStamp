@@ -167,7 +167,7 @@ Sonra frontend-i Vite ilə işə salın (3-cü addım). Brauzer `*.localhost` do
 
    ```powershell
    $env:JAVA_HOME = "<JDK 21 qovluğu>"; $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-   cd backend
+   cd be-tapstamp
    .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
    ```
 
@@ -176,7 +176,7 @@ Sonra frontend-i Vite ilə işə salın (3-cü addım). Brauzer `*.localhost` do
 3. Frontend:
 
    ```bash
-   cd frontend
+   cd fe-tapstamp
    npm install
    npm run dev
    ```
@@ -186,8 +186,8 @@ Sonra frontend-i Vite ilə işə salın (3-cü addım). Brauzer `*.localhost` do
 ## Testlər
 
 ```powershell
-cd backend; .\mvnw.cmd test            # unit və ArchUnit testləri (Docker lazım deyil)
-cd backend; .\mvnw.cmd verify          # + inteqrasiya testləri (*IT): Testcontainers ilə real PostgreSQL 16
+cd be-tapstamp; .\mvnw.cmd test            # unit və ArchUnit testləri (Docker lazım deyil)
+cd be-tapstamp; .\mvnw.cmd verify          # + inteqrasiya testləri (*IT): Testcontainers ilə real PostgreSQL 16
 ```
 
 İnteqrasiya testləri production-dakı eyni init skripti ilə PostgreSQL konteyneri qaldırır, iki test şirkəti yaradır və izolyasiyanı həm HTTP, həm də DB hüquqları səviyyəsində yoxlayır. Docker yoxdursa, bu testlər uğursuz sayılmır, atlanır.
@@ -195,7 +195,7 @@ cd backend; .\mvnw.cmd verify          # + inteqrasiya testləri (*IT): Testcont
 Autentifikasiya testləri (`StaffAuthIT`, `PasswordResetIT`, `InvitationIT`, `PlatformAdminIT`, `AdminAccessIT`, `RateLimitIT`) idarə olunan test saatı ilə işləyir: 30 dəqiqəlik fəaliyyətsizlik, 8 saatlıq mütləq limit, link ömrü və TOTP addımları gözləmədən yoxlanılır. `AdminAccessIT` bütün admin endpoint-lərinin inventarını çıxarır və sessiyasız heç birinin işləmədiyini təsdiqləyir.
 
 ```bash
-cd frontend
+cd fe-tapstamp
 npm run lint        # ESLint (UI-da tərcüməsiz mətn qadağandır)
 npm run typecheck   # TypeScript (mövcud olmayan tərcümə açarı xəta verir)
 npm test            # Vitest: tərcümə paritetı, cəm formaları, formatlar, şriftlər
@@ -203,7 +203,7 @@ npm run build
 npm run e2e          # Playwright: işləyən dev mühitinə qarşı (docker compose), sistemdəki Edge ilə
 ```
 
-Playwright dəsti (`frontend/e2e`, ardıcıl işləyir — dev hesablarının TOTP kodu eyni 30 saniyədə iki dəfə qəbul olunmur):
+Playwright dəsti (`fe-tapstamp/e2e`, ardıcıl işləyir — dev hesablarının TOTP kodu eyni 30 saniyədə iki dəfə qəbul olunmur):
 
 | Fayl | Nə yoxlanılır |
 |---|---|
@@ -221,7 +221,7 @@ Dev profilində yalnız **IP üzrə** sorğu limitləri artırılıb (`applicati
 
 Frontend-in API klienti backend-in OpenAPI sənədindən yaradılan tiplərlə işləyir (`openapi-fetch`): mövcud olmayan endpoint və ya səhv sahə build zamanı xəta verir.
 
-1. `backend`-də `.\mvnw.cmd verify` — `OpenApiContractIT` sənədi `frontend/src/shared/api/openapi.json`-a yazır (hər əməliyyatın Azərbaycan dilində təsviri olduğunu da yoxlayır).
+1. `be-tapstamp`-də `.\mvnw.cmd verify` — `OpenApiContractIT` sənədi `fe-tapstamp/src/shared/api/openapi.json`-a yazır (hər əməliyyatın Azərbaycan dilində təsviri olduğunu da yoxlayır).
 2. `frontend`-də `npm run api:types` — `schema.d.ts` yenilənir.
 
 CI hər iki faylın commit olunmuş versiyasının aktual olduğunu yoxlayır.
@@ -230,7 +230,7 @@ CI hər iki faylın commit olunmuş versiyasının aktual olduğunu yoxlayır.
 
 **Frontend:**
 
-1. Açarı uyğun namespace faylına **3 dilin hamısında** əlavə edin: `frontend/src/locales/az/<ns>.json`, `en/<ns>.json`, `ru/<ns>.json`. Namespace-lər: `common`, `auth`, `profile`, `admin`, `errors`.
+1. Açarı uyğun namespace faylına **3 dilin hamısında** əlavə edin: `fe-tapstamp/src/locales/az/<ns>.json`, `en/<ns>.json`, `ru/<ns>.json`. Namespace-lər: `common`, `auth`, `profile`, `admin`, `errors`.
 2. Sayla dəyişən mətnlər üçün cəm formalarından istifadə edin:
    - az və en: `açar_one`, `açar_other`;
    - ru: `açar_one`, `açar_few`, `açar_many`, `açar_other` (1 штамп / 2 штампа / 5 штампов).
@@ -239,8 +239,8 @@ CI hər iki faylın commit olunmuş versiyasının aktual olduğunu yoxlayır.
 
 **Backend:**
 
-1. Açarı `backend/src/main/resources/i18n/messages_az.properties`, `messages_en.properties` və `messages_ru.properties` fayllarının hamısına əlavə edin (UTF-8).
-2. Yeni xəta kodu üçün `ErrorCode` enum-una dəyər və `error.<KOD>.title` / `error.<KOD>.detail` açarlarını əlavə edin. Frontend üçün `frontend/src/locales/*/errors.json` fayllarına da eyni kodu əlavə edin.
+1. Açarı `be-tapstamp/src/main/resources/i18n/messages_az.properties`, `messages_en.properties` və `messages_ru.properties` fayllarının hamısına əlavə edin (UTF-8).
+2. Yeni xəta kodu üçün `ErrorCode` enum-una dəyər və `error.<KOD>.title` / `error.<KOD>.detail` açarlarını əlavə edin. Frontend üçün `fe-tapstamp/src/locales/*/errors.json` fayllarına da eyni kodu əlavə edin.
 3. Arqumentli mesajlarda apostrofu iki dəfə yazın (`''`) — bu, `MessageFormat` qaydasıdır.
 4. `MessagesParityTest` 3 faylın açarlarının eyni olduğunu yoxlayır.
 
@@ -249,8 +249,8 @@ Terminologiya (möhür / stamp / штамп və s.) üçün plana baxın: `docs/
 ## Layihə strukturu
 
 ```
-backend/    Spring Boot tətbiqi (az.cafeloyalty.*)
-frontend/   Vite: müştəri PWA (/) və admin paneli (/admin)
+be-tapstamp/ Spring Boot tətbiqi (az.cafeloyalty.*)
+fe-tapstamp/ Vite: müştəri PWA (/) və admin paneli (/admin)
 infra/      nginx və PostgreSQL konfiqurasiyası
 scripts/    sirlərin və dev sertifikatlarının yaradılması
 docs/       arxitektura planı və sənədlər

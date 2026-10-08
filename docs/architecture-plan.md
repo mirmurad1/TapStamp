@@ -203,7 +203,7 @@ cafe-loyalty/
 │   │   ├── snippets/security-headers.conf
 │   │   └── certs/<domen>/           # TLS sertifikatları (.gitignore-dadır)
 │   └── postgres/init/01-platform.sh # platforma bazası və rollar
-├── backend/
+├── be-tapstamp/
 │   ├── pom.xml, mvnw, mvnw.cmd, Dockerfile
 │   └── src/
 │       ├── main/java/az/cafeloyalty/
@@ -229,7 +229,7 @@ cafe-loyalty/
 │       │   ├── i18n/messages_az.properties, messages_en.properties, messages_ru.properties
 │       │   └── security/common-passwords.txt
 │       └── test/java/az/cafeloyalty/    # unit, *IT (Testcontainers), arch (ArchUnit)
-├── frontend/
+├── fe-tapstamp/
 │   ├── package.json, vite.config.ts, tsconfig.json, eslint.config.js
 │   ├── index.html                   # müştəri giriş nöqtəsi (/)
 │   ├── admin/index.html             # işçi və platforma paneli (/admin)

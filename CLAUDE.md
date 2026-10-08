@@ -17,9 +17,9 @@
 Bu kompüterdə standart `java` 1.8-dir; Maven üçün JDK 21 göstərilməlidir:
 ```powershell
 $env:JAVA_HOME = "$env:USERPROFILE\.jdks\ms-21.0.9"; $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-cd backend; .\mvnw.cmd -B -ntp verify
+cd be-tapstamp; .\mvnw.cmd -B -ntp verify
 ```
-Frontend (`frontend/`): `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run dev`.
+Frontend (`fe-tapstamp/`): `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run dev`.
 Git Bash-də `mvnw` skripti `~/.m2`-yə yaza bilmir — Maven-i PowerShell-dən `mvnw.cmd` ilə işlədin.
 
 ## İş qaydası

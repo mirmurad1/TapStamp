@@ -40,7 +40,7 @@ services:
 
   backend:
     logging: *logging
-    build: ./backend
+    build: ./be-tapstamp
     restart: unless-stopped
     depends_on:
       postgres:
@@ -87,7 +87,7 @@ services:
 
   frontend:
     logging: *logging
-    build: ./frontend
+    build: ./fe-tapstamp
     restart: unless-stopped
     read_only: true
     tmpfs:

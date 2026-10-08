@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
-const java = fs.readFileSync(path.join(root, 'backend/src/main/java/az/cafeloyalty/shared/error/ErrorCode.java'), 'utf8');
-const props = fs.readFileSync(path.join(root, 'backend/src/main/resources/i18n/messages_az.properties'), 'utf8');
+const java = fs.readFileSync(path.join(root, 'be-tapstamp/src/main/java/az/cafeloyalty/shared/error/ErrorCode.java'), 'utf8');
+const props = fs.readFileSync(path.join(root, 'be-tapstamp/src/main/resources/i18n/messages_az.properties'), 'utf8');
 
 const messages = {};
 for (const line of props.split(/\r?\n/)) {

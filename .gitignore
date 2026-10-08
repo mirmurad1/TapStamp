@@ -11,21 +11,21 @@ infra/nginx/certs/**
 !infra/nginx/certs/.gitkeep
 
 # Backend
-backend/target/
-backend/.mvn/wrapper/maven-wrapper.jar
+be-tapstamp/target/
+be-tapstamp/.mvn/wrapper/maven-wrapper.jar
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/coverage/
-frontend/*.tsbuildinfo
+fe-tapstamp/node_modules/
+fe-tapstamp/dist/
+fe-tapstamp/coverage/
+fe-tapstamp/*.tsbuildinfo
 
 # E2E
 e2e/node_modules/
 e2e/test-results/
 e2e/playwright-report/
-frontend/test-results/
-frontend/playwright-report/
+fe-tapstamp/test-results/
+fe-tapstamp/playwright-report/
 e2e/blob-report/
 
 # IDE və OS

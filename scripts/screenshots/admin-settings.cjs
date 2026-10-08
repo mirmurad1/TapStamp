@@ -2,7 +2,7 @@
 const path = require('path');
 const crypto = require('crypto');
 const root = path.resolve(__dirname, '../..');
-const { chromium } = require(path.join(root, 'frontend/node_modules/@playwright/test'));
+const { chromium } = require(path.join(root, 'fe-tapstamp/node_modules/@playwright/test'));
 // İstifadə: node scripts/screenshots/<skript>.cjs [qovluq] [prefiks] — standart: docs/screenshots, prefiks 'phase5'
 const out = process.argv[2] ?? path.join(root, 'docs/screenshots');
 const prefix = process.argv[3] ?? 'phase5';

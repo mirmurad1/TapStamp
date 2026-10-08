@@ -17,7 +17,7 @@ Bu sənəddə üç şey var:
 | nginx image | Trivy | Əvvəl 2 yüksək (libexpat, pcre2). `apk upgrade` əlavə olundu (`infra/nginx/Dockerfile`), indi **0** |
 | postgres:16-alpine | Trivy | 22 tapıntı, hamısı `gosu` utilitində (Go stdlib). Qəbul edilmiş risk, bax §4 |
 
-Yenilənən kitabxanalar (`backend/pom.xml`):
+Yenilənən kitabxanalar (`be-tapstamp/pom.xml`):
 
 | Kitabxana | Köhnə → yeni | Zəifliklər |
 |---|---|---|

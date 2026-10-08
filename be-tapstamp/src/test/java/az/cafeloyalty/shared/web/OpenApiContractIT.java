@@ -24,7 +24,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 /**
  * OpenAPI müqaviləsi: hər əməliyyatın Azərbaycan dilində təsviri var və sənəd frontend-in tipli API klienti üçün
- * {@code frontend/src/shared/api/openapi.json}-a yazılır ({@code npm run api:types} ondan TypeScript tipləri yaradır).
+ * {@code fe-tapstamp/src/shared/api/openapi.json}-a yazılır ({@code npm run api:types} ondan TypeScript tipləri yaradır).
  * Sənəd dəyişibsə, fayl yenilənir və dəyişiklik git-də görünür — CI-da {@code git diff --exit-code} ilə yoxlanılır.
  */
 @TestPropertySource(properties = {
@@ -33,7 +33,7 @@ import tools.jackson.databind.node.ObjectNode;
         "springdoc.writer-with-default-pretty-printer=true"})
 class OpenApiContractIT extends IntegrationTest {
 
-    private static final Path FRONTEND_SPEC = Path.of("..", "frontend", "src", "shared", "api", "openapi.json");
+    private static final Path FRONTEND_SPEC = Path.of("..", "fe-tapstamp", "src", "shared", "api", "openapi.json");
     private static final JsonMapper JSON = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
     @Autowired

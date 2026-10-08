@@ -3,7 +3,7 @@
 const path = require('path');
 const crypto = require('crypto');
 const root = path.resolve(__dirname, '../..');
-const { chromium } = require(path.join(root, 'frontend/node_modules/@playwright/test'));
+const { chromium } = require(path.join(root, 'fe-tapstamp/node_modules/@playwright/test'));
 const out = process.argv[2] ?? path.join(root, 'docs/screenshots');
 const prefix = process.argv[3] ?? 'phase8';
 const base = 'https://mockcoffee.localhost';
