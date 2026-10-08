@@ -13,7 +13,8 @@ services:
 
   backend:
     ports:
-      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+      # Aralıq: sıfır fasiləli deploy zamanı ikinci backend konteyneri növbəti portu tutur (scripts/deploy.sh --dev)
+      - "127.0.0.1:${BACKEND_PORT:-8080}-${BACKEND_PORT_ALT:-8081}:8080"
 
 networks:
   devdb:

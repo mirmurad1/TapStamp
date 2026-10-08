@@ -121,8 +121,24 @@ crontab -e
 
 ```bash
 cd /opt/tapstamp && git pull
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+./scripts/deploy.sh --build
 ```
+
+`scripts/deploy.sh` **sıfır fasilə ilə** yeniləyir: istifadəçilər 502 görmür, sorğular itmir. Ardıcıllıq belədir:
+1. Bazanın ehtiyat nüsxəsi götürülür.
+2. Köhnə backend işləyərkən yanında yeni versiya qalxır.
+3. Yeni versiya sağlam olana qədər gözlənilir. Sağlam olmasa, silinir və köhnə versiya işləməyə davam edir.
+4. nginx yeni konteynerə keçirilir (`reload` açıq bağlantıları kəsmir).
+5. Köhnə konteyner yumşaq dayandırılır: yeni sorğu almır, başlanmış sorğuları 30 saniyəyə qədər bitirir.
+
+Frontend də eyni qaydada yenilənir.
+
+Adi `docker compose up -d --build` da işləyir, amma backend yenidən başlayana qədər (20–40 san) istifadəçilər **502** görür. Ondan yalnız ilk quraşdırmada istifadə edin.
+
+**Miqrasiyalar geriyə uyğun olmalıdır.** Keçid zamanı köhnə və yeni versiya qısa müddət eyni bazada işləyir. Ona görə:
+- sütun və ya cədvəl iki deploy-da silinir: əvvəl kod ondan istifadəni dayandırır, növbəti deploy-da silinir;
+- yeni `NOT NULL` sütun standart dəyərlə əlavə olunur;
+- ad dəyişikliyi əvəzinə yeni sütun yaradılır və məlumat köçürülür.
 
 Baza miqrasiyaları (Flyway) başlanğıcda avtomatik işləyir: əvvəl platforma bazasında, sonra hər şirkətin bazasında. Bir şirkətin miqrasiyası uğursuz olsa, yalnız o şirkət dayanır (`MIGRATION_FAILED`), digərləri işləməyə davam edir.
 

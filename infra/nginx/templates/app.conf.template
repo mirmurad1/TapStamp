@@ -2,12 +2,13 @@
 # ${...} şəklində yalnız env dəyişənləri əvəz olunur; nginx-in öz $dəyişənlərinə toxunulmur.
 
 upstream backend {
-    server backend:8080;
+    # Hansı konteyner(lər)ə göndəriləcəyi: deploy skripti bu faylı dəyişir (scripts/deploy.sh)
+    include /etc/nginx/upstreams/backend.conf;
     keepalive 16;
 }
 
 upstream frontend {
-    server frontend:8080;
+    include /etc/nginx/upstreams/frontend.conf;
     keepalive 16;
 }
 
@@ -90,6 +91,8 @@ server {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
         proxy_pass http://frontend;
+        proxy_next_upstream error timeout http_502;
+        proxy_next_upstream_tries 2;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_set_header Host $host;

@@ -1,5 +1,8 @@
 # Ümumi konfiqurasiya. Sirlər burada YOXDUR — yalnız env dəyişənlərindən gəlir (.env.example-a bax).
 spring:
+  lifecycle:
+    # Graceful shutdown-da başlanmış sorğular üçün ən çox gözləmə (docker stop_grace_period bundan uzundur)
+    timeout-per-shutdown-phase: 30s
   application:
     name: tapstamp
   jackson:
@@ -30,6 +33,8 @@ spring:
 
 server:
   port: 8080
+  # Sıfır fasiləli deploy: dayan siqnalından sonra yeni sorğu qəbul olunmur, başlanmış sorğular bitirilir
+  shutdown: graceful
   # nginx-in X-Forwarded-* başlıqları yalnız daxili şəbəkədəki proxy-dən qəbul olunur (Tomcat RemoteIpValve)
   forward-headers-strategy: native
   max-http-request-header-size: 16KB

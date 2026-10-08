@@ -41,6 +41,8 @@ services:
   backend:
     logging: *logging
     build: ./be-tapstamp
+    # Graceful shutdown (30 san, application.yml) bitənə qədər gözlənilir
+    stop_grace_period: 40s
     restart: unless-stopped
     depends_on:
       postgres:
@@ -88,6 +90,7 @@ services:
   frontend:
     logging: *logging
     build: ./fe-tapstamp
+    stop_grace_period: 40s
     restart: unless-stopped
     read_only: true
     tmpfs:
