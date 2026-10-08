@@ -52,7 +52,7 @@ export interface paths {
          * Əsas göstəricilər
          * @description Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.
          */
-        get: operations["overview"];
+        get: operations["overview_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -953,67 +953,9 @@ export interface paths {
          * Çiplərin siyahısı
          * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.
          */
-        get: operations["list_2"];
-        put?: never;
-        /**
-         * Çipin qeydiyyatı
-         * @description Server 3 təsadüfi açar yaradır (PENDING); ilk toxunuş onları aktivləşdirir.
-         */
-        post: operations["register_1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/tags/{tagId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
+        get: operations["list_5"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Etiket və ya filialın dəyişdirilməsi */
-        patch: operations["update_2"];
-        trace?: never;
-    };
-    "/api/v1/admin/tags/{tagId}/disable": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Deaktivasiya
-         * @description Dərhal qüvvəyə minir: bütün toxunuşlar TAG_DISABLED alır.
-         */
-        post: operations["disable"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/tags/{tagId}/enable": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Aktivləşdirmə */
-        post: operations["enable"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1031,49 +973,9 @@ export interface paths {
          * Çipin toxunuş jurnalı
          * @description Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.
          */
-        get: operations["events"];
+        get: operations["events_1"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/tags/{tagId}/key-rotations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Açarın yenilənməsi
-         * @description Yeni PENDING açar dəsti (step-up). Çip yeni açarlarla proqramlaşdırılandan sonra ilk toxunuşda keçid avtomatik olur; o vaxta qədər köhnə açar işləyir.
-         */
-        post: operations["rotate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/tags/{tagId}/provisioning-package": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Provisioning paketi
-         * @description Çipin proqramlaşdırılması üçün URL şablonu, SDM ofsetləri və açarlar. Step-up tələb edir; PENDING açarlar yalnız bir dəfə göstərilir (təkrar — PROVISIONING_ALREADY_EXPORTED), auditə yazılır.
-         */
-        post: operations["provisioningPackage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1308,7 +1210,7 @@ export interface paths {
          * Qeydiyyatın tamamlanması
          * @description Ad istəyə bağlıdır. Məxfilik siyasəti və istifadə şərtlərinin cari versiyalarına razılıq məcburidir (`CONSENT_REQUIRED`). Razılığın dili, vaxtı, IP-si və brauzeri qeyd olunur.
          */
-        post: operations["register"];
+        post: operations["register_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1440,7 +1342,7 @@ export interface paths {
          * Ad və dilin dəyişdirilməsi
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
-        patch: operations["update_1"];
+        patch: operations["update_2"];
         trace?: never;
     };
     "/api/v1/me/gift-cards": {
@@ -1454,7 +1356,7 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_5"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1525,7 +1427,7 @@ export interface paths {
          * Platforma audit jurnalı
          * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.
          */
-        get: operations["list_4"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1735,7 +1637,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update"];
+        patch: operations["update_1"];
         trace?: never;
     };
     "/api/v1/platform/me/mfa/pause": {
@@ -2071,6 +1973,144 @@ export interface paths {
         patch: operations["updateStatus"];
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin çipləri
+         * @description Çiplər, şirkətin aktiv filialları və say: ilk N çip pulsuzdur (app.nfc.free-tags-per-tenant), qalanları pulludur.
+         */
+        get: operations["overview"];
+        put?: never;
+        /**
+         * Çipin qeydiyyatı
+         * @description Server 3 təsadüfi açar yaradır (PENDING); ilk toxunuş onları aktivləşdirir.
+         */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Etiket və ya filialın dəyişdirilməsi */
+        patch: operations["update"];
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deaktivasiya
+         * @description Dərhal qüvvəyə minir: bütün toxunuşlar TAG_DISABLED alır.
+         */
+        post: operations["disable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Aktivləşdirmə */
+        post: operations["enable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Çipin toxunuş jurnalı
+         * @description Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.
+         */
+        get: operations["events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/key-rotations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Açarın yenilənməsi
+         * @description Yeni PENDING açar dəsti (step-up). Çip yeni açarlarla proqramlaşdırılandan sonra ilk toxunuşda keçid avtomatik olur; o vaxta qədər köhnə açar işləyir.
+         */
+        post: operations["rotate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Provisioning paketi
+         * @description Çipin proqramlaşdırılması üçün URL şablonu, SDM ofsetləri və açarlar. Step-up tələb edir; PENDING açarlar yalnız bir dəfə göstərilir (təkrar — PROVISIONING_ALREADY_EXPORTED), auditə yazılır.
+         */
+        post: operations["provisioningPackage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/company": {
         parameters: {
             query?: never;
@@ -2122,7 +2162,7 @@ export interface paths {
          * Cari hüquqi sənədlər
          * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
          */
-        get: operations["list_3"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2261,6 +2301,11 @@ export interface components {
         AuthStatusResponse: {
             /** @enum {string} */
             status?: "AUTHENTICATED";
+        };
+        BranchOption: {
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
         };
         BranchPolicy: {
             enforceBusinessHours?: boolean;
@@ -2751,6 +2796,18 @@ export interface components {
             targetId?: string;
             targetType?: string;
         };
+        /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
+        PlatformTagRegisterRequest: {
+            /** Format: uuid */
+            branchId: string;
+            label: string;
+            uid: string;
+        };
+        PlatformTagUpdateRequest: {
+            /** Format: uuid */
+            branchId?: string;
+            label?: string;
+        };
         ProvisionRequest: {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
@@ -2969,17 +3026,20 @@ export interface components {
             code?: string;
             password?: string;
         };
-        /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
-        TagRegisterRequest: {
-            /** Format: uuid */
-            branchId: string;
-            label: string;
-            uid: string;
+        TagOverview: {
+            branches?: components["schemas"]["BranchOption"][];
+            tags?: components["schemas"]["TagView"][];
+            usage?: components["schemas"]["TagUsage"];
         };
-        TagUpdateRequest: {
-            /** Format: uuid */
-            branchId?: string;
-            label?: string;
+        TagUsage: {
+            /** Format: int64 */
+            free?: number;
+            /** Format: int32 */
+            freeLimit?: number;
+            /** Format: int64 */
+            paid?: number;
+            /** Format: int64 */
+            total?: number;
         };
         TagView: {
             /** Format: int32 */
@@ -2988,6 +3048,7 @@ export interface components {
             branchId?: string;
             /** Format: date-time */
             createdAt?: string;
+            free?: boolean;
             /** Format: uuid */
             id?: string;
             label?: string;
@@ -3128,7 +3189,7 @@ export interface operations {
             };
         };
     };
-    overview: {
+    overview_1: {
         parameters: {
             query?: {
                 from?: string;
@@ -4321,7 +4382,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_5: {
         parameters: {
             query?: {
                 branchId?: string;
@@ -4343,101 +4404,7 @@ export interface operations {
             };
         };
     };
-    register_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TagRegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TagView"];
-                };
-            };
-        };
-    };
-    update_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                tagId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TagUpdateRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TagView"];
-                };
-            };
-        };
-    };
-    disable: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                tagId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TagView"];
-                };
-            };
-        };
-    };
-    enable: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                tagId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TagView"];
-                };
-            };
-        };
-    };
-    events: {
+    events_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4455,50 +4422,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TapEvent"][];
-                };
-            };
-        };
-    };
-    rotate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                tagId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TagView"];
-                };
-            };
-        };
-    };
-    provisioningPackage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                tagId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ProvisioningPackage"];
                 };
             };
         };
@@ -4759,7 +4682,7 @@ export interface operations {
             };
         };
     };
-    register: {
+    register_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4921,7 +4844,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4945,7 +4868,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -5025,7 +4948,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_3: {
         parameters: {
             query?: {
                 action?: string;
@@ -5264,7 +5187,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5711,6 +5634,196 @@ export interface operations {
             };
         };
     };
+    overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagOverview"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformTagRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformTagUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    disable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    enable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TapEvent"][];
+                };
+            };
+        };
+    };
+    rotate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TagView"];
+                };
+            };
+        };
+    };
+    provisioningPackage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProvisioningPackage"];
+                };
+            };
+        };
+    };
     company_1: {
         parameters: {
             query?: never;
@@ -5753,7 +5866,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_2: {
         parameters: {
             query?: never;
             header?: never;

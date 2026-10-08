@@ -59,7 +59,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs certbot | t
    - möhür qaydası: möhürlər arası vaxt, gündəlik limit;
    - hədiyyə: neçənci möhürdə verilir, adı 3 dildə, kartın müddəti.
 2. **Komanda**: menecer və işçilərin dəvəti.
-3. **NFC çipləri**: hər piştaxta üçün çipin qeydiyyatı → provisioning paketi → çipin proqramlaşdırılması ([nfc-ntag424-programming.md](nfc-ntag424-programming.md)) → ilk toxunuşla aktivləşmə.
+3. **NFC çipləri**: bu addımı **siz** (platforma admini) edirsiniz, şirkətin səhifəsində: hər piştaxta üçün çipin qeydiyyatı → provisioning paketi → çipin proqramlaşdırılması ([nfc-ntag424-programming.md](nfc-ntag424-programming.md)) → ilk toxunuşla aktivləşmə. Hər şirkətdə ilk çip pulsuzdur, qalanları pulludur (say kartda görünür; limit `APP_NFC_FREE_TAGS`).
 4. **Hesabım**: 2FA-nı qurmaq tövsiyə olunur.
 
 ## 6. Domenlərin idarəsi

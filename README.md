@@ -210,7 +210,7 @@ Playwright dəsti (`frontend/e2e`, ardıcıl işləyir — dev hesablarının TO
 | `nfc-tap.spec.ts`, `gift-card.spec.ts` | NFC toxunuşu → qeydiyyat → möhür, replay qorunması; kartın dolması, hədiyyə kartının təhvili |
 | `language.spec.ts` | Dilin dəyişməsi (qonaq), müştərinin və işçinin dilinin profildə saxlanması (başqa cihazda da) |
 | `isolation.spec.ts` | Tenant izolyasiyası: sessiya cookie-ləri, hədiyyə kartı kodu və NFC linki digər şirkətdə işləmir |
-| `admin.spec.ts` | İşçi dəvəti → qəbul → giriş → silinmə; müştəriyə əl ilə möhür; NFC çipinin qeydiyyatı və deaktivasiyası |
+| `admin.spec.ts` | İşçi dəvəti → qəbul → giriş → silinmə; müştəriyə əl ilə möhür; platforma adminin NFC çipini qeydiyyatı və deaktivasiyası, sahibin yalnız baxması |
 | `quality.spec.ts` | Bütün əsas səhifələr: telefon (375 px)/masaüstü, az/en/ru — üfüqi daşma yoxdur, axe (WCAG 2.1 AA) ciddi pozuntu tapmır |
 
 Dev profilində yalnız **IP üzrə** sorğu limitləri artırılıb (`application-dev.yml` → `app.rate-limits`), çünki lokalda bütün testlər bir IP-dən gəlir; nömrə və email üzrə limitlər, eləcə də prod dəyərləri dəyişmir.
@@ -288,7 +288,7 @@ Sahib (`owner@mockcoffee.az`) və filial meneceri (`manager@mockcoffee.az`, yaln
 |---|---|
 | **İdarəetmə paneli** | Ümumi/aktiv müştərilər, yeni müştərilər, möhürlər, hədiyyələr, geri qayıtma; günlük/həftəlik qrafik, istilik xəritəsi (gün × saat), dil bölgüsü; dövr və filial filtri. Təriflər: `docs/metrics.md` |
 | **Müştərilər** | Ad və ya telefonla axtarış, filtrlər (dil, status, gəlməyənlər, filial), sıralama; detallar, tarixçə, fırıldaq işarələri; möhürün əl ilə düzəlişi (səbəb məcburi, təkrar göndərişdən qorunur). Sahib üçün: tam nömrə və CSV ixracı (kimliyin təsdiqi ilə, auditə yazılır), bloklama |
-| **NFC çipləri** | Qeydiyyat, birdəfəlik provisioning paketi, açar rotasiyası, deaktivasiya, toxunuş jurnalı. Təlimat: `docs/nfc-ntag424-programming.md` |
+| **NFC çipləri** | Yalnız baxış: çiplər, vəziyyəti (pulsuz/pullu), toxunuş jurnalı. Çipləri platforma admini əlavə edir: **Platforma → şirkət → NFC çipləri** (qeydiyyat, birdəfəlik provisioning paketi, açar rotasiyası, deaktivasiya; hər şirkətdə ilk çip pulsuzdur, `APP_NFC_FREE_TAGS`). Təlimat: `docs/nfc-ntag424-programming.md` |
 | **Parametrlər** | Möhür qaydası, hədiyyə, şirkətin adı/təsviri (3 dildə), brend rəngi, saat qurşağı; filiallar (ad, ünvan, iş saatları) və filial üzrə ayrıca qayda |
 | **Komanda** | Dəvət, bloklama, silmə (bazada yumşaq silinmə), 2FA-nın sıfırlanması |
 | **Audit jurnalı** | Kim, nə vaxt, nə etdi (yalnız sahib) |

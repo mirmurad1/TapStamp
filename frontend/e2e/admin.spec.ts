@@ -72,21 +72,31 @@ test('sahib müştəriyə əl ilə möhür əlavə edir', async ({ browser }) =>
   expect(me.card.currentStamps).toBe(2);
 });
 
-test('sahib yeni NFC çipini qeydiyyatdan keçirir və deaktiv edir', async ({ browser }) => {
-  const owner = await (await browser.newContext()).newPage();
-  await staffLogin(owner, 'owner@mockcoffee.az');
-  await owner.goto('/admin/tags');
+test('platforma admini şirkətə NFC çipi əlavə edir və deaktiv edir; sahib yalnız baxır', async ({ browser }) => {
+  const platformUrl = new URL(test.info().project.use.baseURL ?? '').origin.replace('mockcoffee.', 'platform.');
+  const admin = await (await browser.newContext({ baseURL: platformUrl })).newPage();
+  await staffLogin(admin, 'superadmin@platform.localhost');
+  await admin.locator('tr', { hasText: 'mockcoffee.localhost' }).getByRole('link').click();
   const uid = `04${randomBytes(6).toString('hex').toUpperCase()}`;
   const label = `E2E ${uid.slice(-4)}`;
 
-  await owner.getByRole('button', { name: 'Çip əlavə et' }).click();
-  await owner.getByLabel('UID').fill(uid);
-  await owner.getByLabel('Etiket').fill(label);
-  await owner.getByRole('button', { name: 'Qeydiyyatdan keçir' }).click();
+  await admin.getByRole('button', { name: 'Çip əlavə et' }).click();
+  await admin.getByLabel('UID').fill(uid);
+  await admin.getByLabel('Etiket').fill(label);
+  await admin.getByRole('button', { name: 'Qeydiyyatdan keçir' }).click();
 
-  const card = owner.locator('div.rounded-xl', { hasText: uid }).first();
+  // Kart platforma kartının içindədir: ən daxili uyğun element çipin öz kartıdır
+  const card = admin.locator('div.rounded-xl', { hasText: uid }).last();
   await expect(card.getByText('Yeni açar v1 — paket yüklənməyib')).toBeVisible();
+  await expect(card.getByText(/^(Pulsuz|Pullu)$/)).toBeVisible();
   await card.getByRole('button', { name: 'Deaktiv et' }).click();
-  await owner.getByRole('dialog').getByRole('button', { name: 'Davam et' }).click();
+  await admin.getByRole('dialog').getByRole('button', { name: 'Davam et' }).click();
   await expect(card.getByText('Deaktiv', { exact: true })).toBeVisible();
+
+  const owner = await (await browser.newContext()).newPage();
+  await staffLogin(owner, 'owner@mockcoffee.az');
+  await owner.goto('/admin/tags');
+  await expect(owner.locator('div.rounded-xl', { hasText: uid }).first()).toBeVisible();
+  await expect(owner.getByRole('button', { name: 'Çip əlavə et' })).toHaveCount(0);
+  await expect(owner.getByRole('button', { name: 'Deaktiv et' })).toHaveCount(0);
 });

@@ -22,21 +22,28 @@ import az.cafeloyalty.security.admin.AdminAuthService;
 import az.cafeloyalty.security.admin.AdminPrincipal;
 import az.cafeloyalty.security.admin.AdminRealm;
 import az.cafeloyalty.security.admin.AdminRealms;
+import az.cafeloyalty.security.admin.AdminRole;
 import az.cafeloyalty.security.admin.BranchScope;
 import az.cafeloyalty.security.crypto.EnvelopeCipher;
 import az.cafeloyalty.security.crypto.KeyPurpose;
 import az.cafeloyalty.shared.error.ApiException;
 import az.cafeloyalty.shared.error.ErrorCode;
+import az.cafeloyalty.shared.i18n.LocalizedText;
 import az.cafeloyalty.shared.id.Ids;
+import az.cafeloyalty.shared.persistence.LocalizedTextConverter;
 import az.cafeloyalty.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * NFC çiplərinin idarəsi (bax: plan §6.7). Qeydiyyatda server 3 təsadüfi açar (K0, K1, K2) yaradır və şifrəli saxlayır
+ * NFC çiplərinin idarəsi (bax: plan §6.7). Çipləri yalnız platforma admini əlavə edir və idarə edir (qərar 44); sahib
+ * və menecer yalnız baxır. Platforma əməliyyatlarından əvvəl tenant konteksti {@code TenantContext.callAs} ilə təyin
+ * olunur. Hər şirkətdə ilk {@code app.nfc.free-tags-per-tenant} çip pulsuzdur, qalanları pulludur (yalnız say).
+ * Qeydiyyatda server 3 təsadüfi açar (K0, K1, K2) yaradır və şifrəli saxlayır
  * (PENDING); açarlar yalnız bir dəfə — provisioning paketində (sahib + step-up) göstərilir. Proqramlaşdırılmış çipə
  * ilk toxunuş PENDING dəsti ACTIVE edir. Açarın yenilənməsi yeni PENDING dəst yaradır; keçidə qədər köhnə dəst işləyir.
  */
@@ -45,10 +52,15 @@ public class TagAdminService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final HexFormat HEX = HexFormat.of().withUpperCase();
+    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
 
     public record TagView(UUID id, String uid, String label, String type, UUID branchId, String status, Instant lastTapAt,
                       int lastCounter, Integer activeKeyVersion, Integer pendingKeyVersion, boolean pendingExported,
-                      long tapsLast7Days, Instant createdAt) {
+                      long tapsLast7Days, Instant createdAt, boolean free) {
+    }
+
+    /** Çiplərin sayı: pulsuz limit, cəmi, pulsuz və pullu (simulyator çipləri sayılmır). */
+    public record TagUsage(int freeLimit, long total, long free, long paid) {
     }
 
     public record TapEvent(UUID id, String stage, String outcome, String reason, Integer counter, Integer counterGap,
@@ -75,10 +87,12 @@ public class TagAdminService {
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
+    private final int freeTags;
 
     public TagAdminService(@Qualifier("tenantJdbc") JdbcClient jdbc, @Qualifier("tenantCipher") EnvelopeCipher cipher,
                            AdminAuthService adminAuth, AdminRealms realms, AuditLogger audit,
-                           PlatformTransactionManager transactionManager, Clock clock) {
+                           PlatformTransactionManager transactionManager, Clock clock,
+                           @Value("${app.nfc.free-tags-per-tenant:1}") int freeTags) {
         this.jdbc = jdbc;
         this.cipher = cipher;
         this.adminAuth = adminAuth;
@@ -86,15 +100,35 @@ public class TagAdminService {
         this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
+        this.freeTags = freeTags;
     }
 
-    /** Sahib bütün çipləri, menecer öz filiallarının çiplərini görür (yalnız baxış). */
+    /** Pulsuz və pullu çiplərin sayı (bütün şirkət üzrə). */
+    public TagUsage usage() {
+        long total = jdbc.sql("SELECT count(*) FROM nfc_tags WHERE type <> 'SIMULATED'").query(Long.class).single();
+        long free = Math.min(total, freeTags);
+        return new TagUsage(freeTags, total, free, total - free);
+    }
+
+    /** Aktiv filiallar (platforma panelində çipin filialını seçmək üçün). */
+    public List<BranchOption> branches() {
+        return jdbc.sql("SELECT id, name::text AS name FROM branches WHERE status = 'ACTIVE' ORDER BY created_at")
+                .query((rs, n) -> new BranchOption(rs.getObject("id", UUID.class),
+                        TEXT.convertToEntityAttribute(rs.getString("name"))))
+                .list();
+    }
+
+    public record BranchOption(UUID id, LocalizedText name) {
+    }
+
+    /** Sahib və platforma admini bütün çipləri, menecer öz filiallarının çiplərini görür. */
     public List<TagView> list(AdminPrincipal principal, UUID branchId) {
         BranchScope scope = BranchScope.of(principal, branchId);
         return jdbc.sql(SELECT + " WHERE (:all OR t.branch_id IN (:branches)) ORDER BY t.created_at DESC")
                 .param("all", scope.all())
                 .param("branches", scope.branchIds())
                 .param("since", ts(clock.instant().minus(7, ChronoUnit.DAYS)))
+                .param("freeTags", freeTags)
                 .query((rs, n) -> map(rs))
                 .list();
     }
@@ -103,6 +137,7 @@ public class TagAdminService {
         TagView tag = jdbc.sql(SELECT + " WHERE t.id = :id")
                 .param("id", tagId)
                 .param("since", ts(clock.instant().minus(7, ChronoUnit.DAYS)))
+                .param("freeTags", freeTags)
                 .query((rs, n) -> map(rs))
                 .optional()
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
@@ -112,7 +147,7 @@ public class TagAdminService {
 
     /** Yeni çip: UID (7 bayt, 14 hex), filial və etiket. Açarlar PENDING yaranır. */
     public TagView register(AdminPrincipal principal, String uidHex, UUID branchId, String label) {
-        AccessPolicy.requireCompanyWide(principal);
+        requirePlatform(principal);
         byte[] uid = parseUid(uidHex);
         requireActiveBranch(branchId);
         String cleanLabel = cleanLabel(label);
@@ -133,16 +168,16 @@ public class TagAdminService {
                     .param("label", cleanLabel)
                     .param("now", ts(now))
                     .update();
-            insertPendingKeys(id, 1, principal.userId(), now);
+            insertPendingKeys(id, 1, now);
         });
-        audit.tenant("TAG_REGISTERED", AuditLogger.ActorType.STAFF, principal.userId(), "tag", id,
+        audit.tenant("TAG_REGISTERED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", id,
                 Map.of("uid", HEX.formatHex(uid), "branchId", branchId.toString()));
         return get(principal, id);
     }
 
     /** Etiket və ya filial dəyişikliyi. */
     public TagView update(AdminPrincipal principal, UUID tagId, String label, UUID branchId) {
-        AccessPolicy.requireCompanyWide(principal);
+        requirePlatform(principal);
         get(principal, tagId);
         if (branchId != null) {
             requireActiveBranch(branchId);
@@ -163,26 +198,25 @@ public class TagAdminService {
         if (branchId != null) {
             details.put("branchId", branchId.toString());
         }
-        audit.tenant("TAG_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "tag", tagId, details);
+        audit.tenant("TAG_UPDATED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId, details);
         return get(principal, tagId);
     }
 
     /** Deaktivasiya dərhal qüvvəyə minir: bütün toxunuşlar {@code TAG_DISABLED} alır. */
     public TagView setEnabled(AdminPrincipal principal, UUID tagId, boolean enabled) {
-        AccessPolicy.requireCompanyWide(principal);
+        requirePlatform(principal);
         get(principal, tagId);
         Instant now = clock.instant();
         jdbc.sql("""
-                        UPDATE nfc_tags SET status = :status, disabled_at = :disabledAt, disabled_by = :disabledBy,
+                        UPDATE nfc_tags SET status = :status, disabled_at = :disabledAt, disabled_by = NULL,
                                             updated_at = :now, version = version + 1
                         WHERE id = :id""")
                 .param("status", enabled ? "ACTIVE" : "DISABLED")
                 .param("disabledAt", enabled ? null : ts(now))
-                .param("disabledBy", enabled ? null : principal.userId())
                 .param("now", ts(now))
                 .param("id", tagId)
                 .update();
-        audit.tenant(enabled ? "TAG_ENABLED" : "TAG_DISABLED", AuditLogger.ActorType.STAFF, principal.userId(), "tag",
+        audit.tenant(enabled ? "TAG_ENABLED" : "TAG_DISABLED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag",
                 tagId, Map.of());
         return get(principal, tagId);
     }
@@ -192,7 +226,7 @@ public class TagAdminService {
      * ixrac olunubsa (çip artıq proqramlaşdırılıb ola bilər), xəta — əvvəlcə ona toxunulmalıdır.
      */
     public TagView rotateKeys(AdminPrincipal principal, UUID tagId) {
-        AccessPolicy.requireCompanyWide(principal);
+        requirePlatform(principal);
         adminAuth.requireStepUp(principal);
         TagView tag = get(principal, tagId);
         if (tag.pendingKeyVersion() != null && tag.pendingExported()) {
@@ -204,15 +238,15 @@ public class TagAdminService {
                     .param("id", tagId).update();
             int next = jdbc.sql("SELECT coalesce(max(key_version), 0) + 1 FROM nfc_tag_keys WHERE tag_id = :id")
                     .param("id", tagId).query(Integer.class).single();
-            insertPendingKeys(tagId, next, principal.userId(), now);
+            insertPendingKeys(tagId, next, now);
         });
-        audit.tenant("TAG_KEYS_ROTATED", AuditLogger.ActorType.STAFF, principal.userId(), "tag", tagId, Map.of());
+        audit.tenant("TAG_KEYS_ROTATED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId, Map.of());
         return get(principal, tagId);
     }
 
     /** Provisioning paketi (sahib + step-up) — PENDING açarlar yalnız bir dəfə göstərilir, sonra auditə yazılır. */
     public ProvisioningPackage provisioningPackage(AdminPrincipal principal, UUID tagId) {
-        AccessPolicy.requireCompanyWide(principal);
+        requirePlatform(principal);
         adminAuth.requireStepUp(principal);
         TagView tag = get(principal, tagId);
         UUID tenantId = TenantContext.require().id();
@@ -244,7 +278,7 @@ public class TagAdminService {
                     piccOffset, macOffset, macOffset,
                     "SDM: PICCData K1 ilə şifrəli (UID + sayğac), CMAC K2 ilə (boş giriş). Ətraflı: docs/nfc-ntag424-programming.md");
         });
-        audit.tenant("TAG_PROVISIONING_EXPORTED", AuditLogger.ActorType.STAFF, principal.userId(), "tag", tagId,
+        audit.tenant("TAG_PROVISIONING_EXPORTED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId,
                 Map.of("keyVersion", pkg.keyVersion()));
         return pkg;
     }
@@ -272,16 +306,23 @@ public class TagAdminService {
                    EXISTS (SELECT 1 FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'PENDING'
                            AND k.provisioning_exported_at IS NOT NULL) AS pending_exported,
                    (SELECT count(*) FROM tap_events e WHERE e.tag_id = t.id AND e.stage = 'VERIFY'
-                           AND e.outcome = 'ACCEPTED' AND e.created_at >= :since) AS taps_7d
+                           AND e.outcome = 'ACCEPTED' AND e.created_at >= :since) AS taps_7d,
+                   (t.type = 'SIMULATED' OR (SELECT count(*) FROM nfc_tags o WHERE o.type <> 'SIMULATED'
+                           AND (o.created_at, o.id) < (t.created_at, t.id)) < :freeTags) AS free
             FROM nfc_tags t""";
 
-    private void insertPendingKeys(UUID tagId, int version, UUID createdBy, Instant now) {
+    private static void requirePlatform(AdminPrincipal principal) {
+        AccessPolicy.requireAnyRole(principal, AdminRole.SUPER_ADMIN);
+    }
+
+    /** {@code created_by} və {@code disabled_by} işçiyə istinad edir; platforma admini işçi deyil — aktor auditdədir. */
+    private void insertPendingKeys(UUID tagId, int version, Instant now) {
         UUID keyId = Ids.newId();
         UUID tenantId = TenantContext.require().id();
         jdbc.sql("""
                         INSERT INTO nfc_tag_keys (id, tag_id, key_version, status, app_master_key_enc, meta_read_key_enc,
                                                   file_read_key_enc, created_by, created_at)
-                        VALUES (:id, :tagId, :version, 'PENDING', :k0, :k1, :k2, :createdBy, :now)""")
+                        VALUES (:id, :tagId, :version, 'PENDING', :k0, :k1, :k2, NULL, :now)""")
                 .param("id", keyId)
                 .param("tagId", tagId)
                 .param("version", version)
@@ -291,7 +332,6 @@ public class TagAdminService {
                         TapVerificationService.keyAad(tenantId, "meta_read_key_enc", keyId)))
                 .param("k2", cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
                         TapVerificationService.keyAad(tenantId, "file_read_key_enc", keyId)))
-                .param("createdBy", createdBy)
                 .param("now", ts(now))
                 .update();
     }
@@ -331,7 +371,8 @@ public class TagAdminService {
                 rs.getString("type"), rs.getObject("branch_id", UUID.class), rs.getString("status"),
                 instant(rs.getTimestamp("last_tap_at")), rs.getInt("last_counter"),
                 (Integer) rs.getObject("active_version"), (Integer) rs.getObject("pending_version"),
-                rs.getBoolean("pending_exported"), rs.getLong("taps_7d"), instant(rs.getTimestamp("created_at")));
+                rs.getBoolean("pending_exported"), rs.getLong("taps_7d"), instant(rs.getTimestamp("created_at")),
+                rs.getBoolean("free"));
     }
 
     private static Instant instant(Timestamp timestamp) {

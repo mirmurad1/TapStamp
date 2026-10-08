@@ -200,6 +200,17 @@ public abstract class TapIntegrationTest extends CustomerIntegrationTest {
         return client;
     }
 
+    /** Platforma admini (TOTP-siz; step-up şifrə ilə olur). */
+    protected AdminClient signedInPlatformAdmin() throws Exception {
+        String email = "super-" + UUID.randomUUID().toString().substring(0, 8) + "@example.test";
+        realms.tx(AdminRealm.PLATFORM).executeWithoutResult(status -> realms.accounts(AdminRealm.PLATFORM)
+                .insert(email, hasher.hash(STAFF_PASSWORD), "Platform Test", Language.AZ,
+                        AdminAccount.AccountStatus.ACTIVE, clock.instant()));
+        AdminClient client = AdminClient.platform(mvc);
+        client.login(email, STAFF_PASSWORD);
+        return client;
+    }
+
     private static byte[] randomKey() {
         byte[] key = new byte[16];
         RANDOM.nextBytes(key);

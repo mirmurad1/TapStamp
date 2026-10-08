@@ -7,7 +7,7 @@ Bu təlimat admin panelindən alınan **provisioning paketi** (çipi proqramlaş
 - NTAG 424 DNA çipi: stiker və ya kart.
 - PC/SC NFC oxuyucusu, məsələn ACR1252U.
 - NXP **TagXplorer** proqramı (NXP saytından pulsuz).
-- Admin panelində **sahib** hesabı. Paketi yükləmək üçün kimlik yenidən təsdiqlənir (step-up): 2FA aktivdirsə kodla, deyilsə şifrə ilə.
+- **Platforma admini** hesabı (Platforma → şirkət → **NFC çipləri**). Şirkət sahibi çipləri yalnız görür. Paketi yükləmək üçün kimlik yenidən təsdiqlənir (step-up): 2FA aktivdirsə kodla, deyilsə şifrə ilə.
 
 ## 1. Çipi qeydiyyatdan keçirin
 

@@ -274,6 +274,14 @@
       "placeholder": "yeni-domen.mockcoffe.com",
       "add": "Domen əlavə et"
     },
+    "tags": {
+      "title": "NFC çipləri",
+      "description": "Çipləri yalnız siz əlavə edirsiniz. Şirkət üzrə ilk {{limit}} çip pulsuzdur, qalanları pulludur.",
+      "total": "Cəmi çip",
+      "free": "Pulsuz",
+      "paid": "Pullu",
+      "noBranches": "Şirkətin aktiv filialı yoxdur. Çip əlavə etmək üçün əvvəlcə sahib filial yaratmalıdır."
+    },
     "audit": {
       "title": "Platforma audit jurnalı",
       "subtitle": "Şirkətlərin yaradılması, dayandırılması, domenlər və sahiblərin 2FA-sı."
@@ -527,7 +535,12 @@
   },
   "tags": {
     "title": "NFC çipləri",
-    "subtitle": "Piştaxtadakı çiplər: qeydiyyat, açarlar, deaktivasiya və toxunuş jurnalı.",
+    "subtitle": "Piştaxtadakı çiplər, onların vəziyyəti və toxunuş jurnalı.",
+    "managedByPlatform": "Çipləri platforma quraşdırır və idarə edir. Yeni çip lazımdırsa və ya çip işləmirsə, platforma ilə əlaqə saxlayın.",
+    "billing": {
+      "free": "Pulsuz",
+      "paid": "Pullu"
+    },
     "empty": "Hələ çip qeydiyyatdan keçməyib.",
     "status": {
       "ACTIVE": "Aktiv",

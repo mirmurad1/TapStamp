@@ -79,6 +79,9 @@ app:
   platform-domain: ${APP_PLATFORM_DOMAIN:platform.localhost}
   # Daxili endpoint-lər (certbot üçün TLS domen siyahısı) üçün sirr; boşdursa həmin endpoint-lər işləmir
   internal-token: ${APP_INTERNAL_TOKEN:}
+  # NFC çipləri: hər şirkətdə ilk N çip pulsuzdur, qalanları pulludur (yalnız say aparılır)
+  nfc:
+    free-tags-per-tenant: ${APP_NFC_FREE_TAGS:1}
   security:
     cookie-secure: true
     hsts-enabled: true

@@ -326,18 +326,29 @@ export type TapEvent = Schemas['TapEvent'];
 export type ProvisioningPackage = Schemas['ProvisioningPackage'];
 export type AuditEntry = Schemas['Entry'];
 
-/** NFC çipləri: sahib idarə edir, menecer baxır. Rotasiya və provisioning paketi step-up tələb edir. */
+/** NFC çipləri şirkət panelində yalnız baxış üçündür (sahib — hamısı, menecer — öz filialları). */
 export const tagsApi = {
   list: () => unwrap(api.GET('/api/v1/admin/tags')),
-  register: (body: { uid: string; branchId: string; label: string }) => unwrap(api.POST('/api/v1/admin/tags', { body })),
-  update: (tagId: string, body: { label?: string; branchId?: string }) =>
-    unwrap(api.PATCH('/api/v1/admin/tags/{tagId}', { params: { path: { tagId } }, body })),
-  disable: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/disable', { params: { path: { tagId } } })),
-  enable: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/enable', { params: { path: { tagId } } })),
-  rotate: (tagId: string) => unwrap(api.POST('/api/v1/admin/tags/{tagId}/key-rotations', { params: { path: { tagId } } })),
-  provisioningPackage: (tagId: string) =>
-    unwrap(api.POST('/api/v1/admin/tags/{tagId}/provisioning-package', { params: { path: { tagId } } })),
   events: (tagId: string) => unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId } } })),
+};
+
+/** Şirkətin çipləri platforma panelindən: qeydiyyat, idarə, say. Rotasiya və provisioning paketi step-up tələb edir. */
+export const platformTagsApi = {
+  overview: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId } } })),
+  register: (tenantId: string, body: { uid: string; branchId: string; label: string }) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId } }, body })),
+  disable: (tenantId: string, tagId: string) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable', { params: { path: { tenantId, tagId } } })),
+  enable: (tenantId: string, tagId: string) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/enable', { params: { path: { tenantId, tagId } } })),
+  rotate: (tenantId: string, tagId: string) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/key-rotations', { params: { path: { tenantId, tagId } } })),
+  provisioningPackage: (tenantId: string, tagId: string) =>
+    unwrap(
+      api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package', { params: { path: { tenantId, tagId } } }),
+    ),
+  events: (tenantId: string, tagId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events', { params: { path: { tenantId, tagId } } })),
 };
 
 export const auditApi = {

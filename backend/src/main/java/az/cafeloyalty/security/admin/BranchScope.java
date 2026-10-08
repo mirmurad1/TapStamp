@@ -22,7 +22,7 @@ public record BranchScope(boolean all, List<UUID> branchIds) {
             AccessPolicy.requireBranch(principal, requestedBranchId);
             return new BranchScope(false, List.of(requestedBranchId));
         }
-        if (principal.hasRole(AdminRole.COMPANY_OWNER)) {
+        if (principal.hasRole(AdminRole.COMPANY_OWNER) || principal.hasRole(AdminRole.SUPER_ADMIN)) {
             return new BranchScope(true, List.of(NONE));
         }
         List<UUID> own = principal.roles().stream().map(RoleGrant::branchId).filter(id -> id != null).distinct().toList();

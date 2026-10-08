@@ -274,6 +274,14 @@
       "placeholder": "new-domain.mockcoffe.com",
       "add": "Add domain"
     },
+    "tags": {
+      "title": "NFC tags",
+      "description": "Only you can add tags. The first {{limit}} tag(s) per company are free, the rest are paid.",
+      "total": "Total tags",
+      "free": "Free",
+      "paid": "Paid",
+      "noBranches": "The company has no active branch. The owner must create a branch before tags can be added."
+    },
     "audit": {
       "title": "Platform audit log",
       "subtitle": "Company creation and suspension, domains and owners’ 2FA."
@@ -527,7 +535,12 @@
   },
   "tags": {
     "title": "NFC tags",
-    "subtitle": "Counter tags: registration, keys, deactivation and tap log.",
+    "subtitle": "Counter tags, their status and tap log.",
+    "managedByPlatform": "Tags are installed and managed by the platform. Contact the platform if you need a new tag or a tag is not working.",
+    "billing": {
+      "free": "Free",
+      "paid": "Paid"
+    },
     "empty": "No tags registered yet.",
     "status": {
       "ACTIVE": "Active",
