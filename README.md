@@ -301,6 +301,7 @@ Ekran görüntüləri: `docs/screenshots/phase7-*`.
 
 | Sənəd | Mövzu |
 |---|---|
+| [docs/setup-guide.md](docs/setup-guide.md) | **Addım-addım quraşdırma:** VPS seçimi, domen, DNS və wildcard, Hetzner, `.env`, poçt, loglar, yoxlama siyahısı |
 | [docs/deployment.md](docs/deployment.md) | Prod-a yerləşdirmə: server, DNS, sirlər, HTTPS (certbot), ehtiyat nüsxə, yeniləmə |
 | [docs/tenant-onboarding.md](docs/tenant-onboarding.md) | Yeni şirkətin və domenin qoşulması, sahibin ilk addımları |
 | [docs/nfc-ntag424-programming.md](docs/nfc-ntag424-programming.md) | NTAG 424 DNA çipinin proqramlaşdırılması və açar rotasiyası |
