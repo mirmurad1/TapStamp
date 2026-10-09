@@ -48,8 +48,8 @@ public interface GiftCardMapper {
     /** Kodun HMAC-ı ilə axtarış; {@code forUpdate} — kart sətri kilidlənir (təhvil). */
     Optional<RedemptionRow> findByLookup(byte[] codeLookup, boolean forUpdate);
 
-    /** Filialda {@code since}-dən sonra təhvil verilmiş kartlar (ən yenisi birinci, ən çox 20). */
-    List<RedemptionRow> recentlyRedeemed(UUID branchId, Instant since);
+    /** Filialda istifadə olunmuş son {@code limit} kart (ən yenisi birinci). */
+    List<RedemptionRow> recentlyRedeemed(UUID branchId, int limit);
 
     void markRedeemed(UUID id, UUID staffId, UUID branchId, Instant now);
 

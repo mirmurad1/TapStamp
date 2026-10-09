@@ -1,7 +1,6 @@
 package az.tapstamp.loyalty.reward;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -107,10 +106,13 @@ public class GiftCardRedemptionService {
         return result.orElseThrow(() -> notFound(principal));
     }
 
-    /** Filialda son 24 saatda təhvil verilmiş kartlar (ən yenisi birinci). */
+    /** Tarixçədə göstərilən kart sayı. */
+    static final int RECENT_LIMIT = 5;
+
+    /** Filialda istifadə olunmuş son {@value #RECENT_LIMIT} kart (ən yenisi birinci). */
     public List<GiftCardCheck> recent(AdminPrincipal principal, UUID branchId) {
         AccessPolicy.requireBranch(principal, branchId);
-        return giftCards.recentlyRedeemed(branchId, clock.instant().minus(Duration.ofDays(1))).stream()
+        return giftCards.recentlyRedeemed(branchId, RECENT_LIMIT).stream()
                 .map(this::toCheck)
                 .toList();
     }
