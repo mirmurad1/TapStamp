@@ -7,7 +7,9 @@ import java.util.Map;
 
 import az.tapstamp.shared.web.RequestIdFilter;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +19,7 @@ public class ProblemDetailFactory {
 
     private final MessageSource messageSource;
 
-    public ProblemDetailFactory(MessageSource messageSource) {
+    public ProblemDetailFactory(@Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 

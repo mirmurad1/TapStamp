@@ -1,7 +1,9 @@
 package az.tapstamp.notification.sms;
 
 import az.tapstamp.shared.i18n.Language;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,7 +18,7 @@ public class SmsTemplates {
 
     private final MessageSource messages;
 
-    public SmsTemplates(MessageSource messages) {
+    public SmsTemplates(@Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messages) {
         this.messages = messages;
     }
 

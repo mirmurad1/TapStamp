@@ -18,7 +18,9 @@ import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -41,7 +43,8 @@ public class CustomerCsvExporter {
     private final CompanySettings company;
     private final AuditLogger audit;
 
-    public CustomerCsvExporter(CustomerDirectory directory, AdminAuthService adminAuth, MessageSource messages,
+    public CustomerCsvExporter(CustomerDirectory directory, AdminAuthService adminAuth,
+                               @Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messages,
                                CompanySettings company, AuditLogger audit) {
         this.directory = directory;
         this.adminAuth = adminAuth;

@@ -1,7 +1,9 @@
 package az.tapstamp.notification.mail;
 
 import az.tapstamp.shared.i18n.Language;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
 /** Email mətnləri alıcının dilində ({@code messages_*.properties}, {@code mail.*} açarları). */
@@ -10,7 +12,7 @@ public class MailTemplates {
 
     private final MessageSource messages;
 
-    public MailTemplates(MessageSource messages) {
+    public MailTemplates(@Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messages) {
         this.messages = messages;
     }
 
