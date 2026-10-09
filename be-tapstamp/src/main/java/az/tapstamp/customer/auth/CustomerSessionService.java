@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -120,7 +121,7 @@ public class CustomerSessionService {
     /** Refresh token rotasiyası (bax: sinifin təsviri). */
     public IssuedTokens refresh(String refreshToken, ClientInfo client) {
         Instant now = clock.instant();
-        Outcome outcome = tx.execute(status -> rotate(refreshToken, client, now));
+        Outcome outcome = Objects.requireNonNull(tx.execute(status -> rotate(refreshToken, client, now)));
         if (outcome.reuseDetectedSession() != null) {
             evictSession(outcome.reuseDetectedSession());
             log.warn("Refresh tokenin təkrar istifadəsi aşkarlandı: sessiya ləğv olundu ({})", outcome.reuseDetectedSession());
@@ -172,8 +173,8 @@ public class CustomerSessionService {
         Optional<UUID> sessionId = accessToken.flatMap(token -> sessions.findByAccessHash(SecureTokens.hash(token)))
                 .map(CustomerSessionMapper.ActiveSession::sessionId);
         if (sessionId.isEmpty() && refreshToken.isPresent()) {
-            sessionId = tx.execute(status -> sessions.lockRefreshToken(SecureTokens.hash(refreshToken.get()))
-                    .map(CustomerSessionMapper.RefreshRow::sessionId));
+            sessionId = Objects.requireNonNull(tx.execute(status -> sessions.lockRefreshToken(
+                    SecureTokens.hash(refreshToken.get())).map(CustomerSessionMapper.RefreshRow::sessionId)));
         }
         sessionId.ifPresent(id -> {
             sessions.revoke(id, "LOGOUT", now);

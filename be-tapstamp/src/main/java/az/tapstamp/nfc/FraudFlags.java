@@ -43,13 +43,12 @@ public class FraudFlags {
     }
 
     /** İşarə yaradır (son bir saatda eyni çip və müştəri üçün həll olunmamış eyni işarə yoxdursa). */
-    public boolean raise(Type type, Severity severity, UUID tagId, UUID customerId, Map<String, ?> details,
-                         Instant now) {
+    public void raise(Type type, Severity severity, UUID tagId, UUID customerId, Map<String, ?> details,
+                      Instant now) {
         if (flags.existsOpen(type.name(), tagId, customerId, now.minus(DEDUPLICATION_WINDOW))) {
-            return false;
+            return;
         }
         flags.insert(Ids.newId(), customerId, tagId, type.name(), severity.name(),
                 details == null || details.isEmpty() ? null : JSON.writeValueAsString(details), now);
-        return true;
     }
 }

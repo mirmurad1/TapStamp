@@ -47,25 +47,6 @@ public enum AdminRealm {
         return cookieName;
     }
 
-    String usersTable() {
-        return usersTable;
-    }
-
-    String sessionsTable() {
-        return sessionsTable;
-    }
-
-    String recoveryCodesTable() {
-        return recoveryCodesTable;
-    }
-
-    String resetTokensTable() {
-        return resetTokensTable;
-    }
-
-    String userIdColumn() {
-        return userIdColumn;
-    }
 
     /**
      * MyBatis mapper-lərindəki dəyişənlər ({@code mapper/admin/*.xml}): cədvəl və sütun adları. Sabitdir, istifadəçi

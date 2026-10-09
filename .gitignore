@@ -36,3 +36,5 @@ e2e/blob-report/
 Thumbs.db
 *.log
 scripts/load-test/last-result.json
+
+be-tapstamp/inspection/

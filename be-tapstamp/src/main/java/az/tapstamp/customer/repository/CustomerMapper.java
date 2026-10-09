@@ -42,11 +42,10 @@ public interface CustomerMapper {
     void insertAccount(UUID id, UUID customerId, Instant now);
 
     /** Yeni müştəri və onun boş loyallıq hesabı (çağıranın tranzaksiyasında). */
-    default UUID insert(UUID id, byte[] phoneEnc, byte[] phoneHash, String phoneMasked, String name, Language language,
+    default void insert(UUID id, byte[] phoneEnc, byte[] phoneHash, String phoneMasked, String name, Language language,
                         Instant now) {
         insertCustomer(id, phoneEnc, phoneHash, phoneMasked, name, language, now);
         insertAccount(Ids.newId(), id, now);
-        return id;
     }
 
     /** {@code keepName} — ad dəyişmir; əks halda {@code name} yazılır (null — silinir). {@code language} null — dəyişmir. */

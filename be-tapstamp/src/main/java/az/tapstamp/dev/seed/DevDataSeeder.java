@@ -1,7 +1,6 @@
 package az.tapstamp.dev.seed;
 
 import java.time.Instant;
-
 import javax.sql.DataSource;
 
 import az.tapstamp.config.AppProperties;
@@ -12,6 +11,7 @@ import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
 import az.tapstamp.tenancy.provisioning.TenantProvisioner;
 import az.tapstamp.tenancy.registry.TenantRecord;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,7 +58,7 @@ public class DevDataSeeder implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         if (!properties.dev().seedEnabled() || args.containsOption("provision-tenant")) {
             return;
         }

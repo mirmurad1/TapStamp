@@ -20,7 +20,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
@@ -40,6 +40,10 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  * <p>Tranzaksiyalar Spring-in tranzaksiya menecerləri ilə idarə olunur (mapper eyni bağlantını istifadə edir).
  */
 @org.springframework.context.annotation.Configuration
+@MapperScan(basePackages = "az.tapstamp", annotationClass = TenantMapper.class,
+        sqlSessionFactoryRef = "tenantSqlSessionFactory")
+@MapperScan(basePackages = "az.tapstamp", annotationClass = PlatformMapper.class,
+        sqlSessionFactoryRef = "platformSqlSessionFactory")
 public class MyBatisConfig {
 
     @Bean
@@ -51,16 +55,6 @@ public class MyBatisConfig {
     SqlSessionFactory platformSqlSessionFactory(@Qualifier("platformDataSource") DataSource dataSource)
             throws Exception {
         return factory(dataSource, AdminRealm.PLATFORM, "classpath*:mapper/platform/**/*.xml");
-    }
-
-    @Bean
-    static MapperScannerConfigurer tenantMappers() {
-        return scanner(TenantMapper.class, "tenantSqlSessionFactory");
-    }
-
-    @Bean
-    static MapperScannerConfigurer platformMappers() {
-        return scanner(PlatformMapper.class, "platformSqlSessionFactory");
     }
 
     private static SqlSessionFactory factory(DataSource dataSource, AdminRealm realm, String mappers) throws Exception {
@@ -93,14 +87,5 @@ public class MyBatisConfig {
         bean.setConfigurationProperties(variables);
         bean.setMapperLocations(all);
         return bean.getObject();
-    }
-
-    private static MapperScannerConfigurer scanner(Class<? extends java.lang.annotation.Annotation> marker,
-                                                   String factoryBeanName) {
-        MapperScannerConfigurer scanner = new MapperScannerConfigurer();
-        scanner.setBasePackage("az.tapstamp");
-        scanner.setAnnotationClass(marker);
-        scanner.setSqlSessionFactoryBeanName(factoryBeanName);
-        return scanner;
     }
 }

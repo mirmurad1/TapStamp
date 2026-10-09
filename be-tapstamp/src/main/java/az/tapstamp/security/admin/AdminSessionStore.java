@@ -20,11 +20,10 @@ public class AdminSessionStore {
         this.sessions = sessions;
     }
 
-    public UUID create(UUID userId, byte[] tokenHash, AdminSession.State state, Instant now, Instant absoluteExpiresAt,
+    public void create(UUID userId, byte[] tokenHash, AdminSession.State state, Instant now, Instant absoluteExpiresAt,
                        Instant mfaVerifiedAt, String ip, String userAgent) {
-        UUID id = Ids.newId();
-        sessions.insert(id, userId, tokenHash, state, now, absoluteExpiresAt, mfaVerifiedAt, ip, truncate(userAgent));
-        return id;
+        sessions.insert(Ids.newId(), userId, tokenHash, state, now, absoluteExpiresAt, mfaVerifiedAt, ip,
+                truncate(userAgent));
     }
 
     public Optional<AdminSession> findActiveByTokenHash(byte[] tokenHash) {
@@ -55,8 +54,8 @@ public class AdminSessionStore {
     }
 
     /** İstifadəçinin bütün sessiyalarını ləğv edir (məs. şifrə dəyişəndə), istəyə görə cari sessiyadan başqa. */
-    public int revokeAll(UUID userId, String reason, Instant now, UUID exceptSessionId) {
-        return sessions.revokeAll(userId, reason, now, exceptSessionId);
+    public void revokeAll(UUID userId, String reason, Instant now, UUID exceptSessionId) {
+        sessions.revokeAll(userId, reason, now, exceptSessionId);
     }
 
     public List<AdminSession> listActive(UUID userId, Instant now) {

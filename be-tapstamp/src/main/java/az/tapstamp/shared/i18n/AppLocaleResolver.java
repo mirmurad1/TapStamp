@@ -6,6 +6,7 @@ import java.util.Optional;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -32,7 +33,7 @@ public class AppLocaleResolver implements LocaleResolver {
     }
 
     @Override
-    public Locale resolveLocale(HttpServletRequest request) {
+    public @NonNull Locale resolveLocale(@NonNull HttpServletRequest request) {
         return resolveLanguage(request).locale();
     }
 
@@ -49,7 +50,7 @@ public class AppLocaleResolver implements LocaleResolver {
 
     /** Dil yalnız frontend tərəfindən {@code lang} cookie-si ilə dəyişdirilir; server tərəfində dəyişiklik yoxdur. */
     @Override
-    public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+    public void setLocale(@NonNull HttpServletRequest request, HttpServletResponse response, Locale locale) {
         throw new UnsupportedOperationException("Dil 'lang' cookie-si və ya istifadəçi profili ilə dəyişdirilir");
     }
 

@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
@@ -70,7 +71,9 @@ public class CustomerCsvExporter {
             directory.forEach(principal, filter, row -> {
                 try {
                     writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), nullToEmpty(row.phoneMasked()),
-                            row.language(), messages.getMessage("csv.customers.status." + row.status(), null, row.status(), locale),
+                            row.language(), Objects.requireNonNullElse(
+                                    messages.getMessage("csv.customers.status." + row.status(), null, row.status(),
+                                            locale), row.status()),
                             format(row.registeredAt(), zone), format(row.lastVisitAt(), zone),
                             Integer.toString(row.currentStamps()), Integer.toString(row.totalStamps()),
                             Integer.toString(row.rewardsEarned()), Integer.toString(row.rewardsRedeemed())));

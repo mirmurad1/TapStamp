@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,10 +77,10 @@ public class GiftCardRedemptionService {
         AccessPolicy.requireBranch(principal, branchId);
         byte[] lookup = lookup(principal, rawCode);
         Instant now = clock.instant();
-        Optional<GiftCardCheck> result = tx.execute(status -> {
+        Optional<GiftCardCheck> result = Objects.requireNonNull(tx.execute(status -> {
             Optional<RedemptionRow> found = giftCards.findByLookup(lookup, true);
             if (found.isEmpty()) {
-                return Optional.<GiftCardCheck>empty();
+                return Optional.empty();
             }
             RedemptionRow row = found.get();
             GiftCardCheck card = toCheck(row);
@@ -102,7 +103,7 @@ public class GiftCardRedemptionService {
             audit.tenant("GIFT_CARD_REDEEMED", AuditLogger.ActorType.STAFF, principal.userId(), "reward", card.id(),
                     Map.of("branchId", branchId.toString()));
             return giftCards.findByLookup(lookup, false).map(this::toCheck);
-        });
+        }));
         return result.orElseThrow(() -> notFound(principal));
     }
 

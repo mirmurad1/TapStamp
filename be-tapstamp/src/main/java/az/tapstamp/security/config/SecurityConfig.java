@@ -1,6 +1,7 @@
 package az.tapstamp.security.config;
 
 import java.time.Clock;
+import java.util.Objects;
 
 import az.tapstamp.config.AppProperties;
 import az.tapstamp.customer.auth.CustomerCookies;
@@ -61,7 +62,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     @ConditionalOnProperty(name = "springdoc.api-docs.enabled", havingValue = "true")
-    SecurityFilterChain apiDocsSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain apiDocsSecurityFilterChain(HttpSecurity http) {
         http.securityMatcher("/swagger-ui/**", "/api/v1/docs", "/api/v1/docs/**", "/api/v1/openapi.json", "/api/v1/openapi.json/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -76,7 +77,7 @@ public class SecurityConfig {
     SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http, AppProperties properties, ProblemSecurityHandlers problemHandlers, AdminRealms realms,
             AdminSessionCookies sessionCookies, AdminAuthProperties authProperties, Clock clock,
-            CustomerSessionService customerSessions, CustomerCookies customerCookies) throws Exception {
+            CustomerSessionService customerSessions, CustomerCookies customerCookies) {
         boolean secureCookies = properties.security().cookieSecure();
 
         CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
@@ -141,7 +142,7 @@ public class SecurityConfig {
                         // Simulyator imzalı toxunuş yaradır: yalnız dev-də və yalnız daxil olmuş işçi üçün
                         .requestMatchers("/api/v1/dev/simulator/**").access((authentication, context) ->
                                 new AuthorizationDecision(properties.dev().simulatorEnabled()
-                                        && authentication.get().getAuthorities().stream()
+                                        && Objects.requireNonNull(authentication.get()).getAuthorities().stream()
                                         .anyMatch(authority -> STAFF.equals(authority.getAuthority()))))
                         .requestMatchers("/api/v1/dev/**").access((authentication, context) ->
                                 new AuthorizationDecision(properties.dev().simulatorEnabled()))

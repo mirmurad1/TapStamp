@@ -35,6 +35,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("dev")
+// JdbcClient-in :ad parametrləri JPA sorğusu deyil — IDE-nin JPA yoxlaması burada tətbiq olunmur
+@SuppressWarnings("JpaQueryApiInspection")
 public class DevAccountSeeder {
 
     public static final String PLATFORM_ADMIN_EMAIL = "superadmin@platform.localhost";
@@ -147,10 +149,8 @@ public class DevAccountSeeder {
             return;
         }
         Instant now = clock.instant();
-        realms.tx(AdminRealm.PLATFORM).executeWithoutResult(status -> {
-            accounts.insert(PLATFORM_ADMIN_EMAIL, hasher.hash(password()), "Platforma Admini", Language.AZ,
-                    AdminAccount.AccountStatus.ACTIVE, now);
-        });
+        realms.tx(AdminRealm.PLATFORM).executeWithoutResult(status -> accounts.insert(PLATFORM_ADMIN_EMAIL,
+                hasher.hash(password()), "Platforma Admini", Language.AZ, AdminAccount.AccountStatus.ACTIVE, now));
         log.info("Dev platforma admini yaradıldı: {}", PLATFORM_ADMIN_EMAIL);
     }
 

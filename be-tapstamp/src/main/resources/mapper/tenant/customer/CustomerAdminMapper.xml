@@ -3,7 +3,7 @@
 <!-- Admin panelinin müştəri əməliyyatları -->
 <mapper namespace="az.tapstamp.customer.repository.CustomerAdminMapper">
 
-    <select id="findEncryptedPhone" resultType="_byte[]">
+    <select id="findEncryptedPhone" resultType="az.tapstamp.customer.repository.CustomerAdminMapper$EncryptedPhone">
         SELECT phone_enc FROM customers WHERE id = #{customerId}
     </select>
 

@@ -62,8 +62,8 @@ public interface CustomerSessionMapper {
 
     int revokeSession(UUID sessionId, String reason, Instant now);
 
-    default boolean revoke(UUID sessionId, String reason, Instant now) {
-        return revokeSession(sessionId, reason, now) == 1;
+    default void revoke(UUID sessionId, String reason, Instant now) {
+        revokeSession(sessionId, reason, now);
     }
 
     /** Müştərinin bütün sessiyaları (istəyə görə cari sessiyadan başqa). Ləğv olunan sessiyaların ID-ləri qaytarılır. */

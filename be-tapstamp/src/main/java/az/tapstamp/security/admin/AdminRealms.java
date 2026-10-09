@@ -42,6 +42,7 @@ public class AdminRealms {
      * Hesab və sessiya mapper-ləri hər realm üçün öz bazasının {@link SqlSessionFactory}-si ilə yaradılır: eyni SQL,
      * fərqli cədvəllər ({@code AdminRealm.mapperVariables()}).
      */
+    @SuppressWarnings("resource") // SqlSessionTemplate bağlanmır: sessiyaları Spring tranzaksiyası idarə edir
     public AdminRealms(@Qualifier("tenantSqlSessionFactory") SqlSessionFactory tenantSql,
                        @Qualifier("platformSqlSessionFactory") SqlSessionFactory platformSql,
                        PlatformTransactionManager transactionManager,

@@ -12,6 +12,19 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  web:
+    # Stack trace və daxili mesajlar istifadəçiyə heç vaxt göstərilmir
+    error:
+      include-stacktrace: never
+      include-message: never
+      include-binding-errors: never
+      include-exception: false
+      whitelabel:
+        enabled: false
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
   flyway:
     # Miqrasiyalar DatabaseMigrator ilə idarə olunur (platforma + hər tenant bazası)
     enabled: false
@@ -36,17 +49,6 @@ server:
   # nginx-in X-Forwarded-* başlıqları yalnız daxili şəbəkədəki proxy-dən qəbul olunur (Tomcat RemoteIpValve)
   forward-headers-strategy: native
   max-http-request-header-size: 16KB
-  error:
-    include-stacktrace: never
-    include-message: never
-    include-binding-errors: never
-    include-exception: false
-    whitelabel:
-      enabled: false
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
 
 management:
   endpoints:

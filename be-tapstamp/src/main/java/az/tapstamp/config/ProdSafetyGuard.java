@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import az.tapstamp.security.ratelimit.RateLimitPolicy;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -41,12 +42,12 @@ public class ProdSafetyGuard implements BeanFactoryPostProcessor, EnvironmentAwa
     private Environment environment;
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(@NonNull Environment environment) {
         this.environment = environment;
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+    public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) {
         List<String> violations = new ArrayList<>(checkEnvironment(environment));
         violations.addAll(checkBeanDefinitions(beanFactory));
         if (!violations.isEmpty()) {

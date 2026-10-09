@@ -1,0 +1,61 @@
+{
+  "properties": [
+    {
+      "name": "app.rate-limits",
+      "type": "java.util.Map<java.lang.String,java.lang.Integer>",
+      "description": "Rate limit siyasətlərinin dəyişdirilmiş limitləri: açar RateLimitPolicy adıdır (kiçik hərf, '-' ilə), məs. admin-login-per-ip."
+    }
+  ],
+  "hints": [
+    {
+      "name": "app.rate-limits.keys",
+      "values": [
+        {
+          "value": "admin-login-per-ip"
+        },
+        {
+          "value": "admin-login-failure-per-email"
+        },
+        {
+          "value": "password-reset-per-email"
+        },
+        {
+          "value": "password-reset-per-ip"
+        },
+        {
+          "value": "token-redeem-per-ip"
+        },
+        {
+          "value": "otp-request-per-phone"
+        },
+        {
+          "value": "otp-request-per-phone-daily"
+        },
+        {
+          "value": "otp-request-per-ip"
+        },
+        {
+          "value": "otp-request-per-tenant"
+        },
+        {
+          "value": "otp-request-global"
+        },
+        {
+          "value": "otp-verify-per-ip"
+        },
+        {
+          "value": "otp-verify-failure-per-phone"
+        },
+        {
+          "value": "tap-per-ip"
+        },
+        {
+          "value": "tap-per-tag"
+        },
+        {
+          "value": "gift-card-lookup-per-staff"
+        }
+      ]
+    }
+  ]
+}

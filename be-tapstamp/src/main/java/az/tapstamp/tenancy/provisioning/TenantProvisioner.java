@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service;
  * Rol və baza adları slug-dan törədilir və ağ siyahı ilə yoxlanılır ({@link DbIdentifiers}).
  */
 @Service
+// JdbcClient-in :ad parametrləri JPA sorğusu deyil — IDE-nin JPA yoxlaması burada tətbiq olunmur
+@SuppressWarnings("JpaQueryApiInspection")
 public class TenantProvisioner {
 
     private static final Logger log = LoggerFactory.getLogger(TenantProvisioner.class);
@@ -69,7 +71,7 @@ public class TenantProvisioner {
         }
         String slug = DbIdentifiers.requireSlug(command.slug());
         String host = DbIdentifiers.requireHostname(command.primaryDomain().trim().toLowerCase(Locale.ROOT));
-        ZoneId.of(command.timezone());
+        Objects.requireNonNull(ZoneId.of(command.timezone()), "timezone");
         Objects.requireNonNull(command.displayName(), "displayName");
         Objects.requireNonNull(command.defaultLanguage(), "defaultLanguage");
 

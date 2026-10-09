@@ -10,7 +10,6 @@ import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRealm;
 import az.tapstamp.security.admin.AdminRealms;
 import az.tapstamp.security.admin.AdminSessionCookies;
-import az.tapstamp.shared.web.ClientInfo;
 import az.tapstamp.security.admin.api.AdminAuthDtos.ChangePasswordRequest;
 import az.tapstamp.security.admin.api.AdminAuthDtos.CodeRequest;
 import az.tapstamp.security.admin.api.AdminAuthDtos.MeResponse;
@@ -21,7 +20,6 @@ import az.tapstamp.security.admin.api.AdminAuthDtos.SessionResponse;
 import az.tapstamp.security.admin.api.AdminAuthDtos.UpdateProfileRequest;
 import az.tapstamp.shared.i18n.Language;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -74,8 +72,8 @@ public abstract class AdminAccountEndpoints {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Şifrənin dəyişdirilməsi", description = "Digər bütün sessiyalar ləğv olunur, cari sessiyanın tokeni yenilənir.")
     void changePassword(@Valid @RequestBody ChangePasswordRequest request, @AuthenticationPrincipal AdminPrincipal principal,
-                        HttpServletRequest http, HttpServletResponse response) {
-        var session = auth.changePassword(principal, request.currentPassword(), request.newPassword(), ClientInfo.of(http));
+                        HttpServletResponse response) {
+        var session = auth.changePassword(principal, request.currentPassword(), request.newPassword());
         cookies.write(response, realm(), session);
     }
 

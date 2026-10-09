@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -131,7 +132,7 @@ public class TapVerificationService {
         }
 
         try {
-            Outcome outcome = tx.execute(status -> accept(tag.id(), verification, source));
+            Outcome outcome = Objects.requireNonNull(tx.execute(status -> accept(tag.id(), verification, source)));
             if (outcome.error() != null) {
                 throw new ApiException(outcome.error());
             }

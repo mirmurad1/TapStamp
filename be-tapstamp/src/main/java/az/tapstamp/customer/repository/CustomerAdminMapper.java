@@ -27,7 +27,10 @@ public interface CustomerAdminMapper {
     record CardTotals(int currentStamps, int totalStamps) {
     }
 
-    Optional<byte[]> findEncryptedPhone(UUID customerId);
+    record EncryptedPhone(byte[] phoneEnc) {
+    }
+
+    Optional<EncryptedPhone> findEncryptedPhone(UUID customerId);
 
     Optional<StoredAdjustment> findAdjustment(String scope, String key);
 

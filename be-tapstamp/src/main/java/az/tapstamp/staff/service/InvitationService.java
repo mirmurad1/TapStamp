@@ -157,7 +157,7 @@ public class InvitationService {
     }
 
     private InvitationView create(UUID invitedBy, String email, AdminRole role, UUID branchId, Language language) {
-        if (role == AdminRole.SUPER_ADMIN || role.branchScoped() != (branchId != null)) {
+        if (role == AdminRole.SUPER_ADMIN || role.branchScoped() == (branchId == null)) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         if (branchId != null && !activeBranchExists(branchId)) {

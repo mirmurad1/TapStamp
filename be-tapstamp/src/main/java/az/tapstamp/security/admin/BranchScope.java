@@ -1,6 +1,7 @@
 package az.tapstamp.security.admin;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -25,7 +26,8 @@ public record BranchScope(boolean all, List<UUID> branchIds) {
         if (principal.hasRole(AdminRole.COMPANY_OWNER) || principal.hasRole(AdminRole.SUPER_ADMIN)) {
             return new BranchScope(true, List.of(NONE));
         }
-        List<UUID> own = principal.roles().stream().map(RoleGrant::branchId).filter(id -> id != null).distinct().toList();
+        List<UUID> own = principal.roles().stream().map(RoleGrant::branchId)
+                .filter(Objects::nonNull).distinct().toList();
         return new BranchScope(false, own.isEmpty() ? List.of(NONE) : own);
     }
 }

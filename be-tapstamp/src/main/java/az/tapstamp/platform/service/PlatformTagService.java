@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import az.tapstamp.nfc.admin.TagAdminService;
 import az.tapstamp.nfc.admin.TagAdminService.BranchOption;
 import az.tapstamp.nfc.admin.TagAdminService.ProvisioningPackage;
 import az.tapstamp.nfc.admin.TagAdminService.TagUsage;
 import az.tapstamp.nfc.admin.TagAdminService.TagView;
 import az.tapstamp.nfc.admin.TagAdminService.TapEvent;
+import az.tapstamp.nfc.admin.TagAdminService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRealm;
 import az.tapstamp.security.admin.AdminRealms;
@@ -77,7 +77,7 @@ public class PlatformTagService {
 
     private <T> T inTenant(UUID tenantId, Supplier<T> action) {
         TenantRecord tenant = directory.findById(tenantId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-        if (!tenant.status().servesRequests()) {
+        if (tenant.status().outOfService()) {
             throw new ApiException(ErrorCode.TENANT_UNAVAILABLE);
         }
         return TenantContext.callAs(tenant.toInfo(), action);

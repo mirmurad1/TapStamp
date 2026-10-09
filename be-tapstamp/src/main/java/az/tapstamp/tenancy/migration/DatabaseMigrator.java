@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
  * göstərmir (fail closed); digər tenant-lar işləməyə davam edir. Platforma miqrasiyası uğursuzdursa, tətbiq başlamır.
  */
 @Component
+// JdbcClient-in :ad parametrləri JPA sorğusu deyil — IDE-nin JPA yoxlaması burada tətbiq olunmur
+@SuppressWarnings("JpaQueryApiInspection")
 public class DatabaseMigrator implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);

@@ -157,7 +157,7 @@ public class PlatformTenantService {
 
     private TenantRecord activeTenant(UUID tenantId) {
         TenantRecord tenant = tenant(tenantId);
-        if (!tenant.status().servesRequests()) {
+        if (tenant.status().outOfService()) {
             throw new ApiException(ErrorCode.TENANT_UNAVAILABLE);
         }
         return tenant;

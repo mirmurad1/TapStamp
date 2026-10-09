@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -108,13 +109,11 @@ final class TenantSeedWriter {
 
     private static final class RewardRow {
         final UUID id = Ids.newId();
-        final UUID customerId;
         final Instant earnedAt;
         Instant redeemedAt;
         UUID redeemedBranch;
 
-        RewardRow(UUID customerId, Instant earnedAt) {
-            this.customerId = customerId;
+        RewardRow(Instant earnedAt) {
             this.earnedAt = earnedAt;
         }
     }
@@ -228,7 +227,7 @@ final class TenantSeedWriter {
 
             // Mövcud mükafat əksər hallarda növbəti ziyarətdə istifadə olunur
             if (!available.isEmpty() && random.nextDouble() < 0.75) {
-                RewardRow reward = available.poll();
+                RewardRow reward = Objects.requireNonNull(available.poll());
                 reward.redeemedAt = visit.at().minus(Duration.ofMinutes(2));
                 reward.redeemedBranch = branchId;
                 redeemed++;
@@ -238,7 +237,7 @@ final class TenantSeedWriter {
             UUID rewardId = null;
             current++;
             if (current == rule.stampsRequired()) {
-                RewardRow reward = new RewardRow(customerId, visit.at());
+                RewardRow reward = new RewardRow(visit.at());
                 available.add(reward);
                 customerRewards.add(reward);
                 rewardId = reward.id;
@@ -281,8 +280,8 @@ final class TenantSeedWriter {
                         .addValue("id", Ids.newId())
                         .addValue("rewardId", reward.id)
                         .addValue("customerId", customerId)
-                        .addValue("codeHash", randomBytes(32))
-                        .addValue("qrHash", randomBytes(32))
+                        .addValue("codeHash", randomHash())
+                        .addValue("qrHash", randomHash())
                         .addValue("expiresAt", ts(reward.redeemedAt.plus(Duration.ofMinutes(2))))
                         .addValue("branchId", reward.redeemedBranch)
                         .addValue("confirmedAt", ts(reward.redeemedAt.plusSeconds(40)))
@@ -377,8 +376,8 @@ final class TenantSeedWriter {
                 .addValue("customerId", event.customerId)
                 .addValue("stampId", event.stampId)
                 .addValue("ip", randomIp())
-                .addValue("browserHash", randomBytes(32))
-                .addValue("uaHash", randomBytes(32))
+                .addValue("browserHash", randomHash())
+                .addValue("uaHash", randomHash())
                 .addValue("createdAt", ts(event.at));
     }
 
@@ -552,8 +551,9 @@ final class TenantSeedWriter {
         return "203.0.113." + (1 + random.nextInt(254));
     }
 
-    private byte[] randomBytes(int length) {
-        byte[] bytes = new byte[length];
+    /** SHA-256 ölçüsündə (32 bayt) təsadüfi dəyər. */
+    private byte[] randomHash() {
+        byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         return bytes;
     }

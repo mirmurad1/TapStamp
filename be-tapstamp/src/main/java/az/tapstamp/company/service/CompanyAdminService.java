@@ -5,11 +5,11 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -172,7 +172,7 @@ public class CompanyAdminService {
 
     private static void validateZone(String zone) {
         try {
-            ZoneId.of(zone == null ? "" : zone);
+            Objects.requireNonNull(ZoneId.of(zone == null ? "" : zone));
         } catch (DateTimeException e) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
@@ -211,7 +211,7 @@ public class CompanyAdminService {
     }
 
     private static Map<String, List<List<String>>> parseHours(String json) {
-        return json == null ? null : JSON.readValue(json, new TypeReference<Map<String, List<List<String>>>>() {
+        return json == null ? null : JSON.readValue(json, new TypeReference<>() {
         });
     }
 
@@ -224,9 +224,5 @@ public class CompanyAdminService {
 
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.strip();
-    }
-
-    private static java.time.OffsetDateTime ts(Instant instant) {
-        return instant.atOffset(ZoneOffset.UTC);
     }
 }

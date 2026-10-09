@@ -9,12 +9,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.nfc.TapVerificationService;
-import az.tapstamp.nfc.repository.TagAdminMapper;
 import az.tapstamp.nfc.repository.TagAdminMapper.ExportedKeys;
+import az.tapstamp.nfc.repository.TagAdminMapper;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -202,7 +203,7 @@ public class TagAdminService {
         adminAuth.requireStepUp(principal);
         TagView tag = get(principal, tagId);
         UUID tenantId = TenantContext.require().id();
-        ProvisioningPackage pkg = tx.execute(status -> {
+        ProvisioningPackage pkg = Objects.requireNonNull(tx.execute(status -> {
             ExportedKeys keys = tags.exportPendingKeys(tagId, clock.instant())
                     .orElseThrow(() -> new ApiException(ErrorCode.PROVISIONING_ALREADY_EXPORTED));
             UUID keyId = keys.id();
@@ -221,7 +222,7 @@ public class TagAdminService {
             return new ProvisioningPackage(tag.uid(), keys.keyVersion(), url, k0, k1, k2,
                     piccOffset, macOffset, macOffset,
                     "SDM: PICCData K1 ilə şifrəli (UID + sayğac), CMAC K2 ilə (boş giriş). Ətraflı: docs/nfc-ntag424-programming.md");
-        });
+        }));
         audit.tenant("TAG_PROVISIONING_EXPORTED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId,
                 Map.of("keyVersion", pkg.keyVersion()));
         return pkg;

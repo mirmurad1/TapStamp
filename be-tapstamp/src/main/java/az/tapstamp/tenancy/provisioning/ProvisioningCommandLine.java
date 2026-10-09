@@ -40,7 +40,7 @@ public class ProvisioningCommandLine implements ApplicationRunner {
                 LocalizedText.of(single(args, "name-az"), optional(args, "name-en"), optional(args, "name-ru")),
                 single(args, "domain"),
                 Language.fromTag(optional(args, "default-language")).orElse(Language.DEFAULT),
-                optionalOr(args, "timezone", "Asia/Baku"));
+                timezone(args));
         var tenant = provisioner.provision(command);
         log.info("Tenant hazırdır: slug={}, baza={}", tenant.slug(), tenant.dbName());
     }
@@ -58,8 +58,8 @@ public class ProvisioningCommandLine implements ApplicationRunner {
         return values == null || values.isEmpty() ? null : values.getFirst();
     }
 
-    private static String optionalOr(ApplicationArguments args, String name, String fallback) {
-        String value = optional(args, name);
-        return value == null || value.isBlank() ? fallback : value;
+    private static String timezone(ApplicationArguments args) {
+        String value = optional(args, "timezone");
+        return value == null || value.isBlank() ? "Asia/Baku" : value;
     }
 }

@@ -1,7 +1,6 @@
 package az.tapstamp.security.admin;
 
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -148,11 +147,5 @@ public class AdminAccountStore {
 
     public static String normalizeEmail(String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
-    }
-
-    static Set<AdminRole> roles(Set<RoleGrant> grants) {
-        Set<AdminRole> roles = EnumSet.noneOf(AdminRole.class);
-        grants.forEach(grant -> roles.add(grant.role()));
-        return roles;
     }
 }

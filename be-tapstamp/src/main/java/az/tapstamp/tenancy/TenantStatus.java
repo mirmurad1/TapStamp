@@ -10,7 +10,8 @@ public enum TenantStatus {
     MIGRATION_FAILED,
     DECOMMISSIONED;
 
-    public boolean servesRequests() {
-        return this == ACTIVE;
+    /** Yalnız ACTIVE tenant sorğulara xidmət göstərir. */
+    public boolean outOfService() {
+        return this != ACTIVE;
     }
 }

@@ -3,7 +3,6 @@ package az.tapstamp.tenancy.datasource;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.sql.DataSource;
 
 import az.tapstamp.tenancy.TenancyProperties;
@@ -38,7 +37,7 @@ public class TenantDataSourceRegistry implements DisposableBean {
     }
 
     public DataSource dataSourceFor(TenantInfo tenant) {
-        if (!tenant.status().servesRequests()) {
+        if (tenant.status().outOfService()) {
             throw new IllegalStateException("Tenant is not active: " + tenant.slug());
         }
         return pools.computeIfAbsent(tenant.id(), this::createPool);

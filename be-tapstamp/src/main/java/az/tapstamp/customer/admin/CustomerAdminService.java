@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.auth.CustomerSessionService;
 import az.tapstamp.customer.repository.CustomerAdminMapper.CardTotals;
+import az.tapstamp.customer.repository.CustomerAdminMapper.EncryptedPhone;
 import az.tapstamp.customer.repository.CustomerAdminMapper.RevocableReward;
 import az.tapstamp.customer.repository.CustomerAdminMapper;
 import az.tapstamp.loyalty.stamp.StampLedger;
@@ -89,7 +91,8 @@ public class CustomerAdminService {
         AccessPolicy.requireCompanyWide(principal);
         adminAuth.requireStepUp(principal);
         directory.get(principal, customerId);
-        byte[] encrypted = customers.findEncryptedPhone(customerId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        byte[] encrypted = customers.findEncryptedPhone(customerId).map(EncryptedPhone::phoneEnc)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         String phone = cipher.decryptString(encrypted,
                 Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customerId));
         audit.tenant("CUSTOMER_PHONE_REVEALED", AuditLogger.ActorType.STAFF, principal.userId(), "customer", customerId,
@@ -124,7 +127,7 @@ public class CustomerAdminService {
         byte[] requestHash = sha256(adjustment.delta() + "|" + reason + "|" + adjustment.branchId());
         Instant now = clock.instant();
 
-        AdjustmentResult result = tx.execute(status -> {
+        return Objects.requireNonNull(tx.execute(status -> {
             ledger.lockAccount(customerId, now);
             Optional<AdjustmentResult> previous = previousResult(scope, idempotencyKey, requestHash);
             if (previous.isPresent()) {
@@ -142,8 +145,7 @@ public class CustomerAdminService {
                     Map.of("delta", adjustment.delta(), "reason", reason, "giftCardsIssued", done.giftCardsIssued(),
                             "giftCardsRevoked", done.giftCardsRevoked()));
             return done;
-        });
-        return result;
+        }));
     }
 
     private Optional<AdjustmentResult> previousResult(String scope, String key, byte[] requestHash) {

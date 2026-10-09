@@ -115,7 +115,7 @@ public class AdminAuthService {
             }
             realms.audit(realm, "ADMIN_LOGIN_FAILED", null, "account", null, Map.of(
                     "email", EmailMasker.mask(email),
-                    "reason", found.isEmpty() ? "UNKNOWN_ACCOUNT" : "ACCOUNT_" + found.get().status()));
+                    "reason", found.map(a -> "ACCOUNT_" + a.status()).orElse("UNKNOWN_ACCOUNT")));
             throw new ApiException(ErrorCode.LOGIN_FAILED);
         }
 
@@ -157,12 +157,12 @@ public class AdminAuthService {
         if (account.lockedAt(now)) {
             throw new ApiException(ErrorCode.LOGIN_TEMPORARILY_BLOCKED);
         }
-        if (!checkSecondFactor(principal.realm(), account, code, true, now)) {
+        if (secondFactorFails(principal.realm(), account, code, true, now)) {
             onMfaFailure(principal, account, now);
         }
         // Uğurlu ikinci faktor uğursuz cəhdlərin sayğacını sıfırlayır
         realms.accounts(principal.realm()).recordSuccessfulLogin(account.id(), now);
-        IssuedSession session = rotate(principal, AdminSession.State.ACTIVE, now);
+        IssuedSession session = rotate(principal, now);
         realms.audit(principal.realm(), "ADMIN_LOGIN_SUCCEEDED", account.id(), "account", account.id(),
                 Map.of("mfa", true));
         return session;
@@ -199,9 +199,9 @@ public class AdminAuthService {
         List<String> codes = recoveryCodes();
         AdminAccountStore accounts = realms.accounts(principal.realm());
         IssuedSession session = realms.tx(principal.realm()).execute(status -> {
-            accounts.enableTotp(account.id(), step.getAsLong(), now);
+            accounts.enableTotp(account.id(), step.orElseThrow(), now);
             accounts.replaceRecoveryCodes(account.id(), codes.stream().map(SecureTokens::hash).toList(), now);
-            return rotate(principal, AdminSession.State.ACTIVE, now);
+            return rotate(principal, now);
         });
         realms.audit(principal.realm(), "ADMIN_MFA_ENABLED", account.id(), "account", account.id(), Map.of());
         return new EnrollmentResult(codes, session);
@@ -234,7 +234,7 @@ public class AdminAuthService {
         if (step.isEmpty()) {
             onMfaFailure(principal, account, now);
         }
-        realms.accounts(principal.realm()).enableTotp(account.id(), step.getAsLong(), now);
+        realms.accounts(principal.realm()).enableTotp(account.id(), step.orElseThrow(), now);
         realms.audit(principal.realm(), "ADMIN_MFA_RESUMED", account.id(), "account", account.id(), Map.of());
     }
 
@@ -273,7 +273,7 @@ public class AdminAuthService {
         Instant now = clock.instant();
         AdminAccount account = account(principal);
         if (account.totpEnabled()) {
-            if (!checkSecondFactor(principal.realm(), account, code, false, now)) {
+            if (secondFactorFails(principal.realm(), account, code, false, now)) {
                 onMfaFailure(principal, account, now);
             }
         } else {
@@ -316,8 +316,7 @@ public class AdminAuthService {
 
     // ------------------------------------------------------------------ Şifrə
 
-    public IssuedSession changePassword(AdminPrincipal principal, String currentPassword, String newPassword,
-                                        ClientInfo client) {
+    public IssuedSession changePassword(AdminPrincipal principal, String currentPassword, String newPassword) {
         requireState(principal, AdminSession.State.ACTIVE);
         Instant now = clock.instant();
         AdminAccount account = account(principal);
@@ -330,7 +329,7 @@ public class AdminAuthService {
         IssuedSession session = realms.tx(principal.realm()).execute(status -> {
             accounts.updatePassword(account.id(), hasher.hash(newPassword), now);
             realms.sessions(principal.realm()).revokeAll(account.id(), "PASSWORD_CHANGED", now, principal.sessionId());
-            return rotate(principal, AdminSession.State.ACTIVE, now);
+            return rotate(principal, now);
         });
         sendMail(templates.passwordChanged(account.email(), account.preferredLanguage(),
                 realms.tenantIdOrNull(principal.realm())));
@@ -413,34 +412,36 @@ public class AdminAuthService {
         return new IssuedSession(token, state, ttl);
     }
 
-    private IssuedSession rotate(AdminPrincipal principal, AdminSession.State state, Instant now) {
+    /** Sessiya tokeni yenilənir və sessiya tam (ACTIVE) olur. */
+    private IssuedSession rotate(AdminPrincipal principal, Instant now) {
+        AdminSession.State state = AdminSession.State.ACTIVE;
         String token = SecureTokens.generate();
-        Duration ttl = state == AdminSession.State.ACTIVE ? properties.sessionAbsolute() : properties.pendingMfaTtl();
-        Instant mfaVerifiedAt = state == AdminSession.State.ACTIVE && principal.state() != AdminSession.State.ACTIVE
-                ? now : null;
+        Duration ttl = properties.sessionAbsolute();
+        Instant mfaVerifiedAt = principal.state() != AdminSession.State.ACTIVE ? now : null;
         realms.sessions(principal.realm()).rotate(principal.sessionId(), SecureTokens.hash(token), state,
                 now.plus(ttl), mfaVerifiedAt, now);
         return new IssuedSession(token, state, ttl);
     }
 
-    private boolean checkSecondFactor(AdminRealm realm, AdminAccount account, String code, boolean allowRecoveryCode,
-                                      Instant now) {
+    /** Kod (TOTP və ya icazə verilərsə bərpa kodu) qəbul olunmadısa {@code true}. */
+    private boolean secondFactorFails(AdminRealm realm, AdminAccount account, String code,
+                                      boolean allowRecoveryCode, Instant now) {
         if (code == null) {
-            return false;
+            return true;
         }
         String trimmed = code.trim();
         AdminAccountStore accounts = realms.accounts(realm);
         if (trimmed.matches("^\\d{6}$")) {
             OptionalLong step = totp.verify(decryptSecret(realm, account), trimmed, account.totpLastUsedStep());
-            return step.isPresent() && accounts.advanceTotpStep(account.id(), step.getAsLong());
+            return step.isEmpty() || !accounts.advanceTotpStep(account.id(), step.getAsLong());
         }
         if (allowRecoveryCode && accounts.useRecoveryCode(account.id(),
                 SecureTokens.hash(SecureTokens.normalizeRecoveryCode(trimmed)), now)) {
             realms.audit(realm, "ADMIN_RECOVERY_CODE_USED", account.id(), "account", account.id(),
                     Map.of("remaining", accounts.remainingRecoveryCodes(account.id())));
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void onMfaFailure(AdminPrincipal principal, AdminAccount account, Instant now) {

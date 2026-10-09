@@ -44,7 +44,7 @@ public class LoyaltyMaintenanceJob {
     @Scheduled(fixedDelayString = "${app.jobs.loyalty-maintenance-interval:60s}", initialDelayString = "30s")
     public void run() {
         for (TenantRecord tenant : directory.findAll()) {
-            if (!tenant.status().servesRequests()) {
+            if (tenant.status().outOfService()) {
                 continue;
             }
             try {

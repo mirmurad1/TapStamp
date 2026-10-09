@@ -9,6 +9,7 @@ import az.tapstamp.shared.i18n.AppLocaleResolver;
 import az.tapstamp.shared.i18n.Language;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -93,7 +94,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            @NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         List<FieldViolation> violations = ex.getBindingResult().getFieldErrors().stream()
                 .map(GlobalExceptionHandler::toViolation)
                 .toList();
@@ -102,7 +104,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
-            HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            @NonNull HandlerMethodValidationException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         List<FieldViolation> violations = ex.getParameterValidationResults().stream()
                 .flatMap(result -> result.getResolvableErrors().stream().map(error -> new FieldViolation(
                         result.getMethodParameter().getParameterName(),
@@ -117,7 +120,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /** Spring-in özünün yaratdığı bütün xətalar (404, 405, 415, oxunmayan JSON və s.) buradan keçir. */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+            @NonNull Exception ex, Object body, @NonNull HttpHeaders headers, @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request) {
         ErrorCode code = ErrorCode.fromStatus(statusCode);
         if (code == ErrorCode.INTERNAL_ERROR) {
             log.error("Daxili xəta", ex);

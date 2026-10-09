@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -108,7 +109,7 @@ public class StampClaimService {
     public Optional<TapStatus> status(String token, String browserId) {
         Instant now = clock.instant();
         return tokens.find(SecureTokens.hash(token == null ? "" : token)).map(found -> new TapStatus(
-                found.effectiveStatus(now), found.branchId(),
+                effectiveStatus(found, now), found.branchId(),
                 stamps.findBranchName(found.branchId()),
                 found.status() == TapTokenMapper.Status.RESERVED ? found.reservedUntil() : found.expiresAt(),
                 MessageDigest.isEqual(found.bindingHash(), BrowserIdCookie.bindingHash(browserId))));
@@ -118,11 +119,24 @@ public class StampClaimService {
         byte[] tokenHash = SecureTokens.hash(token == null ? "" : token);
         Source source = new Source(client.ip(), BrowserIdCookie.bindingHash(browserId),
                 BrowserIdCookie.userAgentHash(client.userAgent()));
-        Outcome outcome = tx.execute(status -> claimInTransaction(tokenHash, customerId, source));
+        Outcome outcome = Objects.requireNonNull(
+                tx.execute(status -> claimInTransaction(tokenHash, customerId, source)));
         if (outcome.error() != null) {
             throw new ApiException(outcome.error(), new Object[0], outcome.properties());
         }
         return outcome.result();
+    }
+
+    /** Vaxtı keçmiş ACTIVE/RESERVED token fon işi onu yeniləməmişdən əvvəl də EXPIRED sayılır. */
+    static TapTokenMapper.Status effectiveStatus(TapToken token, Instant now) {
+        if (token.status() == TapTokenMapper.Status.ACTIVE && !token.expiresAt().isAfter(now)) {
+            return TapTokenMapper.Status.EXPIRED;
+        }
+        if (token.status() == TapTokenMapper.Status.RESERVED
+                && (token.reservedUntil() == null || !token.reservedUntil().isAfter(now))) {
+            return TapTokenMapper.Status.EXPIRED;
+        }
+        return token.status();
     }
 
     private Outcome claimInTransaction(byte[] tokenHash, UUID customerId, Source source) {
@@ -139,7 +153,7 @@ public class StampClaimService {
             return Outcome.fail(ErrorCode.CUSTOMER_BLOCKED);
         }
 
-        switch (token.effectiveStatus(now)) {
+        switch (effectiveStatus(token, now)) {
             case CONSUMED -> {
                 return customerId.equals(token.consumedBy()) ? Outcome.ok(previousResult(token, customerId))
                         : Outcome.fail(ErrorCode.TAP_TOKEN_USED);

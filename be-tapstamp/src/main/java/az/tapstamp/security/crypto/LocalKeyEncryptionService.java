@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -41,10 +40,6 @@ public class LocalKeyEncryptionService implements KeyEncryptionService {
             throw new CryptoException("Unknown KEK id: " + wrapped.kekId());
         }
         return AesGcm.decrypt(kek, wrapped.ciphertext(), aad(wrapped.kekId(), context));
-    }
-
-    public String activeKekId() {
-        return activeKekId;
     }
 
     private static String aad(String kekId, String context) {

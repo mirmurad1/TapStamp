@@ -21,6 +21,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
  * Açılmış açarlar yaddaşda qısa müddət keşlənir; keş açarı bazanın (platforma və ya tenant) adını daşıyır,
  * ona görə bir tenant-ın açarı heç vaxt digərinin kontekstində işlədilmir.
  */
+// JdbcClient-in :ad parametrləri JPA sorğusu deyil — IDE-nin JPA yoxlaması burada tətbiq olunmur
+@SuppressWarnings("JpaQueryApiInspection")
 public class JdbcDataKeyProvider implements DataKeyProvider {
 
     private static final SecureRandom RANDOM = new SecureRandom();

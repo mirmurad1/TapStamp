@@ -18,6 +18,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -62,7 +63,8 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain chain)
             throws ServletException, IOException {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         if (HOST_INDEPENDENT_PREFIXES.stream().anyMatch(path::startsWith)) {
@@ -91,7 +93,7 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
             resolver.resolveException(request, response, null, new ApiException(ErrorCode.NOT_FOUND));
             return;
         }
-        if (!tenant.get().status().servesRequests()) {
+        if (tenant.get().status().outOfService()) {
             resolver.resolveException(request, response, null, new ApiException(ErrorCode.TENANT_UNAVAILABLE));
             return;
         }
