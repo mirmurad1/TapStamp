@@ -1610,7 +1610,7 @@
     },
     "/api/v1/admin/staff-console/gift-cards/recent" : {
       "get" : {
-        "description" : "Filialda son 24 saatda təhvil verilmiş hədiyyə kartları.",
+        "description" : "Filialda istifadə olunmuş son 5 hədiyyə kartı (ən yenisi birinci).",
         "operationId" : "recent",
         "parameters" : [ {
           "in" : "query",

@@ -449,8 +449,9 @@
     "noExpiry": "No expiry",
     "usedAt": "Used: {{date}} · {{branch}}",
     "anotherCode": "Another code",
-    "recent": "Recent redemptions (24 hours)",
-    "recentEmpty": "No redemptions yet today."
+    "recent": "Recently used cards",
+    "recentEmpty": "No cards have been used at this branch yet.",
+    "recentNote": "Note: the 5 most recently used gift cards at this branch are shown."
   },
   "customers": {
     "title": "Customers",

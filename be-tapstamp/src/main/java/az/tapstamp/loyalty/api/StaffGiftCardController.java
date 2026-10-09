@@ -91,7 +91,7 @@ public class StaffGiftCardController {
     }
 
     @GetMapping("/recent")
-    @Operation(summary = "Son təhvillər", description = "Filialda son 24 saatda təhvil verilmiş hədiyyə kartları.")
+    @Operation(summary = "Son təhvillər", description = "Filialda istifadə olunmuş son 5 hədiyyə kartı (ən yenisi birinci).")
     List<GiftCardCheckResponse> recent(@RequestParam UUID branchId, @AuthenticationPrincipal AdminPrincipal principal) {
         return redemptions.recent(principal, branchId).stream().map(GiftCardCheckResponse::from).toList();
     }

@@ -449,8 +449,9 @@
     "noExpiry": "Müddətsiz",
     "usedAt": "İstifadə olunub: {{date}} · {{branch}}",
     "anotherCode": "Başqa kod",
-    "recent": "Son təhvillər (24 saat)",
-    "recentEmpty": "Bu gün hələ təhvil yoxdur."
+    "recent": "Son istifadə olunmuş kartlar",
+    "recentEmpty": "Bu filialda hələ kart istifadə olunmayıb.",
+    "recentNote": "Qeyd: bu filialda istifadə olunmuş ən son 5 hədiyyə kartı göstərilir."
   },
   "customers": {
     "title": "Müştərilər",

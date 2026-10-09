@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { cn } from '@/shared/lib/cn';
-import { formatDate, formatDateTime, formatTime } from '@/shared/lib/format';
+import { formatDate, formatDateTime } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
@@ -205,10 +205,11 @@ function RecentRedemptions({ branchId, queryKey }: { branchId: string; queryKey:
             <span>
               <span className="font-mono">{item.code}</span> · {resolveText(item.rewardName, lang)}
             </span>
-            <span className="text-muted-foreground">{item.redeemedAt ? formatTime(item.redeemedAt, lang) : ''}</span>
+            <span className="text-muted-foreground">{item.redeemedAt ? formatDateTime(item.redeemedAt, lang) : ''}</span>
           </li>
         ))}
       </ul>
+      <p className="text-xs text-muted-foreground">{t('giftDesk.recentNote')}</p>
       <ApiErrorAlert error={recent.error} />
     </section>
   );

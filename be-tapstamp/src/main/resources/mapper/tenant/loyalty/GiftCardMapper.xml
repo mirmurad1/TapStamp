@@ -63,9 +63,9 @@
 
     <select id="recentlyRedeemed" resultType="az.tapstamp.loyalty.repository.GiftCardMapper$RedemptionRow">
         <include refid="redemption"/>
-        WHERE r.status = 'REDEEMED' AND r.redeemed_branch_id = #{branchId} AND r.redeemed_at &gt; #{since}
+        WHERE r.status = 'REDEEMED' AND r.redeemed_branch_id = #{branchId}
         ORDER BY r.redeemed_at DESC
-        LIMIT 20
+        LIMIT #{limit}
     </select>
 
     <update id="markRedeemed">
