@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class NfcTagStore {
                              byte[] fileReadKeyEnc) {
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "StoredKeys[id=" + id + ", status=" + status + "]";
         }
     }

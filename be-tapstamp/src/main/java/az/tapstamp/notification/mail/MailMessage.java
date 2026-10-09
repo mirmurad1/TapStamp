@@ -1,6 +1,7 @@
 package az.tapstamp.notification.mail;
 
 import az.tapstamp.shared.pii.EmailMasker;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Göndəriləcək email. {@code tenantId} dev outbox-da mesajları şirkətə görə ayırmaq üçündür (platforma üçün null).
@@ -8,7 +9,7 @@ import az.tapstamp.shared.pii.EmailMasker;
 public record MailMessage(String to, String subject, String textBody, String tenantId) {
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         // Mətnin içində tokenlər ola bilər — toString-də göstərilmir
         return "MailMessage[to=" + EmailMasker.mask(to) + ", subject=" + subject + "]";
     }

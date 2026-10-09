@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,7 +72,7 @@ public class CustomerAuthController {
             @Schema(description = "Toxunuşdan sonra giriş: toxunuş tokeni 10 dəqiqəlik bu sorğuya rezerv olunur")
             @Size(max = 128) String tapToken) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "OtpRequest[***]";
         }
     }
@@ -82,7 +83,7 @@ public class CustomerAuthController {
 
     public record OtpVerifyRequest(@NotNull UUID challengeId, @NotBlank @Size(max = 12) String code) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "OtpVerifyRequest[challengeId=" + challengeId + "]";
         }
     }
@@ -95,7 +96,7 @@ public class CustomerAuthController {
             String registrationToken,
             Instant registrationExpiresAt) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "OtpVerifyResponse[status=" + status + "]";
         }
     }
@@ -112,7 +113,7 @@ public class CustomerAuthController {
             @NotNull @Size(max = 10) List<@Valid @NotNull DocumentAcceptance> acceptedDocuments,
             @NotBlank @Pattern(regexp = "az|en|ru") String language) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "RegisterRequest[***]";
         }
     }

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.NonNull;
 
 /** Admin autentifikasiyası endpoint-lərinin sorğu və cavab modelləri. */
 public final class AdminAuthDtos {
@@ -21,7 +22,7 @@ public final class AdminAuthDtos {
             @NotBlank @Email @Size(max = 254) String email,
             @NotBlank @Size(max = 128) String password) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "LoginRequest[email=***]";
         }
     }
@@ -55,7 +56,7 @@ public final class AdminAuthDtos {
             @NotBlank @Size(max = 128) String token,
             @NotBlank @Size(max = 128) String newPassword) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "PasswordResetRequest[***]";
         }
     }
@@ -64,7 +65,7 @@ public final class AdminAuthDtos {
             @NotBlank @Size(max = 128) String currentPassword,
             @NotBlank @Size(max = 128) String newPassword) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "ChangePasswordRequest[***]";
         }
     }
@@ -72,14 +73,14 @@ public final class AdminAuthDtos {
     @Schema(description = "2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir")
     public record StepUpRequest(@Size(max = 32) String code, @Size(max = 128) String password) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "StepUpRequest[***]";
         }
     }
 
     public record PasswordConfirmRequest(@NotBlank @Size(max = 128) String password) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "PasswordConfirmRequest[***]";
         }
     }

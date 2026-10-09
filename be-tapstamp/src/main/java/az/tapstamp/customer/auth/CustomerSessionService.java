@@ -18,6 +18,7 @@ import az.tapstamp.shared.web.DeviceLabels;
 import az.tapstamp.tenancy.TenantContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class CustomerSessionService {
 
     public record IssuedTokens(UUID sessionId, String accessToken, String refreshToken) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "IssuedTokens[sessionId=" + sessionId + "]";
         }
     }

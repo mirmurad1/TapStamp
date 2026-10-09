@@ -33,6 +33,7 @@ import az.tapstamp.shared.web.ClientInfo;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
 import az.tapstamp.tenancy.registry.TenantDirectory;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,7 +66,7 @@ public class OtpService {
 
         record RegistrationRequired(String registrationToken, Instant expiresAt) implements LoginResult {
             @Override
-            public String toString() {
+            public @NonNull String toString() {
                 return "RegistrationRequired[expiresAt=" + expiresAt + "]";
             }
         }

@@ -7,6 +7,7 @@ import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.tenancy.TenantInfo;
 import az.tapstamp.tenancy.TenantStatus;
+import org.jspecify.annotations.NonNull;
 
 /** Platforma reyestrindəki tenant qeydi, o cümlədən bazaya qoşulma məlumatı (şifrələr şifrəli). */
 public record TenantRecord(
@@ -29,7 +30,7 @@ public record TenantRecord(
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "TenantRecord[id=" + id + ", slug=" + slug + ", status=" + status + ", db=" + dbName + "]";
     }
 }

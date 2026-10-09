@@ -13,6 +13,7 @@ import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenantContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class GiftCardService {
     public record GiftCard(UUID id, String code, LocalizedText name, Status status, Instant earnedAt,
                            Instant expiresAt, Instant redeemedAt) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "GiftCard[id=" + id + ", status=" + status + "]";
         }
     }

@@ -4,6 +4,8 @@ import java.util.HexFormat;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Toxunuş URL-inin parametrləri: {@code /t/{uid}?picc=…&cmac=…}. Format yoxlaması DB-yə müraciətdən əvvəl aparılır.
  * {@code uid} yalnız çipi tapmaq üçün ipucudur — etibarlı UID deşifrə olunmuş PICC məlumatından götürülür.
@@ -24,7 +26,7 @@ public record TapParams(byte[] uid, byte[] picc, byte[] cmac) {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "TapParams[uid=" + HEX.formatHex(uid) + "]";
     }
 }

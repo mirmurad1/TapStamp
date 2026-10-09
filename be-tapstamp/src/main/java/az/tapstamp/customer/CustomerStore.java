@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ public class CustomerStore {
                            Language language, Status status, Instant registeredAt) {
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Customer[id=" + id + ", status=" + status + "]";
         }
     }

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import az.tapstamp.shared.i18n.Language;
+import org.jspecify.annotations.NonNull;
 
 /** Daxil olmuş admin (işçi və ya platforma admini) və onun cari sessiyası. */
 public record AdminPrincipal(
@@ -30,7 +31,7 @@ public record AdminPrincipal(
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "AdminPrincipal[realm=" + realm + ", userId=" + userId + ", state=" + state + "]";
     }
 }

@@ -32,6 +32,7 @@ import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenantContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -75,7 +76,7 @@ public class TagAdminService {
                                       String sdmFileReadKey, int piccDataOffset, int sdmMacInputOffset,
                                       int sdmMacOffset, String note) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "ProvisioningPackage[uid=" + uid + ", keyVersion=" + keyVersion + "]";
         }
     }

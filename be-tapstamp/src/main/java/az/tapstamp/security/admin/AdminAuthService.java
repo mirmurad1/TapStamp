@@ -26,6 +26,7 @@ import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.pii.EmailMasker;
 import az.tapstamp.shared.web.ClientInfo;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class AdminAuthService {
     /** Yeni və ya yenilənmiş sessiya: token yalnız cookie-də göndərilir. */
     public record IssuedSession(String token, AdminSession.State state, Duration maxAge) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "IssuedSession[state=" + state + "]";
         }
     }

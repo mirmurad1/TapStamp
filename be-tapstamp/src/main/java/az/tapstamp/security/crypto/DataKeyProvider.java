@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
+import org.jspecify.annotations.NonNull;
+
 /** Məlumat açarlarının (DEK) mənbəyi: platforma bazası və ya cari tenant-ın bazası. */
 public interface DataKeyProvider {
 
@@ -15,7 +17,7 @@ public interface DataKeyProvider {
 
     record DataKey(UUID id, KeyPurpose purpose, SecretKey key) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "DataKey[id=" + id + ", purpose=" + purpose + "]";
         }
     }

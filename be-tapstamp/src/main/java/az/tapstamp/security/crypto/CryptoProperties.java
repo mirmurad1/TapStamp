@@ -1,5 +1,6 @@
 package az.tapstamp.security.crypto;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -20,7 +21,7 @@ public record CryptoProperties(
         String redemptionCodeKey) {
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         // Sirlər heç vaxt toString ilə loga düşməsin
         return "CryptoProperties[activeKekId=" + activeKekId + "]";
     }

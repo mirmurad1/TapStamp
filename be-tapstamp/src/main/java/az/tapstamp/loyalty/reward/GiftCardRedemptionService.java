@@ -24,6 +24,7 @@ import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenantContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class GiftCardRedemptionService {
                                 String phoneMasked, Instant earnedAt, Instant expiresAt, Instant redeemedAt,
                                 LocalizedText redeemedBranchName) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "GiftCardCheck[id=" + id + ", status=" + status + "]";
         }
     }

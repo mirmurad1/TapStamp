@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +44,7 @@ public class StaffAuthController extends AdminAuthEndpoints {
 
     public record InvitationTokenRequest(@NotBlank @Size(max = 128) String token) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "InvitationTokenRequest[***]";
         }
     }
@@ -53,7 +54,7 @@ public class StaffAuthController extends AdminAuthEndpoints {
             @NotBlank @Size(max = 80) String displayName,
             @NotBlank @Size(max = 128) String password) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "AcceptInvitationRequest[***]";
         }
     }

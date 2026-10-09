@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import az.tapstamp.shared.i18n.Language;
+import org.jspecify.annotations.NonNull;
 
 /** Admin hesabının bazadakı vəziyyəti. Şifrə hash-i və şifrəli TOTP sirri toString-də göstərilmir. */
 public record AdminAccount(
@@ -43,7 +44,7 @@ public record AdminAccount(
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "AdminAccount[id=" + id + ", status=" + status + "]";
     }
 }

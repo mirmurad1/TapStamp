@@ -24,6 +24,7 @@ import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.web.ClientInfo;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -53,7 +54,7 @@ public class TapVerificationService {
     /** Uğurlu yoxlamanın nəticəsi: brauzerə veriləcək token. */
     public record Accepted(String token, UUID tagId, int counter) {
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Accepted[tagId=" + tagId + ", counter=" + counter + "]";
         }
     }

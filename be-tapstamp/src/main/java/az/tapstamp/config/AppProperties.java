@@ -1,5 +1,6 @@
 package az.tapstamp.config;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -44,7 +45,7 @@ public record AppProperties(
             String simulatorKey) {
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Dev[simulatorEnabled=" + simulatorEnabled + ", seedEnabled=" + seedEnabled + "]";
         }
     }

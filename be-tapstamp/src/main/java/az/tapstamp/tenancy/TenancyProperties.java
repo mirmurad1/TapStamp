@@ -2,6 +2,7 @@ package az.tapstamp.tenancy;
 
 import java.time.Duration;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -31,7 +32,7 @@ public record TenancyProperties(
             @DefaultValue("10") int maxPoolSize) {
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Platform[database=" + database + ", appUsername=" + appUsername + "]";
         }
     }
@@ -45,7 +46,7 @@ public record TenancyProperties(
             String password) {
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Provisioner[enabled=" + enabled + ", username=" + username + "]";
         }
     }
