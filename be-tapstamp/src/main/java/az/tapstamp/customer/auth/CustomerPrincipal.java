@@ -15,7 +15,7 @@ public record CustomerPrincipal(UUID customerId, UUID sessionId, Language langua
     public static final String AUTHORITY = "CUSTOMER_SESSION";
 
     /** Spring Security autentifikasiyası (authority: {@link #AUTHORITY}). */
-    public static class Authentication extends AbstractAuthenticationToken {
+    public static final class Authentication extends AbstractAuthenticationToken {
 
         private final CustomerPrincipal principal;
 

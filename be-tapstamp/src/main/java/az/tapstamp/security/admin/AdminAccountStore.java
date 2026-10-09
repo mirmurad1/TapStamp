@@ -251,7 +251,7 @@ public class AdminAccountStore {
         return timestamp == null ? null : timestamp.toInstant();
     }
 
-    private static AdminAccount map(ResultSet rs, int rowNum) throws SQLException {
+    private static AdminAccount map(ResultSet rs, int ignoredRowNum) throws SQLException {
         long stepValue = rs.getLong("totp_last_used_step");
         Long step = rs.wasNull() ? null : stepValue;
         return new AdminAccount(

@@ -98,7 +98,7 @@ public class TenantDirectory {
         byHost.invalidateAll();
     }
 
-    private static TenantRecord map(ResultSet rs, int rowNum) throws SQLException {
+    private static TenantRecord map(ResultSet rs, int ignoredRowNum) throws SQLException {
         return new TenantRecord(
                 rs.getObject("id", UUID.class),
                 rs.getString("slug"),

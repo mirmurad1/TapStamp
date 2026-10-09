@@ -96,7 +96,6 @@ public class HttpSmsProvider implements SmsProvider {
             if (response.statusCode() >= 400) {
                 // 4xx təkrar cəhd ilə düzəlmir (məs. yanlış nömrə) — loga yalnız maskalı nömrə
                 log.warn("SMS rədd edildi: status={}, to={}", response.statusCode(), PhoneMasker.mask(message.to()));
-                return;
             }
         } catch (IOException e) {
             throw new SmsDeliveryException("SMS provider is unreachable", e);

@@ -282,6 +282,7 @@ public class CompanyAdminService {
             return false;
         }
         try {
+            // Yalnız yoxlama: format düzgün olsa da, saat mövcud olmalıdır (məs. 25:00 rədd edilir)
             LocalTime.parse(value);
             return true;
         } catch (DateTimeParseException e) {

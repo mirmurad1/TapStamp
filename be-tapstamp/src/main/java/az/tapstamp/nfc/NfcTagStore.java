@@ -105,7 +105,7 @@ public class NfcTagStore {
                 .orElse(10);
     }
 
-    static NfcTag map(ResultSet rs, int rowNum) throws SQLException {
+    static NfcTag map(ResultSet rs, int ignoredRowNum) throws SQLException {
         return new NfcTag(
                 rs.getObject("id", UUID.class),
                 rs.getObject("branch_id", UUID.class),

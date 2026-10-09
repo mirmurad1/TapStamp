@@ -108,7 +108,7 @@ public class CustomerStore {
         return instant == null ? null : instant.atOffset(ZoneOffset.UTC);
     }
 
-    private static Customer map(ResultSet rs, int rowNum) throws SQLException {
+    private static Customer map(ResultSet rs, int ignoredRowNum) throws SQLException {
         Timestamp registered = rs.getTimestamp("registered_at");
         return new Customer(
                 rs.getObject("id", UUID.class),

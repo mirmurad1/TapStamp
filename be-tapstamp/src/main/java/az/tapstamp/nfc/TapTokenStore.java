@@ -134,7 +134,7 @@ public class TapTokenStore {
                 .update();
     }
 
-    private static TapToken map(ResultSet rs, int rowNum) throws SQLException {
+    private static TapToken map(ResultSet rs, int ignoredRowNum) throws SQLException {
         return new TapToken(
                 rs.getObject("id", UUID.class),
                 rs.getObject("branch_id", UUID.class),

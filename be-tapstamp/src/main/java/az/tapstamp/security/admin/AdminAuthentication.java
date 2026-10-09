@@ -11,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * Spring Security autentifikasiyası. Authority-lər sessiyanın vəziyyətindən asılıdır: MFA gözləyən sessiyanın
  * heç bir rolu yoxdur, yalnız MFA endpoint-lərinə çıxışı var.
  */
-public class AdminAuthentication extends AbstractAuthenticationToken {
+public final class AdminAuthentication extends AbstractAuthenticationToken {
 
     public static final String MFA_PENDING = "MFA_PENDING";
     public static final String MFA_ENROLLMENT = "MFA_ENROLLMENT";

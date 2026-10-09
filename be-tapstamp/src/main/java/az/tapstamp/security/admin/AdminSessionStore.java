@@ -117,7 +117,7 @@ public class AdminSessionStore {
                 .list();
     }
 
-    private AdminSession map(ResultSet rs, int rowNum) throws SQLException {
+    private AdminSession map(ResultSet rs, int ignoredRowNum) throws SQLException {
         return new AdminSession(
                 rs.getObject("id", UUID.class),
                 rs.getObject(realm.userIdColumn(), UUID.class),
