@@ -1,15 +1,16 @@
 package az.tapstamp.loyalty.settings;
 
-import static az.tapstamp.shared.persistence.SqlTime.ts;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.loyalty.repository.LoyaltySettingsMapper.AccountStamps;
+import az.tapstamp.loyalty.repository.LoyaltySettingsMapper.ActiveRuleKey;
+import az.tapstamp.loyalty.repository.LoyaltySettingsMapper.ImpactRow;
+import az.tapstamp.loyalty.repository.LoyaltySettingsMapper;
 import az.tapstamp.loyalty.reward.GiftCardService;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
@@ -18,9 +19,6 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -67,19 +65,17 @@ public class LoyaltySettingsService {
     public record RewardChange(RewardSettings settings, int giftCardsIssued) {
     }
 
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-
-    private final JdbcClient jdbc;
+    private final LoyaltySettingsMapper settings;
     private final GiftCardService giftCards;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
     private final AdminAuthService adminAuth;
 
-    public LoyaltySettingsService(@Qualifier("tenantJdbc") JdbcClient jdbc, GiftCardService giftCards,
+    public LoyaltySettingsService(LoyaltySettingsMapper settings, GiftCardService giftCards,
                                   AuditLogger audit, PlatformTransactionManager transactionManager, Clock clock,
                                   AdminAuthService adminAuth) {
-        this.jdbc = jdbc;
+        this.settings = settings;
         this.giftCards = giftCards;
         this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
@@ -89,30 +85,13 @@ public class LoyaltySettingsService {
 
     public StampRules stampRules(AdminPrincipal principal) {
         AccessPolicy.requireCompanyWide(principal);
-        return jdbc.sql("""
-                        SELECT min_interval_minutes, max_stamps_per_day, require_staff_approval, pending_timeout_minutes
-                        FROM stamp_policies WHERE branch_id IS NULL""")
-                .query((rs, n) -> new StampRules(rs.getInt("min_interval_minutes"), rs.getInt("max_stamps_per_day"),
-                        rs.getBoolean("require_staff_approval"), rs.getInt("pending_timeout_minutes")))
-                .single();
+        return settings.findCompanyStampRules();
     }
 
     public StampRules updateStampRules(AdminPrincipal principal, StampRules rules) {
         AccessPolicy.requireCompanyWide(principal);
         StampRules before = stampRules(principal);
-        jdbc.sql("""
-                        UPDATE stamp_policies
-                           SET min_interval_minutes = :interval, max_stamps_per_day = :maxPerDay,
-                               require_staff_approval = :approval, pending_timeout_minutes = :timeout,
-                               updated_by = :staffId, updated_at = :now, version = version + 1
-                         WHERE branch_id IS NULL""")
-                .param("interval", rules.minIntervalMinutes())
-                .param("maxPerDay", rules.maxStampsPerDay())
-                .param("approval", rules.requireStaffApproval())
-                .param("timeout", rules.pendingTimeoutMinutes())
-                .param("staffId", principal.userId())
-                .param("now", ts(clock.instant()))
-                .update();
+        settings.updateCompanyStampRules(rules, principal.userId(), clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("before", before);
         details.put("after", rules);
@@ -135,47 +114,26 @@ public class LoyaltySettingsService {
         Instant now = clock.instant();
         return tx.execute(status -> {
             // Paralel iki dəyişiklik eyni versiya nömrəsini almasın
-            Map<String, Object> previous = jdbc.sql(
-                            "SELECT id, rule_version, stamps_required FROM reward_rules WHERE active FOR UPDATE")
-                    .query().listOfRows().stream().findFirst().orElse(null);
-            int previousVersion = previous == null ? 0 : ((Number) previous.get("rule_version")).intValue();
-            boolean thresholdChanged = previous != null
-                    && ((Number) previous.get("stamps_required")).intValue() != update.stampsRequired();
+            ActiveRuleKey previous = settings.lockActiveRule().orElse(null);
+            int previousVersion = previous == null ? 0 : previous.ruleVersion();
+            boolean thresholdChanged = previous != null && previous.stampsRequired() != update.stampsRequired();
             boolean applyNow = update.existingCards() == ExistingCards.APPLY_NOW;
             if (thresholdChanged && !applyNow) {
                 // Yarımçıq kartlar (hələ qaydaya bağlanmayıbsa) köhnə qaydada qalır və onunla bitir
-                jdbc.sql("""
-                                UPDATE loyalty_accounts SET reward_rule_id = :ruleId
-                                WHERE current_stamps > 0 AND reward_rule_id IS NULL""")
-                        .param("ruleId", previous.get("id"))
-                        .update();
+                settings.pinCardsInProgress(previous.id());
             }
-            int nextVersion = jdbc.sql("SELECT COALESCE(max(rule_version), 0) + 1 FROM reward_rules")
-                    .query(Integer.class).single();
-            jdbc.sql("UPDATE reward_rules SET active = false WHERE active").update();
+            int nextVersion = settings.nextRuleVersion();
+            settings.deactivateRules();
             UUID id = Ids.newId();
-            jdbc.sql("""
-                            INSERT INTO reward_rules (id, rule_version, stamps_required, reward_name, reward_description,
-                                                      validity_days, active, created_by, created_at)
-                            VALUES (:id, :version, :stamps, CAST(:name AS jsonb), CAST(:description AS jsonb), :validity,
-                                    true, :staffId, :now)""")
-                    .param("id", id)
-                    .param("version", nextVersion)
-                    .param("stamps", update.stampsRequired())
-                    .param("name", TEXT.convertToDatabaseColumn(clean(update.name())))
-                    .param("description", TEXT.convertToDatabaseColumn(clean(update.description())))
-                    .param("validity", update.validityDays())
-                    .param("staffId", principal.userId())
-                    .param("now", ts(now))
-                    .update();
+            settings.insertRule(id, nextVersion, update.stampsRequired(), clean(update.name()),
+                    clean(update.description()), update.validityDays(), principal.userId(), now);
             int issued = 0;
             if (applyNow) {
                 // Bütün kartlar yeni qaydaya keçir (köhnə qaydaya bağlananlar da)
-                jdbc.sql("UPDATE loyalty_accounts SET reward_rule_id = NULL WHERE reward_rule_id IS NOT NULL").update();
+                settings.unpinAllCards();
                 issued = issueForReachedThreshold(update.stampsRequired(), now);
             }
-            int keptOnOldRule = jdbc.sql("SELECT count(*) FROM loyalty_accounts WHERE reward_rule_id IS NOT NULL")
-                    .query(Integer.class).single();
+            int keptOnOldRule = settings.countPinnedCards();
             audit.tenant("REWARD_RULE_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "reward_rule", id,
                     Map.of("previousVersion", previousVersion, "version", nextVersion,
                             "stampsRequired", update.stampsRequired(), "existingCards", update.existingCards().name(),
@@ -194,61 +152,28 @@ public class LoyaltySettingsService {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         RewardSettings current = current();
-        return jdbc.sql("""
-                        SELECT count(*) FILTER (WHERE la.current_stamps > 0) AS in_progress,
-                               count(*) FILTER (WHERE la.current_stamps >= :required) AS reaching,
-                               COALESCE(sum(la.current_stamps / :required), 0) AS gift_cards
-                        FROM loyalty_accounts la JOIN customers c ON c.id = la.customer_id
-                        WHERE c.status = 'ACTIVE'""")
-                .param("required", stampsRequired)
-                .query((rs, n) -> new RewardImpact(current == null ? null : current.stampsRequired(),
-                        rs.getInt("in_progress"), rs.getInt("reaching"), rs.getInt("gift_cards")))
-                .single();
+        ImpactRow impact = settings.impact(stampsRequired);
+        return new RewardImpact(current == null ? null : current.stampsRequired(), impact.inProgress(),
+                impact.reaching(), impact.giftCards());
     }
 
     /** Qayda hamıya dərhal tətbiq olunanda: kartı artıq dolmuş müştərilərə hədiyyə kartı verilir (hesablar kilidlənir). */
     private int issueForReachedThreshold(int required, Instant now) {
         GiftCardService.ActiveRule rule = giftCards.activeRule().orElseThrow();
-        List<UUID> customers = jdbc.sql("""
-                        SELECT la.customer_id FROM loyalty_accounts la JOIN customers c ON c.id = la.customer_id
-                        WHERE la.current_stamps >= :required AND c.status = 'ACTIVE'
-                        ORDER BY la.customer_id FOR UPDATE OF la""")
-                .param("required", required)
-                .query(UUID.class)
-                .list();
         int issued = 0;
-        for (UUID customerId : customers) {
-            int current = jdbc.sql("SELECT current_stamps FROM loyalty_accounts WHERE customer_id = :id")
-                    .param("id", customerId).query(Integer.class).single();
-            int cards = current / required;
+        for (AccountStamps account : settings.lockAccountsReaching(required)) {
+            int cards = account.currentStamps() / required;
             for (int i = 0; i < cards; i++) {
-                giftCards.issue(customerId, rule, now);
+                giftCards.issue(account.customerId(), rule, now);
             }
-            jdbc.sql("""
-                            UPDATE loyalty_accounts SET current_stamps = current_stamps - :used,
-                                                        rewards_earned = rewards_earned + :cards, updated_at = :now
-                            WHERE customer_id = :id""")
-                    .param("used", cards * required)
-                    .param("cards", cards)
-                    .param("now", ts(now))
-                    .param("id", customerId)
-                    .update();
+            settings.deductRewards(account.customerId(), cards * required, cards, now);
             issued += cards;
         }
         return issued;
     }
 
     private RewardSettings current() {
-        return jdbc.sql("""
-                        SELECT rule_version, stamps_required, reward_name::text AS name,
-                               reward_description::text AS description, validity_days
-                        FROM reward_rules WHERE active""")
-                .query((rs, n) -> new RewardSettings(rs.getInt("rule_version"), rs.getInt("stamps_required"),
-                        TEXT.convertToEntityAttribute(rs.getString("name")),
-                        TEXT.convertToEntityAttribute(rs.getString("description")),
-                        rs.getObject("validity_days", Integer.class)))
-                .optional()
-                .orElse(null);
+        return settings.findActiveReward().orElse(null);
     }
 
     /** Boş tərcümələr saxlanılmır (müştəri tətbiqi Azərbaycan dilindəki versiyanı göstərir). */

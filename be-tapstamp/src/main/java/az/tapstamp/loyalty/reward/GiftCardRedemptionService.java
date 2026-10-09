@@ -1,10 +1,5 @@
 package az.tapstamp.loyalty.reward;
 
-import static az.tapstamp.shared.persistence.SqlTime.instant;
-import static az.tapstamp.shared.persistence.SqlTime.ts;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.loyalty.repository.GiftCardMapper.RedemptionRow;
+import az.tapstamp.loyalty.repository.GiftCardMapper;
 import az.tapstamp.loyalty.reward.GiftCardService.Status;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -22,11 +19,8 @@ import az.tapstamp.security.ratelimit.RateLimiter;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -54,30 +48,16 @@ public class GiftCardRedemptionService {
         }
     }
 
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-    private static final String SELECT = """
-            SELECT r.id, r.code_nonce, r.status, r.reward_name_snapshot::text AS name, r.earned_at, r.expires_at,
-                   r.redeemed_at, r.redeemed_by, r.redeemed_branch_id, c.name AS customer_name, c.phone_masked,
-                   b.name::text AS branch_name, r.customer_id
-            FROM rewards r
-            JOIN customers c ON c.id = r.customer_id
-            LEFT JOIN branches b ON b.id = r.redeemed_branch_id
-            """;
-
-    private record Row(GiftCardCheck check, UUID redeemedBy, UUID redeemedBranchId, UUID customerId) {
-    }
-
-    private final JdbcClient jdbc;
+    private final GiftCardMapper giftCards;
     private final GiftCardCodes codes;
     private final RateLimiter rateLimiter;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public GiftCardRedemptionService(@Qualifier("tenantJdbc") JdbcClient jdbc, GiftCardCodes codes,
-                                     RateLimiter rateLimiter, AuditLogger audit,
-                                     PlatformTransactionManager transactionManager, Clock clock) {
-        this.jdbc = jdbc;
+    public GiftCardRedemptionService(GiftCardMapper giftCards, GiftCardCodes codes, RateLimiter rateLimiter,
+                                     AuditLogger audit, PlatformTransactionManager transactionManager, Clock clock) {
+        this.giftCards = giftCards;
         this.codes = codes;
         this.rateLimiter = rateLimiter;
         this.audit = audit;
@@ -88,7 +68,7 @@ public class GiftCardRedemptionService {
     /** Kodun yoxlanması (yan təsiri yoxdur): kart tapılırsa statusu ilə qaytarılır. */
     public GiftCardCheck check(AdminPrincipal principal, String rawCode) {
         byte[] lookup = lookup(principal, rawCode);
-        return find(lookup, false).map(Row::check).orElseThrow(() -> notFound(principal));
+        return giftCards.findByLookup(lookup, false).map(this::toCheck).orElseThrow(() -> notFound(principal));
     }
 
     /** Hədiyyənin təhvili: kart birdəfəlik REDEEMED olur, filial və işçi qeyd olunur. */
@@ -97,12 +77,12 @@ public class GiftCardRedemptionService {
         byte[] lookup = lookup(principal, rawCode);
         Instant now = clock.instant();
         Optional<GiftCardCheck> result = tx.execute(status -> {
-            Optional<Row> found = find(lookup, true);
+            Optional<RedemptionRow> found = giftCards.findByLookup(lookup, true);
             if (found.isEmpty()) {
                 return Optional.<GiftCardCheck>empty();
             }
-            Row row = found.get();
-            GiftCardCheck card = row.check();
+            RedemptionRow row = found.get();
+            GiftCardCheck card = toCheck(row);
             switch (card.status()) {
                 case REDEEMED -> {
                     if (principal.userId().equals(row.redeemedBy()) && branchId.equals(row.redeemedBranchId())) {
@@ -117,24 +97,11 @@ public class GiftCardRedemptionService {
                     // davam
                 }
             }
-            jdbc.sql("""
-                            UPDATE rewards SET status = 'REDEEMED', redeemed_at = :now, redeemed_by = :staffId,
-                                               redeemed_branch_id = :branchId
-                            WHERE id = :id""")
-                    .param("now", ts(now))
-                    .param("staffId", principal.userId())
-                    .param("branchId", branchId)
-                    .param("id", card.id())
-                    .update();
-            jdbc.sql("""
-                            UPDATE loyalty_accounts SET rewards_redeemed = rewards_redeemed + 1, updated_at = :now
-                            WHERE customer_id = :customerId""")
-                    .param("now", ts(now))
-                    .param("customerId", row.customerId())
-                    .update();
+            giftCards.markRedeemed(card.id(), principal.userId(), branchId, now);
+            giftCards.incrementRedeemedCount(row.customerId(), now);
             audit.tenant("GIFT_CARD_REDEEMED", AuditLogger.ActorType.STAFF, principal.userId(), "reward", card.id(),
                     Map.of("branchId", branchId.toString()));
-            return find(lookup, false).map(Row::check);
+            return giftCards.findByLookup(lookup, false).map(this::toCheck);
         });
         return result.orElseThrow(() -> notFound(principal));
     }
@@ -142,13 +109,9 @@ public class GiftCardRedemptionService {
     /** Filialda son 24 saatda təhvil verilmiş kartlar (ən yenisi birinci). */
     public List<GiftCardCheck> recent(AdminPrincipal principal, UUID branchId) {
         AccessPolicy.requireBranch(principal, branchId);
-        return jdbc.sql(SELECT + """
-                        WHERE r.status = 'REDEEMED' AND r.redeemed_branch_id = :branchId AND r.redeemed_at > :since
-                        ORDER BY r.redeemed_at DESC LIMIT 20""")
-                .param("branchId", branchId)
-                .param("since", ts(clock.instant().minus(Duration.ofDays(1))))
-                .query((rs, n) -> map(rs).check())
-                .list();
+        return giftCards.recentlyRedeemed(branchId, clock.instant().minus(Duration.ofDays(1))).stream()
+                .map(this::toCheck)
+                .toList();
     }
 
     private byte[] lookup(AdminPrincipal principal, String rawCode) {
@@ -158,33 +121,20 @@ public class GiftCardRedemptionService {
         return codes.lookup(tenantId, code);
     }
 
-    private Optional<Row> find(byte[] lookup, boolean forUpdate) {
-        return jdbc.sql(SELECT + "WHERE r.code_lookup = :lookup" + (forUpdate ? " FOR UPDATE OF r" : ""))
-                .param("lookup", lookup)
-                .query((rs, n) -> map(rs))
-                .optional();
-    }
-
     private ApiException notFound(AdminPrincipal principal) {
         audit.tenant("GIFT_CARD_LOOKUP_FAILED", AuditLogger.ActorType.STAFF, principal.userId(), "reward", null,
                 Map.of());
         return new ApiException(ErrorCode.GIFT_CARD_NOT_FOUND);
     }
 
-    private Row map(ResultSet rs) throws SQLException {
-        UUID id = rs.getObject("id", UUID.class);
-        Status status = Status.valueOf(rs.getString("status"));
-        Instant expiresAt = instant(rs, "expires_at");
-        if (status == Status.AVAILABLE && expiresAt != null && !expiresAt.isAfter(clock.instant())) {
+    private GiftCardCheck toCheck(RedemptionRow row) {
+        Status status = Status.valueOf(row.status());
+        // Müddəti keçmiş kart fon işi onu yeniləməmişdən əvvəl də EXPIRED sayılır
+        if (status == Status.AVAILABLE && row.expiresAt() != null && !row.expiresAt().isAfter(clock.instant())) {
             status = Status.EXPIRED;
         }
-        String branch = rs.getString("branch_name");
-        GiftCardCheck check = new GiftCardCheck(id,
-                codes.code(TenantContext.require().id(), id, rs.getInt("code_nonce")), status,
-                TEXT.convertToEntityAttribute(rs.getString("name")), rs.getString("customer_name"),
-                rs.getString("phone_masked"), instant(rs, "earned_at"), expiresAt, instant(rs, "redeemed_at"),
-                branch == null ? null : TEXT.convertToEntityAttribute(branch));
-        return new Row(check, rs.getObject("redeemed_by", UUID.class), rs.getObject("redeemed_branch_id", UUID.class),
-                rs.getObject("customer_id", UUID.class));
+        return new GiftCardCheck(row.id(), codes.code(TenantContext.require().id(), row.id(), row.codeNonce()), status,
+                row.name(), row.customerName(), row.phoneMasked(), row.earnedAt(), row.expiresAt(), row.redeemedAt(),
+                row.branchName());
     }
 }

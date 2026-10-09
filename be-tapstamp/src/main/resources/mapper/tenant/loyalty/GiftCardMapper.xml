@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Hədiyyə kartları və qaydası -->
+<mapper namespace="az.tapstamp.loyalty.repository.GiftCardMapper">
+
+    <sql id="ruleColumns">
+        id, stamps_required, reward_name AS name, reward_description AS description, validity_days
+    </sql>
+
+    <select id="findActiveRule" resultType="az.tapstamp.loyalty.reward.GiftCardService$ActiveRule">
+        SELECT <include refid="ruleColumns"/> FROM reward_rules WHERE active
+    </select>
+
+    <select id="findRuleFor" resultType="az.tapstamp.loyalty.reward.GiftCardService$ActiveRule">
+        SELECT <include refid="ruleColumns"/>
+        FROM reward_rules
+        WHERE id = COALESCE((SELECT reward_rule_id FROM loyalty_accounts WHERE customer_id = #{customerId}),
+                            (SELECT id FROM reward_rules WHERE active))
+    </select>
+
+    <insert id="insert">
+        INSERT INTO rewards (id, customer_id, rule_id, stamps_required_snapshot, reward_name_snapshot, status,
+                             earned_at, expires_at, code_nonce, code_lookup, created_at)
+        VALUES (#{id}, #{customerId}, #{ruleId}, #{stampsRequired}, CAST(#{name} AS jsonb), 'AVAILABLE', #{earnedAt},
+                #{expiresAt}, #{codeNonce}, #{codeLookup}, #{earnedAt})
+    </insert>
+
+    <select id="codeTaken" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM rewards WHERE code_lookup = #{codeLookup})
+    </select>
+
+    <select id="listForCustomer" resultType="az.tapstamp.loyalty.repository.GiftCardMapper$GiftCardRow">
+        SELECT id, reward_name_snapshot AS name, status, earned_at, expires_at, redeemed_at, code_nonce
+        FROM rewards
+        WHERE customer_id = #{customerId}
+        ORDER BY CASE WHEN status = 'AVAILABLE' THEN 0 ELSE 1 END, earned_at DESC
+        LIMIT 100
+    </select>
+
+    <select id="findWithoutCode" resultType="java.util.UUID">
+        SELECT id FROM rewards WHERE customer_id = #{customerId} AND code_lookup IS NULL
+    </select>
+
+    <update id="assignCode">
+        UPDATE rewards SET code_nonce = #{codeNonce}, code_lookup = #{codeLookup}
+        WHERE id = #{id} AND code_lookup IS NULL
+    </update>
+
+    <sql id="redemption">
+        SELECT r.id, r.code_nonce, r.status, r.reward_name_snapshot AS name, r.earned_at, r.expires_at,
+               r.redeemed_at, r.redeemed_by, r.redeemed_branch_id, c.name AS customer_name, c.phone_masked,
+               b.name AS branch_name, r.customer_id
+        FROM rewards r
+        JOIN customers c ON c.id = r.customer_id
+        LEFT JOIN branches b ON b.id = r.redeemed_branch_id
+    </sql>
+
+    <select id="findByLookup" resultType="az.tapstamp.loyalty.repository.GiftCardMapper$RedemptionRow">
+        <include refid="redemption"/>
+        WHERE r.code_lookup = #{codeLookup}
+        <if test="forUpdate">FOR UPDATE OF r</if>
+    </select>
+
+    <select id="recentlyRedeemed" resultType="az.tapstamp.loyalty.repository.GiftCardMapper$RedemptionRow">
+        <include refid="redemption"/>
+        WHERE r.status = 'REDEEMED' AND r.redeemed_branch_id = #{branchId} AND r.redeemed_at &gt; #{since}
+        ORDER BY r.redeemed_at DESC
+        LIMIT 20
+    </select>
+
+    <update id="markRedeemed">
+        UPDATE rewards
+        SET status = 'REDEEMED', redeemed_at = #{now}, redeemed_by = #{staffId}, redeemed_branch_id = #{branchId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementRedeemedCount">
+        UPDATE loyalty_accounts SET rewards_redeemed = rewards_redeemed + 1, updated_at = #{now}
+        WHERE customer_id = #{customerId}
+    </update>
+
+    <update id="expireOverdue">
+        UPDATE rewards SET status = 'EXPIRED'
+        WHERE status = 'AVAILABLE' AND expires_at IS NOT NULL AND expires_at &lt;= #{now}
+    </update>
+</mapper>

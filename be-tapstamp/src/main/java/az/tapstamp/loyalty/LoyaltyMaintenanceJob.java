@@ -1,10 +1,9 @@
 package az.tapstamp.loyalty;
 
-import static az.tapstamp.shared.persistence.SqlTime.ts;
-
 import java.time.Clock;
 import java.time.Instant;
 
+import az.tapstamp.loyalty.repository.GiftCardMapper;
 import az.tapstamp.loyalty.stamp.StampApprovalService;
 import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.tenancy.TenantContext;
@@ -12,9 +11,7 @@ import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -32,15 +29,15 @@ public class LoyaltyMaintenanceJob {
     private final TenantDirectory directory;
     private final TapTokenMapper tokens;
     private final StampApprovalService approvals;
-    private final JdbcClient jdbc;
+    private final GiftCardMapper giftCards;
     private final Clock clock;
 
     public LoyaltyMaintenanceJob(TenantDirectory directory, TapTokenMapper tokens, StampApprovalService approvals,
-                                 @Qualifier("tenantJdbc") JdbcClient jdbc, Clock clock) {
+                                 GiftCardMapper giftCards, Clock clock) {
         this.directory = directory;
         this.tokens = tokens;
         this.approvals = approvals;
-        this.jdbc = jdbc;
+        this.giftCards = giftCards;
         this.clock = clock;
     }
 
@@ -62,11 +59,7 @@ public class LoyaltyMaintenanceJob {
         Instant now = clock.instant();
         int expiredTokens = tokens.expireStale(now);
         int timedOut = approvals.rejectTimedOut();
-        int expiredCards = jdbc.sql("""
-                        UPDATE rewards SET status = 'EXPIRED'
-                        WHERE status = 'AVAILABLE' AND expires_at IS NOT NULL AND expires_at <= :now""")
-                .param("now", ts(now))
-                .update();
+        int expiredCards = giftCards.expireOverdue(now);
         if (timedOut + expiredCards > 0) {
             log.info("Loyalty maintenance: {} tokens expired, {} pending stamps timed out, {} gift cards expired",
                     expiredTokens, timedOut, expiredCards);

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Loyallıq parametrləri: möhür qaydası və hədiyyə qaydasının versiyaları -->
+<mapper namespace="az.tapstamp.loyalty.repository.LoyaltySettingsMapper">
+
+    <select id="findCompanyStampRules" resultType="az.tapstamp.loyalty.settings.LoyaltySettingsService$StampRules">
+        SELECT min_interval_minutes, max_stamps_per_day, require_staff_approval, pending_timeout_minutes
+        FROM stamp_policies
+        WHERE branch_id IS NULL
+    </select>
+
+    <update id="updateCompanyStampRules">
+        UPDATE stamp_policies
+        SET min_interval_minutes = #{rules.minIntervalMinutes}, max_stamps_per_day = #{rules.maxStampsPerDay},
+            require_staff_approval = #{rules.requireStaffApproval},
+            pending_timeout_minutes = #{rules.pendingTimeoutMinutes},
+            updated_by = #{staffId}, updated_at = #{now}, version = version + 1
+        WHERE branch_id IS NULL
+    </update>
+
+    <select id="findActiveReward" resultType="az.tapstamp.loyalty.settings.LoyaltySettingsService$RewardSettings">
+        SELECT rule_version AS version, stamps_required, reward_name AS name, reward_description AS description,
+               validity_days
+        FROM reward_rules
+        WHERE active
+    </select>
+
+    <select id="lockActiveRule" resultType="az.tapstamp.loyalty.repository.LoyaltySettingsMapper$ActiveRuleKey">
+        SELECT id, rule_version, stamps_required FROM reward_rules WHERE active FOR UPDATE
+    </select>
+
+    <select id="nextRuleVersion" resultType="int">
+        SELECT COALESCE(max(rule_version), 0) + 1 FROM reward_rules
+    </select>
+
+    <update id="deactivateRules">
+        UPDATE reward_rules SET active = false WHERE active
+    </update>
+
+    <insert id="insertRule">
+        INSERT INTO reward_rules (id, rule_version, stamps_required, reward_name, reward_description, validity_days,
+                                  active, created_by, created_at)
+        VALUES (#{id}, #{version}, #{stampsRequired}, CAST(#{name} AS jsonb), CAST(#{description} AS jsonb),
+                #{validityDays}, true, #{staffId}, #{now})
+    </insert>
+
+    <update id="pinCardsInProgress">
+        UPDATE loyalty_accounts SET reward_rule_id = #{ruleId}
+        WHERE current_stamps &gt; 0 AND reward_rule_id IS NULL
+    </update>
+
+    <update id="unpinAllCards">
+        UPDATE loyalty_accounts SET reward_rule_id = NULL WHERE reward_rule_id IS NOT NULL
+    </update>
+
+    <select id="countPinnedCards" resultType="int">
+        SELECT count(*) FROM loyalty_accounts WHERE reward_rule_id IS NOT NULL
+    </select>
+
+    <select id="impact" resultType="az.tapstamp.loyalty.repository.LoyaltySettingsMapper$ImpactRow">
+        SELECT count(*) FILTER (WHERE la.current_stamps &gt; 0) AS in_progress,
+               count(*) FILTER (WHERE la.current_stamps &gt;= #{stampsRequired}) AS reaching,
+               COALESCE(sum(la.current_stamps / #{stampsRequired}), 0) AS gift_cards
+        FROM loyalty_accounts la
+        JOIN customers c ON c.id = la.customer_id
+        WHERE c.status = 'ACTIVE'
+    </select>
+
+    <select id="lockAccountsReaching" resultType="az.tapstamp.loyalty.repository.LoyaltySettingsMapper$AccountStamps">
+        SELECT la.customer_id, la.current_stamps
+        FROM loyalty_accounts la
+        JOIN customers c ON c.id = la.customer_id
+        WHERE la.current_stamps &gt;= #{required} AND c.status = 'ACTIVE'
+        ORDER BY la.customer_id
+        FOR UPDATE OF la
+    </select>
+
+    <update id="deductRewards">
+        UPDATE loyalty_accounts
+        SET current_stamps = current_stamps - #{usedStamps}, rewards_earned = rewards_earned + #{cards},
+            updated_at = #{now}
+        WHERE customer_id = #{customerId}
+    </update>
+</mapper>

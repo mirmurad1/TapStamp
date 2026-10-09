@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Möhürlər, loyallıq hesabı və sui-istifadə qaydaları -->
+<mapper namespace="az.tapstamp.loyalty.repository.StampMapper">
+
+    <sql id="stampColumns">
+        id, branch_id, customer_id, status, reward_id, created_at
+    </sql>
+
+    <select id="findPolicy" resultType="az.tapstamp.loyalty.repository.StampMapper$PolicyRow">
+        SELECT min_interval_minutes, max_stamps_per_day, require_staff_approval, pending_timeout_minutes,
+               enforce_business_hours
+        FROM stamp_policies
+        WHERE branch_id = #{branchId} OR branch_id IS NULL
+        ORDER BY branch_id NULLS LAST
+        LIMIT 1
+    </select>
+
+    <select id="findBusinessHours" resultType="string">
+        SELECT business_hours::text FROM branches WHERE id = #{branchId}
+    </select>
+
+    <insert id="ensureAccount">
+        INSERT INTO loyalty_accounts (id, customer_id, created_at, updated_at)
+        VALUES (#{id}, #{customerId}, #{now}, #{now})
+        ON CONFLICT (customer_id) DO NOTHING
+    </insert>
+
+    <select id="lockAccount" resultType="java.util.UUID">
+        SELECT id FROM loyalty_accounts WHERE customer_id = #{customerId} FOR UPDATE
+    </select>
+
+    <select id="lastTapStampAt" resultType="java.time.Instant">
+        SELECT created_at FROM stamps
+        WHERE customer_id = #{customerId} AND source = 'NFC_TAP' AND status IN ('PENDING', 'CONFIRMED')
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="countTapStampsOn" resultType="int">
+        SELECT count(*) FROM stamps
+        WHERE customer_id = #{customerId} AND local_date = #{day} AND source = 'NFC_TAP'
+          AND status IN ('PENDING', 'CONFIRMED')
+    </select>
+
+    <insert id="insertTapStamp">
+        INSERT INTO stamps (id, branch_id, customer_id, tag_id, tap_token_id, source, status, local_date, confirmed_at,
+                            created_at)
+        VALUES (#{id}, #{branchId}, #{customerId}, #{tagId}, #{tapTokenId}, 'NFC_TAP', #{status}, #{day},
+                #{confirmedAt}, #{at})
+    </insert>
+
+    <insert id="insertManualStamp">
+        INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason, created_by_staff_id,
+                            confirmed_at, confirmed_by, created_at)
+        VALUES (#{id}, #{branchId}, #{customerId}, 'MANUAL', 'CONFIRMED', #{day}, #{reason}, #{staffId}, #{at},
+                #{staffId}, #{at})
+    </insert>
+
+    <select id="findByTapToken" resultType="az.tapstamp.loyalty.stamp.StampLedger$Stamp">
+        SELECT <include refid="stampColumns"/> FROM stamps WHERE tap_token_id = #{tapTokenId}
+    </select>
+
+    <select id="lockStamp" resultType="az.tapstamp.loyalty.stamp.StampLedger$Stamp">
+        SELECT <include refid="stampColumns"/> FROM stamps WHERE id = #{stampId} FOR UPDATE
+    </select>
+
+    <select id="addStampToCard" resultType="int" flushCache="true">
+        UPDATE loyalty_accounts
+        SET current_stamps = current_stamps + 1, total_stamps = total_stamps + 1, last_stamp_at = #{at},
+            updated_at = #{at}, version = version + 1
+        WHERE customer_id = #{customerId}
+        RETURNING current_stamps
+    </select>
+
+    <update id="redeemCardForReward">
+        UPDATE loyalty_accounts
+        SET current_stamps = current_stamps - #{required}, rewards_earned = rewards_earned + 1, reward_rule_id = NULL
+        WHERE customer_id = #{customerId}
+    </update>
+
+    <update id="linkStampToReward">
+        UPDATE stamps SET reward_id = #{rewardId} WHERE id = #{stampId}
+    </update>
+
+    <select id="findCurrentStamps" resultType="int">
+        SELECT current_stamps FROM loyalty_accounts WHERE customer_id = #{customerId}
+    </select>
+
+    <select id="findBranchName" resultType="az.tapstamp.shared.i18n.LocalizedText">
+        SELECT name FROM branches WHERE id = #{branchId}
+    </select>
+
+    <select id="findPending" resultType="az.tapstamp.loyalty.repository.StampMapper$PendingRow">
+        SELECT s.id, s.branch_id, s.customer_id, c.name AS customer_name, c.phone_masked, s.created_at
+        FROM stamps s
+        JOIN customers c ON c.id = s.customer_id
+        WHERE s.branch_id = #{branchId} AND s.status = 'PENDING'
+        ORDER BY s.created_at
+        LIMIT 100
+    </select>
+
+    <update id="confirmStamp">
+        UPDATE stamps SET status = 'CONFIRMED', confirmed_at = #{now}, confirmed_by = #{staffId} WHERE id = #{stampId}
+    </update>
+
+    <update id="rejectStamp">
+        UPDATE stamps SET status = 'REJECTED', revoke_reason = #{reason}, revoked_at = #{now}, revoked_by = #{staffId}
+        WHERE id = #{stampId}
+    </update>
+
+    <update id="rejectTimedOut">
+        UPDATE stamps s SET status = 'REJECTED', revoke_reason = 'PENDING_TIMEOUT', revoked_at = #{now}
+        WHERE s.status = 'PENDING'
+          AND s.created_at + make_interval(mins => (
+                SELECT p.pending_timeout_minutes FROM stamp_policies p
+                WHERE p.branch_id = s.branch_id OR p.branch_id IS NULL
+                ORDER BY p.branch_id NULLS LAST
+                LIMIT 1)) &lt;= #{now}
+    </update>
+
+    <update id="touchCustomerVisit">
+        UPDATE customers
+        SET last_visit_at = GREATEST(COALESCE(last_visit_at, #{at}), #{at}), last_branch_id = #{branchId}
+        WHERE id = #{customerId}
+    </update>
+</mapper>

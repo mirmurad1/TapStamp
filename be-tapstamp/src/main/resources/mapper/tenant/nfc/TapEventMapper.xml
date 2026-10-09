@@ -17,4 +17,15 @@
         ORDER BY created_at DESC
         LIMIT 1
     </select>
+
+    <select id="countCooldownRejections" resultType="int">
+        SELECT count(*) FROM tap_events
+        WHERE customer_id = #{customerId} AND stage = 'CLAIM' AND reason = 'STAMP_COOLDOWN_ACTIVE'
+          AND created_at &gt; #{since}
+    </select>
+
+    <select id="countAccountsForBrowser" resultType="int">
+        SELECT count(DISTINCT customer_id) FROM tap_events
+        WHERE browser_id_hash = #{browserIdHash} AND stage = 'CLAIM' AND outcome = 'ACCEPTED' AND created_at &gt; #{since}
+    </select>
 </mapper>

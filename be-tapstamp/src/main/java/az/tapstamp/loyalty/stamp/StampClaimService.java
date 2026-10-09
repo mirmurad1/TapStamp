@@ -1,7 +1,5 @@
 package az.tapstamp.loyalty.stamp;
 
-import static az.tapstamp.shared.persistence.SqlTime.ts;
-
 import java.security.MessageDigest;
 import java.time.Clock;
 import java.time.Duration;
@@ -15,6 +13,7 @@ import java.util.UUID;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.CustomerStore;
 import az.tapstamp.customer.auth.OtpChallengeStore;
+import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
 import az.tapstamp.nfc.BrowserIdCookie;
@@ -23,16 +22,14 @@ import az.tapstamp.nfc.TapEventLog.Event;
 import az.tapstamp.nfc.TapEventLog.Source;
 import az.tapstamp.nfc.TapEventLog.Stage;
 import az.tapstamp.nfc.TapEventLog;
+import az.tapstamp.nfc.repository.TapEventMapper;
 import az.tapstamp.nfc.repository.TapTokenMapper.TapToken;
 import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.security.token.SecureTokens;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.shared.web.ClientInfo;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -55,8 +52,6 @@ public class StampClaimService {
     /** Bir brauzerdən bir gündə bu qədər fərqli hesab — fırıldaq işarəsi. */
     static final int MULTI_ACCOUNT_THRESHOLD = 3;
     static final int COOLDOWN_HAMMERING_THRESHOLD = 3;
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-
     public record ClaimResult(UUID stampId, StampStatus status, int currentStamps, int stampsRequired,
                               UUID giftCardId, UUID branchId) {
     }
@@ -82,13 +77,15 @@ public class StampClaimService {
     private final CustomerStore customers;
     private final OtpChallengeStore challenges;
     private final CompanySettings companySettings;
-    private final JdbcClient jdbc;
+    private final StampMapper stamps;
+    private final TapEventMapper tapEvents;
     private final TransactionTemplate tx;
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerStore customers, OtpChallengeStore challenges, CompanySettings companySettings,
-                             @Qualifier("tenantJdbc") JdbcClient jdbc, PlatformTransactionManager transactionManager,
+                             StampMapper stamps, TapEventMapper tapEvents,
+                             PlatformTransactionManager transactionManager,
                              Clock clock) {
         this.tokens = tokens;
         this.events = events;
@@ -97,7 +94,8 @@ public class StampClaimService {
         this.customers = customers;
         this.challenges = challenges;
         this.companySettings = companySettings;
-        this.jdbc = jdbc;
+        this.stamps = stamps;
+        this.tapEvents = tapEvents;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
     }
@@ -111,8 +109,7 @@ public class StampClaimService {
         Instant now = clock.instant();
         return tokens.find(SecureTokens.hash(token == null ? "" : token)).map(found -> new TapStatus(
                 found.effectiveStatus(now), found.branchId(),
-                jdbc.sql("SELECT name::text FROM branches WHERE id = :id").param("id", found.branchId())
-                        .query((rs, n) -> TEXT.convertToEntityAttribute(rs.getString(1))).single(),
+                stamps.findBranchName(found.branchId()),
                 found.status() == TapTokenMapper.Status.RESERVED ? found.reservedUntil() : found.expiresAt(),
                 MessageDigest.isEqual(found.bindingHash(), BrowserIdCookie.bindingHash(browserId))));
     }
@@ -248,14 +245,7 @@ public class StampClaimService {
     }
 
     private void detectCooldownHammering(TapToken token, UUID customerId, Instant now) {
-        int recent = jdbc.sql("""
-                        SELECT count(*) FROM tap_events
-                        WHERE customer_id = :customerId AND stage = 'CLAIM' AND reason = 'STAMP_COOLDOWN_ACTIVE'
-                          AND created_at > :since""")
-                .param("customerId", customerId)
-                .param("since", ts(now.minus(Duration.ofHours(1))))
-                .query(Integer.class)
-                .single();
+        int recent = tapEvents.countCooldownRejections(customerId, now.minus(Duration.ofHours(1)));
         if (recent >= COOLDOWN_HAMMERING_THRESHOLD) {
             fraudFlags.raise(FraudFlags.Type.COOLDOWN_HAMMERING, FraudFlags.Severity.MEDIUM, token.tagId(), customerId,
                     Map.of("attemptsLastHour", recent), now);
@@ -267,14 +257,7 @@ public class StampClaimService {
      * piştaxtada növbə ola bilər.)
      */
     private void detectMultiAccount(TapToken token, UUID customerId, Source source, Instant now) {
-        int accounts = jdbc.sql("""
-                        SELECT count(DISTINCT customer_id) FROM tap_events
-                        WHERE browser_id_hash = :browser AND stage = 'CLAIM' AND outcome = 'ACCEPTED'
-                          AND created_at > :since""")
-                .param("browser", source.browserIdHash())
-                .param("since", ts(now.minus(Duration.ofDays(1))))
-                .query(Integer.class)
-                .single();
+        int accounts = tapEvents.countAccountsForBrowser(source.browserIdHash(), now.minus(Duration.ofDays(1)));
         if (accounts >= MULTI_ACCOUNT_THRESHOLD) {
             fraudFlags.raise(FraudFlags.Type.RAPID_MULTI_ACCOUNT, FraudFlags.Severity.HIGH, token.tagId(), customerId,
                     Map.of("accountsFromBrowserLastDay", accounts), now);
