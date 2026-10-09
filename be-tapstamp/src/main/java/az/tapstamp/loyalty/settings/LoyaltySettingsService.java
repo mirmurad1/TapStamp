@@ -12,6 +12,7 @@ import java.util.UUID;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.loyalty.reward.GiftCardService;
 import az.tapstamp.security.admin.AccessPolicy;
+import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
@@ -73,14 +74,17 @@ public class LoyaltySettingsService {
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
+    private final AdminAuthService adminAuth;
 
     public LoyaltySettingsService(@Qualifier("tenantJdbc") JdbcClient jdbc, GiftCardService giftCards,
-                                  AuditLogger audit, PlatformTransactionManager transactionManager, Clock clock) {
+                                  AuditLogger audit, PlatformTransactionManager transactionManager, Clock clock,
+                                  AdminAuthService adminAuth) {
         this.jdbc = jdbc;
         this.giftCards = giftCards;
         this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
+        this.adminAuth = adminAuth;
     }
 
     public StampRules stampRules(AdminPrincipal principal) {
@@ -124,6 +128,10 @@ public class LoyaltySettingsService {
 
     public RewardChange updateReward(AdminPrincipal principal, RewardUpdate update) {
         AccessPolicy.requireCompanyWide(principal);
+        if (update.existingCards() == ExistingCards.APPLY_NOW) {
+            // Kütləvi hədiyyə kartı verə bilər — kimliyin təkrar təsdiqi (2FA yoxdursa şifrə ilə)
+            adminAuth.requireStepUp(principal);
+        }
         Instant now = clock.instant();
         return tx.execute(status -> {
             // Paralel iki dəyişiklik eyni versiya nömrəsini almasın

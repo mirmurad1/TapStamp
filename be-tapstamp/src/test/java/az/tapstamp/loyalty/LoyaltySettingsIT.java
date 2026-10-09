@@ -119,6 +119,14 @@ class LoyaltySettingsIT extends AdminIntegrationTest {
                     .andExpect(jsonPath("$.giftCardsIfAppliedNow").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
             owner.get("/settings/reward-rule/impact?stampsRequired=0").andExpect(status().isBadRequest());
 
+            // "Hamıya dərhal" kimliyin təsdiqi olmadan rədd edilir (standart rejim təsdiqsiz işləyir)
+            String unconfirmed = uniqueEmail("owner");
+            createStaff(HOST, unconfirmed, AdminRole.COMPANY_OWNER, null, false);
+            signedInStaff(HOST, unconfirmed, false).put("/settings/reward-rule", Map.of("stampsRequired", 6,
+                            "rewardName", Map.of("az", "Hədiyyə qəhvə"), "existingCards", "APPLY_NOW"))
+                    .andExpect(jsonPath("$.code").value("STEP_UP_REQUIRED"));
+            assertThat(count("SELECT count(*) FROM reward_rules WHERE active AND stamps_required = 6")).isZero();
+
             // Standart: heç kimə dərhal hədiyyə verilmir, yarımçıq kartlar köhnə (9) qaydaya bağlanır
             owner.put("/settings/reward-rule", Map.of("stampsRequired", 5, "rewardName", Map.of("az", "Yeni hədiyyə")))
                     .andExpect(status().isOk())
@@ -160,8 +168,11 @@ class LoyaltySettingsIT extends AdminIntegrationTest {
 
     private AdminClient owner() throws Exception {
         String email = uniqueEmail("owner");
-        createStaff(HOST, email, AdminRole.COMPANY_OWNER, null, true);
-        return signedInStaff(HOST, email, true);
+        createStaff(HOST, email, AdminRole.COMPANY_OWNER, null, false);
+        AdminClient owner = signedInStaff(HOST, email, false);
+        // "Hamıya dərhal" (APPLY_NOW) kimliyin təsdiqini tələb edir: 2FA yoxdur — şifrə ilə
+        owner.post("/auth/step-up", Map.of("password", PASSWORD)).andExpect(status().isNoContent());
+        return owner;
     }
 
     private String staffAccount(AdminRole role) {

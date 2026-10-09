@@ -1472,7 +1472,7 @@
         "tags" : [ "Admin: parametrlər" ]
       },
       "put" : {
-        "description" : "Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.",
+        "description" : "Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — kimliyin təsdiqi (step-up) tələb olunur; yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.",
         "operationId" : "updateRewardRule",
         "requestBody" : {
           "content" : {

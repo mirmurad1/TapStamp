@@ -119,7 +119,7 @@ public class LoyaltySettingsController {
     @Operation(summary = "Hədiyyə qaydasının dəyişdirilməsi", description = """
             Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq \
             (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. \
-            APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan \
+            APPLY_NOW — kimliyin təsdiqi (step-up) tələb olunur; yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan \
             müştərilərə hədiyyə kartı verilir.""")
     RewardSettingsResponse updateRewardRule(@Valid @RequestBody RewardSettingsRequest request,
                                         @AuthenticationPrincipal AdminPrincipal principal) {

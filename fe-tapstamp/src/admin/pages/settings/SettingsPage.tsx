@@ -11,6 +11,7 @@ import { Field } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
 import { settingsApi, type ExistingCards, type RewardImpact, type RewardSettings, type StampPolicy } from '../../api/adminApi';
+import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { BranchesCard } from './BranchesCard';
@@ -120,14 +121,18 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
   const [validity, setValidity] = useState(initial?.validityDays ? String(initial.validityDays) : '');
   const [issued, setIssued] = useState<number>();
   const [impact, setImpact] = useState<RewardImpact>();
+  const withStepUp = useStepUp();
   const save = useMutation({
+    // "Hamıya dərhal" kimliyin təsdiqini tələb edir (2FA yoxdursa şifrə) — StepUpProvider pəncərə açır
     mutationFn: (existingCards: ExistingCards) =>
-      settingsApi.updateRewardRule({
-        stampsRequired: Number(stamps),
-        rewardName: { az: nameAz.trim(), en: nameEn.trim() || undefined, ru: nameRu.trim() || undefined },
-        validityDays: validity.trim() ? Number(validity) : undefined,
-        existingCards,
-      }),
+      withStepUp(() =>
+        settingsApi.updateRewardRule({
+          stampsRequired: Number(stamps),
+          rewardName: { az: nameAz.trim(), en: nameEn.trim() || undefined, ru: nameRu.trim() || undefined },
+          validityDays: validity.trim() ? Number(validity) : undefined,
+          existingCards,
+        }),
+      ),
     onSuccess: (updated) => {
       setImpact(undefined);
       setIssued(updated.giftCardsIssued ?? 0);
