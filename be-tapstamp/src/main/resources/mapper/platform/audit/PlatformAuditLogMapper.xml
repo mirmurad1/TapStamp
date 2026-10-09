@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Platformanın audit jurnalı: şirkətlərin yaradılması, dayandırılması, domenlər, çiplər -->
+<mapper namespace="az.tapstamp.audit.repository.PlatformAuditLogMapper">
+
+    <insert id="insert">
+        INSERT INTO platform_audit_logs (id, actor_id, action, target_type, target_id, ip, user_agent, details,
+                                         created_at)
+        VALUES (#{id}, #{actorId}, #{action}, #{targetType}, #{targetId}, CAST(#{ip} AS inet), #{userAgent},
+                CAST(#{details} AS jsonb), #{createdAt})
+    </insert>
+
+    <select id="list" resultType="az.tapstamp.audit.PlatformAuditEntry">
+        SELECT a.id, a.actor_id, coalesce(p.display_name, p.email) AS actor_name, a.action, a.target_type,
+               a.target_id, a.details::text AS details, host(a.ip) AS ip, a.created_at
+        FROM platform_audit_logs a
+        LEFT JOIN platform_admins p ON p.id = a.actor_id
+        <where>
+            <if test="action != null">a.action = #{action}</if>
+            <if test="before != null">AND a.created_at &lt; #{before}</if>
+        </where>
+        ORDER BY a.created_at DESC, a.id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

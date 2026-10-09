@@ -1,6 +1,7 @@
 package az.tapstamp.security.admin;
 
 import java.util.Optional;
+import java.util.Properties;
 
 import az.tapstamp.tenancy.RequestScope;
 
@@ -64,6 +65,20 @@ public enum AdminRealm {
 
     String userIdColumn() {
         return userIdColumn;
+    }
+
+    /**
+     * MyBatis mapper-lərindəki dəyişənlər ({@code mapper/admin/*.xml}): cədvəl və sütun adları. Sabitdir, istifadəçi
+     * məlumatından qurulmur; SQL-ə XML yüklənəndə bir dəfə yerləşdirilir.
+     */
+    public Properties mapperVariables() {
+        Properties variables = new Properties();
+        variables.setProperty("admin.users", usersTable);
+        variables.setProperty("admin.sessions", sessionsTable);
+        variables.setProperty("admin.recoveryCodes", recoveryCodesTable);
+        variables.setProperty("admin.resetTokens", resetTokensTable);
+        variables.setProperty("admin.userId", userIdColumn);
+        return variables;
     }
 
     /** Tam (MFA keçmiş) sessiyanın authority-si: STAFF_SESSION və ya PLATFORM_SESSION. */

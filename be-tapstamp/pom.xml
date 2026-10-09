@@ -26,6 +26,8 @@
         <bouncycastle.version>1.86</bouncycastle.version>
         <bucket4j.version>8.21.0</bucket4j.version>
         <libphonenumber.version>9.0.40</libphonenumber.version>
+        <mybatis.version>3.5.19</mybatis.version>
+        <mybatis-spring.version>4.1.0</mybatis-spring.version>
         <!-- Təhlükəsizlik yamaqları (Trivy, Mərhələ 9): Spring Boot 4.1.1-in versiyaları üzərinə; Boot-un növbəti
              buraxılışı bu versiyaları özü gətirəndə silinməlidir -->
         <!-- Tomcat 11.0.24: CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 (kritik) -->
@@ -75,6 +77,18 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <!-- SQL: MyBatis (sorğular resources/mapper/**/*.xml fayllarında) -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>${mybatis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>${mybatis-spring.version}</version>
         </dependency>
 
         <!-- Şifrələr (Argon2id), rate limiting, email -->
