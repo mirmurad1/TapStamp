@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Komanda və işçi dəvətləri -->
+<mapper namespace="az.tapstamp.staff.repository.StaffMapper">
+
+    <select id="members" resultType="az.tapstamp.staff.repository.StaffMapper$MemberRow">
+        SELECT id, email, display_name, status, totp_enabled_at, last_login_at
+        FROM staff_users
+        WHERE status NOT IN ('INVITED', 'DELETED')
+        ORDER BY created_at
+    </select>
+
+    <select id="roles" resultType="az.tapstamp.staff.repository.StaffMapper$RoleRow">
+        SELECT staff_user_id, role, branch_id FROM staff_roles
+    </select>
+
+    <insert id="insertRole">
+        INSERT INTO staff_roles (id, staff_user_id, role, branch_id, created_at)
+        VALUES (#{id}, #{staffUserId}, #{role}, #{branchId}, #{now})
+    </insert>
+
+    <select id="countActiveOwners" resultType="int">
+        SELECT count(DISTINCT u.id)
+        FROM staff_users u
+        JOIN staff_roles r ON r.staff_user_id = u.id
+        WHERE r.role = 'COMPANY_OWNER' AND u.status = 'ACTIVE'
+        <if test="excluded != null">AND u.id &lt;&gt; #{excluded}</if>
+    </select>
+
+    <select id="pendingInvitations" resultType="az.tapstamp.staff.service.InvitationService$InvitationView">
+        SELECT id, email, role, branch_id, language, expires_at, created_at
+        FROM staff_invitations
+        WHERE accepted_at IS NULL AND revoked_at IS NULL AND expires_at &gt; #{now}
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="revokeInvitation">
+        UPDATE staff_invitations SET revoked_at = #{now} WHERE id = #{id} AND revoked_at IS NULL
+    </update>
+
+    <update id="revokeInvitationsForEmail">
+        UPDATE staff_invitations SET revoked_at = #{now}
+        WHERE email = #{email} AND accepted_at IS NULL AND revoked_at IS NULL
+    </update>
+
+    <insert id="insertInvitation">
+        INSERT INTO staff_invitations (id, email, role, branch_id, token_hash, expires_at, invited_by, created_at,
+                                       language)
+        VALUES (#{id}, #{email}, #{role}, #{branchId}, #{tokenHash}, #{expiresAt}, #{invitedBy}, #{now}, #{language})
+    </insert>
+
+    <select id="findOpenInvitation" resultType="az.tapstamp.staff.repository.StaffMapper$OpenInvitation">
+        SELECT id, email, role, branch_id, language
+        FROM staff_invitations
+        WHERE token_hash = #{tokenHash} AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at &gt; #{now}
+        <if test="lock">FOR UPDATE</if>
+    </select>
+
+    <update id="markInvitationAccepted">
+        UPDATE staff_invitations SET accepted_at = #{now} WHERE id = #{id}
+    </update>
+
+    <select id="activeBranchExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId} AND status = 'ACTIVE')
+    </select>
+
+    <select id="findBranchName" resultType="az.tapstamp.shared.i18n.LocalizedText">
+        SELECT name FROM branches WHERE id = #{branchId}
+    </select>
+
+    <select id="findCompanyName" resultType="az.tapstamp.shared.i18n.LocalizedText">
+        SELECT name FROM company_profile WHERE singleton
+    </select>
+</mapper>

@@ -105,7 +105,7 @@ public class TenantProvisioner {
                                 :host, :port, :db, :owner, :ownerPwd, :app, :appPwd, now(), now())""")
                 .param("id", id)
                 .param("slug", slug)
-                .param("name", TEXT.convertToDatabaseColumn(command.displayName()))
+                .param("name", TEXT.toJson(command.displayName()))
                 .param("lang", command.defaultLanguage().tag())
                 .param("tz", command.timezone())
                 .param("host", properties.dbHost())
@@ -162,7 +162,7 @@ public class TenantProvisioner {
                         INSERT INTO company_profile (singleton, name, timezone, default_language, updated_at)
                         VALUES (true, CAST(:name AS jsonb), :tz, :lang, now())
                         ON CONFLICT (singleton) DO NOTHING""")
-                .param("name", TEXT.convertToDatabaseColumn(command.displayName()))
+                .param("name", TEXT.toJson(command.displayName()))
                 .param("tz", command.timezone())
                 .param("lang", command.defaultLanguage().tag())
                 .update();

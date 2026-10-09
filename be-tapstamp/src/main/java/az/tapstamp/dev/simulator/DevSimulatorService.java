@@ -67,7 +67,7 @@ public class DevSimulatorService {
                 .query((rs, n) -> new SimulatedTag(rs.getObject("id", UUID.class), HEX.formatHex(rs.getBytes("uid")),
                         rs.getString("label"), TagType.valueOf(rs.getString("type")),
                         "ACTIVE".equals(rs.getString("status")), rs.getInt("last_counter"),
-                        rs.getObject("branch_id", UUID.class), TEXT.convertToEntityAttribute(rs.getString("branch"))))
+                        rs.getObject("branch_id", UUID.class), TEXT.fromJson(rs.getString("branch"))))
                 .list();
     }
 

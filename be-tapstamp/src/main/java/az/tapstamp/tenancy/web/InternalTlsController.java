@@ -9,11 +9,10 @@ import java.util.Locale;
 import az.tapstamp.config.AppProperties;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.tenancy.repository.TenantRegistryMapper;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,13 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class InternalTlsController {
 
-    private final JdbcClient platform;
+    private final TenantRegistryMapper registry;
     private final AppProperties properties;
     private final byte[] token;
 
-    public InternalTlsController(@Qualifier("platformJdbc") JdbcClient platform, AppProperties properties,
+    public InternalTlsController(TenantRegistryMapper registry, AppProperties properties,
                                  @Value("${app.internal-token:}") String token) {
-        this.platform = platform;
+        this.registry = registry;
         this.properties = properties;
         this.token = token.getBytes(StandardCharsets.UTF_8);
     }
@@ -46,11 +45,7 @@ public class InternalTlsController {
                 || !MessageDigest.isEqual(token, provided.getBytes(StandardCharsets.UTF_8))) {
             throw new ApiException(ErrorCode.NOT_FOUND);
         }
-        List<String> domains = new ArrayList<>(platform.sql("""
-                        SELECT d.hostname FROM tenant_domains d JOIN tenants t ON t.id = d.tenant_id
-                        WHERE t.status IN ('ACTIVE', 'SUSPENDED') ORDER BY d.hostname""")
-                .query(String.class)
-                .list());
+        List<String> domains = new ArrayList<>(registry.findCertificateHostnames());
         domains.add(properties.platformDomain().toLowerCase(Locale.ROOT));
         return String.join("\n", domains.stream().distinct().toList()) + "\n";
     }

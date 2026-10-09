@@ -272,7 +272,7 @@ final class TenantSeedWriter {
                     .addValue("customerId", customerId)
                     .addValue("ruleId", ruleId)
                     .addValue("stampsRequired", rule.stampsRequired())
-                    .addValue("rewardName", TEXT.convertToDatabaseColumn(rule.name()))
+                    .addValue("rewardName", TEXT.toJson(rule.name()))
                     .addValue("status", reward.redeemedAt == null ? "AVAILABLE" : "REDEEMED")
                     .addValue("earnedAt", ts(reward.earnedAt))
                     .addValue("redeemedAt", reward.redeemedAt == null ? null : ts(reward.redeemedAt)));
@@ -400,7 +400,7 @@ final class TenantSeedWriter {
                                                    brand_color = :brandColor,
                                                    updated_at = :now""",
                 params()
-                        .addValue("description", TEXT.convertToDatabaseColumn(seed.description()))
+                        .addValue("description", TEXT.toJson(seed.description()))
                         .addValue("sender", seed.smsSenderName())
                         .addValue("brandColor", seed.brandColor()));
     }
@@ -413,9 +413,9 @@ final class TenantSeedWriter {
                                 CAST(:hours AS jsonb), 'ACTIVE', :createdAt, :now)""",
                 params()
                         .addValue("id", id)
-                        .addValue("name", TEXT.convertToDatabaseColumn(branch.name()))
-                        .addValue("address", TEXT.convertToDatabaseColumn(branch.address()))
-                        .addValue("description", TEXT.convertToDatabaseColumn(branch.description()))
+                        .addValue("name", TEXT.toJson(branch.name()))
+                        .addValue("address", TEXT.toJson(branch.address()))
+                        .addValue("description", TEXT.toJson(branch.description()))
                         .addValue("hours", branch.businessHours())
                         .addValue("createdAt", ts(now.minus(Duration.ofDays(DemoDataGenerator.HISTORY_DAYS + 30)))));
         return id;
@@ -467,8 +467,8 @@ final class TenantSeedWriter {
                 params()
                         .addValue("id", id)
                         .addValue("stamps", rule.stampsRequired())
-                        .addValue("name", TEXT.convertToDatabaseColumn(rule.name()))
-                        .addValue("description", TEXT.convertToDatabaseColumn(rule.description()))
+                        .addValue("name", TEXT.toJson(rule.name()))
+                        .addValue("description", TEXT.toJson(rule.description()))
                         .addValue("createdAt", ts(now.minus(Duration.ofDays(DemoDataGenerator.HISTORY_DAYS + 30)))));
         return id;
     }
@@ -481,7 +481,7 @@ final class TenantSeedWriter {
                 params()
                         .addValue("id", id)
                         .addValue("type", type)
-                        .addValue("content", TEXT.convertToDatabaseColumn(content))
+                        .addValue("content", TEXT.toJson(content))
                         .addValue("publishedAt", ts(now.minus(Duration.ofDays(DemoDataGenerator.HISTORY_DAYS + 30)))));
         return id;
     }

@@ -1,6 +1,7 @@
 package az.tapstamp.tenancy.datasource;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Properties;
 import java.util.UUID;
 import javax.sql.DataSource;
@@ -14,6 +15,7 @@ import az.tapstamp.shared.persistence.mybatis.InstantTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.LanguageTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.LocalizedTextTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.UuidTypeHandler;
+import az.tapstamp.shared.persistence.mybatis.ZoneIdTypeHandler;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -74,6 +76,7 @@ public class MyBatisConfig {
         configuration.getTypeHandlerRegistry().register(UUID.class, UuidTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(LocalizedText.class, LocalizedTextTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(Language.class, LanguageTypeHandler.class);
+        configuration.getTypeHandlerRegistry().register(ZoneId.class, ZoneIdTypeHandler.class);
         Properties variables = realm.mapperVariables();
         configuration.setVariables(variables);
 

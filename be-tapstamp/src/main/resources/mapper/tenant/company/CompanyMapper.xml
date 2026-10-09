@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Şirkətin profili, filiallar və filial üzrə möhür qaydası -->
+<mapper namespace="az.tapstamp.company.repository.CompanyMapper">
+
+    <!-- Profil -->
+
+    <select id="findSettings" resultType="az.tapstamp.company.repository.CompanyMapper$SettingsRow">
+        SELECT name, array_to_string(allowed_phone_regions, ',') AS allowed_phone_regions, sms_sender_name, timezone,
+               brand_color
+        FROM company_profile
+        WHERE singleton
+    </select>
+
+    <select id="findCompany" resultType="az.tapstamp.company.service.CompanyAdminService$Company">
+        SELECT name, description, timezone, default_language, brand_color, sms_sender_name
+        FROM company_profile
+        WHERE singleton
+    </select>
+
+    <update id="updateCompany">
+        UPDATE company_profile
+        SET name = CAST(#{company.name} AS jsonb), description = CAST(#{company.description} AS jsonb),
+            timezone = #{company.timezone}, default_language = #{company.defaultLanguage},
+            brand_color = #{company.brandColor}, sms_sender_name = #{company.smsSenderName},
+            updated_at = #{now}, version = version + 1
+        WHERE singleton
+    </update>
+
+    <!-- İctimai məlumat -->
+
+    <select id="activeBranches" resultType="az.tapstamp.company.api.PublicCompanyResponse$BranchResponse">
+        SELECT id, name, address, description FROM branches WHERE status = 'ACTIVE' ORDER BY created_at
+    </select>
+
+    <select id="activeRewardRule" resultType="az.tapstamp.company.api.PublicCompanyResponse$RewardRuleResponse">
+        SELECT stamps_required, reward_name, reward_description FROM reward_rules WHERE active
+    </select>
+
+    <select id="companyStampRules" resultType="az.tapstamp.company.api.PublicCompanyResponse$StampRulesResponse">
+        SELECT min_interval_minutes, max_stamps_per_day FROM stamp_policies WHERE branch_id IS NULL
+    </select>
+
+    <!-- Filiallar -->
+
+    <select id="branches" resultType="az.tapstamp.company.repository.CompanyMapper$BranchRow">
+        SELECT b.id, b.name, b.address, b.business_hours::text AS business_hours, b.status,
+               EXISTS (SELECT 1 FROM stamp_policies p WHERE p.branch_id = b.id) AS policy_overridden
+        FROM branches b
+        ORDER BY b.created_at
+    </select>
+
+    <select id="countOtherActiveBranches" resultType="int">
+        SELECT count(*) FROM branches WHERE status = 'ACTIVE' AND id &lt;&gt; #{excludedId}
+    </select>
+
+    <insert id="insertBranch">
+        INSERT INTO branches (id, name, address, business_hours, status, created_at, updated_at)
+        VALUES (#{id}, CAST(#{name} AS jsonb), CAST(#{address} AS jsonb), CAST(#{businessHours} AS jsonb), 'ACTIVE',
+                #{now}, #{now})
+    </insert>
+
+    <update id="updateBranch">
+        UPDATE branches
+        SET name = COALESCE(CAST(#{name} AS jsonb), name),
+            address = COALESCE(CAST(#{address} AS jsonb), address),
+            business_hours = <choose>
+                                 <when test="clearHours">NULL</when>
+                                 <otherwise>COALESCE(CAST(#{businessHours} AS jsonb), business_hours)</otherwise>
+                             </choose>,
+            status = COALESCE(#{status}, status), updated_at = #{now}, version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- Filialın qaydası -->
+
+    <select id="branchPolicy" resultType="az.tapstamp.company.service.CompanyAdminService$BranchPolicy">
+        SELECT branch_id IS NOT NULL AS overridden, min_interval_minutes, max_stamps_per_day, require_staff_approval,
+               pending_timeout_minutes, enforce_business_hours
+        FROM stamp_policies
+        WHERE branch_id = #{branchId} OR branch_id IS NULL
+        ORDER BY branch_id NULLS LAST
+        LIMIT 1
+    </select>
+
+    <insert id="upsertBranchPolicy">
+        INSERT INTO stamp_policies (id, branch_id, min_interval_minutes, max_stamps_per_day, require_staff_approval,
+                                    pending_timeout_minutes, enforce_business_hours, updated_by, updated_at)
+        VALUES (#{id}, #{branchId}, #{policy.minIntervalMinutes}, #{policy.maxStampsPerDay},
+                #{policy.requireStaffApproval}, #{policy.pendingTimeoutMinutes}, #{policy.enforceBusinessHours},
+                #{staffId}, #{now})
+        ON CONFLICT (branch_id) DO UPDATE
+        SET min_interval_minutes = EXCLUDED.min_interval_minutes,
+            max_stamps_per_day = EXCLUDED.max_stamps_per_day,
+            require_staff_approval = EXCLUDED.require_staff_approval,
+            pending_timeout_minutes = EXCLUDED.pending_timeout_minutes,
+            enforce_business_hours = EXCLUDED.enforce_business_hours,
+            updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at,
+            version = stamp_policies.version + 1
+    </insert>
+
+    <delete id="deleteBranchPolicy">
+        DELETE FROM stamp_policies WHERE branch_id = #{branchId}
+    </delete>
+</mapper>

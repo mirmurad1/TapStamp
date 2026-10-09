@@ -19,8 +19,7 @@ import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.security.admin.RoleGrant;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import az.tapstamp.staff.repository.StaffMapper;
 import org.springframework.stereotype.Service;
 
 /** Komanda: işçilərin siyahısı, bloklanma/aktivləşdirmə, yumşaq silinmə, itirilmiş TOTP-nin sıfırlanması. */
@@ -31,13 +30,13 @@ public class TeamService {
                              List<RoleGrant> roles, boolean totpEnabled, Instant lastLoginAt) {
     }
 
-    private final JdbcClient jdbc;
+    private final StaffMapper staff;
     private final AdminRealms realms;
     private final AdminAuthService auth;
     private final Clock clock;
 
-    public TeamService(@Qualifier("tenantJdbc") JdbcClient jdbc, AdminRealms realms, AdminAuthService auth, Clock clock) {
-        this.jdbc = jdbc;
+    public TeamService(StaffMapper staff, AdminRealms realms, AdminAuthService auth, Clock clock) {
+        this.staff = staff;
         this.realms = realms;
         this.auth = auth;
         this.clock = clock;
@@ -45,27 +44,19 @@ public class TeamService {
 
     public List<MemberView> members(AdminPrincipal principal) {
         Map<UUID, Set<RoleGrant>> roles = new HashMap<>();
-        jdbc.sql("SELECT staff_user_id, role, branch_id FROM staff_roles")
-                .query(rs -> {
-                    roles.computeIfAbsent(rs.getObject("staff_user_id", UUID.class), id -> new HashSet<>())
-                            .add(new RoleGrant(AdminRole.valueOf(rs.getString("role")), rs.getObject("branch_id", UUID.class)));
-                });
+        for (StaffMapper.RoleRow role : staff.roles()) {
+            roles.computeIfAbsent(role.staffUserId(), id -> new HashSet<>())
+                    .add(new RoleGrant(role.role(), role.branchId()));
+        }
         List<MemberView> members = new ArrayList<>();
-        jdbc.sql("""
-                        SELECT id, email, display_name, status, totp_enabled_at, last_login_at FROM staff_users
-                        WHERE status NOT IN ('INVITED', 'DELETED') ORDER BY created_at""")
-                .query(rs -> {
-                    UUID id = rs.getObject("id", UUID.class);
-                    Set<RoleGrant> grants = roles.getOrDefault(id, Set.of());
-                    if (TeamPermissions.canView(principal, grants) || id.equals(principal.userId())) {
-                        var lastLogin = rs.getTimestamp("last_login_at");
-                        members.add(new MemberView(id, rs.getString("email"), rs.getString("display_name"),
-                                AdminAccount.AccountStatus.valueOf(rs.getString("status")),
-                                grants.stream().sorted((a, b) -> a.role().compareTo(b.role())).toList(),
-                                rs.getTimestamp("totp_enabled_at") != null,
-                                lastLogin == null ? null : lastLogin.toInstant()));
-                    }
-                });
+        for (StaffMapper.MemberRow member : staff.members()) {
+            Set<RoleGrant> grants = roles.getOrDefault(member.id(), Set.of());
+            if (TeamPermissions.canView(principal, grants) || member.id().equals(principal.userId())) {
+                members.add(new MemberView(member.id(), member.email(), member.displayName(), member.status(),
+                        grants.stream().sorted((a, b) -> a.role().compareTo(b.role())).toList(),
+                        member.totpEnabledAt() != null, member.lastLoginAt()));
+            }
+        }
         return members;
     }
 
@@ -153,12 +144,6 @@ public class TeamService {
 
     /** Aktiv sahiblərin sayı ({@code excluded} istisna olmaqla). */
     private int activeOwners(UUID excluded) {
-        return jdbc.sql("""
-                        SELECT count(DISTINCT u.id) FROM staff_users u JOIN staff_roles r ON r.staff_user_id = u.id
-                        WHERE r.role = 'COMPANY_OWNER' AND u.status = 'ACTIVE'
-                          AND (CAST(:excluded AS uuid) IS NULL OR u.id <> CAST(:excluded AS uuid))""")
-                .param("excluded", excluded)
-                .query(Integer.class)
-                .single();
+        return staff.countActiveOwners(excluded);
     }
 }

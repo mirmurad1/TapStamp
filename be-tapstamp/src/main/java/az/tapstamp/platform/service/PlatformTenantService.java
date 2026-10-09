@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.platform.repository.TenantOverviewMapper;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRealm;
@@ -24,8 +25,6 @@ import az.tapstamp.tenancy.provisioning.ProvisionTenantCommand;
 import az.tapstamp.tenancy.provisioning.TenantProvisioner;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
 /**
@@ -53,12 +52,12 @@ public class PlatformTenantService {
     private final AdminRealms realms;
     private final AdminAuthService auth;
     private final AuditLogger audit;
-    private final JdbcClient tenantJdbc;
+    private final TenantOverviewMapper overview;
     private final Clock clock;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
-                                 @Qualifier("tenantJdbc") JdbcClient tenantJdbc, Clock clock) {
+                                 TenantOverviewMapper overview, Clock clock) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -66,7 +65,7 @@ public class PlatformTenantService {
         this.realms = realms;
         this.auth = auth;
         this.audit = audit;
-        this.tenantJdbc = tenantJdbc;
+        this.overview = overview;
         this.clock = clock;
     }
 
@@ -111,27 +110,12 @@ public class PlatformTenantService {
 
     public TenantStats stats(UUID tenantId) {
         TenantRecord tenant = activeTenant(tenantId);
-        return TenantContext.callAs(tenant.toInfo(), () -> new TenantStats(
-                count("SELECT count(*) FROM branches WHERE status = 'ACTIVE'"),
-                tenantJdbc.sql("SELECT count(*) FROM customers WHERE status = 'ACTIVE'").query(Long.class).single(),
-                count("SELECT count(*) FROM staff_users WHERE status = 'ACTIVE'")));
+        return TenantContext.callAs(tenant.toInfo(), overview::stats);
     }
 
     public List<OwnerView> owners(UUID tenantId) {
         TenantRecord tenant = activeTenant(tenantId);
-        return TenantContext.callAs(tenant.toInfo(), () -> tenantJdbc.sql("""
-                        SELECT DISTINCT u.id, u.email, u.display_name, u.status, u.totp_enabled_at, u.last_login_at,
-                               u.created_at
-                        FROM staff_users u JOIN staff_roles r ON r.staff_user_id = u.id
-                        WHERE r.role = 'COMPANY_OWNER' ORDER BY u.created_at""")
-                .query((rs, n) -> {
-                    var lastLogin = rs.getTimestamp("last_login_at");
-                    return new OwnerView(rs.getObject("id", UUID.class), rs.getString("email"),
-                            rs.getString("display_name"), rs.getString("status"),
-                            rs.getTimestamp("totp_enabled_at") != null,
-                            lastLogin == null ? null : lastLogin.toInstant());
-                })
-                .list());
+        return TenantContext.callAs(tenant.toInfo(), overview::owners);
     }
 
     /** Şirkətin sahibinə dəvət (ilk sahib və ya əlavə sahib). Link şirkətin öz domenində açılır. */
@@ -166,9 +150,6 @@ public class PlatformTenantService {
                 Map.of("userId", userId.toString()));
     }
 
-    private int count(String sql) {
-        return tenantJdbc.sql(sql).query(Integer.class).single();
-    }
 
     private TenantRecord tenant(UUID tenantId) {
         return directory.findById(tenantId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));

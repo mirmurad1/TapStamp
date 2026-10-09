@@ -11,6 +11,7 @@
 - Hər şirkətin ayrıca bazası var (database-per-tenant); tenant yalnız `Host` başlığından müəyyən olunur.
 - Backend: Spring Boot 4.1 / Java 21, package-by-feature (`az.tapstamp.<modul>`), controller-lər `api` və ya `web` paketində.
 - `dev` paketi yalnız `@Profile("dev")`; başqa paketlər ona istinad edə bilməz (ArchUnit).
+- Qatlar: `api` (controller) → `service` (qaydalar, tranzaksiya, audit) → `repository` (MyBatis mapper interfeysi, `@TenantMapper` və ya `@PlatformMapper`). SQL yalnız `src/main/resources/mapper/{tenant,platform,admin}/<modul>/<Mapper>.xml`-dədir; servisdə SQL və `JdbcClient` olmur (ArchUnit). Yeni mapper metodu → XML-də eyni `id` (`MyBatisMappingIT` yoxlayır).
 - Texniki sətirlərdə `toUpperCase/toLowerCase` yalnız `Locale.ROOT` ilə.
 
 ## Əmrlər

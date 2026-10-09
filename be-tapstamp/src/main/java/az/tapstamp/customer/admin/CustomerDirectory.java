@@ -146,5 +146,4 @@ public class CustomerDirectory {
                 filter.registeredFrom(), filter.registeredTo(), company.current().timezone().getId(),
                 sort.expression, filter.descending(), limit, offset);
     }
-
 }

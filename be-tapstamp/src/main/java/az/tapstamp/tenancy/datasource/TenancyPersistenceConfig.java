@@ -1,7 +1,5 @@
 package az.tapstamp.tenancy.datasource;
 
-import java.util.Map;
-
 import javax.sql.DataSource;
 
 import az.tapstamp.security.crypto.CryptoProperties;
@@ -14,33 +12,28 @@ import az.tapstamp.tenancy.TenancyProperties;
 import az.tapstamp.tenancy.TenantContext;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.JdbcTransactionManager;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * İki növ baza üçün bağlantılar:
+ * İki növ baza üçün bağlantılar və tranzaksiya menecerləri:
  * <ul>
  *   <li><b>platforma</b> — tenant reyestri; {@code platformJdbc} və {@code platformTransactionManager};</li>
- *   <li><b>tenant</b> — JPA və {@code tenantJdbc}; bağlantı cari tenant-ın bazasından verilir.</li>
+ *   <li><b>tenant</b> — bağlantı cari tenant-ın bazasından verilir ({@link TenantRoutingDataSource});
+ *       standart ({@code @Primary}) tranzaksiya meneceri.</li>
  * </ul>
- * JPA {@link TenantRoutingDataSource} üzərində qurulub; Hibernate başlanğıcda bazaya qoşulmur (tenant hələ yoxdur),
- * ona görə dialekt açıq göstərilir.
+ * SQL sorğuları MyBatis mapper-lərindədir ({@link MyBatisConfig}); {@code JdbcClient} yalnız infrastruktur üçündür
+ * (miqrasiyalar, şifrələmə açarları, yeni şirkətin yaradılması).
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "az.tapstamp")
 public class TenancyPersistenceConfig {
 
     // --- Platforma bazası ---
@@ -89,30 +82,9 @@ public class TenancyPersistenceConfig {
     }
 
     @Bean
-    LocalContainerEntityManagerFactoryBean entityManagerFactory(@Qualifier("tenantDataSource") DataSource dataSource) {
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setPackagesToScan("az.tapstamp");
-        factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        factory.setPersistenceUnitName("tenant");
-        factory.setJpaPropertyMap(Map.of(
-                // Başlanğıcda heç bir tenant bazasına qoşulmuruq; dialekt aşağıdakı versiya məlumatından seçilir
-                "hibernate.boot.allow_jdbc_metadata_access", "false",
-                "jakarta.persistence.database-product-name", "PostgreSQL",
-                "jakarta.persistence.database-major-version", "16",
-                "hibernate.hbm2ddl.auto", "none",
-                "hibernate.jdbc.time_zone", "UTC",
-                "hibernate.jdbc.batch_size", "50",
-                "hibernate.order_inserts", "true",
-                "hibernate.order_updates", "true",
-                "hibernate.query.fail_on_pagination_over_collection_fetch", "true"));
-        return factory;
-    }
-
-    @Bean
     @Primary
-    PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
+    PlatformTransactionManager transactionManager(@Qualifier("tenantDataSource") DataSource dataSource) {
+        return new JdbcTransactionManager(dataSource);
     }
 
     // --- Kriptoqrafiya ---

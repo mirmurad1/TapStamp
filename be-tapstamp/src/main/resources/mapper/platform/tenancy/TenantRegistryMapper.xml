@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Platforma reyestri: şirkətlər, onların bazaları (şifrələr şifrəli) və domenlər -->
+<mapper namespace="az.tapstamp.tenancy.repository.TenantRegistryMapper">
+
+    <sql id="tenant">
+        SELECT t.id, t.slug, t.display_name, t.status, t.default_language, t.timezone,
+               t.db_host, t.db_port, t.db_name, t.db_owner_username AS owner_username,
+               t.db_owner_password_enc AS owner_password_enc, t.db_app_username AS app_username,
+               t.db_app_password_enc AS app_password_enc
+        FROM tenants t
+    </sql>
+
+    <select id="findByHost" resultType="az.tapstamp.tenancy.registry.TenantRecord">
+        <include refid="tenant"/>
+        JOIN tenant_domains d ON d.tenant_id = t.id
+        WHERE d.hostname = #{host}
+    </select>
+
+    <select id="findById" resultType="az.tapstamp.tenancy.registry.TenantRecord">
+        <include refid="tenant"/>
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="findBySlug" resultType="az.tapstamp.tenancy.registry.TenantRecord">
+        <include refid="tenant"/>
+        WHERE t.slug = #{slug}
+    </select>
+
+    <select id="findAll" resultType="az.tapstamp.tenancy.registry.TenantRecord">
+        <include refid="tenant"/>
+        ORDER BY t.created_at
+    </select>
+
+    <update id="updateStatus">
+        UPDATE tenants
+        SET status = #{status}, last_migration_error = #{error}, updated_at = now(), version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- Domenlər -->
+
+    <select id="findPrimaryHost" resultType="string">
+        SELECT hostname FROM tenant_domains WHERE tenant_id = #{tenantId} AND is_primary
+    </select>
+
+    <select id="findHostnames" resultType="string">
+        SELECT hostname FROM tenant_domains WHERE tenant_id = #{tenantId} ORDER BY hostname
+    </select>
+
+    <select id="findDomains" resultType="az.tapstamp.platform.service.PlatformDomainService$Domain">
+        SELECT id, hostname, is_primary AS primary, tls_status, created_at
+        FROM tenant_domains
+        WHERE tenant_id = #{tenantId}
+        ORDER BY is_primary DESC, hostname
+    </select>
+
+    <select id="hostnameExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM tenant_domains WHERE hostname = #{hostname})
+    </select>
+
+    <insert id="insertDomain">
+        INSERT INTO tenant_domains (id, tenant_id, hostname, is_primary, tls_status, created_at)
+        VALUES (#{id}, #{tenantId}, #{hostname}, false, 'PENDING', #{now})
+    </insert>
+
+    <update id="clearPrimary">
+        UPDATE tenant_domains SET is_primary = false WHERE tenant_id = #{tenantId} AND is_primary
+    </update>
+
+    <update id="markPrimary">
+        UPDATE tenant_domains SET is_primary = true WHERE id = #{domainId}
+    </update>
+
+    <delete id="deleteDomain">
+        DELETE FROM tenant_domains WHERE id = #{domainId}
+    </delete>
+
+    <select id="findCertificateHostnames" resultType="string">
+        SELECT d.hostname
+        FROM tenant_domains d
+        JOIN tenants t ON t.id = d.tenant_id
+        WHERE t.status IN ('ACTIVE', 'SUSPENDED')
+        ORDER BY d.hostname
+    </select>
+</mapper>

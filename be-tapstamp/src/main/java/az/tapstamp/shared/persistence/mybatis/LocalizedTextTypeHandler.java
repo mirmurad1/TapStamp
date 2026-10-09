@@ -22,21 +22,21 @@ public class LocalizedTextTypeHandler extends BaseTypeHandler<LocalizedText> {
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, LocalizedText parameter, JdbcType jdbcType)
             throws SQLException {
-        ps.setObject(i, JSON.convertToDatabaseColumn(parameter), Types.VARCHAR);
+        ps.setObject(i, JSON.toJson(parameter), Types.VARCHAR);
     }
 
     @Override
     public LocalizedText getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        return JSON.convertToEntityAttribute(rs.getString(columnName));
+        return JSON.fromJson(rs.getString(columnName));
     }
 
     @Override
     public LocalizedText getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        return JSON.convertToEntityAttribute(rs.getString(columnIndex));
+        return JSON.fromJson(rs.getString(columnIndex));
     }
 
     @Override
     public LocalizedText getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        return JSON.convertToEntityAttribute(cs.getString(columnIndex));
+        return JSON.fromJson(cs.getString(columnIndex));
     }
 }

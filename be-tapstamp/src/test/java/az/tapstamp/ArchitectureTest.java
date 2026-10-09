@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import az.tapstamp.shared.persistence.PlatformMapper;
+import az.tapstamp.shared.persistence.TenantMapper;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -53,6 +55,25 @@ class ArchitectureTest {
             .that().areAnnotatedWith(RestController.class)
             .should().resideInAnyPackage("..api..", "..web..")
             .because("controller-lər modulun api (və ya ümumi web) qatındadır");
+
+    /**
+     * SQL yalnız MyBatis mapper-lərindədir ({@code <modul>.repository}, XML: {@code resources/mapper}). Birbaşa JDBC
+     * yalnız infrastrukturda: bağlantılar, miqrasiyalar, yeni şirkətin bazasının yaradılması, şifrələmə açarları (bunlar
+     * tenant konteksti olmadan və ya xüsusi bağlantı ilə işləyir) və dev test məlumatları.
+     */
+    @ArchTest
+    static final ArchRule sqlOnlyInMappersOrInfrastructure = noClasses()
+            .that().resideOutsideOfPackages("az.tapstamp.tenancy.datasource..", "az.tapstamp.tenancy.migration..",
+                    "az.tapstamp.tenancy.provisioning..", "az.tapstamp.security.crypto..", "az.tapstamp.dev..")
+            .should().dependOnClassesThat().resideInAnyPackage("org.springframework.jdbc.core..")
+            .because("biznes kodu bazaya yalnız repository qatındakı mapper-lər vasitəsilə müraciət edir");
+
+    @ArchTest
+    static final ArchRule mappersLiveInRepositoryPackages = classes()
+            .that().areAnnotatedWith(TenantMapper.class).or().areAnnotatedWith(PlatformMapper.class)
+            .should().resideInAPackage("..repository..")
+            .andShould().beInterfaces()
+            .because("hər modulun SQL qatı onun repository paketindədir");
 
     @ArchTest
     static final ArchRule noStandardStreams = GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;

@@ -1,14 +1,10 @@
 package az.tapstamp.company.service;
 
-import java.sql.Array;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.List;
 
+import az.tapstamp.company.repository.CompanyMapper;
 import az.tapstamp.shared.i18n.LocalizedText;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 /** Şirkət profilindən müştəri girişi üçün lazım olan parametrlər (cari tenant). */
@@ -26,27 +22,18 @@ public class CompanySettings {
                            String brandColor) {
     }
 
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
+    private final CompanyMapper companies;
 
-    private final JdbcClient jdbc;
-
-    public CompanySettings(@Qualifier("tenantJdbc") JdbcClient jdbc) {
-        this.jdbc = jdbc;
+    public CompanySettings(CompanyMapper companies) {
+        this.companies = companies;
     }
 
     public Settings current() {
-        return jdbc.sql("""
-                        SELECT name::text AS name, allowed_phone_regions, sms_sender_name, timezone, brand_color
-                        FROM company_profile WHERE singleton""")
-                .query((rs, n) -> {
-                    Array regions = rs.getArray("allowed_phone_regions");
-                    List<String> allowed = regions == null ? List.of("AZ")
-                            : Arrays.stream((Object[]) regions.getArray()).map(String::valueOf).toList();
-                    return new Settings(TEXT.convertToEntityAttribute(rs.getString("name")), allowed,
-                            rs.getString("sms_sender_name"), ZoneId.of(rs.getString("timezone")),
-                            rs.getString("brand_color"));
-                })
-                .optional()
+        return companies.findSettings()
+                .map(row -> new Settings(row.name(),
+                        row.allowedPhoneRegions() == null || row.allowedPhoneRegions().isBlank()
+                                ? List.of("AZ") : List.of(row.allowedPhoneRegions().split(",")),
+                        row.smsSenderName(), ZoneId.of(row.timezone()), row.brandColor()))
                 .orElseThrow(() -> new IllegalStateException("company_profile is missing"));
     }
 }

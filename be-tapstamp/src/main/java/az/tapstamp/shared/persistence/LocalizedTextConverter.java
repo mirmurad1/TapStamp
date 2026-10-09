@@ -4,24 +4,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import az.tapstamp.shared.i18n.LocalizedText;
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * {@link LocalizedText} ↔ JSONB. Sütun {@code @ColumnTransformer(write = "?::jsonb")} ilə yazılır,
- * oxunanda PostgreSQL JSONB dəyərini mətn kimi qaytarır.
+ * {@link LocalizedText} ↔ JSONB mətni ({@code {"az": "...", "en": "...", "ru": "..."}}): boş tərcümələr yazılmır,
+ * oxunanda yoxdursa null qalır. MyBatis tip çeviricisi ({@code LocalizedTextTypeHandler}) bu sinfi istifadə edir.
  */
-@Converter
-public class LocalizedTextConverter implements AttributeConverter<LocalizedText, String> {
+public class LocalizedTextConverter {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final TypeReference<Map<String, String>> MAP_TYPE = new TypeReference<>() {
     };
 
-    @Override
-    public String convertToDatabaseColumn(LocalizedText text) {
+    public String toJson(LocalizedText text) {
         if (text == null) {
             return null;
         }
@@ -36,8 +32,7 @@ public class LocalizedTextConverter implements AttributeConverter<LocalizedText,
         return JSON.writeValueAsString(map);
     }
 
-    @Override
-    public LocalizedText convertToEntityAttribute(String json) {
+    public LocalizedText fromJson(String json) {
         if (json == null) {
             return null;
         }

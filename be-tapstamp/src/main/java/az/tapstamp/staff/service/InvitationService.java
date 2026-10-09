@@ -2,8 +2,6 @@ package az.tapstamp.staff.service;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +20,6 @@ import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRealm;
 import az.tapstamp.security.admin.AdminRealms;
 import az.tapstamp.security.admin.AdminRole;
-import az.tapstamp.shared.web.ClientInfo;
 import az.tapstamp.security.password.PasswordHasher;
 import az.tapstamp.security.ratelimit.RateLimitPolicy;
 import az.tapstamp.security.ratelimit.RateLimiter;
@@ -31,12 +28,13 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.shared.pii.EmailMasker;
+import az.tapstamp.shared.web.ClientInfo;
+import az.tapstamp.staff.repository.StaffMapper.OpenInvitation;
+import az.tapstamp.staff.repository.StaffMapper;
 import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -56,12 +54,7 @@ public class InvitationService {
                                     Language language) {
     }
 
-    private record OpenInvitation(UUID id, String email, AdminRole role, UUID branchId, Language language) {
-    }
-
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-
-    private final JdbcClient jdbc;
+    private final StaffMapper staff;
     private final TransactionTemplate tx;
     private final AdminRealms realms;
     private final AdminAuthService auth;
@@ -74,12 +67,12 @@ public class InvitationService {
     private final AdminAuthProperties properties;
     private final Clock clock;
 
-    public InvitationService(@Qualifier("tenantJdbc") JdbcClient jdbc, PlatformTransactionManager transactionManager,
+    public InvitationService(StaffMapper staff, PlatformTransactionManager transactionManager,
                              AdminRealms realms, AdminAuthService auth, PasswordHasher hasher, RateLimiter rateLimiter,
                              MailSender mail, MailTemplates templates,
                              @Qualifier("applicationTaskExecutor") TaskExecutor mailExecutor, AuditLogger audit,
                              AdminAuthProperties properties, Clock clock) {
-        this.jdbc = jdbc;
+        this.staff = staff;
         this.tx = new TransactionTemplate(transactionManager);
         this.realms = realms;
         this.auth = auth;
@@ -114,21 +107,7 @@ public class InvitationService {
     public List<InvitationView> pending(AdminPrincipal principal) {
         boolean owner = principal.hasRole(AdminRole.COMPANY_OWNER);
         Set<UUID> managed = TeamPermissions.managedBranches(principal);
-        return jdbc.sql("""
-                        SELECT id, email, role, branch_id, language, expires_at, created_at FROM staff_invitations
-                        WHERE accepted_at IS NULL AND revoked_at IS NULL AND expires_at > :now
-                        ORDER BY created_at DESC""")
-                .param("now", ts(clock.instant()))
-                .query((rs, n) -> new InvitationView(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("email"),
-                        AdminRole.valueOf(rs.getString("role")),
-                        rs.getObject("branch_id", UUID.class),
-                        Language.fromTag(rs.getString("language")).orElse(Language.DEFAULT),
-                        rs.getTimestamp("expires_at").toInstant(),
-                        rs.getTimestamp("created_at").toInstant()))
-                .list()
-                .stream()
+        return staff.pendingInvitations(clock.instant()).stream()
                 .filter(view -> owner || (view.branchId() != null && managed.contains(view.branchId())))
                 .toList();
     }
@@ -139,10 +118,7 @@ public class InvitationService {
                 .findFirst()
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         TeamPermissions.requireCanGrant(principal, view.role(), view.branchId());
-        jdbc.sql("UPDATE staff_invitations SET revoked_at = :now WHERE id = :id AND revoked_at IS NULL")
-                .param("now", ts(clock.instant()))
-                .param("id", invitationId)
-                .update();
+        staff.revokeInvitation(invitationId, clock.instant());
         audit.tenant("STAFF_INVITATION_REVOKED", AuditLogger.ActorType.STAFF, principal.userId(), "invitation",
                 invitationId, Map.of());
     }
@@ -172,19 +148,8 @@ public class InvitationService {
             }
             UUID id = accounts.insert(invitation.email(), hasher.hash(password), displayName.strip(),
                     invitation.language(), AdminAccount.AccountStatus.ACTIVE, now);
-            jdbc.sql("""
-                            INSERT INTO staff_roles (id, staff_user_id, role, branch_id, created_at)
-                            VALUES (:id, :userId, :role, :branchId, :now)""")
-                    .param("id", Ids.newId())
-                    .param("userId", id)
-                    .param("role", invitation.role().name())
-                    .param("branchId", invitation.branchId())
-                    .param("now", ts(now))
-                    .update();
-            jdbc.sql("UPDATE staff_invitations SET accepted_at = :now WHERE id = :id")
-                    .param("now", ts(now))
-                    .param("id", invitation.id())
-                    .update();
+            staff.insertRole(Ids.newId(), id, invitation.role(), invitation.branchId(), now);
+            staff.markInvitationAccepted(invitation.id(), now);
             return id;
         });
         audit.tenant("STAFF_INVITATION_ACCEPTED", AuditLogger.ActorType.STAFF, userId, "account", userId, Map.of());
@@ -207,26 +172,9 @@ public class InvitationService {
         String token = SecureTokens.generate();
         UUID id = Ids.newId();
         tx.executeWithoutResult(status -> {
-            jdbc.sql("""
-                            UPDATE staff_invitations SET revoked_at = :now
-                            WHERE email = :email AND accepted_at IS NULL AND revoked_at IS NULL""")
-                    .param("now", ts(now))
-                    .param("email", normalized)
-                    .update();
-            jdbc.sql("""
-                            INSERT INTO staff_invitations (id, email, role, branch_id, token_hash, expires_at, invited_by,
-                                                           created_at, language)
-                            VALUES (:id, :email, :role, :branchId, :hash, :expiresAt, :invitedBy, :now, :lang)""")
-                    .param("id", id)
-                    .param("email", normalized)
-                    .param("role", role.name())
-                    .param("branchId", branchId)
-                    .param("hash", SecureTokens.hash(token))
-                    .param("expiresAt", ts(expiresAt))
-                    .param("invitedBy", invitedBy)
-                    .param("now", ts(now))
-                    .param("lang", language.tag())
-                    .update();
+            staff.revokeInvitationsForEmail(normalized, now);
+            staff.insertInvitation(id, normalized, role, branchId, SecureTokens.hash(token), expiresAt, invitedBy, now,
+                    language);
         });
         // Token URL fraqmentindədir (#): server loglarına və Referer başlığına düşmür
         String link = realms.baseUrl(AdminRealm.STAFF) + "/admin/invitation#token=" + token;
@@ -237,44 +185,18 @@ public class InvitationService {
     }
 
     private Optional<OpenInvitation> findOpen(String token, boolean lock) {
-        return jdbc.sql("""
-                        SELECT id, email, role, branch_id, language FROM staff_invitations
-                        WHERE token_hash = :hash AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at > :now"""
-                        + (lock ? " FOR UPDATE" : ""))
-                .param("hash", SecureTokens.hash(token == null ? "" : token))
-                .param("now", ts(clock.instant()))
-                .query((rs, n) -> new OpenInvitation(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("email"),
-                        AdminRole.valueOf(rs.getString("role")),
-                        rs.getObject("branch_id", UUID.class),
-                        Language.fromTag(rs.getString("language")).orElse(Language.DEFAULT)))
-                .optional();
+        return staff.findOpenInvitation(SecureTokens.hash(token == null ? "" : token), clock.instant(), lock);
     }
 
     private boolean activeBranchExists(UUID branchId) {
-        return jdbc.sql("SELECT count(*) FROM branches WHERE id = :id AND status = 'ACTIVE'")
-                .param("id", branchId).query(Integer.class).single() > 0;
+        return staff.activeBranchExists(branchId);
     }
 
     private String branchName(UUID branchId, Language language) {
-        return jdbc.sql("SELECT name::text FROM branches WHERE id = :id")
-                .param("id", branchId)
-                .query(String.class)
-                .optional()
-                .map(json -> TEXT.convertToEntityAttribute(json).resolve(language))
-                .orElse(null);
+        return staff.findBranchName(branchId).map(name -> name.resolve(language)).orElse(null);
     }
 
     private String companyName(Language language) {
-        return jdbc.sql("SELECT name::text FROM company_profile WHERE singleton")
-                .query(String.class)
-                .optional()
-                .map(json -> TEXT.convertToEntityAttribute(json).resolve(language))
-                .orElse(TenantContext.require().slug());
-    }
-
-    private static OffsetDateTime ts(Instant instant) {
-        return instant.atOffset(ZoneOffset.UTC);
+        return staff.findCompanyName().map(name -> name.resolve(language)).orElse(TenantContext.require().slug());
     }
 }

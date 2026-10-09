@@ -3,8 +3,6 @@ package az.tapstamp.company.api;
 import java.util.List;
 import java.util.UUID;
 
-import az.tapstamp.company.domain.Branch;
-import az.tapstamp.loyalty.rule.domain.RewardRule;
 import az.tapstamp.shared.i18n.LocalizedText;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -28,17 +26,11 @@ public record PublicCompanyResponse(
     }
 
     public record BranchResponse(UUID id, LocalizedText name, LocalizedText address, LocalizedText description) {
-        public static BranchResponse from(Branch branch) {
-            return new BranchResponse(branch.getId(), branch.getName(), branch.getAddress(), branch.getDescription());
-        }
     }
 
     public record RewardRuleResponse(
             @Schema(description = "Hədiyyə üçün lazım olan möhür sayı") int stampsRequired,
             LocalizedText rewardName,
             LocalizedText rewardDescription) {
-        public static RewardRuleResponse from(RewardRule rule) {
-            return new RewardRuleResponse(rule.getStampsRequired(), rule.getRewardName(), rule.getRewardDescription());
-        }
     }
 }

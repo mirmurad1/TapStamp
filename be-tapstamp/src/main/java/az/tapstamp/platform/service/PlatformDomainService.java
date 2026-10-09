@@ -1,9 +1,7 @@
 package az.tapstamp.platform.service;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,8 +16,7 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.tenancy.registry.TenantDirectory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import az.tapstamp.tenancy.repository.TenantRegistryMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,17 +30,17 @@ public class PlatformDomainService {
     public record Domain(UUID id, String hostname, boolean primary, String tlsStatus, Instant createdAt) {
     }
 
-    private final JdbcClient platform;
+    private final TenantRegistryMapper registry;
     private final TenantDirectory directory;
     private final AdminAuthService auth;
     private final AdminRealms realms;
     private final AppProperties appProperties;
     private final Clock clock;
 
-    public PlatformDomainService(@Qualifier("platformJdbc") JdbcClient platform, TenantDirectory directory,
+    public PlatformDomainService(TenantRegistryMapper registry, TenantDirectory directory,
                                  AdminAuthService auth, AdminRealms realms, AppProperties appProperties,
                                  Clock clock) {
-        this.platform = platform;
+        this.registry = registry;
         this.directory = directory;
         this.auth = auth;
         this.realms = realms;
@@ -53,13 +50,7 @@ public class PlatformDomainService {
 
     public List<Domain> list(UUID tenantId) {
         requireTenant(tenantId);
-        return platform.sql("""
-                        SELECT id, hostname, is_primary, tls_status, created_at FROM tenant_domains
-                        WHERE tenant_id = :id ORDER BY is_primary DESC, hostname""")
-                .param("id", tenantId)
-                .query((rs, n) -> new Domain(rs.getObject("id", UUID.class), rs.getString("hostname"),
-                        rs.getBoolean("is_primary"), rs.getString("tls_status"), instant(rs.getTimestamp("created_at"))))
-                .list();
+        return registry.findDomains(tenantId);
     }
 
     /** Yeni domen (kiçik hərflə, portsuz). Platforma domeni və başqa şirkətin domeni qəbul olunmur. */
@@ -67,19 +58,10 @@ public class PlatformDomainService {
         requireTenant(tenantId);
         String host = normalize(hostname);
         UUID id = Ids.newId();
-        boolean exists = platform.sql("SELECT count(*) FROM tenant_domains WHERE hostname = :host")
-                .param("host", host).query(Integer.class).single() > 0;
-        if (exists) {
+        if (registry.hostnameExists(host)) {
             throw new ApiException(ErrorCode.ALREADY_EXISTS);
         }
-        platform.sql("""
-                        INSERT INTO tenant_domains (id, tenant_id, hostname, is_primary, tls_status, created_at)
-                        VALUES (:id, :tenantId, :host, false, 'PENDING', :now)""")
-                .param("id", id)
-                .param("tenantId", tenantId)
-                .param("host", host)
-                .param("now", clock.instant().atOffset(ZoneOffset.UTC))
-                .update();
+        registry.insertDomain(id, tenantId, host, clock.instant());
         directory.evictCaches();
         realms.audit(AdminRealm.PLATFORM, "TENANT_DOMAIN_ADDED", principal.userId(), "tenant", tenantId,
                 Map.of("hostname", host));
@@ -92,9 +74,8 @@ public class PlatformDomainService {
         Domain target = domain(tenantId, domainId);
         if (!target.primary()) {
             realms.tx(AdminRealm.PLATFORM).executeWithoutResult(status -> {
-                platform.sql("UPDATE tenant_domains SET is_primary = false WHERE tenant_id = :id AND is_primary")
-                        .param("id", tenantId).update();
-                platform.sql("UPDATE tenant_domains SET is_primary = true WHERE id = :id").param("id", domainId).update();
+                registry.clearPrimary(tenantId);
+                registry.markPrimary(domainId);
             });
             directory.evictCaches();
             realms.audit(AdminRealm.PLATFORM, "TENANT_PRIMARY_DOMAIN_CHANGED", principal.userId(), "tenant", tenantId,
@@ -110,7 +91,7 @@ public class PlatformDomainService {
         if (target.primary()) {
             throw new ApiException(ErrorCode.DOMAIN_IS_PRIMARY);
         }
-        platform.sql("DELETE FROM tenant_domains WHERE id = :id").param("id", domainId).update();
+        registry.deleteDomain(domainId);
         directory.evictCaches();
         realms.audit(AdminRealm.PLATFORM, "TENANT_DOMAIN_REMOVED", principal.userId(), "tenant", tenantId,
                 Map.of("hostname", target.hostname()));
@@ -134,7 +115,4 @@ public class PlatformDomainService {
         return host;
     }
 
-    private static Instant instant(Timestamp timestamp) {
-        return timestamp == null ? null : timestamp.toInstant();
-    }
 }

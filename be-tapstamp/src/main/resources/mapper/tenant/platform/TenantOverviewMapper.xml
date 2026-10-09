@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Platforma panelinin şirkət baxışı (şirkətin bazasından): saylar və sahiblər -->
+<mapper namespace="az.tapstamp.platform.repository.TenantOverviewMapper">
+
+    <select id="stats" resultType="az.tapstamp.platform.service.PlatformTenantService$TenantStats">
+        SELECT (SELECT count(*) FROM branches WHERE status = 'ACTIVE') AS branches,
+               (SELECT count(*) FROM customers WHERE status = 'ACTIVE') AS active_customers,
+               (SELECT count(*) FROM staff_users WHERE status = 'ACTIVE') AS active_staff
+    </select>
+
+    <select id="owners" resultType="az.tapstamp.platform.service.PlatformTenantService$OwnerView">
+        SELECT DISTINCT u.id, u.email, u.display_name, u.status, u.totp_enabled_at IS NOT NULL AS totp_enabled,
+               u.last_login_at, u.created_at
+        FROM staff_users u
+        JOIN staff_roles r ON r.staff_user_id = u.id
+        WHERE r.role = 'COMPANY_OWNER'
+        ORDER BY u.created_at
+    </select>
+</mapper>
