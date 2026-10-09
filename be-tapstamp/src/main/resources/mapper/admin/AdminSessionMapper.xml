@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Admin sessiyaları (hər iki realm); ${admin.*} — fabrikin dəyişənləri (cədvəl/sütun adları) -->
+<mapper namespace="az.tapstamp.security.admin.repository.AdminSessionMapper">
+
+    <sql id="columns">
+        id, ${admin.userId} AS user_id, state, created_at, last_activity_at, absolute_expires_at, mfa_verified_at,
+        step_up_at, mfa_failed_attempts, host(ip) AS ip, user_agent
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO ${admin.sessions} (id, ${admin.userId}, token_hash, state, created_at, last_activity_at,
+                                       absolute_expires_at, mfa_verified_at, ip, user_agent)
+        VALUES (#{id}, #{userId}, #{tokenHash}, #{state}, #{now}, #{now}, #{absoluteExpiresAt}, #{mfaVerifiedAt},
+                CAST(#{ip} AS inet), #{userAgent})
+    </insert>
+
+    <select id="findActiveByTokenHash" resultType="az.tapstamp.security.admin.AdminSession">
+        SELECT <include refid="columns"/> FROM ${admin.sessions} WHERE token_hash = #{tokenHash} AND revoked_at IS NULL
+    </select>
+
+    <update id="touch">
+        UPDATE ${admin.sessions} SET last_activity_at = #{now} WHERE id = #{sessionId} AND last_activity_at &lt; #{threshold}
+    </update>
+
+    <update id="rotate">
+        UPDATE ${admin.sessions}
+        SET token_hash = #{tokenHash}, state = #{state}, absolute_expires_at = #{absoluteExpiresAt},
+            mfa_verified_at = COALESCE(#{mfaVerifiedAt}, mfa_verified_at), mfa_failed_attempts = 0,
+            last_activity_at = #{now}
+        WHERE id = #{sessionId}
+    </update>
+
+    <select id="recordMfaFailure" resultType="int" flushCache="true">
+        UPDATE ${admin.sessions} SET mfa_failed_attempts = mfa_failed_attempts + 1 WHERE id = #{sessionId}
+        RETURNING mfa_failed_attempts
+    </select>
+
+    <update id="markStepUp">
+        UPDATE ${admin.sessions} SET step_up_at = #{now} WHERE id = #{sessionId}
+    </update>
+
+    <update id="revoke">
+        UPDATE ${admin.sessions} SET revoked_at = #{now}, revoke_reason = #{reason}
+        WHERE id = #{sessionId} AND revoked_at IS NULL
+    </update>
+
+    <update id="revokeAll">
+        UPDATE ${admin.sessions} SET revoked_at = #{now}, revoke_reason = #{reason}
+        WHERE ${admin.userId} = #{userId} AND revoked_at IS NULL
+        <if test="exceptSessionId != null">AND id &lt;&gt; #{exceptSessionId}</if>
+    </update>
+
+    <select id="listActive" resultType="az.tapstamp.security.admin.AdminSession">
+        SELECT <include refid="columns"/>
+        FROM ${admin.sessions}
+        WHERE ${admin.userId} = #{userId} AND revoked_at IS NULL AND absolute_expires_at &gt; #{now}
+        ORDER BY last_activity_at DESC
+    </select>
+</mapper>

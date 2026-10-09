@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  Admin hesabları (hər iki realm). ${admin.*} — cədvəl/sütun adları, XML yüklənəndə fabrikin dəyişənlərindən bir dəfə
+  yerləşdirilir (AdminRealm.mapperVariables): istifadəçi məlumatı deyil.
+-->
+<mapper namespace="az.tapstamp.security.admin.repository.AdminAccountMapper">
+
+    <sql id="accountColumns">
+        id, email, password_hash, display_name, preferred_language, status, totp_secret_enc, totp_enabled_at,
+        totp_last_used_step, failed_login_count, locked_until, last_login_at, totp_disabled_at
+    </sql>
+
+    <select id="findByEmail" resultType="az.tapstamp.security.admin.AdminAccount">
+        SELECT <include refid="accountColumns"/> FROM ${admin.users} WHERE email = #{email} AND status &lt;&gt; 'DELETED'
+    </select>
+
+    <select id="findById" resultType="az.tapstamp.security.admin.AdminAccount">
+        SELECT <include refid="accountColumns"/> FROM ${admin.users} WHERE id = #{id}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO ${admin.users} (id, email, password_hash, display_name, preferred_language, status,
+                                    password_changed_at, created_at, updated_at)
+        VALUES (#{id}, #{email}, #{passwordHash}, #{displayName}, #{language}, #{status}, #{now}, #{now}, #{now})
+    </insert>
+
+    <select id="incrementFailedLogins" resultType="int" flushCache="true">
+        UPDATE ${admin.users} SET failed_login_count = failed_login_count + 1, updated_at = #{now}
+        WHERE id = #{id}
+        RETURNING failed_login_count
+    </select>
+
+    <update id="lockUntil">
+        UPDATE ${admin.users} SET locked_until = #{until} WHERE id = #{id}
+    </update>
+
+    <update id="recordSuccessfulLogin">
+        UPDATE ${admin.users}
+        SET failed_login_count = 0, locked_until = NULL, last_login_at = #{now}, updated_at = #{now}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE ${admin.users}
+        SET password_hash = #{passwordHash}, password_changed_at = #{now}, failed_login_count = 0, locked_until = NULL,
+            updated_at = #{now}, version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePasswordHash">
+        UPDATE ${admin.users} SET password_hash = #{passwordHash} WHERE id = #{id}
+    </update>
+
+    <update id="storePendingTotp">
+        UPDATE ${admin.users}
+        SET totp_secret_enc = #{secretEnc}, totp_enabled_at = NULL, totp_last_used_step = NULL,
+            totp_disabled_at = NULL, updated_at = #{now}
+        WHERE id = #{id} AND totp_enabled_at IS NULL
+    </update>
+
+    <update id="enableTotp">
+        UPDATE ${admin.users}
+        SET totp_enabled_at = #{now}, totp_last_used_step = #{usedStep}, totp_disabled_at = NULL, updated_at = #{now}
+        WHERE id = #{id} AND totp_secret_enc IS NOT NULL
+    </update>
+
+    <update id="advanceTotpStep">
+        UPDATE ${admin.users} SET totp_last_used_step = #{step}
+        WHERE id = #{id} AND (totp_last_used_step IS NULL OR totp_last_used_step &lt; #{step})
+    </update>
+
+    <update id="clearTotp">
+        UPDATE ${admin.users}
+        SET totp_secret_enc = NULL, totp_enabled_at = NULL, totp_last_used_step = NULL, totp_disabled_at = NULL,
+            updated_at = #{now}
+        WHERE id = #{id}
+    </update>
+
+    <update id="pauseTotp">
+        UPDATE ${admin.users} SET totp_enabled_at = NULL, totp_disabled_at = #{now}, updated_at = #{now}
+        WHERE id = #{id} AND totp_enabled_at IS NOT NULL
+    </update>
+
+    <update id="softDelete">
+        UPDATE ${admin.users}
+        SET status = 'DELETED', deleted_at = #{now}, deleted_by = #{deletedBy}, updated_at = #{now},
+            version = version + 1
+        WHERE id = #{id} AND status &lt;&gt; 'DELETED'
+    </update>
+
+    <update id="updateProfile">
+        UPDATE ${admin.users}
+        SET display_name = COALESCE(#{displayName}, display_name),
+            preferred_language = COALESCE(#{language}, preferred_language), updated_at = #{now}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE ${admin.users} SET status = #{status}, updated_at = #{now} WHERE id = #{id}
+    </update>
+
+    <!-- Bərpa kodları -->
+
+    <delete id="deleteRecoveryCodes">
+        DELETE FROM ${admin.recoveryCodes} WHERE ${admin.userId} = #{userId}
+    </delete>
+
+    <insert id="insertRecoveryCode">
+        INSERT INTO ${admin.recoveryCodes} (id, ${admin.userId}, code_hash, created_at)
+        VALUES (#{id}, #{userId}, #{codeHash}, #{now})
+    </insert>
+
+    <update id="useRecoveryCode">
+        UPDATE ${admin.recoveryCodes} SET used_at = #{now}
+        WHERE ${admin.userId} = #{userId} AND code_hash = #{codeHash} AND used_at IS NULL
+    </update>
+
+    <select id="remainingRecoveryCodes" resultType="int">
+        SELECT count(*) FROM ${admin.recoveryCodes} WHERE ${admin.userId} = #{userId} AND used_at IS NULL
+    </select>
+
+    <!-- Şifrə bərpası tokenləri -->
+
+    <update id="invalidateResetTokens">
+        UPDATE ${admin.resetTokens} SET used_at = #{now} WHERE ${admin.userId} = #{userId} AND used_at IS NULL
+    </update>
+
+    <insert id="insertResetToken">
+        INSERT INTO ${admin.resetTokens} (id, ${admin.userId}, token_hash, expires_at, requested_ip, created_at)
+        VALUES (#{id}, #{userId}, #{tokenHash}, #{expiresAt}, CAST(#{ip} AS inet), #{now})
+    </insert>
+
+    <select id="consumeResetToken" resultType="java.util.UUID" flushCache="true">
+        UPDATE ${admin.resetTokens} SET used_at = #{now}
+        WHERE token_hash = #{tokenHash} AND used_at IS NULL AND expires_at &gt; #{now}
+        RETURNING ${admin.userId}
+    </select>
+
+    <!-- Rollar (yalnız işçilər) -->
+
+    <select id="staffRoles" resultType="az.tapstamp.security.admin.RoleGrant">
+        SELECT role, branch_id FROM staff_roles WHERE staff_user_id = #{userId}
+    </select>
+</mapper>

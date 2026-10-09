@@ -5,12 +5,15 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.config.AppProperties;
+import az.tapstamp.security.admin.repository.AdminAccountMapper;
+import az.tapstamp.security.admin.repository.AdminSessionMapper;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -35,17 +38,24 @@ public class AdminRealms {
     private final AppProperties appProperties;
     private final AdminAuthProperties authProperties;
 
-    public AdminRealms(@Qualifier("tenantJdbc") JdbcClient tenantJdbc, @Qualifier("platformJdbc") JdbcClient platformJdbc,
+    /**
+     * Hesab və sessiya mapper-ləri hər realm üçün öz bazasının {@link SqlSessionFactory}-si ilə yaradılır: eyni SQL,
+     * fərqli cədvəllər ({@code AdminRealm.mapperVariables()}).
+     */
+    public AdminRealms(@Qualifier("tenantSqlSessionFactory") SqlSessionFactory tenantSql,
+                       @Qualifier("platformSqlSessionFactory") SqlSessionFactory platformSql,
                        PlatformTransactionManager transactionManager,
                        @Qualifier("platformTransactionManager") PlatformTransactionManager platformTransactionManager,
                        @Qualifier("tenantCipher") EnvelopeCipher tenantCipher,
                        @Qualifier("platformCipher") EnvelopeCipher platformCipher,
                        AuditLogger audit, TenantDirectory directory, AppProperties appProperties,
                        AdminAuthProperties authProperties) {
-        this.staffAccounts = new AdminAccountStore(AdminRealm.STAFF, tenantJdbc);
-        this.platformAccounts = new AdminAccountStore(AdminRealm.PLATFORM, platformJdbc);
-        this.staffSessions = new AdminSessionStore(AdminRealm.STAFF, tenantJdbc);
-        this.platformSessions = new AdminSessionStore(AdminRealm.PLATFORM, platformJdbc);
+        SqlSessionTemplate tenant = new SqlSessionTemplate(tenantSql);
+        SqlSessionTemplate platform = new SqlSessionTemplate(platformSql);
+        this.staffAccounts = new AdminAccountStore(AdminRealm.STAFF, tenant.getMapper(AdminAccountMapper.class));
+        this.platformAccounts = new AdminAccountStore(AdminRealm.PLATFORM, platform.getMapper(AdminAccountMapper.class));
+        this.staffSessions = new AdminSessionStore(tenant.getMapper(AdminSessionMapper.class));
+        this.platformSessions = new AdminSessionStore(platform.getMapper(AdminSessionMapper.class));
         this.tenantTx = new TransactionTemplate(transactionManager);
         this.platformTx = new TransactionTemplate(platformTransactionManager);
         this.tenantCipher = tenantCipher;
