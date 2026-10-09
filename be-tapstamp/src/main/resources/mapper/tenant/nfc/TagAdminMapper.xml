@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- NFC çiplərinin idarəsi: siyahı, qeydiyyat, açarlar, toxunuş jurnalı -->
+<mapper namespace="az.tapstamp.nfc.repository.TagAdminMapper">
+
+    <!-- Çipin görünüşü: açarların vəziyyəti, son 7 gündə toxunuşlar, pulsuz/pullu (ən köhnə N çip pulsuzdur) -->
+    <sql id="tagView">
+        SELECT t.id, upper(encode(t.uid, 'hex')) AS uid, t.label, t.type, t.branch_id, t.status, t.last_tap_at,
+               t.last_counter,
+               (SELECT k.key_version FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'ACTIVE')
+                   AS active_key_version,
+               (SELECT k.key_version FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'PENDING')
+                   AS pending_key_version,
+               EXISTS (SELECT 1 FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'PENDING'
+                       AND k.provisioning_exported_at IS NOT NULL) AS pending_exported,
+               (SELECT count(*) FROM tap_events e WHERE e.tag_id = t.id AND e.stage = 'VERIFY'
+                       AND e.outcome = 'ACCEPTED' AND e.created_at &gt;= #{since}) AS taps_last7_days,
+               t.created_at,
+               (t.type = 'SIMULATED' OR (SELECT count(*) FROM nfc_tags o WHERE o.type &lt;&gt; 'SIMULATED'
+                       AND (o.created_at, o.id) &lt; (t.created_at, t.id)) &lt; #{freeTags}) AS free
+        FROM nfc_tags t
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.nfc.admin.TagAdminService$TagView">
+        <include refid="tagView"/>
+        <where>
+            <if test="!all">
+                t.branch_id IN
+                <foreach item="branchId" collection="branchIds" open="(" separator="," close=")">#{branchId}</foreach>
+            </if>
+        </where>
+        ORDER BY t.created_at DESC
+    </select>
+
+    <select id="find" resultType="az.tapstamp.nfc.admin.TagAdminService$TagView">
+        <include refid="tagView"/>
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="countBillable" resultType="long">
+        SELECT count(*) FROM nfc_tags WHERE type &lt;&gt; 'SIMULATED'
+    </select>
+
+    <select id="activeBranches" resultType="az.tapstamp.nfc.admin.TagAdminService$BranchOption">
+        SELECT id, name FROM branches WHERE status = 'ACTIVE' ORDER BY created_at
+    </select>
+
+    <select id="activeBranchExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{id} AND status = 'ACTIVE')
+    </select>
+
+    <select id="uidExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM nfc_tags WHERE uid = #{uid})
+    </select>
+
+    <insert id="insertTag">
+        INSERT INTO nfc_tags (id, branch_id, uid, type, label, status, created_at, updated_at)
+        VALUES (#{id}, #{branchId}, #{uid}, 'NTAG424_SUN', #{label}, 'ACTIVE', #{now}, #{now})
+    </insert>
+
+    <update id="updateTag">
+        UPDATE nfc_tags
+        SET label = COALESCE(#{label}, label), branch_id = COALESCE(#{branchId}, branch_id), updated_at = #{now},
+            version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE nfc_tags
+        SET status = #{status}, disabled_at = #{disabledAt}, disabled_by = NULL, updated_at = #{now},
+            version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertPendingKeys">
+        INSERT INTO nfc_tag_keys (id, tag_id, key_version, status, app_master_key_enc, meta_read_key_enc,
+                                  file_read_key_enc, created_by, created_at)
+        VALUES (#{id}, #{tagId}, #{version}, 'PENDING', #{appMasterKeyEnc}, #{metaReadKeyEnc}, #{fileReadKeyEnc},
+                NULL, #{now})
+    </insert>
+
+    <delete id="deleteUnexportedPendingKeys">
+        DELETE FROM nfc_tag_keys WHERE tag_id = #{tagId} AND status = 'PENDING' AND provisioning_exported_at IS NULL
+    </delete>
+
+    <select id="nextKeyVersion" resultType="int">
+        SELECT coalesce(max(key_version), 0) + 1 FROM nfc_tag_keys WHERE tag_id = #{tagId}
+    </select>
+
+    <select id="exportPendingKeys" resultType="az.tapstamp.nfc.repository.TagAdminMapper$ExportedKeys"
+            flushCache="true">
+        UPDATE nfc_tag_keys SET provisioning_exported_at = #{now}
+        WHERE tag_id = #{tagId} AND status = 'PENDING' AND provisioning_exported_at IS NULL
+        RETURNING id, key_version, app_master_key_enc, meta_read_key_enc, file_read_key_enc
+    </select>
+
+    <select id="events" resultType="az.tapstamp.nfc.admin.TagAdminService$TapEvent">
+        SELECT id, stage, outcome, reason, counter, counter_gap, customer_id, created_at
+        FROM tap_events
+        WHERE tag_id = #{tagId}
+        ORDER BY created_at DESC
+        LIMIT 100
+    </select>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- NFC çipləri və açarları: toxunuşun yoxlanması -->
+<mapper namespace="az.tapstamp.nfc.repository.NfcTagMapper">
+
+    <sql id="tagColumns">
+        id, branch_id, uid, type, label, status = 'ACTIVE' AS active, last_counter
+    </sql>
+
+    <select id="findByUid" resultType="az.tapstamp.nfc.NfcTag">
+        SELECT <include refid="tagColumns"/> FROM nfc_tags WHERE uid = #{uid}
+    </select>
+
+    <select id="findById" resultType="az.tapstamp.nfc.NfcTag">
+        SELECT <include refid="tagColumns"/> FROM nfc_tags WHERE id = #{id}
+    </select>
+
+    <select id="lock" resultType="az.tapstamp.nfc.NfcTag">
+        SELECT <include refid="tagColumns"/> FROM nfc_tags WHERE id = #{id} FOR UPDATE
+    </select>
+
+    <update id="acceptCounter">
+        UPDATE nfc_tags
+        SET last_counter = #{counter}, last_tap_at = #{now}, updated_at = #{now}, version = version + 1
+        WHERE id = #{id}
+    </update>
+
+    <select id="verificationKeys" resultType="az.tapstamp.nfc.repository.NfcTagMapper$StoredKeys">
+        SELECT id, key_version AS version, status, meta_read_key_enc, file_read_key_enc
+        FROM nfc_tag_keys
+        WHERE tag_id = #{tagId} AND status IN ('ACTIVE', 'PENDING')
+        ORDER BY CASE status WHEN 'ACTIVE' THEN 0 ELSE 1 END
+    </select>
+
+    <update id="retireActiveKeys">
+        UPDATE nfc_tag_keys SET status = 'RETIRED', retired_at = #{now}
+        WHERE tag_id = #{tagId} AND status = 'ACTIVE'
+    </update>
+
+    <update id="activatePendingKey">
+        UPDATE nfc_tag_keys SET status = 'ACTIVE', activated_at = #{now}
+        WHERE id = #{keyId} AND status = 'PENDING'
+    </update>
+
+    <select id="findTapLimitPerMinute" resultType="int">
+        SELECT max_taps_per_tag_per_minute FROM stamp_policies
+        WHERE branch_id = #{branchId} OR branch_id IS NULL
+        ORDER BY branch_id NULLS LAST
+        LIMIT 1
+    </select>
+</mapper>

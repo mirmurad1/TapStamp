@@ -13,6 +13,8 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.nfc.TapEventLog.Event;
 import az.tapstamp.nfc.TapEventLog.Source;
 import az.tapstamp.nfc.TapEventLog.Stage;
+import az.tapstamp.nfc.repository.NfcTagMapper;
+import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.ratelimit.RateLimitPolicy;
@@ -65,9 +67,9 @@ public class TapVerificationService {
     private record Verification(VerifiedTap tap, TagKeys.KeyStatus keyStatus, UUID keyId) {
     }
 
-    private final NfcTagStore tags;
+    private final NfcTagMapper tags;
     private final TapEventLog events;
-    private final TapTokenStore tokens;
+    private final TapTokenMapper tokens;
     private final FraudFlags fraudFlags;
     private final List<TagVerifier> verifiers;
     private final EnvelopeCipher cipher;
@@ -76,7 +78,7 @@ public class TapVerificationService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public TapVerificationService(NfcTagStore tags, TapEventLog events, TapTokenStore tokens, FraudFlags fraudFlags,
+    public TapVerificationService(NfcTagMapper tags, TapEventLog events, TapTokenMapper tokens, FraudFlags fraudFlags,
                                   List<TagVerifier> verifiers, @Qualifier("tenantCipher") EnvelopeCipher cipher,
                                   RateLimiter rateLimiter, AuditLogger audit,
                                   PlatformTransactionManager transactionManager, Clock clock) {
@@ -185,12 +187,12 @@ public class TapVerificationService {
         if (tag.type() == TagType.SIMULATED) {
             return new Verification(verifier.verify(tag, null, params), null, null);
         }
-        List<NfcTagStore.StoredKeys> keySets = tags.verificationKeys(tag.id());
+        List<NfcTagMapper.StoredKeys> keySets = tags.verificationKeys(tag.id());
         if (keySets.isEmpty()) {
             throw new TapVerificationException("KEYS_MISSING");
         }
         List<TapVerificationException> failures = new ArrayList<>();
-        for (NfcTagStore.StoredKeys stored : keySets) {
+        for (NfcTagMapper.StoredKeys stored : keySets) {
             TagKeys keys = decrypt(tenant, stored);
             try {
                 return new Verification(verifier.verify(tag, keys, params), stored.status(), stored.id());
@@ -204,7 +206,7 @@ public class TapVerificationService {
         throw failures.getFirst();
     }
 
-    private TagKeys decrypt(TenantInfo tenant, NfcTagStore.StoredKeys stored) {
+    private TagKeys decrypt(TenantInfo tenant, NfcTagMapper.StoredKeys stored) {
         return new TagKeys(stored.id(), stored.version(), stored.status(),
                 cipher.decrypt(stored.metaReadKeyEnc(), keyAad(tenant.id(), "meta_read_key_enc", stored.id())),
                 cipher.decrypt(stored.fileReadKeyEnc(), keyAad(tenant.id(), "file_read_key_enc", stored.id())));

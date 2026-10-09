@@ -19,12 +19,12 @@ import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
 import az.tapstamp.nfc.BrowserIdCookie;
 import az.tapstamp.nfc.FraudFlags;
-import az.tapstamp.nfc.TapEventLog;
 import az.tapstamp.nfc.TapEventLog.Event;
 import az.tapstamp.nfc.TapEventLog.Source;
 import az.tapstamp.nfc.TapEventLog.Stage;
-import az.tapstamp.nfc.TapTokenStore;
-import az.tapstamp.nfc.TapTokenStore.TapToken;
+import az.tapstamp.nfc.TapEventLog;
+import az.tapstamp.nfc.repository.TapTokenMapper.TapToken;
+import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.security.token.SecureTokens;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
@@ -75,7 +75,7 @@ public class StampClaimService {
         }
     }
 
-    private final TapTokenStore tokens;
+    private final TapTokenMapper tokens;
     private final TapEventLog events;
     private final FraudFlags fraudFlags;
     private final StampLedger ledger;
@@ -86,7 +86,7 @@ public class StampClaimService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public StampClaimService(TapTokenStore tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
+    public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerStore customers, OtpChallengeStore challenges, CompanySettings companySettings,
                              @Qualifier("tenantJdbc") JdbcClient jdbc, PlatformTransactionManager transactionManager,
                              Clock clock) {
@@ -103,7 +103,7 @@ public class StampClaimService {
     }
 
     /** Tokenin vəziyyəti (yan təsiri yoxdur): toxunuş səhifəsi nə göstərəcəyini bilir. */
-    public record TapStatus(TapTokenStore.Status status, UUID branchId, LocalizedText branchName, Instant expiresAt,
+    public record TapStatus(TapTokenMapper.Status status, UUID branchId, LocalizedText branchName, Instant expiresAt,
                             boolean sameBrowser) {
     }
 
@@ -113,7 +113,7 @@ public class StampClaimService {
                 found.effectiveStatus(now), found.branchId(),
                 jdbc.sql("SELECT name::text FROM branches WHERE id = :id").param("id", found.branchId())
                         .query((rs, n) -> TEXT.convertToEntityAttribute(rs.getString(1))).single(),
-                found.status() == TapTokenStore.Status.RESERVED ? found.reservedUntil() : found.expiresAt(),
+                found.status() == TapTokenMapper.Status.RESERVED ? found.reservedUntil() : found.expiresAt(),
                 MessageDigest.isEqual(found.bindingHash(), BrowserIdCookie.bindingHash(browserId))));
     }
 

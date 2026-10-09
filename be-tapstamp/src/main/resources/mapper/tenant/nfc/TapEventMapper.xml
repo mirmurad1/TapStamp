@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Toxunuş jurnalı: hər cəhd, qəbul və rədd, səbəbi ilə -->
+<mapper namespace="az.tapstamp.nfc.repository.TapEventMapper">
+
+    <insert id="insert">
+        INSERT INTO tap_events (id, branch_id, tag_id, stage, outcome, reason, counter, counter_gap, customer_id,
+                                tap_token_id, stamp_id, ip, browser_id_hash, user_agent_hash, created_at)
+        VALUES (#{id}, #{branchId}, #{tagId}, #{stage}, #{outcome}, #{reason}, #{counter}, #{counterGap},
+                #{customerId}, #{tapTokenId}, #{stampId}, CAST(#{ip} AS inet), #{browserIdHash}, #{userAgentHash},
+                #{createdAt})
+    </insert>
+
+    <select id="lastClaimRejection" resultType="string">
+        SELECT reason FROM tap_events
+        WHERE tap_token_id = #{tapTokenId} AND customer_id = #{customerId} AND stage = 'CLAIM' AND outcome = 'REJECTED'
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+</mapper>

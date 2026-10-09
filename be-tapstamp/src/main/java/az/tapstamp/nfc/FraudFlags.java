@@ -1,15 +1,12 @@
 package az.tapstamp.nfc;
 
-import static az.tapstamp.shared.persistence.SqlTime.ts;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
+import az.tapstamp.nfc.repository.FraudFlagMapper;
 import az.tapstamp.shared.id.Ids;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -39,40 +36,20 @@ public class FraudFlags {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
-    private final JdbcClient jdbc;
+    private final FraudFlagMapper flags;
 
-    public FraudFlags(@Qualifier("tenantJdbc") JdbcClient jdbc) {
-        this.jdbc = jdbc;
+    public FraudFlags(FraudFlagMapper flags) {
+        this.flags = flags;
     }
 
     /** İşarə yaradır (son bir saatda eyni çip və müştəri üçün həll olunmamış eyni işarə yoxdursa). */
     public boolean raise(Type type, Severity severity, UUID tagId, UUID customerId, Map<String, ?> details,
                          Instant now) {
-        Boolean recent = jdbc.sql("""
-                        SELECT EXISTS (SELECT 1 FROM fraud_flags
-                                       WHERE type = :type AND resolved_at IS NULL AND created_at > :since
-                                         AND tag_id IS NOT DISTINCT FROM CAST(:tagId AS uuid)
-                                         AND customer_id IS NOT DISTINCT FROM CAST(:customerId AS uuid))""")
-                .param("type", type.name())
-                .param("since", ts(now.minus(DEDUPLICATION_WINDOW)))
-                .param("tagId", tagId)
-                .param("customerId", customerId)
-                .query(Boolean.class)
-                .single();
-        if (Boolean.TRUE.equals(recent)) {
+        if (flags.existsOpen(type.name(), tagId, customerId, now.minus(DEDUPLICATION_WINDOW))) {
             return false;
         }
-        jdbc.sql("""
-                        INSERT INTO fraud_flags (id, customer_id, tag_id, type, severity, details, created_at)
-                        VALUES (:id, :customerId, :tagId, :type, :severity, CAST(:details AS jsonb), :now)""")
-                .param("id", Ids.newId())
-                .param("customerId", customerId)
-                .param("tagId", tagId)
-                .param("type", type.name())
-                .param("severity", severity.name())
-                .param("details", details == null || details.isEmpty() ? null : JSON.writeValueAsString(details))
-                .param("now", ts(now))
-                .update();
+        flags.insert(Ids.newId(), customerId, tagId, type.name(), severity.name(),
+                details == null || details.isEmpty() ? null : JSON.writeValueAsString(details), now);
         return true;
     }
 }

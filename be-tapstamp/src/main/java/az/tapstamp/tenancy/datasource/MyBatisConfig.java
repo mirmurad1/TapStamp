@@ -3,7 +3,6 @@ package az.tapstamp.tenancy.datasource;
 import java.time.Instant;
 import java.util.Properties;
 import java.util.UUID;
-
 import javax.sql.DataSource;
 
 import az.tapstamp.security.admin.AdminRealm;
@@ -14,6 +13,7 @@ import az.tapstamp.shared.persistence.mybatis.InstantTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.LocalizedTextTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.UuidTypeHandler;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
@@ -66,6 +66,8 @@ public class MyBatisConfig {
         configuration.setArgNameBasedConstructorAutoMapping(true);
         configuration.setCallSettersOnNulls(true);
         configuration.setReturnInstanceForEmptyRow(false);
+        // Sessiya keşi yoxdur: kilid (FOR UPDATE) və təkrar oxunuşlar həmişə bazanın cari vəziyyətini görsün
+        configuration.setLocalCacheScope(LocalCacheScope.STATEMENT);
         configuration.getTypeHandlerRegistry().register(Instant.class, InstantTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(UUID.class, UuidTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(LocalizedText.class, LocalizedTextTypeHandler.class);

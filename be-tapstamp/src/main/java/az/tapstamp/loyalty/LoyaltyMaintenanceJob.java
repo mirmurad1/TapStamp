@@ -6,7 +6,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 import az.tapstamp.loyalty.stamp.StampApprovalService;
-import az.tapstamp.nfc.TapTokenStore;
+import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
@@ -30,12 +30,12 @@ public class LoyaltyMaintenanceJob {
     private static final Logger log = LoggerFactory.getLogger(LoyaltyMaintenanceJob.class);
 
     private final TenantDirectory directory;
-    private final TapTokenStore tokens;
+    private final TapTokenMapper tokens;
     private final StampApprovalService approvals;
     private final JdbcClient jdbc;
     private final Clock clock;
 
-    public LoyaltyMaintenanceJob(TenantDirectory directory, TapTokenStore tokens, StampApprovalService approvals,
+    public LoyaltyMaintenanceJob(TenantDirectory directory, TapTokenMapper tokens, StampApprovalService approvals,
                                  @Qualifier("tenantJdbc") JdbcClient jdbc, Clock clock) {
         this.directory = directory;
         this.tokens = tokens;

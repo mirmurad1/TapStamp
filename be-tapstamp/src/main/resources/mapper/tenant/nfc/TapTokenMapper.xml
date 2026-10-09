@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Toxunuş tokenləri: yalnız hash saxlanılır -->
+<mapper namespace="az.tapstamp.nfc.repository.TapTokenMapper">
+
+    <sql id="columns">
+        id, branch_id, tag_id, binding_hash, status, expires_at, reserved_challenge_id, reserved_until,
+        consumed_by_customer_id AS consumed_by, created_at
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO tap_tokens (id, token_hash, branch_id, tag_id, tap_event_id, binding_hash, status, expires_at,
+                                created_at)
+        VALUES (#{id}, #{tokenHash}, #{branchId}, #{tagId}, #{tapEventId}, #{bindingHash}, 'ACTIVE', #{expiresAt},
+                #{now})
+    </insert>
+
+    <select id="find" resultType="az.tapstamp.nfc.repository.TapTokenMapper$TapToken">
+        SELECT <include refid="columns"/> FROM tap_tokens WHERE token_hash = #{tokenHash}
+    </select>
+
+    <select id="lock" resultType="az.tapstamp.nfc.repository.TapTokenMapper$TapToken">
+        SELECT <include refid="columns"/> FROM tap_tokens WHERE token_hash = #{tokenHash} FOR UPDATE
+    </select>
+
+    <select id="reserve" resultType="java.util.UUID" flushCache="true">
+        UPDATE tap_tokens
+        SET status = 'RESERVED', reserved_challenge_id = #{challengeId}, reserved_until = #{until}
+        WHERE token_hash = #{tokenHash} AND binding_hash = #{bindingHash}
+          AND ((status = 'ACTIVE' AND expires_at &gt; #{now}) OR (status = 'RESERVED' AND reserved_until &gt; #{now}))
+        RETURNING id
+    </select>
+
+    <update id="markConsumed">
+        UPDATE tap_tokens SET status = 'CONSUMED', consumed_at = #{now}, consumed_by_customer_id = #{customerId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="markRejected">
+        UPDATE tap_tokens SET status = 'REJECTED' WHERE id = #{id}
+    </update>
+
+    <update id="expireStale">
+        UPDATE tap_tokens SET status = 'EXPIRED'
+        WHERE (status = 'ACTIVE' AND expires_at &lt;= #{now})
+           OR (status = 'RESERVED' AND (reserved_until IS NULL OR reserved_until &lt;= #{now}))
+    </update>
+</mapper>

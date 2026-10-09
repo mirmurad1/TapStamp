@@ -14,7 +14,7 @@ import az.tapstamp.customer.CustomerStore;
 import az.tapstamp.customer.auth.OtpChallengeStore.Purpose;
 import az.tapstamp.customer.phone.PhoneNumberService;
 import az.tapstamp.nfc.BrowserIdCookie;
-import az.tapstamp.nfc.TapTokenStore;
+import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.notification.sms.SmsMessage;
 import az.tapstamp.notification.sms.SmsProvider;
 import az.tapstamp.notification.sms.SmsTemplates;
@@ -78,7 +78,7 @@ public class OtpService {
     static final Duration TAP_RESERVATION = Duration.ofMinutes(10);
 
     private final OtpChallengeStore challenges;
-    private final TapTokenStore tapTokens;
+    private final TapTokenMapper tapTokens;
     private final OtpCodes codes;
     private final CustomerStore customers;
     private final PhoneNumberService phoneNumbers;
@@ -95,7 +95,7 @@ public class OtpService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public OtpService(OtpChallengeStore challenges, TapTokenStore tapTokens, OtpCodes codes, CustomerStore customers,
+    public OtpService(OtpChallengeStore challenges, TapTokenMapper tapTokens, OtpCodes codes, CustomerStore customers,
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
                       @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
                       CompanySettings companySettings, TenantDirectory directory, SmsProvider sms,

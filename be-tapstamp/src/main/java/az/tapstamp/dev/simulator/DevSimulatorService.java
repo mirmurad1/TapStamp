@@ -8,10 +8,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import az.tapstamp.nfc.NfcTag;
-import az.tapstamp.nfc.NfcTagStore;
 import az.tapstamp.nfc.TagKeys;
 import az.tapstamp.nfc.TagType;
 import az.tapstamp.nfc.TapVerificationService;
+import az.tapstamp.nfc.repository.NfcTagMapper;
 import az.tapstamp.nfc.sun.Ntag424Sun;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.error.ApiException;
@@ -46,13 +46,13 @@ public class DevSimulatorService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final JdbcClient jdbc;
-    private final NfcTagStore tags;
+    private final NfcTagMapper tags;
     private final EnvelopeCipher cipher;
     private final DevSimulatorKey key;
     /** Simulyatorun verdiyi son sayğac (tenant:çip) — açılmamış linklər də sayğacı "istehlak edir". */
     private final Map<String, Integer> issued = new ConcurrentHashMap<>();
 
-    public DevSimulatorService(@Qualifier("tenantJdbc") JdbcClient jdbc, NfcTagStore tags,
+    public DevSimulatorService(@Qualifier("tenantJdbc") JdbcClient jdbc, NfcTagMapper tags,
                                @Qualifier("tenantCipher") EnvelopeCipher cipher, DevSimulatorKey key) {
         this.jdbc = jdbc;
         this.tags = tags;
@@ -102,8 +102,8 @@ public class DevSimulatorService {
 
     /** Çipə "yazılmış" açarlar: rotasiya gedirsə yeni (PENDING) dəst, əks halda ACTIVE. */
     private TagKeys programmedKeys(UUID tenantId, UUID tagId) {
-        List<NfcTagStore.StoredKeys> sets = tags.verificationKeys(tagId);
-        NfcTagStore.StoredKeys stored = sets.stream().filter(s -> s.status() == TagKeys.KeyStatus.PENDING).findFirst()
+        List<NfcTagMapper.StoredKeys> sets = tags.verificationKeys(tagId);
+        NfcTagMapper.StoredKeys stored = sets.stream().filter(s -> s.status() == TagKeys.KeyStatus.PENDING).findFirst()
                 .or(() -> sets.stream().findFirst())
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         return new TagKeys(stored.id(), stored.version(), stored.status(),

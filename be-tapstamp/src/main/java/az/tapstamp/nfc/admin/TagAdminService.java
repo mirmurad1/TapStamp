@@ -1,12 +1,8 @@
 package az.tapstamp.nfc.admin;
 
 import java.security.SecureRandom;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -17,6 +13,8 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.nfc.TapVerificationService;
+import az.tapstamp.nfc.repository.TagAdminMapper;
+import az.tapstamp.nfc.repository.TagAdminMapper.ExportedKeys;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -30,12 +28,10 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -53,7 +49,6 @@ public class TagAdminService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final HexFormat HEX = HexFormat.of().withUpperCase();
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
 
     public record TagView(UUID id, String uid, String label, String type, UUID branchId, String status, Instant lastTapAt,
                       int lastCounter, Integer activeKeyVersion, Integer pendingKeyVersion, boolean pendingExported,
@@ -81,7 +76,7 @@ public class TagAdminService {
         }
     }
 
-    private final JdbcClient jdbc;
+    private final TagAdminMapper tags;
     private final EnvelopeCipher cipher;
     private final AdminAuthService adminAuth;
     private final AdminRealms realms;
@@ -90,11 +85,11 @@ public class TagAdminService {
     private final Clock clock;
     private final int freeTags;
 
-    public TagAdminService(@Qualifier("tenantJdbc") JdbcClient jdbc, @Qualifier("tenantCipher") EnvelopeCipher cipher,
+    public TagAdminService(TagAdminMapper tags, @Qualifier("tenantCipher") EnvelopeCipher cipher,
                            AdminAuthService adminAuth, AdminRealms realms, AuditLogger audit,
                            PlatformTransactionManager transactionManager, Clock clock,
                            @Value("${app.nfc.free-tags-per-tenant:1}") int freeTags) {
-        this.jdbc = jdbc;
+        this.tags = tags;
         this.cipher = cipher;
         this.adminAuth = adminAuth;
         this.realms = realms;
@@ -106,17 +101,14 @@ public class TagAdminService {
 
     /** Pulsuz və pullu çiplərin sayı (bütün şirkət üzrə). */
     public TagUsage usage() {
-        long total = jdbc.sql("SELECT count(*) FROM nfc_tags WHERE type <> 'SIMULATED'").query(Long.class).single();
+        long total = tags.countBillable();
         long free = Math.min(total, freeTags);
         return new TagUsage(freeTags, total, free, total - free);
     }
 
     /** Aktiv filiallar (platforma panelində çipin filialını seçmək üçün). */
     public List<BranchOption> branches() {
-        return jdbc.sql("SELECT id, name::text AS name FROM branches WHERE status = 'ACTIVE' ORDER BY created_at")
-                .query((rs, n) -> new BranchOption(rs.getObject("id", UUID.class),
-                        TEXT.convertToEntityAttribute(rs.getString("name"))))
-                .list();
+        return tags.activeBranches();
     }
 
     public record BranchOption(UUID id, LocalizedText name) {
@@ -125,23 +117,11 @@ public class TagAdminService {
     /** Sahib və platforma admini bütün çipləri, menecer öz filiallarının çiplərini görür. */
     public List<TagView> list(AdminPrincipal principal, UUID branchId) {
         BranchScope scope = BranchScope.of(principal, branchId);
-        return jdbc.sql(SELECT + " WHERE (:all OR t.branch_id IN (:branches)) ORDER BY t.created_at DESC")
-                .param("all", scope.all())
-                .param("branches", scope.branchIds())
-                .param("since", ts(clock.instant().minus(7, ChronoUnit.DAYS)))
-                .param("freeTags", freeTags)
-                .query((rs, n) -> map(rs))
-                .list();
+        return tags.list(scope.all(), scope.branchIds(), weekAgo(), freeTags);
     }
 
     public TagView get(AdminPrincipal principal, UUID tagId) {
-        TagView tag = jdbc.sql(SELECT + " WHERE t.id = :id")
-                .param("id", tagId)
-                .param("since", ts(clock.instant().minus(7, ChronoUnit.DAYS)))
-                .param("freeTags", freeTags)
-                .query((rs, n) -> map(rs))
-                .optional()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        TagView tag = tags.find(tagId, weekAgo(), freeTags).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         AccessPolicy.requireBranch(principal, tag.branchId());
         return tag;
     }
@@ -155,20 +135,10 @@ public class TagAdminService {
         Instant now = clock.instant();
         UUID id = Ids.newId();
         tx.executeWithoutResult(status -> {
-            boolean exists = jdbc.sql("SELECT count(*) FROM nfc_tags WHERE uid = :uid").param("uid", uid)
-                    .query(Integer.class).single() > 0;
-            if (exists) {
+            if (tags.uidExists(uid)) {
                 throw new ApiException(ErrorCode.ALREADY_EXISTS);
             }
-            jdbc.sql("""
-                            INSERT INTO nfc_tags (id, branch_id, uid, type, label, status, created_at, updated_at)
-                            VALUES (:id, :branchId, :uid, 'NTAG424_SUN', :label, 'ACTIVE', :now, :now)""")
-                    .param("id", id)
-                    .param("branchId", branchId)
-                    .param("uid", uid)
-                    .param("label", cleanLabel)
-                    .param("now", ts(now))
-                    .update();
+            tags.insertTag(id, branchId, uid, cleanLabel, now);
             insertPendingKeys(id, 1, now);
         });
         audit.tenant("TAG_REGISTERED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", id,
@@ -183,15 +153,7 @@ public class TagAdminService {
         if (branchId != null) {
             requireActiveBranch(branchId);
         }
-        jdbc.sql("""
-                        UPDATE nfc_tags SET label = COALESCE(:label, label), branch_id = COALESCE(:branchId, branch_id),
-                                            updated_at = :now, version = version + 1
-                        WHERE id = :id""")
-                .param("label", label == null ? null : cleanLabel(label))
-                .param("branchId", branchId)
-                .param("now", ts(clock.instant()))
-                .param("id", tagId)
-                .update();
+        tags.updateTag(tagId, label == null ? null : cleanLabel(label), branchId, clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         if (label != null) {
             details.put("label", cleanLabel(label));
@@ -208,15 +170,7 @@ public class TagAdminService {
         requirePlatform(principal);
         get(principal, tagId);
         Instant now = clock.instant();
-        jdbc.sql("""
-                        UPDATE nfc_tags SET status = :status, disabled_at = :disabledAt, disabled_by = NULL,
-                                            updated_at = :now, version = version + 1
-                        WHERE id = :id""")
-                .param("status", enabled ? "ACTIVE" : "DISABLED")
-                .param("disabledAt", enabled ? null : ts(now))
-                .param("now", ts(now))
-                .param("id", tagId)
-                .update();
+        tags.updateStatus(tagId, enabled ? "ACTIVE" : "DISABLED", enabled ? null : now, now);
         audit.tenant(enabled ? "TAG_ENABLED" : "TAG_DISABLED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag",
                 tagId, Map.of());
         return get(principal, tagId);
@@ -235,11 +189,8 @@ public class TagAdminService {
         }
         Instant now = clock.instant();
         tx.executeWithoutResult(status -> {
-            jdbc.sql("DELETE FROM nfc_tag_keys WHERE tag_id = :id AND status = 'PENDING' AND provisioning_exported_at IS NULL")
-                    .param("id", tagId).update();
-            int next = jdbc.sql("SELECT coalesce(max(key_version), 0) + 1 FROM nfc_tag_keys WHERE tag_id = :id")
-                    .param("id", tagId).query(Integer.class).single();
-            insertPendingKeys(tagId, next, now);
+            tags.deleteUnexportedPendingKeys(tagId);
+            insertPendingKeys(tagId, tags.nextKeyVersion(tagId), now);
         });
         audit.tenant("TAG_KEYS_ROTATED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId, Map.of());
         return get(principal, tagId);
@@ -252,22 +203,14 @@ public class TagAdminService {
         TagView tag = get(principal, tagId);
         UUID tenantId = TenantContext.require().id();
         ProvisioningPackage pkg = tx.execute(status -> {
-            Map<String, Object> keys = jdbc.sql("""
-                            UPDATE nfc_tag_keys SET provisioning_exported_at = :now
-                            WHERE tag_id = :id AND status = 'PENDING' AND provisioning_exported_at IS NULL
-                            RETURNING id, key_version, app_master_key_enc, meta_read_key_enc, file_read_key_enc""")
-                    .param("now", ts(clock.instant()))
-                    .param("id", tagId)
-                    .query()
-                    .listOfRows()
-                    .stream().findFirst()
+            ExportedKeys keys = tags.exportPendingKeys(tagId, clock.instant())
                     .orElseThrow(() -> new ApiException(ErrorCode.PROVISIONING_ALREADY_EXPORTED));
-            UUID keyId = (UUID) keys.get("id");
-            String k0 = HEX.formatHex(cipher.decrypt((byte[]) keys.get("app_master_key_enc"),
+            UUID keyId = keys.id();
+            String k0 = HEX.formatHex(cipher.decrypt(keys.appMasterKeyEnc(),
                     TapVerificationService.keyAad(tenantId, "app_master_key_enc", keyId)));
-            String k1 = HEX.formatHex(cipher.decrypt((byte[]) keys.get("meta_read_key_enc"),
+            String k1 = HEX.formatHex(cipher.decrypt(keys.metaReadKeyEnc(),
                     TapVerificationService.keyAad(tenantId, "meta_read_key_enc", keyId)));
-            String k2 = HEX.formatHex(cipher.decrypt((byte[]) keys.get("file_read_key_enc"),
+            String k2 = HEX.formatHex(cipher.decrypt(keys.fileReadKeyEnc(),
                     TapVerificationService.keyAad(tenantId, "file_read_key_enc", keyId)));
             String piccPlaceholder = "0".repeat(32);
             String macPlaceholder = "0".repeat(16);
@@ -275,7 +218,7 @@ public class TagAdminService {
             String withoutScheme = url.substring("https://".length());
             int piccOffset = 7 + withoutScheme.indexOf("picc=") + "picc=".length();
             int macOffset = 7 + withoutScheme.indexOf("cmac=") + "cmac=".length();
-            return new ProvisioningPackage(tag.uid(), ((Number) keys.get("key_version")).intValue(), url, k0, k1, k2,
+            return new ProvisioningPackage(tag.uid(), keys.keyVersion(), url, k0, k1, k2,
                     piccOffset, macOffset, macOffset,
                     "SDM: PICCData K1 ilə şifrəli (UID + sayğac), CMAC K2 ilə (boş giriş). Ətraflı: docs/nfc-ntag424-programming.md");
         });
@@ -287,60 +230,31 @@ public class TagAdminService {
     /** Çipin son toxunuşları (qəbul və rədd edilənlər, səbəbləri ilə). */
     public List<TapEvent> events(AdminPrincipal principal, UUID tagId) {
         get(principal, tagId);
-        return jdbc.sql("""
-                        SELECT id, stage, outcome, reason, counter, counter_gap, customer_id, created_at FROM tap_events
-                        WHERE tag_id = :id ORDER BY created_at DESC LIMIT 100""")
-                .param("id", tagId)
-                .query((rs, n) -> new TapEvent(rs.getObject("id", UUID.class), rs.getString("stage"),
-                        rs.getString("outcome"), rs.getString("reason"), (Integer) rs.getObject("counter"),
-                        (Integer) rs.getObject("counter_gap"), rs.getObject("customer_id", UUID.class),
-                        instant(rs.getTimestamp("created_at"))))
-                .list();
+        return tags.events(tagId);
     }
 
     // ------------------------------------------------------------------
-
-    private static final String SELECT = """
-            SELECT t.id, t.uid, t.label, t.type, t.branch_id, t.status, t.last_tap_at, t.last_counter, t.created_at,
-                   (SELECT k.key_version FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'ACTIVE') AS active_version,
-                   (SELECT k.key_version FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'PENDING') AS pending_version,
-                   EXISTS (SELECT 1 FROM nfc_tag_keys k WHERE k.tag_id = t.id AND k.status = 'PENDING'
-                           AND k.provisioning_exported_at IS NOT NULL) AS pending_exported,
-                   (SELECT count(*) FROM tap_events e WHERE e.tag_id = t.id AND e.stage = 'VERIFY'
-                           AND e.outcome = 'ACCEPTED' AND e.created_at >= :since) AS taps_7d,
-                   (t.type = 'SIMULATED' OR (SELECT count(*) FROM nfc_tags o WHERE o.type <> 'SIMULATED'
-                           AND (o.created_at, o.id) < (t.created_at, t.id)) < :freeTags) AS free
-            FROM nfc_tags t""";
 
     private static void requirePlatform(AdminPrincipal principal) {
         AccessPolicy.requireAnyRole(principal, AdminRole.SUPER_ADMIN);
     }
 
-    /** {@code created_by} və {@code disabled_by} işçiyə istinad edir; platforma admini işçi deyil — aktor auditdədir. */
+    /** Yeni PENDING dəst: 3 təsadüfi AES-128 açarı, tenant-ın açarı ilə şifrəli (AAD sətrə bağlıdır). */
     private void insertPendingKeys(UUID tagId, int version, Instant now) {
         UUID keyId = Ids.newId();
         UUID tenantId = TenantContext.require().id();
-        jdbc.sql("""
-                        INSERT INTO nfc_tag_keys (id, tag_id, key_version, status, app_master_key_enc, meta_read_key_enc,
-                                                  file_read_key_enc, created_by, created_at)
-                        VALUES (:id, :tagId, :version, 'PENDING', :k0, :k1, :k2, NULL, :now)""")
-                .param("id", keyId)
-                .param("tagId", tagId)
-                .param("version", version)
-                .param("k0", cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
-                        TapVerificationService.keyAad(tenantId, "app_master_key_enc", keyId)))
-                .param("k1", cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
-                        TapVerificationService.keyAad(tenantId, "meta_read_key_enc", keyId)))
-                .param("k2", cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
-                        TapVerificationService.keyAad(tenantId, "file_read_key_enc", keyId)))
-                .param("now", ts(now))
-                .update();
+        tags.insertPendingKeys(keyId, tagId, version,
+                cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
+                        TapVerificationService.keyAad(tenantId, "app_master_key_enc", keyId)),
+                cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
+                        TapVerificationService.keyAad(tenantId, "meta_read_key_enc", keyId)),
+                cipher.encrypt(KeyPurpose.NFC_KEYS, randomKey(),
+                        TapVerificationService.keyAad(tenantId, "file_read_key_enc", keyId)),
+                now);
     }
 
     private void requireActiveBranch(UUID branchId) {
-        boolean exists = branchId != null && jdbc.sql("SELECT count(*) FROM branches WHERE id = :id AND status = 'ACTIVE'")
-                .param("id", branchId).query(Integer.class).single() > 0;
-        if (!exists) {
+        if (branchId == null || !tags.activeBranchExists(branchId)) {
             throw new ApiException(ErrorCode.NOT_FOUND);
         }
     }
@@ -367,20 +281,7 @@ public class TagAdminService {
         return key;
     }
 
-    private static TagView map(ResultSet rs) throws SQLException {
-        return new TagView(rs.getObject("id", UUID.class), HEX.formatHex(rs.getBytes("uid")), rs.getString("label"),
-                rs.getString("type"), rs.getObject("branch_id", UUID.class), rs.getString("status"),
-                instant(rs.getTimestamp("last_tap_at")), rs.getInt("last_counter"),
-                (Integer) rs.getObject("active_version"), (Integer) rs.getObject("pending_version"),
-                rs.getBoolean("pending_exported"), rs.getLong("taps_7d"), instant(rs.getTimestamp("created_at")),
-                rs.getBoolean("free"));
-    }
-
-    private static Instant instant(Timestamp timestamp) {
-        return timestamp == null ? null : timestamp.toInstant();
-    }
-
-    private static java.time.OffsetDateTime ts(Instant instant) {
-        return instant == null ? null : instant.atOffset(ZoneOffset.UTC);
+    private Instant weekAgo() {
+        return clock.instant().minus(7, ChronoUnit.DAYS);
     }
 }

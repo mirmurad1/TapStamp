@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Fırıldaq işarələri -->
+<mapper namespace="az.tapstamp.nfc.repository.FraudFlagMapper">
+
+    <select id="existsOpen" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM fraud_flags
+                       WHERE type = #{type} AND resolved_at IS NULL AND created_at &gt; #{since}
+                         AND tag_id IS NOT DISTINCT FROM CAST(#{tagId} AS uuid)
+                         AND customer_id IS NOT DISTINCT FROM CAST(#{customerId} AS uuid))
+    </select>
+
+    <insert id="insert">
+        INSERT INTO fraud_flags (id, customer_id, tag_id, type, severity, details, created_at)
+        VALUES (#{id}, #{customerId}, #{tagId}, #{type}, #{severity}, CAST(#{details} AS jsonb), #{now})
+    </insert>
+</mapper>
