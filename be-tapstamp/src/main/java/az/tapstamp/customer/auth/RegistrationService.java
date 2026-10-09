@@ -8,9 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
-import az.tapstamp.customer.CustomerStore;
-import az.tapstamp.customer.consent.LegalDocumentService;
 import az.tapstamp.customer.consent.LegalDocumentService.DocumentRef;
+import az.tapstamp.customer.consent.LegalDocumentService;
+import az.tapstamp.customer.repository.CustomerMapper;
+import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.crypto.KeyPurpose;
@@ -34,15 +35,15 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class RegistrationService {
 
-    private final OtpChallengeStore challenges;
-    private final CustomerStore customers;
+    private final OtpChallengeMapper challenges;
+    private final CustomerMapper customers;
     private final LegalDocumentService legal;
     private final EnvelopeCipher cipher;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public RegistrationService(OtpChallengeStore challenges, CustomerStore customers, LegalDocumentService legal,
+    public RegistrationService(OtpChallengeMapper challenges, CustomerMapper customers, LegalDocumentService legal,
                                @Qualifier("tenantCipher") EnvelopeCipher cipher, AuditLogger audit,
                                PlatformTransactionManager transactionManager, Clock clock) {
         this.challenges = challenges;
@@ -59,13 +60,13 @@ public class RegistrationService {
         Instant now = clock.instant();
         UUID tenantId = TenantContext.require().id();
         return tx.execute(status -> {
-            OtpChallengeStore.Registration registration = challenges
+            OtpChallengeMapper.Registration registration = challenges
                     .consumeRegistrationToken(SecureTokens.hash(registrationToken == null ? "" : registrationToken), now)
                     .orElseThrow(() -> new ApiException(ErrorCode.TOKEN_INVALID));
             // Eyni nömrə bu arada başqa tabdan qeydiyyatdan keçibsə — nömrəyə sahiblik sübut olunub, həmin hesaba daxil olur
-            Optional<CustomerStore.Customer> existing = customers.findByPhoneHash(registration.phoneHash());
+            Optional<CustomerMapper.Customer> existing = customers.findByPhoneHash(registration.phoneHash());
             if (existing.isPresent()) {
-                if (existing.get().status() == CustomerStore.Status.BLOCKED) {
+                if (existing.get().status() == CustomerMapper.Status.BLOCKED) {
                     throw new ApiException(ErrorCode.CUSTOMER_BLOCKED);
                 }
                 legal.accept(existing.get().id(), acceptedDocuments, language, client);

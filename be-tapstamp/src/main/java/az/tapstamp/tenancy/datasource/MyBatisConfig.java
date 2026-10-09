@@ -6,10 +6,12 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import az.tapstamp.security.admin.AdminRealm;
+import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.persistence.PlatformMapper;
 import az.tapstamp.shared.persistence.TenantMapper;
 import az.tapstamp.shared.persistence.mybatis.InstantTypeHandler;
+import az.tapstamp.shared.persistence.mybatis.LanguageTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.LocalizedTextTypeHandler;
 import az.tapstamp.shared.persistence.mybatis.UuidTypeHandler;
 import org.apache.ibatis.session.Configuration;
@@ -71,6 +73,7 @@ public class MyBatisConfig {
         configuration.getTypeHandlerRegistry().register(Instant.class, InstantTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(UUID.class, UuidTypeHandler.class);
         configuration.getTypeHandlerRegistry().register(LocalizedText.class, LocalizedTextTypeHandler.class);
+        configuration.getTypeHandlerRegistry().register(Language.class, LanguageTypeHandler.class);
         Properties variables = realm.mapperVariables();
         configuration.setVariables(variables);
 

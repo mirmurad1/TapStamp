@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Hüquqi sənədlər (versiyalı) və razılıqlar -->
+<mapper namespace="az.tapstamp.customer.repository.LegalDocumentMapper">
+
+    <select id="currentDocuments" resultType="az.tapstamp.customer.consent.LegalDocumentService$Document">
+        SELECT id, type, doc_version AS version, content, published_at
+        FROM legal_documents
+        WHERE is_current
+        ORDER BY type
+    </select>
+
+    <select id="acceptedDocumentIds" resultType="java.util.UUID">
+        SELECT document_id FROM consents WHERE customer_id = #{customerId} AND withdrawn_at IS NULL
+    </select>
+
+    <insert id="insertConsent">
+        INSERT INTO consents (id, customer_id, document_id, document_type, document_version, language, accepted_at, ip,
+                              user_agent)
+        VALUES (#{id}, #{customerId}, #{document.id}, #{document.type}, #{document.version}, #{language}, #{now},
+                CAST(#{ip} AS inet), #{userAgent})
+    </insert>
+
+    <update id="withdrawAll">
+        UPDATE consents SET withdrawn_at = #{now} WHERE customer_id = #{customerId} AND withdrawn_at IS NULL
+    </update>
+</mapper>

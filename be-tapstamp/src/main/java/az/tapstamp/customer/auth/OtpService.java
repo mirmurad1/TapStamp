@@ -10,9 +10,10 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
-import az.tapstamp.customer.CustomerStore;
-import az.tapstamp.customer.auth.OtpChallengeStore.Purpose;
 import az.tapstamp.customer.phone.PhoneNumberService;
+import az.tapstamp.customer.repository.CustomerMapper;
+import az.tapstamp.customer.repository.OtpChallengeMapper.Purpose;
+import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.nfc.BrowserIdCookie;
 import az.tapstamp.nfc.repository.TapTokenMapper;
 import az.tapstamp.notification.sms.SmsMessage;
@@ -77,10 +78,10 @@ public class OtpService {
     /** Toxunuş tokeni SMS gələnə və kod daxil edilənə qədər saxlanılır. */
     static final Duration TAP_RESERVATION = Duration.ofMinutes(10);
 
-    private final OtpChallengeStore challenges;
+    private final OtpChallengeMapper challenges;
     private final TapTokenMapper tapTokens;
     private final OtpCodes codes;
-    private final CustomerStore customers;
+    private final CustomerMapper customers;
     private final PhoneNumberService phoneNumbers;
     private final PhoneHasher phoneHasher;
     private final EnvelopeCipher cipher;
@@ -95,7 +96,7 @@ public class OtpService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public OtpService(OtpChallengeStore challenges, TapTokenMapper tapTokens, OtpCodes codes, CustomerStore customers,
+    public OtpService(OtpChallengeMapper challenges, TapTokenMapper tapTokens, OtpCodes codes, CustomerMapper customers,
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
                       @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
                       CompanySettings companySettings, TenantDirectory directory, SmsProvider sms,
@@ -135,11 +136,11 @@ public class OtpService {
     }
 
     public LoginResult verifyLogin(UUID challengeId, String code, ClientInfo client) {
-        OtpChallengeStore.Attempt attempt = verify(challengeId, code, Purpose.LOGIN, null, client);
+        OtpChallengeMapper.Attempt attempt = verify(challengeId, code, Purpose.LOGIN, null, client);
         Instant now = clock.instant();
-        Optional<CustomerStore.Customer> customer = customers.findByPhoneHash(attempt.phoneHash());
+        Optional<CustomerMapper.Customer> customer = customers.findByPhoneHash(attempt.phoneHash());
         if (customer.isPresent()) {
-            if (customer.get().status() == CustomerStore.Status.BLOCKED) {
+            if (customer.get().status() == CustomerMapper.Status.BLOCKED) {
                 throw new ApiException(ErrorCode.CUSTOMER_BLOCKED);
             }
             return new LoginResult.Existing(customer.get().id());
@@ -153,8 +154,8 @@ public class OtpService {
     // ------------------------------------------------------------------ Step-up (həssas əməliyyatlar)
 
     public Issued requestStepUp(CustomerPrincipal principal, ClientInfo client) {
-        CustomerStore.Customer customer = customers.findById(principal.customerId())
-                .filter(c -> c.status() == CustomerStore.Status.ACTIVE)
+        CustomerMapper.Customer customer = customers.findById(principal.customerId())
+                .filter(c -> c.status() == CustomerMapper.Status.ACTIVE)
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHENTICATED));
         String phone = cipher.decryptString(customer.phoneEnc(), customerPhoneAad(customer.id()));
         return issue(phone, customer.language(), Purpose.STEP_UP, customer.id(), companySettings.current(), client,
@@ -187,7 +188,7 @@ public class OtpService {
         UUID id = Ids.newId();
         String code = codes.generate();
         Instant expiresAt = now.plus(properties.otpTtl());
-        OtpChallengeStore.NewChallenge challenge = new OtpChallengeStore.NewChallenge(id, phoneHash,
+        OtpChallengeMapper.NewChallenge challenge = new OtpChallengeMapper.NewChallenge(id, phoneHash,
                 cipher.encryptString(KeyPurpose.PII, phone, Aad.tenantField(tenant.id(), "otp_challenges", "phone_enc", id)),
                 codes.hash(id, code), language, properties.otpMaxAttempts(), purpose, customerId, client.ip(), now,
                 expiresAt);
@@ -216,20 +217,20 @@ public class OtpService {
         return new Issued(id, expiresAt, now.plus(properties.otpResendCooldown()));
     }
 
-    private OtpChallengeStore.Attempt verify(UUID challengeId, String code, Purpose purpose, UUID customerId,
+    private OtpChallengeMapper.Attempt verify(UUID challengeId, String code, Purpose purpose, UUID customerId,
                                              ClientInfo client) {
         TenantInfo tenant = TenantContext.require();
         String scope = "t:" + tenant.id();
         Instant now = clock.instant();
         rateLimiter.consume(RateLimitPolicy.OTP_VERIFY_PER_IP, scope, client.ip());
 
-        Optional<OtpChallengeStore.Attempt> found = challenges.attempt(challengeId, purpose, customerId, now);
+        Optional<OtpChallengeMapper.Attempt> found = challenges.attempt(challengeId, purpose, customerId, now);
         if (found.isEmpty()) {
             throw new ApiException(challenges.find(challengeId)
                     .filter(state -> "LOCKED".equals(state.status()) || state.attempts() >= state.maxAttempts())
                     .isPresent() ? ErrorCode.OTP_ATTEMPTS_EXCEEDED : ErrorCode.OTP_EXPIRED);
         }
-        OtpChallengeStore.Attempt attempt = found.get();
+        OtpChallengeMapper.Attempt attempt = found.get();
         String phoneKey = HexFormat.of().formatHex(attempt.phoneHash());
         if (rateLimiter.isExhausted(RateLimitPolicy.OTP_VERIFY_FAILURE_PER_PHONE, scope, phoneKey)) {
             challenges.markLocked(attempt.id());

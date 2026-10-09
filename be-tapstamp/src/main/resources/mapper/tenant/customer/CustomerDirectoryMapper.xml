@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Admin panelinin müştəri siyahısı: telefon yalnız maskalı, menecer yalnız öz filiallarının müştərilərini görür -->
+<mapper namespace="az.tapstamp.customer.repository.CustomerDirectoryMapper">
+
+    <sql id="columns">
+        SELECT c.id, c.name, c.phone_masked, c.preferred_language AS language, c.status, c.registered_at,
+               c.last_visit_at,
+               coalesce(a.current_stamps, 0) AS current_stamps, coalesce(a.total_stamps, 0) AS total_stamps,
+               coalesce(a.rewards_earned, 0) AS rewards_earned, coalesce(a.rewards_redeemed, 0) AS rewards_redeemed,
+               (SELECT count(*) FROM fraud_flags f WHERE f.customer_id = c.id AND f.resolved_at IS NULL)
+                   AS open_fraud_flags
+        FROM customers c
+        LEFT JOIN loyalty_accounts a ON a.customer_id = c.id
+    </sql>
+
+    <!-- Menecerin görmə sahəsi: öz filiallarında möhürü olan müştərilər -->
+    <sql id="scope">
+        <if test="!all">
+            AND EXISTS (SELECT 1 FROM stamps s WHERE s.customer_id = c.id AND s.branch_id IN
+                <foreach item="branchId" collection="branchIds" open="(" separator="," close=")">#{branchId}</foreach>)
+        </if>
+    </sql>
+
+    <sql id="filters">
+        WHERE c.status &lt;&gt; 'DELETED'
+        <include refid="scope"/>
+        <if test="phoneHash != null">AND c.phone_hash = #{phoneHash}</if>
+        <if test="namePattern != null">AND c.name ILIKE #{namePattern}</if>
+        <if test="language != null">AND c.preferred_language = #{language}</if>
+        <if test="status != null">AND c.status = #{status}</if>
+        <if test="inactiveBefore != null">AND coalesce(c.last_visit_at, c.registered_at) &lt; #{inactiveBefore}</if>
+        <if test="registeredFrom != null">AND (c.registered_at AT TIME ZONE #{timezone})::date &gt;= #{registeredFrom}</if>
+        <if test="registeredTo != null">AND (c.registered_at AT TIME ZONE #{timezone})::date &lt;= #{registeredTo}</if>
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row">
+        <include refid="columns"/>
+        <include refid="filters"/>
+        <!-- orderBy: yalnız CustomerDirectory.Sort ağ siyahısından -->
+        ORDER BY ${orderBy} <choose><when test="descending">DESC</when><otherwise>ASC</otherwise></choose> NULLS LAST,
+                 c.id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*)
+        FROM customers c
+        LEFT JOIN loyalty_accounts a ON a.customer_id = c.id
+        <include refid="filters"/>
+    </select>
+
+    <select id="stream" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row" fetchSize="500">
+        <include refid="columns"/>
+        <include refid="filters"/>
+        ORDER BY c.registered_at DESC, c.id
+    </select>
+
+    <select id="find" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row">
+        <include refid="columns"/>
+        WHERE c.id = #{id} AND c.status &lt;&gt; 'DELETED'
+        <include refid="scope"/>
+    </select>
+
+    <select id="timeline" resultType="az.tapstamp.customer.admin.CustomerDirectory$TimelineItem">
+        SELECT * FROM (
+            SELECT s.id, 'STAMP' AS kind, s.status, s.source, s.branch_id,
+                   coalesce(s.revoke_reason, s.reason) AS reason, NULL::text AS reward_name,
+                   s.created_at AS at, NULL::timestamptz AS redeemed_at
+            FROM stamps s
+            WHERE s.customer_id = #{customerId}
+            UNION ALL
+            SELECT r.id, 'REWARD', r.status, NULL, r.redeemed_branch_id, NULL, r.reward_name_snapshot::text,
+                   r.earned_at, r.redeemed_at
+            FROM rewards r
+            WHERE r.customer_id = #{customerId}
+        ) t
+        <where>
+            <if test="before != null">t.at &lt; #{before}</if>
+        </where>
+        ORDER BY t.at DESC, t.id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

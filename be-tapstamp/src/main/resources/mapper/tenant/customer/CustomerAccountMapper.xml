@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Müştərinin öz hesabı: kart, hədiyyələr, silinmə -->
+<mapper namespace="az.tapstamp.customer.repository.CustomerAccountMapper">
+
+    <select id="findCard" resultType="az.tapstamp.customer.repository.CustomerAccountMapper$CardRow">
+        SELECT coalesce(la.current_stamps, 0) AS current_stamps, coalesce(la.total_stamps, 0) AS total_stamps,
+               r.stamps_required, r.reward_name, r.reward_description,
+               (SELECT count(*) FROM stamps WHERE customer_id = #{customerId} AND status = 'PENDING') AS pending_stamps,
+               (SELECT max(created_at) + make_interval(mins => (
+                        SELECT min_interval_minutes FROM stamp_policies WHERE branch_id IS NULL))
+                FROM stamps
+                WHERE customer_id = #{customerId} AND source = 'NFC_TAP' AND status IN ('PENDING', 'CONFIRMED'))
+                   AS next_stamp_at
+        FROM (SELECT 1) one
+        LEFT JOIN loyalty_accounts la ON la.customer_id = #{customerId}
+        <!-- Kartın öz qaydası, yoxdursa aktiv qayda -->
+        JOIN reward_rules r ON r.id = COALESCE(la.reward_rule_id, (SELECT id FROM reward_rules WHERE active))
+    </select>
+
+    <select id="availableRewards" resultType="az.tapstamp.customer.account.CustomerAccountService$AvailableReward">
+        SELECT id, reward_name_snapshot AS name, earned_at
+        FROM rewards
+        WHERE customer_id = #{customerId} AND status = 'AVAILABLE' AND (expires_at IS NULL OR expires_at &gt; #{now})
+        ORDER BY earned_at
+    </select>
+
+    <update id="cancelPendingRedemptions">
+        UPDATE redemptions SET status = 'CANCELLED' WHERE customer_id = #{customerId} AND status = 'PENDING'
+    </update>
+
+    <update id="revokeAvailableRewards">
+        UPDATE rewards SET status = 'REVOKED' WHERE customer_id = #{customerId} AND status = 'AVAILABLE'
+    </update>
+
+    <select id="anonymizeTapEvents" resultType="int" flushCache="true">
+        SELECT anonymize_customer_tap_events(#{customerId})
+    </select>
+</mapper>

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.customer.repository.CustomerSessionMapper;
 import az.tapstamp.security.token.SecureTokens;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
@@ -54,14 +55,14 @@ public class CustomerSessionService {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerSessionService.class);
 
-    private final CustomerSessionStore sessions;
+    private final CustomerSessionMapper sessions;
     private final CustomerAuthProperties properties;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
     private final Cache<String, CachedSession> cache;
 
-    public CustomerSessionService(CustomerSessionStore sessions, CustomerAuthProperties properties, AuditLogger audit,
+    public CustomerSessionService(CustomerSessionMapper sessions, CustomerAuthProperties properties, AuditLogger audit,
                                   PlatformTransactionManager transactionManager, Clock clock) {
         this.sessions = sessions;
         this.properties = properties;
@@ -96,12 +97,12 @@ public class CustomerSessionService {
         Instant now = clock.instant();
         CachedSession cached = cache.getIfPresent(key);
         if (cached == null) {
-            Optional<CustomerSessionStore.ActiveSession> found = sessions.findByAccessHash(hash)
+            Optional<CustomerSessionMapper.ActiveSession> found = sessions.findByAccessHash(hash)
                     .filter(s -> s.revokedAt() == null && "ACTIVE".equals(s.customerStatus()));
             if (found.isEmpty()) {
                 return Optional.empty();
             }
-            CustomerSessionStore.ActiveSession session = found.get();
+            CustomerSessionMapper.ActiveSession session = found.get();
             cached = new CachedSession(tenantId, new CustomerPrincipal(session.customerId(), session.sessionId(),
                     session.language(), session.stepUpAt()), session.accessExpiresAt(), session.lastSeenAt());
             cache.put(key, cached);
@@ -135,11 +136,11 @@ public class CustomerSessionService {
     }
 
     private Outcome rotate(String refreshToken, ClientInfo client, Instant now) {
-        Optional<CustomerSessionStore.RefreshRow> found = sessions.lockRefreshToken(SecureTokens.hash(refreshToken));
+        Optional<CustomerSessionMapper.RefreshRow> found = sessions.lockRefreshToken(SecureTokens.hash(refreshToken));
         if (found.isEmpty()) {
             return new Outcome(null, ErrorCode.SESSION_EXPIRED, null);
         }
-        CustomerSessionStore.RefreshRow row = found.get();
+        CustomerSessionMapper.RefreshRow row = found.get();
         if (row.sessionRevokedAt() != null || !row.expiresAt().isAfter(now)
                 || !row.sessionRefreshExpiresAt().isAfter(now) || !"ACTIVE".equals(row.customerStatus())) {
             return new Outcome(null, ErrorCode.SESSION_EXPIRED, null);
@@ -169,10 +170,10 @@ public class CustomerSessionService {
     public void logout(Optional<String> accessToken, Optional<String> refreshToken) {
         Instant now = clock.instant();
         Optional<UUID> sessionId = accessToken.flatMap(token -> sessions.findByAccessHash(SecureTokens.hash(token)))
-                .map(CustomerSessionStore.ActiveSession::sessionId);
+                .map(CustomerSessionMapper.ActiveSession::sessionId);
         if (sessionId.isEmpty() && refreshToken.isPresent()) {
             sessionId = tx.execute(status -> sessions.lockRefreshToken(SecureTokens.hash(refreshToken.get()))
-                    .map(CustomerSessionStore.RefreshRow::sessionId));
+                    .map(CustomerSessionMapper.RefreshRow::sessionId));
         }
         sessionId.ifPresent(id -> {
             sessions.revoke(id, "LOGOUT", now);
@@ -180,7 +181,7 @@ public class CustomerSessionService {
         });
     }
 
-    public List<CustomerSessionStore.SessionView> list(CustomerPrincipal principal) {
+    public List<CustomerSessionMapper.SessionView> list(CustomerPrincipal principal) {
         return sessions.listActive(principal.customerId(), clock.instant());
     }
 

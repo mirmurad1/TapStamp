@@ -1,6 +1,5 @@
 package az.tapstamp.customer.account;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -9,19 +8,16 @@ import java.util.Map;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
-import az.tapstamp.customer.CustomerStore;
 import az.tapstamp.customer.auth.CustomerPrincipal;
 import az.tapstamp.customer.auth.CustomerSessionService;
-import az.tapstamp.customer.auth.OtpChallengeStore;
 import az.tapstamp.customer.consent.LegalDocumentService;
+import az.tapstamp.customer.repository.CustomerAccountMapper;
+import az.tapstamp.customer.repository.CustomerMapper;
+import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
-import az.tapstamp.shared.persistence.SqlTime;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -45,22 +41,20 @@ public class CustomerAccountService {
                           List<AvailableReward> availableRewards, List<LegalDocumentService.DocumentRef> pendingConsents) {
     }
 
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-
-    private final JdbcClient jdbc;
-    private final CustomerStore customers;
+    private final CustomerAccountMapper accounts;
+    private final CustomerMapper customers;
     private final CustomerSessionService sessions;
-    private final OtpChallengeStore challenges;
+    private final OtpChallengeMapper challenges;
     private final LegalDocumentService legal;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public CustomerAccountService(@Qualifier("tenantJdbc") JdbcClient jdbc, CustomerStore customers,
-                                  CustomerSessionService sessions, OtpChallengeStore challenges,
+    public CustomerAccountService(CustomerAccountMapper accounts, CustomerMapper customers,
+                                  CustomerSessionService sessions, OtpChallengeMapper challenges,
                                   LegalDocumentService legal, AuditLogger audit,
                                   PlatformTransactionManager transactionManager, Clock clock) {
-        this.jdbc = jdbc;
+        this.accounts = accounts;
         this.customers = customers;
         this.sessions = sessions;
         this.challenges = challenges;
@@ -71,38 +65,12 @@ public class CustomerAccountService {
     }
 
     public Profile profile(CustomerPrincipal principal) {
-        CustomerStore.Customer customer = active(principal);
-        Card card = jdbc.sql("""
-                        SELECT la.current_stamps, la.total_stamps, r.stamps_required, r.reward_name::text AS reward_name,
-                               r.reward_description::text AS reward_description,
-                               (SELECT count(*) FROM stamps WHERE customer_id = :customerId AND status = 'PENDING') AS pending,
-                               (SELECT max(created_at) + make_interval(mins => (
-                                        SELECT min_interval_minutes FROM stamp_policies WHERE branch_id IS NULL))
-                                FROM stamps WHERE customer_id = :customerId AND source = 'NFC_TAP'
-                                  AND status IN ('PENDING', 'CONFIRMED')) AS next_stamp_at
-                        FROM (SELECT 1) one
-                        LEFT JOIN loyalty_accounts la ON la.customer_id = :customerId
-                        -- Kartın öz qaydası (hədd dəyişəndə yarımçıq kart köhnə qaydada qalır), yoxdursa aktiv qayda
-                        JOIN reward_rules r ON r.id = COALESCE(la.reward_rule_id,
-                                                               (SELECT id FROM reward_rules WHERE active))""")
-                .param("customerId", customer.id())
-                .query((rs, n) -> new Card(rs.getInt("current_stamps"), rs.getInt("total_stamps"),
-                        rs.getInt("stamps_required"), TEXT.convertToEntityAttribute(rs.getString("reward_name")),
-                        TEXT.convertToEntityAttribute(rs.getString("reward_description")), rs.getInt("pending"),
-                        futureOrNull(SqlTime.instant(rs, "next_stamp_at"))))
-                .optional()
+        CustomerMapper.Customer customer = active(principal);
+        Card card = accounts.findCard(customer.id())
+                .map(row -> new Card(row.currentStamps(), row.totalStamps(), row.stampsRequired(), row.rewardName(),
+                        row.rewardDescription(), row.pendingStamps(), futureOrNull(row.nextStampAt())))
                 .orElse(null);
-        List<AvailableReward> rewards = jdbc.sql("""
-                        SELECT id, reward_name_snapshot::text AS name, earned_at FROM rewards
-                        WHERE customer_id = :customerId AND status = 'AVAILABLE'
-                          AND (expires_at IS NULL OR expires_at > now()) ORDER BY earned_at""")
-                .param("customerId", customer.id())
-                .query((rs, n) -> {
-                    Timestamp earned = rs.getTimestamp("earned_at");
-                    return new AvailableReward(rs.getObject("id", UUID.class),
-                            TEXT.convertToEntityAttribute(rs.getString("name")), earned.toInstant());
-                })
-                .list();
+        List<AvailableReward> rewards = accounts.availableRewards(customer.id(), clock.instant());
         List<LegalDocumentService.DocumentRef> pending = legal.pendingFor(customer.id()).stream()
                 .map(document -> new LegalDocumentService.DocumentRef(document.type(), document.version()))
                 .toList();
@@ -126,15 +94,13 @@ public class CustomerAccountService {
      */
     public void delete(CustomerPrincipal principal) {
         sessions.requireStepUp(principal);
-        CustomerStore.Customer customer = active(principal);
+        CustomerMapper.Customer customer = active(principal);
         Instant now = clock.instant();
         tx.executeWithoutResult(status -> {
-            jdbc.sql("UPDATE redemptions SET status = 'CANCELLED' WHERE customer_id = :id AND status = 'PENDING'")
-                    .param("id", customer.id()).update();
-            jdbc.sql("UPDATE rewards SET status = 'REVOKED' WHERE customer_id = :id AND status = 'AVAILABLE'")
-                    .param("id", customer.id()).update();
+            accounts.cancelPendingRedemptions(customer.id());
+            accounts.revokeAvailableRewards(customer.id());
             challenges.deleteForCustomer(customer.id(), customer.phoneHash());
-            jdbc.sql("SELECT anonymize_customer_tap_events(:id)").param("id", customer.id()).query(Integer.class).single();
+            accounts.anonymizeTapEvents(customer.id());
             legal.withdrawAll(customer.id());
             customers.anonymize(customer.id(), now);
             audit.tenant("CUSTOMER_DELETED", AuditLogger.ActorType.CUSTOMER, customer.id(), "customer", customer.id(),
@@ -147,9 +113,9 @@ public class CustomerAccountService {
         return at != null && at.isAfter(clock.instant()) ? at : null;
     }
 
-    private CustomerStore.Customer active(CustomerPrincipal principal) {
+    private CustomerMapper.Customer active(CustomerPrincipal principal) {
         return customers.findById(principal.customerId())
-                .filter(customer -> customer.status() == CustomerStore.Status.ACTIVE)
+                .filter(customer -> customer.status() == CustomerMapper.Status.ACTIVE)
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHENTICATED));
     }
 }

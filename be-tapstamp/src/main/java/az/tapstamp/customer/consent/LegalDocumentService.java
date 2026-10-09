@@ -1,24 +1,20 @@
 package az.tapstamp.customer.consent;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+import az.tapstamp.customer.repository.LegalDocumentMapper;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
-import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.shared.web.ClientInfo;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,27 +52,16 @@ public class LegalDocumentService {
     public record DocumentRef(DocumentType type, int version) {
     }
 
-    private static final LocalizedTextConverter TEXT = new LocalizedTextConverter();
-
-    private final JdbcClient jdbc;
+    private final LegalDocumentMapper documents;
     private final Clock clock;
 
-    public LegalDocumentService(@Qualifier("tenantJdbc") JdbcClient jdbc, Clock clock) {
-        this.jdbc = jdbc;
+    public LegalDocumentService(LegalDocumentMapper documents, Clock clock) {
+        this.documents = documents;
         this.clock = clock;
     }
 
     public List<Document> current() {
-        return jdbc.sql("""
-                        SELECT id, type, doc_version, content::text AS content, published_at FROM legal_documents
-                        WHERE is_current ORDER BY type""")
-                .query((rs, n) -> {
-                    Timestamp published = rs.getTimestamp("published_at");
-                    return new Document(rs.getObject("id", UUID.class), DocumentType.valueOf(rs.getString("type")),
-                            rs.getInt("doc_version"), TEXT.convertToEntityAttribute(rs.getString("content")),
-                            published.toInstant());
-                })
-                .list();
+        return documents.currentDocuments();
     }
 
     public Optional<Document> current(DocumentType type) {
@@ -85,10 +70,7 @@ public class LegalDocumentService {
 
     /** Müştərinin hələ razılıq vermədiyi cari sənədlər. */
     public List<Document> pendingFor(UUID customerId) {
-        List<UUID> accepted = jdbc.sql("SELECT document_id FROM consents WHERE customer_id = :id AND withdrawn_at IS NULL")
-                .param("id", customerId)
-                .query(UUID.class)
-                .list();
+        List<UUID> accepted = documents.acceptedDocumentIds(customerId);
         return current().stream().filter(document -> !accepted.contains(document.id())).toList();
     }
 
@@ -106,29 +88,14 @@ public class LegalDocumentService {
         }
         Instant now = clock.instant();
         for (Document document : required) {
-            jdbc.sql("""
-                            INSERT INTO consents (id, customer_id, document_id, document_type, document_version, language,
-                                                  accepted_at, ip, user_agent)
-                            VALUES (:id, :customerId, :documentId, :type, :version, :language, :now, CAST(:ip AS inet), :ua)""")
-                    .param("id", Ids.newId())
-                    .param("customerId", customerId)
-                    .param("documentId", document.id())
-                    .param("type", document.type().name())
-                    .param("version", document.version())
-                    .param("language", language.tag())
-                    .param("now", now.atOffset(ZoneOffset.UTC))
-                    .param("ip", client.ip())
-                    .param("ua", client.userAgent() == null || client.userAgent().length() <= 512
-                            ? client.userAgent() : client.userAgent().substring(0, 512))
-                    .update();
+            String userAgent = client.userAgent() == null || client.userAgent().length() <= 512
+                    ? client.userAgent() : client.userAgent().substring(0, 512);
+            documents.insertConsent(Ids.newId(), customerId, document, language, now, client.ip(), userAgent);
         }
     }
 
     /** Hesab silinəndə razılıqlar geri götürülmüş sayılır (qeyd tarixçə üçün qalır). */
     public void withdrawAll(UUID customerId) {
-        jdbc.sql("UPDATE consents SET withdrawn_at = :now WHERE customer_id = :id AND withdrawn_at IS NULL")
-                .param("now", clock.instant().atOffset(ZoneOffset.UTC))
-                .param("id", customerId)
-                .update();
+        documents.withdrawAll(customerId, clock.instant());
     }
 }

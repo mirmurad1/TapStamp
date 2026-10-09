@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Admin panelinin müştəri əməliyyatları -->
+<mapper namespace="az.tapstamp.customer.repository.CustomerAdminMapper">
+
+    <select id="findEncryptedPhone" resultType="_byte[]">
+        SELECT phone_enc FROM customers WHERE id = #{customerId}
+    </select>
+
+    <select id="findAdjustment" resultType="az.tapstamp.customer.repository.CustomerAdminMapper$StoredAdjustment">
+        SELECT request_hash,
+               (response_body->>'currentStamps')::int AS current_stamps,
+               (response_body->>'totalStamps')::int AS total_stamps,
+               (response_body->>'giftCardsIssued')::int AS gift_cards_issued,
+               (response_body->>'giftCardsRevoked')::int AS gift_cards_revoked
+        FROM idempotency_keys
+        WHERE scope = #{scope} AND key = #{key}
+    </select>
+
+    <insert id="saveAdjustment">
+        INSERT INTO idempotency_keys (scope, key, request_hash, response_status, response_body, created_at, expires_at)
+        VALUES (#{scope}, #{key}, #{requestHash}, 200, CAST(#{responseBody} AS jsonb), #{now}, #{expiresAt})
+    </insert>
+
+    <select id="lockLatestAvailableReward"
+            resultType="az.tapstamp.customer.repository.CustomerAdminMapper$RevocableReward">
+        SELECT id, stamps_required_snapshot AS stamps_required
+        FROM rewards
+        WHERE customer_id = #{customerId} AND status = 'AVAILABLE'
+        ORDER BY earned_at DESC, id DESC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <update id="revokeReward">
+        UPDATE rewards SET status = 'REVOKED' WHERE id = #{rewardId}
+    </update>
+
+    <update id="unlinkStampsFromReward">
+        UPDATE stamps SET reward_id = NULL WHERE reward_id = #{rewardId}
+    </update>
+
+    <update id="restoreCardStamps">
+        UPDATE loyalty_accounts
+        SET current_stamps = current_stamps + #{stamps}, rewards_earned = rewards_earned - 1, updated_at = #{now}
+        WHERE customer_id = #{customerId}
+    </update>
+
+    <update id="revokeLatestStamps">
+        UPDATE stamps
+        SET status = 'REVOKED', revoked_at = #{now}, revoked_by = #{staffId}, revoke_reason = #{reason}
+        WHERE id IN (SELECT id FROM stamps
+                     WHERE customer_id = #{customerId} AND status = 'CONFIRMED' AND reward_id IS NULL
+                     ORDER BY created_at DESC, id DESC
+                     LIMIT #{count})
+    </update>
+
+    <update id="deductCardStamps">
+        UPDATE loyalty_accounts
+        SET current_stamps = current_stamps - #{count}, total_stamps = GREATEST(total_stamps - #{count}, 0),
+            updated_at = #{now}, version = version + 1
+        WHERE customer_id = #{customerId}
+    </update>
+
+    <select id="currentStamps" resultType="int">
+        SELECT current_stamps FROM loyalty_accounts WHERE customer_id = #{customerId}
+    </select>
+
+    <select id="cardTotals" resultType="az.tapstamp.customer.repository.CustomerAdminMapper$CardTotals">
+        SELECT current_stamps, total_stamps FROM loyalty_accounts WHERE customer_id = #{customerId}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE customers SET status = #{status}, updated_at = #{now}, version = version + 1 WHERE id = #{customerId}
+    </update>
+
+    <select id="fraudFlags" resultType="az.tapstamp.customer.admin.CustomerAdminService$FraudFlag">
+        SELECT id, type, severity, details::text AS details, created_at, resolved_at, resolution_note
+        FROM fraud_flags
+        WHERE customer_id = #{customerId}
+        ORDER BY created_at DESC
+        LIMIT 100
+    </select>
+
+    <select id="findFraudFlagCustomer" resultType="java.util.UUID">
+        SELECT customer_id FROM fraud_flags WHERE id = #{flagId}
+    </select>
+
+    <update id="resolveFraudFlag">
+        UPDATE fraud_flags SET resolved_at = #{now}, resolved_by = #{staffId}, resolution_note = #{note}
+        WHERE id = #{flagId} AND resolved_at IS NULL
+    </update>
+</mapper>

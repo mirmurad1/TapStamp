@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import az.tapstamp.company.service.CompanySettings;
-import az.tapstamp.customer.CustomerStore;
-import az.tapstamp.customer.auth.OtpChallengeStore;
+import az.tapstamp.customer.repository.CustomerMapper;
+import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
@@ -74,8 +74,8 @@ public class StampClaimService {
     private final TapEventLog events;
     private final FraudFlags fraudFlags;
     private final StampLedger ledger;
-    private final CustomerStore customers;
-    private final OtpChallengeStore challenges;
+    private final CustomerMapper customers;
+    private final OtpChallengeMapper challenges;
     private final CompanySettings companySettings;
     private final StampMapper stamps;
     private final TapEventMapper tapEvents;
@@ -83,7 +83,7 @@ public class StampClaimService {
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
-                             CustomerStore customers, OtpChallengeStore challenges, CompanySettings companySettings,
+                             CustomerMapper customers, OtpChallengeMapper challenges, CompanySettings companySettings,
                              StampMapper stamps, TapEventMapper tapEvents,
                              PlatformTransactionManager transactionManager,
                              Clock clock) {
@@ -132,10 +132,10 @@ public class StampClaimService {
             return Outcome.fail(ErrorCode.TAP_TOKEN_EXPIRED);
         }
         TapToken token = found.get();
-        CustomerStore.Customer customer = customers.findById(customerId)
-                .filter(c -> c.status() != CustomerStore.Status.DELETED)
+        CustomerMapper.Customer customer = customers.findById(customerId)
+                .filter(c -> c.status() != CustomerMapper.Status.DELETED)
                 .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHENTICATED));
-        if (customer.status() == CustomerStore.Status.BLOCKED) {
+        if (customer.status() == CustomerMapper.Status.BLOCKED) {
             return Outcome.fail(ErrorCode.CUSTOMER_BLOCKED);
         }
 

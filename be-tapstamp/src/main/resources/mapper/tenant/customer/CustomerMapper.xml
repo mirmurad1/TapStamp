@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Müştərilər: telefon şifrəli, axtarış HMAC ilə -->
+<mapper namespace="az.tapstamp.customer.repository.CustomerMapper">
+
+    <sql id="columns">
+        id, name, phone_enc, phone_hash, phone_masked, preferred_language AS language, status, registered_at
+    </sql>
+
+    <select id="findById" resultType="az.tapstamp.customer.repository.CustomerMapper$Customer">
+        SELECT <include refid="columns"/> FROM customers WHERE id = #{id}
+    </select>
+
+    <select id="findByPhoneHash" resultType="az.tapstamp.customer.repository.CustomerMapper$Customer">
+        SELECT <include refid="columns"/> FROM customers WHERE phone_hash = #{phoneHash}
+    </select>
+
+    <insert id="insertCustomer">
+        INSERT INTO customers (id, phone_enc, phone_hash, phone_masked, name, preferred_language, status, registered_at,
+                               created_at, updated_at)
+        VALUES (#{id}, #{phoneEnc}, #{phoneHash}, #{phoneMasked}, #{name}, #{language}, 'ACTIVE', #{now}, #{now},
+                #{now})
+    </insert>
+
+    <insert id="insertAccount">
+        INSERT INTO loyalty_accounts (id, customer_id, created_at, updated_at)
+        VALUES (#{id}, #{customerId}, #{now}, #{now})
+    </insert>
+
+    <update id="updateProfile">
+        UPDATE customers
+        SET name = <choose><when test="keepName">name</when><otherwise>#{name}</otherwise></choose>,
+            preferred_language = COALESCE(#{language}, preferred_language),
+            updated_at = #{now}, version = version + 1
+        WHERE id = #{id} AND status = 'ACTIVE'
+    </update>
+
+    <update id="anonymize">
+        UPDATE customers
+        SET status = 'DELETED', phone_enc = NULL, phone_hash = NULL, phone_masked = NULL, name = NULL,
+            deleted_at = #{now}, updated_at = #{now}, version = version + 1
+        WHERE id = #{id}
+    </update>
+</mapper>

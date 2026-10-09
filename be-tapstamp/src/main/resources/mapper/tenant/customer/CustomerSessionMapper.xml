@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Müştəri sessiyaları və refresh tokenləri (yalnız hash) -->
+<mapper namespace="az.tapstamp.customer.repository.CustomerSessionMapper">
+
+    <insert id="insertSessionRow">
+        INSERT INTO customer_sessions (id, customer_id, access_token_hash, access_expires_at, refresh_expires_at,
+                                       device_label, user_agent, created_ip, last_ip, created_at, last_seen_at)
+        VALUES (#{id}, #{customerId}, #{accessHash}, #{accessExpiresAt}, #{refreshExpiresAt}, #{deviceLabel},
+                #{userAgent}, CAST(#{ip} AS inet), CAST(#{ip} AS inet), #{now}, #{now})
+    </insert>
+
+    <insert id="insertRefreshToken">
+        INSERT INTO customer_refresh_tokens (id, session_id, token_hash, issued_at, expires_at)
+        VALUES (#{id}, #{sessionId}, #{tokenHash}, #{issuedAt}, #{expiresAt})
+    </insert>
+
+    <select id="findByAccessHash" resultType="az.tapstamp.customer.repository.CustomerSessionMapper$ActiveSession">
+        SELECT s.id AS session_id, s.customer_id, s.access_expires_at, s.revoked_at, s.step_up_at, s.last_seen_at,
+               c.status AS customer_status, c.preferred_language AS language
+        FROM customer_sessions s
+        JOIN customers c ON c.id = s.customer_id
+        WHERE s.access_token_hash = #{accessHash}
+    </select>
+
+    <select id="lockRefreshToken" resultType="az.tapstamp.customer.repository.CustomerSessionMapper$RefreshRow">
+        SELECT rt.id AS token_id, rt.session_id, s.customer_id, rt.expires_at, rt.consumed_at,
+               s.revoked_at AS session_revoked_at, s.refresh_expires_at AS session_refresh_expires_at,
+               c.status AS customer_status
+        FROM customer_refresh_tokens rt
+        JOIN customer_sessions s ON s.id = rt.session_id
+        JOIN customers c ON c.id = s.customer_id
+        WHERE rt.token_hash = #{tokenHash}
+        FOR UPDATE OF rt, s
+    </select>
+
+    <update id="consumeRefreshToken">
+        UPDATE customer_refresh_tokens SET consumed_at = #{now} WHERE id = #{tokenId}
+    </update>
+
+    <update id="rotateAccess">
+        UPDATE customer_sessions
+        SET access_token_hash = #{accessHash}, access_expires_at = #{accessExpiresAt},
+            refresh_expires_at = #{refreshExpiresAt}, last_seen_at = #{now}, last_ip = CAST(#{ip} AS inet)
+        WHERE id = #{sessionId}
+    </update>
+
+    <update id="touchSession">
+        UPDATE customer_sessions SET last_seen_at = #{now}, last_ip = CAST(#{ip} AS inet)
+        WHERE id = #{sessionId} AND last_seen_at &lt; #{threshold}
+    </update>
+
+    <update id="markStepUp">
+        UPDATE customer_sessions SET step_up_at = #{now} WHERE id = #{sessionId}
+    </update>
+
+    <update id="revokeSession">
+        UPDATE customer_sessions SET revoked_at = #{now}, revoke_reason = #{reason}
+        WHERE id = #{sessionId} AND revoked_at IS NULL
+    </update>
+
+    <select id="revokeAll" resultType="java.util.UUID" flushCache="true">
+        UPDATE customer_sessions SET revoked_at = #{now}, revoke_reason = #{reason}
+        WHERE customer_id = #{customerId} AND revoked_at IS NULL
+        <if test="exceptSessionId != null">AND id &lt;&gt; #{exceptSessionId}</if>
+        RETURNING id
+    </select>
+
+    <select id="listActive" resultType="az.tapstamp.customer.repository.CustomerSessionMapper$SessionView">
+        SELECT id, device_label, created_at, last_seen_at
+        FROM customer_sessions
+        WHERE customer_id = #{customerId} AND revoked_at IS NULL AND refresh_expires_at &gt; #{now}
+        ORDER BY last_seen_at DESC
+    </select>
+</mapper>

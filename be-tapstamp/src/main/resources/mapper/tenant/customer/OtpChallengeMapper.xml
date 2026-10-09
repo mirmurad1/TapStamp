@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- SMS kodları: yalnız hash saxlanılır, cəhdlər atomik sayılır -->
+<mapper namespace="az.tapstamp.customer.repository.OtpChallengeMapper">
+
+    <select id="lastCreatedAt" resultType="java.time.Instant">
+        SELECT created_at FROM otp_challenges
+        WHERE phone_hash = #{phoneHash} AND purpose = #{purpose}
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <update id="supersedeActive">
+        UPDATE otp_challenges SET status = 'SUPERSEDED'
+        WHERE phone_hash = #{phoneHash} AND purpose = #{purpose} AND status = 'ACTIVE'
+    </update>
+
+    <insert id="insert">
+        INSERT INTO otp_challenges (id, phone_hash, phone_enc, code_hash, language, attempts, max_attempts, status,
+                                    purpose, customer_id, ip, created_at, expires_at)
+        VALUES (#{id}, #{phoneHash}, #{phoneEnc}, #{codeHash}, #{language}, 0, #{maxAttempts}, 'ACTIVE', #{purpose},
+                #{customerId}, CAST(#{ip} AS inet), #{createdAt}, #{expiresAt})
+    </insert>
+
+    <select id="attempt" resultType="az.tapstamp.customer.repository.OtpChallengeMapper$Attempt" flushCache="true">
+        UPDATE otp_challenges SET attempts = attempts + 1
+        WHERE id = #{id} AND purpose = #{purpose} AND status = 'ACTIVE' AND attempts &lt; max_attempts
+          AND expires_at &gt; #{now}
+          <if test="customerId != null">AND customer_id = #{customerId}</if>
+        RETURNING id, code_hash, phone_hash, language, attempts, max_attempts, customer_id
+    </select>
+
+    <select id="find" resultType="az.tapstamp.customer.repository.OtpChallengeMapper$State">
+        SELECT status, attempts, max_attempts, expires_at, phone_hash FROM otp_challenges WHERE id = #{id}
+    </select>
+
+    <update id="markVerifiedRow">
+        UPDATE otp_challenges SET status = 'VERIFIED', verified_at = #{now} WHERE id = #{id} AND status = 'ACTIVE'
+    </update>
+
+    <update id="linkTapToken">
+        UPDATE otp_challenges SET tap_token_id = #{tapTokenId} WHERE id = #{id}
+    </update>
+
+    <update id="markLocked">
+        UPDATE otp_challenges SET status = 'LOCKED' WHERE id = #{id} AND status = 'ACTIVE'
+    </update>
+
+    <update id="setRegistrationToken">
+        UPDATE otp_challenges SET registration_token_hash = #{tokenHash}, registration_expires_at = #{expiresAt}
+        WHERE id = #{id}
+    </update>
+
+    <select id="consumeRegistrationToken" resultType="az.tapstamp.customer.repository.OtpChallengeMapper$Registration"
+            flushCache="true">
+        UPDATE otp_challenges SET registration_token_hash = NULL
+        WHERE registration_token_hash = #{tokenHash} AND registration_expires_at &gt; #{now} AND status = 'VERIFIED'
+        RETURNING id AS challenge_id, phone_hash, phone_enc, language
+    </select>
+
+    <delete id="deleteForCustomer">
+        DELETE FROM otp_challenges WHERE customer_id = #{customerId} OR phone_hash = #{phoneHash}
+    </delete>
+</mapper>

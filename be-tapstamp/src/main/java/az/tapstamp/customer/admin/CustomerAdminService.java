@@ -3,7 +3,6 @@ package az.tapstamp.customer.admin;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,6 +16,9 @@ import java.util.UUID;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.auth.CustomerSessionService;
+import az.tapstamp.customer.repository.CustomerAdminMapper.CardTotals;
+import az.tapstamp.customer.repository.CustomerAdminMapper.RevocableReward;
+import az.tapstamp.customer.repository.CustomerAdminMapper;
 import az.tapstamp.loyalty.stamp.StampLedger;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
@@ -28,7 +30,6 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -53,7 +54,7 @@ public class CustomerAdminService {
                             Instant resolvedAt, String resolutionNote) {
     }
 
-    private final JdbcClient jdbc;
+    private final CustomerAdminMapper customers;
     private final CustomerDirectory directory;
     private final StampLedger ledger;
     private final CustomerSessionService customerSessions;
@@ -64,12 +65,12 @@ public class CustomerAdminService {
     private final TransactionTemplate tx;
     private final Clock clock;
 
-    public CustomerAdminService(@Qualifier("tenantJdbc") JdbcClient jdbc, CustomerDirectory directory,
+    public CustomerAdminService(CustomerAdminMapper customers, CustomerDirectory directory,
                                 StampLedger ledger, CustomerSessionService customerSessions,
                                 AdminAuthService adminAuth, @Qualifier("tenantCipher") EnvelopeCipher cipher,
                                 CompanySettings company, AuditLogger audit,
                                 PlatformTransactionManager transactionManager, Clock clock) {
-        this.jdbc = jdbc;
+        this.customers = customers;
         this.directory = directory;
         this.ledger = ledger;
         this.customerSessions = customerSessions;
@@ -88,11 +89,7 @@ public class CustomerAdminService {
         AccessPolicy.requireCompanyWide(principal);
         adminAuth.requireStepUp(principal);
         directory.get(principal, customerId);
-        byte[] encrypted = jdbc.sql("SELECT phone_enc FROM customers WHERE id = :id")
-                .param("id", customerId)
-                .query(byte[].class)
-                .optional()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        byte[] encrypted = customers.findEncryptedPhone(customerId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         String phone = cipher.decryptString(encrypted,
                 Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customerId));
         audit.tenant("CUSTOMER_PHONE_REVEALED", AuditLogger.ActorType.STAFF, principal.userId(), "customer", customerId,
@@ -136,18 +133,11 @@ public class CustomerAdminService {
             AdjustmentResult done = adjustment.delta() > 0
                     ? add(principal, customerId, adjustment.delta(), reason, adjustment.branchId(), now)
                     : remove(principal, customerId, -adjustment.delta(), reason, now);
-            jdbc.sql("""
-                            INSERT INTO idempotency_keys (scope, key, request_hash, response_status, response_body,
-                                                          created_at, expires_at)
-                            VALUES (:scope, :key, :hash, 200, CAST(:body AS jsonb), :now, :expires)""")
-                    .param("scope", scope)
-                    .param("key", idempotencyKey)
-                    .param("hash", requestHash)
-                    .param("body", "{\"currentStamps\":%d,\"totalStamps\":%d,\"giftCardsIssued\":%d,\"giftCardsRevoked\":%d}"
-                            .formatted(done.currentStamps(), done.totalStamps(), done.giftCardsIssued(), done.giftCardsRevoked()))
-                    .param("now", CustomerDirectory.ts(now))
-                    .param("expires", CustomerDirectory.ts(now.plus(IDEMPOTENCY_TTL)))
-                    .update();
+            customers.saveAdjustment(scope, idempotencyKey, requestHash,
+                    "{\"currentStamps\":%d,\"totalStamps\":%d,\"giftCardsIssued\":%d,\"giftCardsRevoked\":%d}"
+                            .formatted(done.currentStamps(), done.totalStamps(), done.giftCardsIssued(),
+                                    done.giftCardsRevoked()),
+                    now, now.plus(IDEMPOTENCY_TTL));
             audit.tenant("STAMPS_ADJUSTED", AuditLogger.ActorType.STAFF, principal.userId(), "customer", customerId,
                     Map.of("delta", adjustment.delta(), "reason", reason, "giftCardsIssued", done.giftCardsIssued(),
                             "giftCardsRevoked", done.giftCardsRevoked()));
@@ -157,21 +147,13 @@ public class CustomerAdminService {
     }
 
     private Optional<AdjustmentResult> previousResult(String scope, String key, byte[] requestHash) {
-        return jdbc.sql("""
-                        SELECT request_hash, (response_body->>'currentStamps')::int AS cur,
-                               (response_body->>'totalStamps')::int AS tot,
-                               (response_body->>'giftCardsIssued')::int AS issued,
-                               (response_body->>'giftCardsRevoked')::int AS revoked
-                        FROM idempotency_keys WHERE scope = :scope AND key = :key""")
-                .param("scope", scope)
-                .param("key", key)
-                .query((rs, n) -> {
-                    if (!Arrays.equals(rs.getBytes("request_hash"), requestHash)) {
-                        throw new ApiException(ErrorCode.IDEMPOTENCY_KEY_REUSED);
-                    }
-                    return new AdjustmentResult(rs.getInt("cur"), rs.getInt("tot"), rs.getInt("issued"), rs.getInt("revoked"));
-                })
-                .optional();
+        return customers.findAdjustment(scope, key).map(stored -> {
+            if (!Arrays.equals(stored.requestHash(), requestHash)) {
+                throw new ApiException(ErrorCode.IDEMPOTENCY_KEY_REUSED);
+            }
+            return new AdjustmentResult(stored.currentStamps(), stored.totalStamps(), stored.giftCardsIssued(),
+                    stored.giftCardsRevoked());
+        });
     }
 
     private AdjustmentResult add(AdminPrincipal principal, UUID customerId, int count, String reason, UUID branchId,
@@ -193,62 +175,26 @@ public class CustomerAdminService {
         int current = currentStamps(customerId);
         while (current < count) {
             // Kartdakı saydan çox silinir: istifadə olunmamış son hədiyyə kartı ləğv edilir, kart geri qaytarılır
-            Map<String, Object> reward = jdbc.sql("""
-                            SELECT id, stamps_required_snapshot FROM rewards
-                            WHERE customer_id = :customerId AND status = 'AVAILABLE'
-                            ORDER BY earned_at DESC, id DESC LIMIT 1 FOR UPDATE""")
-                    .param("customerId", customerId)
-                    .query()
-                    .listOfRows()
-                    .stream().findFirst()
+            RevocableReward reward = customers.lockLatestAvailableReward(customerId)
                     .orElseThrow(() -> new ApiException(ErrorCode.STAMP_ADJUSTMENT_TOO_LARGE));
-            UUID rewardId = (UUID) reward.get("id");
-            int required = ((Number) reward.get("stamps_required_snapshot")).intValue();
-            jdbc.sql("UPDATE rewards SET status = 'REVOKED' WHERE id = :id").param("id", rewardId).update();
-            jdbc.sql("UPDATE stamps SET reward_id = NULL WHERE reward_id = :id").param("id", rewardId).update();
-            jdbc.sql("""
-                            UPDATE loyalty_accounts SET current_stamps = current_stamps + :required,
-                                                        rewards_earned = rewards_earned - 1, updated_at = :now
-                            WHERE customer_id = :customerId""")
-                    .param("required", required)
-                    .param("now", CustomerDirectory.ts(now))
-                    .param("customerId", customerId)
-                    .update();
-            current += required;
+            customers.revokeReward(reward.id());
+            customers.unlinkStampsFromReward(reward.id());
+            customers.restoreCardStamps(customerId, reward.stampsRequired(), now);
+            current += reward.stampsRequired();
             revokedCards++;
         }
-        jdbc.sql("""
-                        UPDATE stamps SET status = 'REVOKED', revoked_at = :now, revoked_by = :staff, revoke_reason = :reason
-                        WHERE id IN (SELECT id FROM stamps WHERE customer_id = :customerId AND status = 'CONFIRMED'
-                                       AND reward_id IS NULL ORDER BY created_at DESC, id DESC LIMIT :count)""")
-                .param("now", CustomerDirectory.ts(now))
-                .param("staff", principal.userId())
-                .param("reason", reason)
-                .param("customerId", customerId)
-                .param("count", count)
-                .update();
-        jdbc.sql("""
-                        UPDATE loyalty_accounts SET current_stamps = current_stamps - :count,
-                                                    total_stamps = GREATEST(total_stamps - :count, 0),
-                                                    updated_at = :now, version = version + 1
-                        WHERE customer_id = :customerId""")
-                .param("count", count)
-                .param("now", CustomerDirectory.ts(now))
-                .param("customerId", customerId)
-                .update();
+        customers.revokeLatestStamps(customerId, count, principal.userId(), reason, now);
+        customers.deductCardStamps(customerId, count, now);
         return card(customerId, 0, revokedCards);
     }
 
     private int currentStamps(UUID customerId) {
-        return jdbc.sql("SELECT current_stamps FROM loyalty_accounts WHERE customer_id = :id")
-                .param("id", customerId).query(Integer.class).single();
+        return customers.currentStamps(customerId);
     }
 
     private AdjustmentResult card(UUID customerId, int issued, int revoked) {
-        return jdbc.sql("SELECT current_stamps, total_stamps FROM loyalty_accounts WHERE customer_id = :id")
-                .param("id", customerId)
-                .query((rs, n) -> new AdjustmentResult(rs.getInt("current_stamps"), rs.getInt("total_stamps"), issued, revoked))
-                .single();
+        CardTotals totals = customers.cardTotals(customerId);
+        return new AdjustmentResult(totals.currentStamps(), totals.totalStamps(), issued, revoked);
     }
 
     // ------------------------------------------------------------------ Bloklama
@@ -264,11 +210,7 @@ public class CustomerAdminService {
             return;
         }
         Instant now = clock.instant();
-        jdbc.sql("UPDATE customers SET status = :status, updated_at = :now, version = version + 1 WHERE id = :id")
-                .param("status", status)
-                .param("now", CustomerDirectory.ts(now))
-                .param("id", customerId)
-                .update();
+        customers.updateStatus(customerId, status, now);
         if (status.equals("BLOCKED")) {
             customerSessions.revokeAll(customerId, "CUSTOMER_BLOCKED");
         }
@@ -280,14 +222,7 @@ public class CustomerAdminService {
 
     public List<FraudFlag> fraudFlags(AdminPrincipal principal, UUID customerId) {
         directory.get(principal, customerId);
-        return jdbc.sql("""
-                        SELECT id, type, severity, details::text AS details, created_at, resolved_at, resolution_note
-                        FROM fraud_flags WHERE customer_id = :id ORDER BY created_at DESC LIMIT 100""")
-                .param("id", customerId)
-                .query((rs, n) -> new FraudFlag(rs.getObject("id", UUID.class), rs.getString("type"),
-                        rs.getString("severity"), rs.getString("details"), instant(rs.getTimestamp("created_at")),
-                        instant(rs.getTimestamp("resolved_at")), rs.getString("resolution_note")))
-                .list();
+        return customers.fraudFlags(customerId);
     }
 
     /** İşarəni qeyd ilə bağlayır; artıq bağlanmış işarə dəyişmir (idempotent). */
@@ -297,28 +232,13 @@ public class CustomerAdminService {
         if (trimmed.length() < 3 || trimmed.length() > 500) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
-        UUID customerId = jdbc.sql("SELECT customer_id FROM fraud_flags WHERE id = :id")
-                .param("id", flagId)
-                .query(UUID.class)
-                .optional()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        UUID customerId = customers.findFraudFlagCustomer(flagId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         directory.get(principal, customerId);
-        int updated = jdbc.sql("""
-                        UPDATE fraud_flags SET resolved_at = :now, resolved_by = :staff, resolution_note = :note
-                        WHERE id = :id AND resolved_at IS NULL""")
-                .param("now", CustomerDirectory.ts(clock.instant()))
-                .param("staff", principal.userId())
-                .param("note", trimmed)
-                .param("id", flagId)
-                .update();
+        int updated = customers.resolveFraudFlag(flagId, principal.userId(), trimmed, clock.instant());
         if (updated == 1) {
             audit.tenant("FRAUD_FLAG_RESOLVED", AuditLogger.ActorType.STAFF, principal.userId(), "fraud_flag", flagId,
                     Map.of("customerId", customerId.toString()));
         }
-    }
-
-    private static Instant instant(Timestamp timestamp) {
-        return timestamp == null ? null : timestamp.toInstant();
     }
 
     private static byte[] sha256(String value) {
