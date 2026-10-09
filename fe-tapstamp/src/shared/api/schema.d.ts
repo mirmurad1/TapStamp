@@ -791,9 +791,29 @@ export interface paths {
         get: operations["rewardRule"];
         /**
          * Hədiyyə qaydasının dəyişdirilməsi
-         * @description Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı dərhal verilir.
+         * @description Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.
          */
         put: operations["updateRewardRule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/reward-rule/impact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yeni möhür həddinin təsiri
+         * @description Yadda saxlamazdan əvvəl: neçə müştərinin yarımçıq kartı var və qayda hamıya dərhal tətbiq olunsa, neçə hədiyyə kartı veriləcək.
+         */
+        get: operations["rewardImpact"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -2877,6 +2897,29 @@ export interface components {
             /** Format: int32 */
             revoked?: number;
         };
+        /** @description Yeni möhür həddinin təsiri (yadda saxlamazdan əvvəl) */
+        RewardImpactResponse: {
+            /**
+             * Format: int32
+             * @description Yarımçıq kartı olan aktiv müştərilər
+             */
+            cardsInProgress?: number;
+            /**
+             * Format: int32
+             * @description Kartında yeni həddən çox və ya bərabər möhür olanlar
+             */
+            cardsReachingNewThreshold?: number;
+            /**
+             * Format: int32
+             * @description Cari hədd (qayda yoxdursa null)
+             */
+            currentStampsRequired?: number;
+            /**
+             * Format: int32
+             * @description Qayda dərhal tətbiq olunsa veriləcək hədiyyə kartları
+             */
+            giftCardsIfAppliedNow?: number;
+        };
         RewardResponse: {
             /** Format: date-time */
             earnedAt?: string;
@@ -2895,6 +2938,11 @@ export interface components {
         };
         /** @description Hədiyyə: neçənci möhürdə verilir, adı (az məcburi, en/ru istəyə bağlı), kartın müddəti */
         RewardSettingsRequest: {
+            /**
+             * @description Möhür həddi dəyişəndə yarımçıq kartlar: KEEP_RULE (standart) — köhnə qayda ilə bitir; APPLY_NOW — yeni qayda hamıya dərhal, kartı dolmuşlara hədiyyə kartı verilir
+             * @enum {string}
+             */
+            existingCards?: "KEEP_RULE" | "APPLY_NOW";
             rewardDescription?: components["schemas"]["LocalizedText"];
             rewardName: components["schemas"]["LocalizedText"];
             /** Format: int32 */
@@ -4194,6 +4242,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RewardSettingsResponse"];
+                };
+            };
+        };
+    };
+    rewardImpact: {
+        parameters: {
+            query: {
+                stampsRequired: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RewardImpactResponse"];
                 };
             };
         };

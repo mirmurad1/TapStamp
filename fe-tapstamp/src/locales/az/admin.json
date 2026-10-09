@@ -357,7 +357,19 @@
       "version": "Qaydanın versiyası: {{version}}",
       "issued_one": "Kartı artıq dolmuş {{count}} müştəriyə hədiyyə kartı verildi.",
       "issued_other": "Kartı artıq dolmuş {{count}} müştəriyə hədiyyə kartı verildi.",
-      "confirm": "Möhür sayı azaldılır: kartında {{count}} və daha çox möhür olan müştərilərə hədiyyə kartı dərhal veriləcək. Davam edilsin?"
+      "change": {
+        "title": "Möhür sayı dəyişir: {{from}} → {{to}}",
+        "inProgress_one": "{{count}} müştərinin kartı yarımçıqdır. Bu kartlarla nə edilsin?",
+        "inProgress_other": "{{count}} müştərinin kartı yarımçıqdır. Bu kartlarla nə edilsin?",
+        "legend": "Yarımçıq kartlar",
+        "keep_one": "Yarımçıq kartlar köhnə qayda ilə ({{count}} möhür) bitsin",
+        "keep_other": "Yarımçıq kartlar köhnə qayda ilə ({{count}} möhür) bitsin",
+        "keepHint": "Tövsiyə olunur. Heç kim möhür itirmir və avtomatik hədiyyə almır. Yeni qayda hədiyyədən sonrakı kartdan və yeni müştərilərdən başlayır.",
+        "applyNow": "Yeni qayda hamıya dərhal tətbiq olunsun",
+        "applyNowHint_one": "Kartı yeni həddə çatmış müştərilərə dərhal {{count}} hədiyyə kartı veriləcək.",
+        "applyNowHint_other": "Kartı yeni həddə çatmış müştərilərə dərhal {{count}} hədiyyə kartı veriləcək.",
+        "applyNowNone": "Heç kimə dərhal hədiyyə kartı verilməyəcək; bütün kartlar yeni həddə görə sayılacaq."
+      }
     },
     "company": {
       "title": "Şirkət",

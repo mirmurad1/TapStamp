@@ -1,6 +1,7 @@
 package az.tapstamp.loyalty.api;
 
 import az.tapstamp.loyalty.settings.LoyaltySettingsService;
+import az.tapstamp.loyalty.settings.LoyaltySettingsService.ExistingCards;
 import az.tapstamp.loyalty.settings.LoyaltySettingsService.RewardSettings;
 import az.tapstamp.loyalty.settings.LoyaltySettingsService.StampRules;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Loyallıq parametrləri — yalnız şirkətin sahibi (COMPANY_OWNER). */
@@ -56,7 +58,19 @@ public class LoyaltySettingsController {
             @NotNull @Valid LocalizedText rewardName,
             @Valid LocalizedText rewardDescription,
             @Schema(description = "Hədiyyə kartının müddəti (gün); null — müddətsiz") @Min(1) @Max(3650)
-            Integer validityDays) {
+            Integer validityDays,
+            @Schema(description = """
+                    Möhür həddi dəyişəndə yarımçıq kartlar: KEEP_RULE (standart) — köhnə qayda ilə bitir; \
+                    APPLY_NOW — yeni qayda hamıya dərhal, kartı dolmuşlara hədiyyə kartı verilir""")
+            ExistingCards existingCards) {
+    }
+
+    @Schema(description = "Yeni möhür həddinin təsiri (yadda saxlamazdan əvvəl)")
+    public record RewardImpactResponse(
+            @Schema(description = "Cari hədd (qayda yoxdursa null)") Integer currentStampsRequired,
+            @Schema(description = "Yarımçıq kartı olan aktiv müştərilər") int cardsInProgress,
+            @Schema(description = "Kartında yeni həddən çox və ya bərabər möhür olanlar") int cardsReachingNewThreshold,
+            @Schema(description = "Qayda dərhal tətbiq olunsa veriləcək hədiyyə kartları") int giftCardsIfAppliedNow) {
     }
 
     public record RewardSettingsResponse(int version, int stampsRequired, LocalizedText rewardName,
@@ -90,15 +104,29 @@ public class LoyaltySettingsController {
         return RewardSettingsResponse.from(settings.reward(principal), null);
     }
 
+    @GetMapping("/reward-rule/impact")
+    @Operation(summary = "Yeni möhür həddinin təsiri", description = """
+            Yadda saxlamazdan əvvəl: neçə müştərinin yarımçıq kartı var və qayda hamıya dərhal tətbiq olunsa, neçə \
+            hədiyyə kartı veriləcək.""")
+    RewardImpactResponse rewardImpact(@RequestParam @Min(1) @Max(50) int stampsRequired,
+                                      @AuthenticationPrincipal AdminPrincipal principal) {
+        LoyaltySettingsService.RewardImpact impact = settings.rewardImpact(principal, stampsRequired);
+        return new RewardImpactResponse(impact.currentStampsRequired(), impact.cardsInProgress(),
+                impact.cardsReachingNewThreshold(), impact.giftCardsIfAppliedNow());
+    }
+
     @PutMapping("/reward-rule")
     @Operation(summary = "Hədiyyə qaydasının dəyişdirilməsi", description = """
-            Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Kartında yeni həddən çox və ya bərabər \
-            möhür olan müştərilərə hədiyyə kartı dərhal verilir.""")
+            Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq \
+            (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. \
+            APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan \
+            müştərilərə hədiyyə kartı verilir.""")
     RewardSettingsResponse updateRewardRule(@Valid @RequestBody RewardSettingsRequest request,
                                         @AuthenticationPrincipal AdminPrincipal principal) {
         LoyaltySettingsService.RewardChange change = settings.updateReward(principal,
                 new LoyaltySettingsService.RewardUpdate(request.stampsRequired(), request.rewardName(),
-                        request.rewardDescription(), request.validityDays()));
+                        request.rewardDescription(), request.validityDays(),
+                        request.existingCards() == null ? ExistingCards.KEEP_RULE : request.existingCards()));
         return RewardSettingsResponse.from(change.settings(), change.giftCardsIssued());
     }
 }

@@ -75,3 +75,4 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase8-10-site-icons.png` | Sayt ikonları: admin (ümumi), şirkətlərin öz brend rəngində ikonu |
 | `phase10-platform-tenant-tags.png` | Platforma → şirkət → NFC çipləri: pulsuz/pullu say, qeydiyyat və idarə |
 | `phase10-owner-tags-readonly.png` | Şirkət sahibi: çiplər yalnız baxış üçün, "Pulsuz/Pullu" nişanı |
+| `phase10-reward-threshold-dialog.png` | Hədiyyə həddi dəyişəndə: yarımçıq kartlar köhnə qayda ilə bitsin və ya yeni qayda hamıya dərhal |

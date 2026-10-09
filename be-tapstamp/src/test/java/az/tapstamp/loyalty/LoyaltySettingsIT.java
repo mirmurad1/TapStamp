@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
  */
 class LoyaltySettingsIT extends AdminIntegrationTest {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private az.tapstamp.loyalty.stamp.StampLedger ledger;
+
     private static final String HOST = TestTenants.BETA_HOST;
 
     @Test
@@ -60,7 +63,8 @@ class LoyaltySettingsIT extends AdminIntegrationTest {
             owner.put("/settings/reward-rule", Map.of(
                             "stampsRequired", 5,
                             "rewardName", Map.of("az", "Pulsuz yuma", "en", "Free wash", "ru", " "),
-                            "validityDays", 30))
+                            "validityDays", 30,
+                            "existingCards", "APPLY_NOW"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.stampsRequired").value(5))
                     .andExpect(jsonPath("$.rewardName.az").value("Pulsuz yuma"))
@@ -91,10 +95,67 @@ class LoyaltySettingsIT extends AdminIntegrationTest {
             owner.put("/settings/reward-rule", Map.of("stampsRequired", 5, "rewardName", Map.of("az", " ")))
                     .andExpect(status().isBadRequest());
         } finally {
-            owner.put("/settings/reward-rule", Map.of("stampsRequired", 9,
+            owner.put("/settings/reward-rule", Map.of("stampsRequired", 9, "existingCards", "APPLY_NOW",
                     "rewardName", Map.of("az", "Hədiyyə qəhvə", "en", "Free coffee"))).andExpect(status().isOk());
         }
         assertThat(count("SELECT count(*) FROM reward_rules WHERE active")).isEqualTo(1);
+    }
+
+    @Test
+    void byDefaultCardsInProgressFinishOnPreviousRule() throws Exception {
+        AdminClient owner = owner();
+        UUID full = customerWithStamps(8);
+        UUID partial = customerWithStamps(3);
+        UUID empty = customerWithStamps(0);
+        // Başlanğıc: hədd 9 (bütün kartlar aktiv qaydada)
+        owner.put("/settings/reward-rule", Map.of("stampsRequired", 9, "existingCards", "APPLY_NOW",
+                "rewardName", Map.of("az", "Hədiyyə qəhvə"))).andExpect(status().isOk());
+        try {
+            // Təsir: yarımçıq kartlar və qayda dərhal tətbiq olunsa veriləcək hədiyyələr
+            owner.get("/settings/reward-rule/impact?stampsRequired=5")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.currentStampsRequired").isNumber())
+                    .andExpect(jsonPath("$.cardsInProgress").value(org.hamcrest.Matchers.greaterThanOrEqualTo(2)))
+                    .andExpect(jsonPath("$.giftCardsIfAppliedNow").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+            owner.get("/settings/reward-rule/impact?stampsRequired=0").andExpect(status().isBadRequest());
+
+            // Standart: heç kimə dərhal hədiyyə verilmir, yarımçıq kartlar köhnə (9) qaydaya bağlanır
+            owner.put("/settings/reward-rule", Map.of("stampsRequired", 5, "rewardName", Map.of("az", "Yeni hədiyyə")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.stampsRequired").value(5))
+                    .andExpect(jsonPath("$.giftCardsIssued").value(0));
+            assertThat(count("SELECT count(*) FROM rewards WHERE customer_id = :id", Map.of("id", full))).isZero();
+            String pinned = """
+                    SELECT count(*) FROM loyalty_accounts la JOIN reward_rules r ON r.id = la.reward_rule_id
+                    WHERE la.customer_id = :id AND r.stamps_required = 9""";
+            assertThat(count(pinned, Map.of("id", full))).isEqualTo(1);
+            assertThat(count(pinned, Map.of("id", partial))).isEqualTo(1);
+            assertThat(count("SELECT count(*) FROM loyalty_accounts WHERE customer_id = :id AND reward_rule_id IS NULL",
+                    Map.of("id", empty))).isEqualTo(1);
+
+            // 9-cu möhürdə köhnə qayda ilə hədiyyə; kart sonra yeni qaydaya (5) keçir
+            TenantContext.runAs(tenant(HOST), () -> ledger.applyConfirmed(full, Ids.newId(), java.time.Instant.now()));
+            assertThat(count("""
+                    SELECT count(*) FROM rewards WHERE customer_id = :id AND stamps_required_snapshot = 9
+                      AND reward_name_snapshot ->> 'az' <> 'Yeni hədiyyə'""", Map.of("id", full))).isEqualTo(1);
+            assertThat(count("""
+                    SELECT count(*) FROM loyalty_accounts
+                    WHERE customer_id = :id AND current_stamps = 0 AND reward_rule_id IS NULL""", Map.of("id", full)))
+                    .isEqualTo(1);
+            // Yarımçıq kartın növbəti möhürü hələ köhnə qayda ilə sayılır (4/9, hədiyyə yoxdur)
+            TenantContext.runAs(tenant(HOST), () -> ledger.applyConfirmed(partial, Ids.newId(), java.time.Instant.now()));
+            assertThat(count("SELECT count(*) FROM rewards WHERE customer_id = :id", Map.of("id", partial))).isZero();
+
+            // "Hamıya dərhal": bağlı kartlar da yeni qaydaya keçir
+            owner.put("/settings/reward-rule", Map.of("stampsRequired", 4, "rewardName", Map.of("az", "Yeni hədiyyə"),
+                            "existingCards", "APPLY_NOW"))
+                    .andExpect(jsonPath("$.giftCardsIssued").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+            assertThat(count("SELECT count(*) FROM rewards WHERE customer_id = :id", Map.of("id", partial))).isEqualTo(1);
+            assertThat(count("SELECT count(*) FROM loyalty_accounts WHERE reward_rule_id IS NOT NULL")).isZero();
+        } finally {
+            owner.put("/settings/reward-rule", Map.of("stampsRequired", 9, "existingCards", "APPLY_NOW",
+                    "rewardName", Map.of("az", "Hədiyyə qəhvə", "en", "Free coffee"))).andExpect(status().isOk());
+        }
     }
 
     private AdminClient owner() throws Exception {

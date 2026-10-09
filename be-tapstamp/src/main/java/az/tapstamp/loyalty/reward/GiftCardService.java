@@ -66,6 +66,25 @@ public class GiftCardService {
                 .optional();
     }
 
+    /**
+     * Müştərinin kartının qaydası: hədd dəyişəndə yarımçıq qalan kart köhnə qaydaya bağlanır
+     * ({@code loyalty_accounts.reward_rule_id}), əks halda aktiv qayda.
+     */
+    public Optional<ActiveRule> ruleFor(UUID customerId) {
+        return jdbc.sql("""
+                        SELECT id, stamps_required, reward_name::text AS name, reward_description::text AS description,
+                               validity_days
+                        FROM reward_rules
+                        WHERE id = COALESCE((SELECT reward_rule_id FROM loyalty_accounts WHERE customer_id = :customerId),
+                                            (SELECT id FROM reward_rules WHERE active))""")
+                .param("customerId", customerId)
+                .query((rs, n) -> new ActiveRule(rs.getObject("id", UUID.class), rs.getInt("stamps_required"),
+                        TEXT.convertToEntityAttribute(rs.getString("name")),
+                        TEXT.convertToEntityAttribute(rs.getString("description")),
+                        rs.getObject("validity_days", Integer.class)))
+                .optional();
+    }
+
     /** Yeni kart (çağıranın tranzaksiyasında). Kod toqquşması (40 bit) praktiki olaraq mümkün deyil, amma yoxlanılır. */
     public UUID issue(UUID customerId, ActiveRule rule, Instant earnedAt) {
         UUID id = Ids.newId();

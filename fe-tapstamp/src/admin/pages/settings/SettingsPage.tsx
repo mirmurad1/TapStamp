@@ -6,11 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
-import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Input } from '@/shared/ui/input';
 
-import { settingsApi, type RewardSettings, type StampPolicy } from '../../api/adminApi';
+import { settingsApi, type ExistingCards, type RewardImpact, type RewardSettings, type StampPolicy } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { BranchesCard } from './BranchesCard';
@@ -119,28 +119,35 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
   const [nameRu, setNameRu] = useState(initial?.rewardName?.ru ?? '');
   const [validity, setValidity] = useState(initial?.validityDays ? String(initial.validityDays) : '');
   const [issued, setIssued] = useState<number>();
-  const confirm = useConfirm();
+  const [impact, setImpact] = useState<RewardImpact>();
   const save = useMutation({
-    mutationFn: () =>
+    mutationFn: (existingCards: ExistingCards) =>
       settingsApi.updateRewardRule({
         stampsRequired: Number(stamps),
         rewardName: { az: nameAz.trim(), en: nameEn.trim() || undefined, ru: nameRu.trim() || undefined },
         validityDays: validity.trim() ? Number(validity) : undefined,
+        existingCards,
       }),
     onSuccess: (updated) => {
+      setImpact(undefined);
       setIssued(updated.giftCardsIssued ?? 0);
       queryClient.setQueryData(REWARD_KEY, updated);
       void queryClient.invalidateQueries({ queryKey: ['public-company'] });
     },
   });
-  const submit = async (event: FormEvent) => {
+  const checkImpact = useMutation({
+    mutationFn: () => settingsApi.rewardImpact(Number(stamps)),
+    onSuccess: (result) => (result.cardsInProgress ? setImpact(result) : save.mutate('KEEP_RULE')),
+  });
+  const submit = (event: FormEvent) => {
     event.preventDefault();
-    const lowered = initial?.stampsRequired !== undefined && Number(stamps) < initial.stampsRequired;
-    // Hədd azaldılırsa, kartı artıq dolmuş müştərilərə hədiyyə kartı dərhal veriləcək — təsdiq istənilir
-    if (lowered && !(await confirm({ message: t('admin:settings.reward.confirm', { count: Number(stamps) }) }))) {
-      return;
+    // Möhür sayı dəyişirsə, yarımçıq kartlarla nə ediləcəyini sahib seçir (təsir əvvəlcədən göstərilir)
+    const changed = initial?.stampsRequired !== undefined && Number(stamps) !== initial.stampsRequired;
+    if (changed) {
+      checkImpact.mutate();
+    } else {
+      save.mutate('KEEP_RULE');
     }
-    save.mutate();
   };
   return (
     <Card>
@@ -159,7 +166,7 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
               {issued ? ` ${t('admin:settings.reward.issued', { count: issued })}` : null}
             </Alert>
           ) : null}
-          <ApiErrorAlert error={save.error} />
+          <ApiErrorAlert error={save.error ?? checkImpact.error} />
           <Field id="stamps-required" label={t('admin:settings.reward.stamps')} hint={t('admin:settings.reward.stampsHint')}>
             <Input type="number" min={1} max={50} required value={stamps} onChange={(e) => setStamps(e.target.value)} />
           </Field>
@@ -179,7 +186,7 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
             <Input type="number" min={1} max={3650} value={validity} onChange={(e) => setValidity(e.target.value)} />
           </Field>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Button type="submit" disabled={save.isPending}>
+            <Button type="submit" disabled={save.isPending || checkImpact.isPending}>
               {t('common:actions.save')}
             </Button>
             {initial?.version ? (
@@ -188,6 +195,87 @@ function RewardForm({ initial }: { initial: RewardSettings | undefined }) {
           </div>
         </form>
       </CardContent>
+      {impact ? (
+        <ExistingCardsDialog
+          impact={impact}
+          to={Number(stamps)}
+          saving={save.isPending}
+          onCancel={() => setImpact(undefined)}
+          onConfirm={(choice) => save.mutate(choice)}
+        />
+      ) : null}
     </Card>
+  );
+}
+
+/** Möhür sayı dəyişəndə yarımçıq kartlar: köhnə qayda ilə bitsin (standart) və ya yeni qayda hamıya dərhal. */
+function ExistingCardsDialog({
+  impact,
+  to,
+  saving,
+  onCancel,
+  onConfirm,
+}: {
+  impact: RewardImpact;
+  to: number;
+  saving: boolean;
+  onCancel: () => void;
+  onConfirm: (choice: ExistingCards) => void;
+}) {
+  const { t } = useTranslation(['admin', 'common']);
+  const [choice, setChoice] = useState<ExistingCards>('KEEP_RULE');
+  const from = impact.currentStampsRequired ?? to;
+  const giftCards = impact.giftCardsIfAppliedNow ?? 0;
+  const options: { value: ExistingCards; title: string; hint: string }[] = [
+    {
+      value: 'KEEP_RULE',
+      title: t('admin:settings.reward.change.keep', { count: from }),
+      hint: t('admin:settings.reward.change.keepHint'),
+    },
+    {
+      value: 'APPLY_NOW',
+      title: t('admin:settings.reward.change.applyNow'),
+      hint: giftCards ? t('admin:settings.reward.change.applyNowHint', { count: giftCards }) : t('admin:settings.reward.change.applyNowNone'),
+    },
+  ];
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onCancel())}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('admin:settings.reward.change.title', { from, to })}</DialogTitle>
+          <DialogDescription>{t('admin:settings.reward.change.inProgress', { count: impact.cardsInProgress ?? 0 })}</DialogDescription>
+        </DialogHeader>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="sr-only">{t('admin:settings.reward.change.legend')}</legend>
+          {options.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer gap-3 rounded-xl border border-border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+            >
+              <input
+                type="radio"
+                name="existing-cards"
+                value={option.value}
+                checked={choice === option.value}
+                onChange={() => setChoice(option.value)}
+                className="mt-1 size-4 accent-[var(--primary)]"
+              />
+              <span>
+                <span className="block font-medium">{option.title}</span>
+                <span className="block text-sm text-muted-foreground">{option.hint}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            {t('common:actions.cancel')}
+          </Button>
+          <Button onClick={() => onConfirm(choice)} disabled={saving}>
+            {t('common:actions.save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

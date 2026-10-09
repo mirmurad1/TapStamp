@@ -166,7 +166,8 @@ public class StampLedger {
      * kart sıfırlanır və möhür həmin hədiyyəyə bağlanır.
      */
     public CardState applyConfirmed(UUID customerId, UUID stampId, Instant at) {
-        Optional<GiftCardService.ActiveRule> rule = giftCards.activeRule();
+        // Kartın öz qaydası (hədd dəyişəndə yarımçıq kart köhnə qayda ilə bitir)
+        Optional<GiftCardService.ActiveRule> rule = giftCards.ruleFor(customerId);
         int current = jdbc.sql("""
                         UPDATE loyalty_accounts SET current_stamps = current_stamps + 1, total_stamps = total_stamps + 1,
                                                     last_stamp_at = :at, updated_at = :at, version = version + 1
@@ -185,7 +186,8 @@ public class StampLedger {
         UUID giftCardId = giftCards.issue(customerId, rule.get(), at);
         jdbc.sql("""
                         UPDATE loyalty_accounts SET current_stamps = current_stamps - :required,
-                                                    rewards_earned = rewards_earned + 1
+                                                    rewards_earned = rewards_earned + 1,
+                                                    reward_rule_id = NULL
                         WHERE customer_id = :customerId""")
                 .param("required", required)
                 .param("customerId", customerId)
@@ -198,7 +200,7 @@ public class StampLedger {
     }
 
     public CardState card(UUID customerId) {
-        int required = giftCards.activeRule().map(GiftCardService.ActiveRule::stampsRequired).orElse(0);
+        int required = giftCards.ruleFor(customerId).map(GiftCardService.ActiveRule::stampsRequired).orElse(0);
         int current = jdbc.sql("SELECT current_stamps FROM loyalty_accounts WHERE customer_id = :customerId")
                 .param("customerId", customerId)
                 .query(Integer.class)

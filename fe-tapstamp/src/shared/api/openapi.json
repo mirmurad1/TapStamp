@@ -1472,7 +1472,7 @@
         "tags" : [ "Admin: parametrlər" ]
       },
       "put" : {
-        "description" : "Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı dərhal verilir.",
+        "description" : "Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.",
         "operationId" : "updateRewardRule",
         "requestBody" : {
           "content" : {
@@ -1497,6 +1497,37 @@
           }
         },
         "summary" : "Hədiyyə qaydasının dəyişdirilməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
+    "/api/v1/admin/settings/reward-rule/impact" : {
+      "get" : {
+        "description" : "Yadda saxlamazdan əvvəl: neçə müştərinin yarımçıq kartı var və qayda hamıya dərhal tətbiq olunsa, neçə hədiyyə kartı veriləcək.",
+        "operationId" : "rewardImpact",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "stampsRequired",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 50,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RewardImpactResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Yeni möhür həddinin təsiri",
         "tags" : [ "Admin: parametrlər" ]
       }
     },
@@ -5261,6 +5292,32 @@
           }
         }
       },
+      "RewardImpactResponse" : {
+        "type" : "object",
+        "description" : "Yeni möhür həddinin təsiri (yadda saxlamazdan əvvəl)",
+        "properties" : {
+          "cardsInProgress" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Yarımçıq kartı olan aktiv müştərilər"
+          },
+          "cardsReachingNewThreshold" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Kartında yeni həddən çox və ya bərabər möhür olanlar"
+          },
+          "currentStampsRequired" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Cari hədd (qayda yoxdursa null)"
+          },
+          "giftCardsIfAppliedNow" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Qayda dərhal tətbiq olunsa veriləcək hədiyyə kartları"
+          }
+        }
+      },
       "RewardResponse" : {
         "type" : "object",
         "properties" : {
@@ -5297,6 +5354,11 @@
         "type" : "object",
         "description" : "Hədiyyə: neçənci möhürdə verilir, adı (az məcburi, en/ru istəyə bağlı), kartın müddəti",
         "properties" : {
+          "existingCards" : {
+            "type" : "string",
+            "description" : "Möhür həddi dəyişəndə yarımçıq kartlar: KEEP_RULE (standart) — köhnə qayda ilə bitir; APPLY_NOW — yeni qayda hamıya dərhal, kartı dolmuşlara hədiyyə kartı verilir",
+            "enum" : [ "KEEP_RULE", "APPLY_NOW" ]
+          },
           "rewardDescription" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },

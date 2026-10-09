@@ -233,6 +233,8 @@ export type StampPolicy = Schemas['StampPolicyResponse'];
 export type StampPolicyRequest = Schemas['StampPolicyRequest'];
 export type RewardSettings = Schemas['RewardSettingsResponse'];
 export type RewardSettingsRequest = Schemas['RewardSettingsRequest'];
+export type RewardImpact = Schemas['RewardImpactResponse'];
+export type ExistingCards = NonNullable<RewardSettingsRequest['existingCards']>;
 
 /** Loyallıq parametrləri (yalnız sahib): möhür qaydası və hədiyyə. */
 export const settingsApi = {
@@ -241,6 +243,8 @@ export const settingsApi = {
   /** Yeni şirkətdə hədiyyə qaydası hələ yoxdur: boş cavab null olur (react-query undefined-i xəta sayır). */
   rewardRule: async () => (await unwrap(api.GET('/api/v1/admin/settings/reward-rule'))) ?? null,
   updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
+  rewardImpact: (stampsRequired: number) =>
+    unwrap(api.GET('/api/v1/admin/settings/reward-rule/impact', { params: { query: { stampsRequired } } })),
 };
 
 export type GiftCardCheck = Schemas['GiftCardCheckResponse'];

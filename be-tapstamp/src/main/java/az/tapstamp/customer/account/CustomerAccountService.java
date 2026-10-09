@@ -80,9 +80,11 @@ public class CustomerAccountService {
                                         SELECT min_interval_minutes FROM stamp_policies WHERE branch_id IS NULL))
                                 FROM stamps WHERE customer_id = :customerId AND source = 'NFC_TAP'
                                   AND status IN ('PENDING', 'CONFIRMED')) AS next_stamp_at
-                        FROM reward_rules r
+                        FROM (SELECT 1) one
                         LEFT JOIN loyalty_accounts la ON la.customer_id = :customerId
-                        WHERE r.active""")
+                        -- Kartın öz qaydası (hədd dəyişəndə yarımçıq kart köhnə qaydada qalır), yoxdursa aktiv qayda
+                        JOIN reward_rules r ON r.id = COALESCE(la.reward_rule_id,
+                                                               (SELECT id FROM reward_rules WHERE active))""")
                 .param("customerId", customer.id())
                 .query((rs, n) -> new Card(rs.getInt("current_stamps"), rs.getInt("total_stamps"),
                         rs.getInt("stamps_required"), TEXT.convertToEntityAttribute(rs.getString("reward_name")),

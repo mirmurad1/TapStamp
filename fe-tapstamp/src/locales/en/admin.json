@@ -357,7 +357,19 @@
       "version": "Rule version: {{version}}",
       "issued_one": "{{count}} customer with a full card received a gift card.",
       "issued_other": "{{count}} customers with a full card received a gift card.",
-      "confirm": "You are lowering the number of stamps: customers with {{count}} or more stamps will receive a gift card right away. Continue?"
+      "change": {
+        "title": "Stamps required change: {{from}} → {{to}}",
+        "inProgress_one": "{{count}} customer has a card in progress. What should happen to it?",
+        "inProgress_other": "{{count}} customers have cards in progress. What should happen to them?",
+        "legend": "Cards in progress",
+        "keep_one": "Cards in progress finish on the old rule ({{count}} stamp)",
+        "keep_other": "Cards in progress finish on the old rule ({{count}} stamps)",
+        "keepHint": "Recommended. Nobody loses stamps or gets an automatic reward. The new rule starts with the next card after a reward and for new customers.",
+        "applyNow": "Apply the new rule to everyone now",
+        "applyNowHint_one": "{{count}} gift card will be issued immediately to customers who already reach the new threshold.",
+        "applyNowHint_other": "{{count}} gift cards will be issued immediately to customers who already reach the new threshold.",
+        "applyNowNone": "No gift cards will be issued immediately; all cards will count towards the new threshold."
+      }
     },
     "company": {
       "title": "Company",
