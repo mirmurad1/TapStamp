@@ -43,6 +43,9 @@ services:
     build: ./be-tapstamp
     # Graceful shutdown (30 san, application.yml) bitənə qədər gözlənilir
     stop_grace_period: 40s
+    # Java yaddaşı bu limitin 75%-i ilə məhdudlaşır (JAVA_TOOL_OPTIONS). Deploy zamanı iki backend birlikdə işləyir:
+    # 4 GB-lıq serverdə 2 × 1280 MB + PostgreSQL sığır
+    mem_limit: ${BACKEND_MEM_LIMIT:-1280m}
     restart: unless-stopped
     depends_on:
       postgres:
