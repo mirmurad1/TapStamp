@@ -22,7 +22,7 @@ public final class DefaultLegalDocuments {
                         Biz yalnız loyallıq proqramı üçün lazım olan məlumatları toplayırıq: telefon nömrəniz, \
                         istəyə bağlı adınız və ziyarətlərinizin tarixçəsi.
 
-                        Telefon nömrənizdən sizə kampaniyalar, endirimlər və yeniliklər barədə məlumat (məsələn, SMS) \
+                        Telefon nömrənizdən sizə kampaniyalar, endirimlər və yeniliklər barədə məlumat \
                         göndərmək üçün istifadə edilə bilər.
 
                         Hesabınızı istənilən vaxt silə bilərsiniz.""",
@@ -32,8 +32,7 @@ public final class DefaultLegalDocuments {
                         We only collect what the loyalty programme needs: your phone number, your name (optional) \
                         and your visit history.
 
-                        We may use your phone number to send you information about campaigns, discounts and news \
-                        (for example, by SMS).
+                        We may use your phone number to send you information about campaigns, discounts and news.
 
                         You can delete your account at any time.""",
                 """
@@ -43,7 +42,7 @@ public final class DefaultLegalDocuments {
                         и историю посещений.
 
                         Ваш номер телефона может использоваться для отправки вам информации об акциях, скидках \
-                        и новостях (например, по SMS).
+                        и новостях.
 
                         Вы можете удалить аккаунт в любой момент.""");
     }
