@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
+import az.tapstamp.customer.consent.DefaultLegalDocuments;
 import az.tapstamp.dev.seed.DemoDataGenerator.DemoCustomer;
 import az.tapstamp.dev.seed.DemoDataGenerator.Visit;
 import az.tapstamp.dev.seed.SeedCatalog.BranchSeed;
@@ -132,8 +133,8 @@ final class TenantSeedWriter {
             tagsByBranch.put(branchId, tags);
         }
         UUID ruleId = insertRule(seed.rule());
-        UUID privacyId = insertLegalDocument("PRIVACY_POLICY", privacyText());
-        UUID termsId = insertLegalDocument("TERMS", termsText());
+        UUID privacyId = insertLegalDocument("PRIVACY_POLICY", DefaultLegalDocuments.privacyPolicy());
+        UUID termsId = insertLegalDocument("TERMS", DefaultLegalDocuments.terms());
 
         List<DemoCustomer> generated = DemoDataGenerator.generate(
                 seed.randomSeed(), seed.customerCount(), branchIds.size(), now, tenant.timezone());
@@ -472,7 +473,17 @@ final class TenantSeedWriter {
         return id;
     }
 
+    /** Şirkət yaradılanda standart sənəd artıq yazılıb: o istifadə olunur (dərc tarixi demo tarixçədən əvvələ çəkilir). */
     private UUID insertLegalDocument(String type, LocalizedText content) {
+        OffsetDateTime publishedAt = ts(now.minus(Duration.ofDays(DemoDataGenerator.HISTORY_DAYS + 30)));
+        List<UUID> existing = jdbc.queryForList(
+                "SELECT id FROM legal_documents WHERE type = :type AND is_current",
+                params().addValue("type", type), UUID.class);
+        if (!existing.isEmpty()) {
+            jdbc.update("UPDATE legal_documents SET published_at = :publishedAt WHERE id = :id",
+                    params().addValue("id", existing.getFirst()).addValue("publishedAt", publishedAt));
+            return existing.getFirst();
+        }
         UUID id = Ids.newId();
         jdbc.update("""
                         INSERT INTO legal_documents (id, type, doc_version, content, published_at, is_current)
@@ -485,52 +496,6 @@ final class TenantSeedWriter {
         return id;
     }
 
-    private static LocalizedText privacyText() {
-        return LocalizedText.of("""
-                        # Məxfilik siyasəti
-
-                        Biz yalnız loyallıq proqramı üçün lazım olan məlumatları toplayırıq: telefon nömrəniz, \
-                        istəyə bağlı adınız və ziyarətlərinizin tarixçəsi. Telefon nömrəniz şifrələnmiş saxlanılır. \
-                        Hesabınızı istənilən vaxt silə bilərsiniz.""",
-                """
-                        # Privacy policy
-
-                        We only collect what the loyalty programme needs: your phone number, your name (optional) \
-                        and your visit history. Your phone number is stored encrypted. You can delete your account \
-                        at any time.""",
-                """
-                        # Политика конфиденциальности
-
-                        Мы собираем только то, что нужно для программы лояльности: номер телефона, имя (по желанию) \
-                        и историю посещений. Номер телефона хранится в зашифрованном виде. Вы можете удалить аккаунт \
-                        в любой момент.""");
-    }
-
-    /**
-     * {@code {{stampRules}}} və {@code {{rewardRule}}} — müştəri tətbiqi bunları şirkətin cari parametrləri ilə
-     * (möhürlər arası vaxt, gündəlik limit, hədiyyə) seçilmiş dildə əvəz edir; sahib parametrləri dəyişəndə mətn də
-     * dəyişir.
-     */
-    private static LocalizedText termsText() {
-        return LocalizedText.of("""
-                        # İstifadə şərtləri
-
-                        Möhürlər yalnız şirkətimizdə alınmış məhsul və xidmətlər üçün verilir. {{stampRules}}
-
-                        {{rewardRule}} Hədiyyə nağd pula dəyişdirilmir.""",
-                """
-                        # Terms of use
-
-                        Stamps are given only for products and services bought from us. {{stampRules}}
-
-                        {{rewardRule}} The reward cannot be exchanged for cash.""",
-                """
-                        # Условия использования
-
-                        Штампы начисляются только за товары и услуги, приобретённые у нас. {{stampRules}}
-
-                        {{rewardRule}} Подарок не обменивается на деньги.""");
-    }
 
     private void batch(String sql, List<SqlParameterSource> rows) {
         if (!rows.isEmpty()) {

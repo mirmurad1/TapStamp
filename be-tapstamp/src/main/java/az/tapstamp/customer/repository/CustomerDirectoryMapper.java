@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import az.tapstamp.customer.admin.CustomerDirectory.Row;
 import az.tapstamp.customer.admin.CustomerDirectory.TimelineItem;
 import az.tapstamp.shared.persistence.TenantMapper;
 import org.apache.ibatis.session.ResultHandler;
@@ -27,14 +26,20 @@ public interface CustomerDirectoryMapper {
                  String timezone, String orderBy, boolean descending, int limit, long offset) {
     }
 
-    List<Row> list(Query query);
+    /** Bazadakı sətir: nömrə şifrəlidir, servis onu açıb {@code Row}-a çevirir. */
+    record Entry(UUID id, String name, byte[] phoneEnc, String language, String status, Instant registeredAt,
+                 Instant lastVisitAt, int currentStamps, int totalStamps, int rewardsEarned, int rewardsRedeemed,
+                 int openFraudFlags) {
+    }
+
+    List<Entry> list(Query query);
 
     long count(Query query);
 
     /** CSV üçün: bütün uyğun sətirlər axınla (yaddaşa yığılmadan), ən yenisi birinci. */
-    void stream(Query query, ResultHandler<Row> handler);
+    void stream(Query query, ResultHandler<Entry> handler);
 
-    Optional<Row> find(UUID id, boolean all, List<UUID> branchIds);
+    Optional<Entry> find(UUID id, boolean all, List<UUID> branchIds);
 
     /** Möhürlər və hədiyyə kartları, yenidən köhnəyə; {@code before} — keyset səhifələmə. */
     List<TimelineItem> timeline(UUID customerId, Instant before, int limit);

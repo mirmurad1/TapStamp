@@ -16,10 +16,13 @@ import az.tapstamp.customer.repository.CustomerDirectoryMapper.Query;
 import az.tapstamp.customer.repository.CustomerDirectoryMapper;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.BranchScope;
+import az.tapstamp.security.crypto.Aad;
+import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.crypto.PhoneHasher;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.tenancy.TenantContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -51,7 +54,8 @@ public class CustomerDirectory {
                          LocalDate registeredFrom, LocalDate registeredTo, Sort sort, boolean descending) {
     }
 
-    public record Row(UUID id, String name, String phoneMasked, String language, String status, Instant registeredAt,
+    /** {@code phone} — tam nömrə (E.164): sahib və menecer kampaniyalar üçün görür. */
+    public record Row(UUID id, String name, String phone, String language, String status, Instant registeredAt,
                       Instant lastVisitAt, int currentStamps, int totalStamps, int rewardsEarned, int rewardsRedeemed,
                       int openFraudFlags) {
     }
@@ -70,14 +74,17 @@ public class CustomerDirectory {
     private final PhoneNumberService phoneNumbers;
     private final PhoneHasher phoneHasher;
     private final CompanySettings company;
+    private final EnvelopeCipher cipher;
     private final Clock clock;
 
     public CustomerDirectory(CustomerDirectoryMapper customers, PhoneNumberService phoneNumbers,
-                             PhoneHasher phoneHasher, CompanySettings company, Clock clock) {
+                             PhoneHasher phoneHasher, CompanySettings company,
+                             @Qualifier("tenantCipher") EnvelopeCipher cipher, Clock clock) {
         this.customers = customers;
         this.phoneNumbers = phoneNumbers;
         this.phoneHasher = phoneHasher;
         this.company = company;
+        this.cipher = cipher;
         this.clock = clock;
     }
 
@@ -89,20 +96,20 @@ public class CustomerDirectory {
         if (query == null) {
             return new Page(List.of(), 0, page, size);
         }
-        return new Page(customers.list(query), customers.count(query), page, size);
+        return new Page(customers.list(query).stream().map(this::toRow).toList(), customers.count(query), page, size);
     }
 
     /** CSV ixracı üçün: filtrə uyğun bütün sətirlər axınla (yaddaşa yığılmadan) emal olunur. */
     public void forEach(AdminPrincipal principal, Filter filter, Consumer<Row> consumer) {
         Query query = query(principal, filter, 0, 0);
         if (query != null) {
-            customers.stream(query, context -> consumer.accept(context.getResultObject()));
+            customers.stream(query, context -> consumer.accept(toRow(context.getResultObject())));
         }
     }
 
     public Row get(AdminPrincipal principal, UUID customerId) {
         BranchScope scope = BranchScope.of(principal, null);
-        return customers.find(customerId, scope.all(), scope.branchIds())
+        return customers.find(customerId, scope.all(), scope.branchIds()).map(this::toRow)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
@@ -110,6 +117,14 @@ public class CustomerDirectory {
     public List<TimelineItem> timeline(AdminPrincipal principal, UUID customerId, Instant before) {
         get(principal, customerId);
         return customers.timeline(customerId, before, TIMELINE_PAGE);
+    }
+
+    private Row toRow(CustomerDirectoryMapper.Entry entry) {
+        String phone = cipher.decryptString(entry.phoneEnc(),
+                Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", entry.id()));
+        return new Row(entry.id(), entry.name(), phone, entry.language(), entry.status(), entry.registeredAt(),
+                entry.lastVisitAt(), entry.currentStamps(), entry.totalStamps(), entry.rewardsEarned(),
+                entry.rewardsRedeemed(), entry.openFraudFlags());
     }
 
     /** Sorğunun parametrləri; telefon kimi axtarış etibarsızdırsa {@code null} (nəticə boşdur). */

@@ -5,15 +5,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import az.tapstamp.customer.admin.CustomerAdminService;
 import az.tapstamp.customer.admin.CustomerAdminService.AdjustmentResult;
 import az.tapstamp.customer.admin.CustomerAdminService.FraudFlag;
+import az.tapstamp.customer.admin.CustomerAdminService;
 import az.tapstamp.customer.admin.CustomerCsvExporter;
-import az.tapstamp.customer.admin.CustomerDirectory;
 import az.tapstamp.customer.admin.CustomerDirectory.Page;
 import az.tapstamp.customer.admin.CustomerDirectory.Row;
 import az.tapstamp.customer.admin.CustomerDirectory.Sort;
 import az.tapstamp.customer.admin.CustomerDirectory.TimelineItem;
+import az.tapstamp.customer.admin.CustomerDirectory;
 import az.tapstamp.security.admin.AdminPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,9 +58,6 @@ public class AdminCustomerController {
         this.directory = directory;
         this.admin = admin;
         this.exporter = exporter;
-    }
-
-    public record PhoneResponse(String phone) {
     }
 
     public record StatusRequest(@NotNull @Pattern(regexp = "ACTIVE|BLOCKED") String status) {
@@ -108,13 +105,6 @@ public class AdminCustomerController {
     List<TimelineItem> timeline(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId,
                                 @RequestParam(required = false) Instant before) {
         return directory.timeline(principal, customerId, before);
-    }
-
-    @PostMapping("/{customerId}/phone-reveal")
-    @PreAuthorize("hasRole('COMPANY_OWNER')")
-    @Operation(summary = "Tam telefon nömrəsi", description = "Yalnız sahib; step-up tələb edir, hər baxış auditə yazılır.")
-    PhoneResponse revealPhone(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId) {
-        return new PhoneResponse(admin.revealPhone(principal, customerId));
     }
 
     @PostMapping("/{customerId}/stamp-adjustments")

@@ -48,7 +48,7 @@ class CustomerAdminIT extends TapIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].id").value(f.customerId().toString()))
-                .andExpect(jsonPath("$.items[0].phoneMasked").value(org.hamcrest.Matchers.containsString("***")))
+                .andExpect(jsonPath("$.items[0].phone").value(org.hamcrest.Matchers.startsWith("+")))
                 .andExpect(jsonPath("$.items[0].currentStamps").value(1));
         // Ölkə kodu və ya əvvəldəki 0 olmadan da tapılır; mövcud olmayan nömrə — boş nəticə
         owner.get("/customers?q=" + localDigits(f.phone()).substring(1)).andExpect(jsonPath("$.total").value(1));
@@ -123,17 +123,12 @@ class CustomerAdminIT extends TapIntegrationTest {
     }
 
     @Test
-    void fullPhoneNeedsOwnerAndStepUp() throws Exception {
+    void ownerAndManagerSeeFullPhone() throws Exception {
         Fixture f = customerWithStamp();
-        String path = "/customers/" + f.customerId() + "/phone-reveal";
-        signedInStaff(HOST, AdminRole.BRANCH_MANAGER, f.branchId()).post(path).andExpect(status().isForbidden());
-
-        AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
-        owner.post(path).andExpect(jsonPath("$.code").value("STEP_UP_REQUIRED"));
-        owner.post("/auth/step-up", Map.of("password", STAFF_PASSWORD)).andExpect(status().isNoContent());
-        owner.post(path).andExpect(status().isOk()).andExpect(jsonPath("$.phone").value(f.phone()));
-        assertThat(count("SELECT count(*) FROM audit_logs WHERE action = 'CUSTOMER_PHONE_REVEALED' AND target_id = :id",
-                Map.of("id", f.customerId().toString()))).isEqualTo(1);
+        signedInStaff(HOST, AdminRole.BRANCH_MANAGER, f.branchId()).get("/customers/" + f.customerId())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.phone").value(f.phone()));
+        signedInStaff(HOST, AdminRole.COMPANY_OWNER, null).get("/customers?branchId=" + f.branchId())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].phone").value(f.phone()));
     }
 
     @Test
@@ -193,11 +188,11 @@ class CustomerAdminIT extends TapIntegrationTest {
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
         String[] lines = csv.split("\r\n");
         assertThat(lines).hasSize(2);
-        assertThat(lines[0]).startsWith("﻿ID,Ad,Telefon (maskalanmış),Dil,Status,Qeydiyyat");
+        assertThat(lines[0]).startsWith("﻿ID,Ad,Telefon,Dil,Status,Qeydiyyat");
         assertThat(lines[1]).contains(f.customerId().toString())
                 .contains("\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\"")
                 .contains(",Aktiv,")
-                .doesNotContain(f.phone());
+                .contains(f.phone());
         assertThat(count("SELECT count(*) FROM audit_logs WHERE action = 'CUSTOMERS_EXPORTED' AND details ->> 'rows' = '1'",
                 Map.of())).isGreaterThanOrEqualTo(1);
     }

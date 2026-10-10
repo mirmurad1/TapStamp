@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Ban, Eye, Gift, MinusCircle, PlusCircle, ShieldAlert, Stamp, Unlock } from 'lucide-react';
+import { ArrowLeft, Ban, Gift, MinusCircle, PlusCircle, ShieldAlert, Stamp, Unlock } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
@@ -19,7 +19,6 @@ import { Input, Select } from '@/shared/ui/input';
 
 import { customersApi, type CustomerRow, type FraudFlag, type TimelineItem } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
-import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { hasAnyRole } from '../../layout/navigation';
@@ -88,13 +87,11 @@ function Header({ customer }: { customer: CustomerRow }) {
   const me = useMe();
   const lang = currentLanguage();
   const isOwner = hasAnyRole(me, ['COMPANY_OWNER']);
-  const withStepUp = useStepUp();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const id = customer.id ?? '';
   const blocked = customer.status === 'BLOCKED';
 
-  const reveal = useMutation({ mutationFn: () => withStepUp(() => customersApi.revealPhone(id)) });
   const status = useMutation({
     mutationFn: (next: 'ACTIVE' | 'BLOCKED') => customersApi.updateStatus(id, next),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: customerKey(id) }),
@@ -104,7 +101,7 @@ function Header({ customer }: { customer: CustomerRow }) {
       status.mutate('ACTIVE');
       return;
     }
-    void confirm({ message: t('admin:customers.detail.blockConfirm', { name: customer.name || customer.phoneMasked }), danger: true }).then(
+    void confirm({ message: t('admin:customers.detail.blockConfirm', { name: customer.name || customer.phone }), danger: true }).then(
       (ok) => ok && status.mutate('BLOCKED'),
     );
   };
@@ -118,7 +115,7 @@ function Header({ customer }: { customer: CustomerRow }) {
             <Badge tone={blocked ? 'danger' : 'success'}>{t(`admin:customers.status.${blocked ? 'BLOCKED' : 'ACTIVE'}`)}</Badge>
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 text-muted-foreground">
-            <span className="tabular-nums">{reveal.data?.phone ?? customer.phoneMasked}</span>
+            <span className="tabular-nums">{customer.phone}</span>
             <span>{t(`common:language.${(customer.language ?? 'az') as 'az' | 'en' | 'ru'}`)}</span>
             {customer.registeredAt ? <span>{t('admin:customers.detail.registered', { date: formatDate(customer.registeredAt, lang) })}</span> : null}
             <span>
@@ -129,12 +126,6 @@ function Header({ customer }: { customer: CustomerRow }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {isOwner && !reveal.data ? (
-            <Button variant="outline" onClick={() => reveal.mutate()} disabled={reveal.isPending}>
-              <Eye className="size-4" aria-hidden="true" />
-              {t('admin:customers.detail.revealPhone')}
-            </Button>
-          ) : null}
           <AdjustDialog customer={customer} />
           {isOwner ? (
             <Button
@@ -149,8 +140,7 @@ function Header({ customer }: { customer: CustomerRow }) {
           ) : null}
         </div>
       </div>
-      <ApiErrorAlert error={reveal.error ?? status.error} />
-      {reveal.data ? <Alert tone="info">{t('admin:customers.detail.revealAudited')}</Alert> : null}
+      <ApiErrorAlert error={status.error} />
     </div>
   );
 }

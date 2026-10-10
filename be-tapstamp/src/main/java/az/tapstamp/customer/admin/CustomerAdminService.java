@@ -18,7 +18,6 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.auth.CustomerSessionService;
 import az.tapstamp.customer.repository.CustomerAdminMapper.CardTotals;
-import az.tapstamp.customer.repository.CustomerAdminMapper.EncryptedPhone;
 import az.tapstamp.customer.repository.CustomerAdminMapper.RevocableReward;
 import az.tapstamp.customer.repository.CustomerAdminMapper;
 import az.tapstamp.loyalty.stamp.StampLedger;
@@ -26,11 +25,9 @@ import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRole;
-import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
-import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -82,22 +79,6 @@ public class CustomerAdminService {
         this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
-    }
-
-    // ------------------------------------------------------------------ Tam nömrə
-
-    /** Tam telefon nömrəsi — yalnız sahib, son 10 dəqiqədə step-up ilə; hər baxış auditə yazılır. */
-    public String revealPhone(AdminPrincipal principal, UUID customerId) {
-        AccessPolicy.requireCompanyWide(principal);
-        adminAuth.requireStepUp(principal);
-        directory.get(principal, customerId);
-        byte[] encrypted = customers.findEncryptedPhone(customerId).map(EncryptedPhone::phoneEnc)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-        String phone = cipher.decryptString(encrypted,
-                Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customerId));
-        audit.tenant("CUSTOMER_PHONE_REVEALED", AuditLogger.ActorType.STAFF, principal.userId(), "customer", customerId,
-                Map.of());
-        return phone;
     }
 
     // ------------------------------------------------------------------ Əl ilə düzəliş

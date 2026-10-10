@@ -45,7 +45,10 @@ export function InstallCard() {
     };
   }, []);
 
-  if (installed || (!promptEvent && !isIos())) {
+  // iPhone-da həmişə təlimat: Safari quraşdırma pəncərəsi vermir (kompüterdəki iPhone emulyasiyasında Chrome-un
+  // hadisəsi gəlsə də düymə göstərilmir)
+  const ios = isIos();
+  if (installed || (!promptEvent && !ios)) {
     return null;
   }
 
@@ -71,15 +74,15 @@ export function InstallCard() {
         <CardDescription>{t('install.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        {promptEvent ? (
+        {promptEvent && !ios ? (
           <Button onClick={() => void install()}>
             <Download className="size-4" aria-hidden="true" />
             {t('install.button')}
           </Button>
         ) : (
-          <p className="flex flex-wrap items-center gap-1 text-sm">
-            {t('install.iosStep1')}
-            <Share className="inline size-4 text-primary" aria-label={t('install.share')} />
+          <p className="text-sm">
+            {t('install.iosStep1')}{' '}
+            <Share className="inline size-4 align-text-bottom text-primary" aria-label={t('install.share')} />{' '}
             {t('install.iosStep2')}
           </p>
         )}

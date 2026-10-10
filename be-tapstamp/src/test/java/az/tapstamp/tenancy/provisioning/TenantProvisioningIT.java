@@ -77,6 +77,11 @@ class TenantProvisioningIT extends IntegrationTest {
                     .query(Integer.class).single()).isEqualTo(1);
             assertThat(tenantJdbc.sql("SELECT purpose FROM data_encryption_keys WHERE status = 'ACTIVE' ORDER BY purpose")
                     .query(String.class).list()).containsExactly("NFC_KEYS", "PII", "TOTP");
+            // Standart hüquqi sənədlər: məxfilik siyasətində kampaniya üçün istifadə qeyd olunub
+            assertThat(tenantJdbc.sql("SELECT type FROM legal_documents WHERE is_current ORDER BY type")
+                    .query(String.class).list()).containsExactly("PRIVACY_POLICY", "TERMS");
+            assertThat(tenantJdbc.sql("SELECT content->>'az' FROM legal_documents WHERE type = 'PRIVACY_POLICY'")
+                    .query(String.class).single()).contains("kampaniyalar").doesNotContain("şifrələnmiş");
         });
         assertThat(platformJdbc.sql("SELECT schema_version FROM tenants WHERE id = :id")
                 .param("id", tenant.id()).query(String.class).single()).isEqualTo(latestTenantMigration());

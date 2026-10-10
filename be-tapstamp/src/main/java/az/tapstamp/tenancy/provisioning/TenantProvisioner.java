@@ -14,9 +14,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import az.tapstamp.customer.consent.DefaultLegalDocuments;
 import az.tapstamp.security.crypto.JdbcDataKeyProvider;
 import az.tapstamp.security.crypto.KeyEncryptionService;
 import az.tapstamp.security.crypto.KeyPurpose;
+import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.persistence.LocalizedTextConverter;
 import az.tapstamp.tenancy.TenancyProperties;
@@ -173,8 +175,23 @@ public class TenantProvisioner {
                         ON CONFLICT DO NOTHING""")
                 .param("id", Ids.newId())
                 .update();
+        // Standart hüquqi sənədlər (ilk versiya): müştəri qeydiyyatda bunlara razılıq verir
+        insertLegalDocument(jdbc, "PRIVACY_POLICY", DefaultLegalDocuments.privacyPolicy());
+        insertLegalDocument(jdbc, "TERMS", DefaultLegalDocuments.terms());
         new JdbcDataKeyProvider(jdbc, kek, () -> "t:" + tenant.id())
                 .ensureKeys(KeyPurpose.PII, KeyPurpose.NFC_KEYS, KeyPurpose.TOTP);
+    }
+
+    /** Bu növün cari sənədi yoxdursa yazılır (təkrar provisioning-də dəyişmir). */
+    private static void insertLegalDocument(JdbcClient jdbc, String type, LocalizedText content) {
+        jdbc.sql("""
+                        INSERT INTO legal_documents (id, type, doc_version, content, published_at, is_current)
+                        SELECT :id, :type, 1, CAST(:content AS jsonb), now(), true
+                        WHERE NOT EXISTS (SELECT 1 FROM legal_documents WHERE type = :type AND is_current)""")
+                .param("id", Ids.newId())
+                .param("type", type)
+                .param("content", TEXT.toJson(content))
+                .update();
     }
 
     private void ensureDomain(UUID tenantId, String host) {

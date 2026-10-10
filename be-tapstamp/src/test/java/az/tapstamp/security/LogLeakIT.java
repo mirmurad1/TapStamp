@@ -48,8 +48,8 @@ class LogLeakIT extends TapIntegrationTest {
         String customerId = json(customer.get("/api/v1/me"), "$.id");
 
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
-        owner.post("/auth/step-up", Map.of("password", STAFF_PASSWORD)).andExpect(status().isNoContent());
-        owner.post("/customers/" + customerId + "/phone-reveal").andExpect(status().isOk());
+        // Admin cavabında tam nömrə var, amma loga düşməməlidir
+        owner.get("/customers/" + customerId).andExpect(status().isOk());
 
         String logs = Arrays.stream(output.getAll().split("\\R"))
                 .filter(line -> !line.contains("SMS (konsol, yalnız dev)"))

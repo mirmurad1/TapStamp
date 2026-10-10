@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- Admin panelinin müştəri siyahısı: telefon yalnız maskalı, menecer yalnız öz filiallarının müştərilərini görür -->
+<!-- Admin panelinin müştəri siyahısı: telefon şifrəli oxunur (servis açır), menecer yalnız öz filiallarının müştərilərini görür -->
 <mapper namespace="az.tapstamp.customer.repository.CustomerDirectoryMapper">
 
     <sql id="columns">
-        SELECT c.id, c.name, c.phone_masked, c.preferred_language AS language, c.status, c.registered_at,
+        SELECT c.id, c.name, c.phone_enc, c.preferred_language AS language, c.status, c.registered_at,
                c.last_visit_at,
                coalesce(a.current_stamps, 0) AS current_stamps, coalesce(a.total_stamps, 0) AS total_stamps,
                coalesce(a.rewards_earned, 0) AS rewards_earned, coalesce(a.rewards_redeemed, 0) AS rewards_redeemed,
@@ -34,7 +34,7 @@
         <if test="registeredTo != null">AND (c.registered_at AT TIME ZONE #{timezone})::date &lt;= #{registeredTo}</if>
     </sql>
 
-    <select id="list" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row">
+    <select id="list" resultType="az.tapstamp.customer.repository.CustomerDirectoryMapper$Entry">
         <include refid="columns"/>
         <include refid="filters"/>
         <!-- orderBy: yalnız CustomerDirectory.Sort ağ siyahısından -->
@@ -50,13 +50,13 @@
         <include refid="filters"/>
     </select>
 
-    <select id="stream" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row" fetchSize="500">
+    <select id="stream" resultType="az.tapstamp.customer.repository.CustomerDirectoryMapper$Entry" fetchSize="500">
         <include refid="columns"/>
         <include refid="filters"/>
         ORDER BY c.registered_at DESC, c.id
     </select>
 
-    <select id="find" resultType="az.tapstamp.customer.admin.CustomerDirectory$Row">
+    <select id="find" resultType="az.tapstamp.customer.repository.CustomerDirectoryMapper$Entry">
         <include refid="columns"/>
         WHERE c.id = #{id} AND c.status &lt;&gt; 'DELETED'
         <include refid="scope"/>

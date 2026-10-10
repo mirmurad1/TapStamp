@@ -203,7 +203,7 @@ export function CustomersPage() {
                           {customer.name || t('admin:customers.noName')}
                         </Link>
                         <p className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                          <span className="tabular-nums">{customer.phoneMasked}</span>
+                          <span className="tabular-nums">{customer.phone}</span>
                           {customer.status === 'BLOCKED' ? <Badge tone="danger">{t('admin:customers.status.BLOCKED')}</Badge> : null}
                           {(customer.openFraudFlags ?? 0) > 0 ? (
                             <Badge tone="warning">

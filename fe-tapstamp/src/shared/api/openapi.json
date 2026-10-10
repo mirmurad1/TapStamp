@@ -873,35 +873,6 @@
         "tags" : [ "Admin: müştərilər" ]
       }
     },
-    "/api/v1/admin/customers/{customerId}/phone-reveal" : {
-      "post" : {
-        "description" : "Yalnız sahib; step-up tələb edir, hər baxış auditə yazılır.",
-        "operationId" : "revealPhone",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "customerId",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PhoneResponse"
-                }
-              }
-            },
-            "description" : "OK"
-          }
-        },
-        "summary" : "Tam telefon nömrəsi",
-        "tags" : [ "Admin: müştərilər" ]
-      }
-    },
     "/api/v1/admin/customers/{customerId}/stamp-adjustments" : {
       "post" : {
         "description" : "`Idempotency-Key` başlığı məcburidir (8–100 simvol): eyni açarla təkrar sorğu eyni nəticəni qaytarır. Silmə kartdakı saydan çox olarsa, istifadə olunmamış son hədiyyə kartı ləğv edilir; təhvil verilmiş hədiyyəni geri almaq olmaz (`STAMP_ADJUSTMENT_TOO_LARGE`).",
@@ -5077,14 +5048,6 @@
           }
         }
       },
-      "PhoneResponse" : {
-        "type" : "object",
-        "properties" : {
-          "phone" : {
-            "type" : "string"
-          }
-        }
-      },
       "PlatformAuditEntry" : {
         "type" : "object",
         "properties" : {
@@ -5511,7 +5474,7 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "phoneMasked" : {
+          "phone" : {
             "type" : "string"
           },
           "registeredAt" : {

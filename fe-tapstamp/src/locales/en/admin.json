@@ -508,8 +508,6 @@
       "registered": "Registered: {{date}}",
       "lastVisit": "Last visit: {{date}}",
       "noVisits": "No visits yet",
-      "revealPhone": "Show full number",
-      "revealAudited": "Viewing the full number was recorded in the audit log.",
       "block": "Block",
       "unblock": "Unblock",
       "blockConfirm": "Block {{name}}? They will be signed out immediately and cannot collect new stamps."

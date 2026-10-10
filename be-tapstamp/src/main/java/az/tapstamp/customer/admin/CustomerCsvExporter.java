@@ -70,7 +70,7 @@ public class CustomerCsvExporter {
             writeLine(writer, COLUMNS.stream().map(c -> messages.getMessage("csv.customers." + c, null, locale)).toList());
             directory.forEach(principal, filter, row -> {
                 try {
-                    writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), nullToEmpty(row.phoneMasked()),
+                    writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), row.phone(),
                             row.language(), Objects.requireNonNullElse(
                                     messages.getMessage("csv.customers.status." + row.status(), null, row.status(),
                                             locale), row.status()),

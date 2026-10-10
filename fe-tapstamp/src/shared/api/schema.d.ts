@@ -452,26 +452,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/customers/{customerId}/phone-reveal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Tam telefon nömrəsi
-         * @description Yalnız sahib; step-up tələb edir, hər baxış auditə yazılır.
-         */
-        post: operations["revealPhone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/customers/{customerId}/stamp-adjustments": {
         parameters: {
             query?: never;
@@ -2843,9 +2823,6 @@ export interface components {
             id?: string;
             phoneMasked?: string;
         };
-        PhoneResponse: {
-            phone?: string;
-        };
         PlatformAuditEntry: {
             action?: string;
             /** Format: uuid */
@@ -3030,7 +3007,7 @@ export interface components {
             name?: string;
             /** Format: int32 */
             openFraudFlags?: number;
-            phoneMasked?: string;
+            phone?: string;
             /** Format: date-time */
             registeredAt?: string;
             /** Format: int32 */
@@ -3769,28 +3746,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FraudFlag"][];
-                };
-            };
-        };
-    };
-    revealPhone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PhoneResponse"];
                 };
             };
         };

@@ -508,8 +508,6 @@
       "registered": "Qeydiyyat: {{date}}",
       "lastVisit": "Son gəliş: {{date}}",
       "noVisits": "Hələ gəlməyib",
-      "revealPhone": "Tam nömrəni göstər",
-      "revealAudited": "Tam nömrəyə baxış audit jurnalına yazıldı.",
       "block": "Blokla",
       "unblock": "Blokdan çıxar",
       "blockConfirm": "{{name}} bloklansın? Hesabından dərhal çıxış ediləcək və yeni möhür ala bilməyəcək."

@@ -306,8 +306,6 @@ export const customersApi = {
   get: (customerId: string) => unwrap(api.GET('/api/v1/admin/customers/{customerId}', { params: { path: { customerId } } })),
   timeline: (customerId: string, before?: string) =>
     unwrap(api.GET('/api/v1/admin/customers/{customerId}/timeline', { params: { path: { customerId }, query: { before } } })),
-  revealPhone: (customerId: string) =>
-    unwrap(api.POST('/api/v1/admin/customers/{customerId}/phone-reveal', { params: { path: { customerId } } })),
   adjust: (customerId: string, body: { delta: number; reason: string; branchId?: string }, idempotencyKey: string) =>
     unwrap(
       api.POST('/api/v1/admin/customers/{customerId}/stamp-adjustments', {
