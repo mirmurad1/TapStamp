@@ -56,8 +56,8 @@ export function CustomerLayout() {
           {companyName ? <span className="line-clamp-2 break-words font-display leading-tight font-bold">{companyName}</span> : null}
         </Link>
         <div className="flex shrink-0 items-center gap-1">
-          {/* Daxil olmuş müştəri dili Parametrlərdə dəyişir — dar ekranda şirkətin adına yer qalsın */}
-          {status === 'signedIn' ? null : <LanguageSwitcher />}
+          {/* Dil yalnız qonaqda (daxil olmuş müştəri Parametrlərdə dəyişir); sessiya yoxlanılarkən heç nə göstərilmir */}
+          {status === 'guest' ? <LanguageSwitcher /> : null}
           {status === 'signedIn' ? (
             <Button asChild variant="ghost" size="icon">
               <Link to="/gift-cards" aria-label={t('profile:nav.giftCards')}>
