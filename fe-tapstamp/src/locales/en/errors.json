@@ -8,7 +8,7 @@
   "METHOD_NOT_ALLOWED": "This action is not supported.",
   "UNSUPPORTED_MEDIA_TYPE": "This format is not supported.",
   "PAYLOAD_TOO_LARGE": "The data you sent is too large.",
-  "LOGO_INVALID": "Logo not accepted: it must be a square PNG or JPEG, 192×192 – 1024×1024 pixels, up to 256 KB.",
+  "LOGO_INVALID": "Logo not accepted: it must be a PNG or JPEG up to 1 MB, with the shorter side at least 192 pixels.",
   "RATE_LIMITED": "Too many attempts. Please try again shortly.",
   "TENANT_UNAVAILABLE": "The service is not available right now. Please try again later.",
   "INTERNAL_ERROR": "Something went wrong. Please try again shortly.",

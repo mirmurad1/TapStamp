@@ -80,9 +80,9 @@ export function CompanyCard() {
 }
 
 /** Tələblər backend-dəki CompanyLogoService ilə eynidir (server də yoxlayır). */
-const LOGO_MAX_BYTES = 256 * 1024;
+const LOGO_MAX_BYTES = 1024 * 1024;
 const LOGO_MIN_SIZE = 192;
-const LOGO_MAX_SIZE = 1024;
+const LOGO_MAX_SIZE = 4096;
 
 async function logoFits(file: File): Promise<boolean> {
   if (file.size > LOGO_MAX_BYTES || !['image/png', 'image/jpeg'].includes(file.type)) {
@@ -92,7 +92,7 @@ async function logoFits(file: File): Promise<boolean> {
     const bitmap = await createImageBitmap(file);
     const { width, height } = bitmap;
     bitmap.close();
-    return width === height && width >= LOGO_MIN_SIZE && width <= LOGO_MAX_SIZE;
+    return Math.min(width, height) >= LOGO_MIN_SIZE && Math.max(width, height) <= LOGO_MAX_SIZE;
   } catch {
     return false;
   }

@@ -31,7 +31,8 @@ class CompanyLogoIT extends TapIntegrationTest {
         String host = TestTenants.BETA_HOST;
         AdminClient owner = signedInStaff(host, AdminRole.COMPANY_OWNER, null);
         try {
-            upload(owner, image(512, 512, "jpeg")).andExpect(status().isNoContent());
+            // Kvadrat olmayan foto: mərkəzdən kəsilir və 512 piksələ kiçildilir
+            upload(owner, image(1200, 800, "jpeg")).andExpect(status().isNoContent());
 
             String logoUrl = publicCompany(host).andExpect(jsonPath("$.logoUrl").isString())
                     .andReturn().getResponse().getContentAsString().replaceAll("(?s).*\"logoUrl\":\"([^\"]+)\".*", "$1");
@@ -46,9 +47,10 @@ class CompanyLogoIT extends TapIntegrationTest {
                     .andReturn().getResponse().getContentAsByteArray();
             BufferedImage stored = ImageIO.read(new ByteArrayInputStream(png));
             assertThat(stored.getWidth()).isEqualTo(512);
+            assertThat(stored.getHeight()).isEqualTo(512);
 
-            // Uyğun olmayanlar: kvadrat deyil, çox kiçik, şəkil deyil
-            upload(owner, image(400, 300, "png")).andExpect(status().isBadRequest())
+            // Uyğun olmayanlar: qısa tərəf çox kiçik, şəkil deyil
+            upload(owner, image(400, 150, "png")).andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("LOGO_INVALID"));
             upload(owner, image(64, 64, "png")).andExpect(status().isBadRequest());
             upload(owner, "<svg xmlns=\"http://www.w3.org/2000/svg\"/>".getBytes()).andExpect(status().isBadRequest());

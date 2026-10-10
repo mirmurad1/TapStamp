@@ -386,7 +386,7 @@
       "logo": {
         "title": "Logo",
         "hint": "Shown at the top of the customer app, next to the company name. If none is uploaded, a default icon is shown.",
-        "requirements": "Requirements: square PNG or JPEG, 192×192 – 1024×1024 pixels (recommended: 512×512), up to 256 KB.",
+        "requirements": "Requirements: PNG or JPEG, up to 1 MB, shorter side at least 192 pixels. A square image (e.g. 512×512) is recommended — other images are cropped to a square from the centre.",
         "upload": "Upload logo",
         "replace": "Change logo",
         "remove": "Remove logo",
@@ -394,7 +394,7 @@
         "removed": "Logo removed; the default icon is shown.",
         "current": "Current logo",
         "defaultIcon": "Default icon",
-        "invalid": "The file does not meet the requirements: square PNG or JPEG, 192×192 – 1024×1024 pixels, up to 256 KB."
+        "invalid": "The file does not meet the requirements: PNG or JPEG, up to 1 MB, shorter side at least 192 pixels."
       }
     },
     "branches": {

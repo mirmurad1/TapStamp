@@ -790,7 +790,7 @@ export interface paths {
         get?: never;
         /**
          * Loqonun yüklənməsi
-         * @description Müştəri tətbiqinin başlığında göstərilir. Kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel,             256 KB-a qədər; PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.
+         * @description Müştəri tətbiqinin başlığında göstərilir. PNG və ya JPEG, 1 MB-a qədər, qısa tərəfi ən az 192 piksel; mərkəzdən kvadrat kəsilir, 512 piksələ kiçildilir və PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.
          */
         put: operations["uploadLogo"];
         post?: never;

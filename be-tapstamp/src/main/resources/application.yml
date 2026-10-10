@@ -22,6 +22,10 @@ spring:
       whitelabel:
         enabled: false
   servlet:
+    # Yalnız loqo yükləməsi multipart istifadə edir (fayl 1 MB-a qədər)
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 2MB
     encoding:
       charset: UTF-8
       # Yalnız sorğular: cavablarda məcburi charset şəkillərə də (image/png) əlavə olunardı; JSON onsuz da UTF-8-dir

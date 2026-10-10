@@ -1,5 +1,7 @@
 package az.tapstamp.company.service;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,16 +25,21 @@ import az.tapstamp.shared.error.ErrorCode;
 import org.springframework.stereotype.Service;
 
 /**
- * Şirkətin loqosu (müştəri tətbiqinin başlığında). Yalnız PNG və JPEG qəbul olunur (SVG-də skript ola bilər);
- * şəkil yenidən PNG kimi kodlanır — EXIF (məs. GPS) və faylın içinə gizlədilmiş məlumat saxlanılmır.
+ * Şirkətin loqosu (müştəri tətbiqinin başlığında). Yalnız PNG və JPEG qəbul olunur (SVG-də skript ola bilər).
+ * Kvadrat olmayan şəkil mərkəzdən kvadrat kəsilir, {@value #STORED_SIZE} pikseldən böyükdürsə kiçildilir və PNG kimi
+ * yenidən kodlanır — EXIF (məs. GPS) və faylın içinə gizlədilmiş məlumat saxlanılmır.
  */
 @Service
 public class CompanyLogoService {
 
     /** Yüklənən faylın ən böyük həcmi. */
-    public static final int MAX_BYTES = 256 * 1024;
+    public static final int MAX_BYTES = 1024 * 1024;
+    /** Qısa tərəfin ən kiçik ölçüsü. */
     public static final int MIN_SIZE = 192;
-    public static final int MAX_SIZE = 1024;
+    /** Uzun tərəfin ən böyük ölçüsü (yaddaş: açılmış şəkil ən çox ~64 MB). */
+    public static final int MAX_SIZE = 4096;
+    /** Saxlanılan loqonun ölçüsü (başlıqda 40–64 px göstərilir, yüksək sıxlıqlı ekranlar üçün ehtiyatla). */
+    public static final int STORED_SIZE = 512;
 
     private static final byte[] PNG_MAGIC = {(byte) 0x89, 'P', 'N', 'G'};
     private static final byte[] JPEG_MAGIC = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
@@ -66,13 +73,13 @@ public class CompanyLogoService {
                 Map.of());
     }
 
-    /** Yoxlama (növ, həcm, kvadrat, ölçü həddləri) və PNG-yə çevirmə. */
+    /** Yoxlama (növ, həcm, ölçü həddləri), kvadrata gətirmə və PNG-yə çevirmə. */
     static byte[] normalize(byte[] file) {
         if (file == null || file.length == 0 || file.length > MAX_BYTES
                 || !(startsWith(file, PNG_MAGIC) || startsWith(file, JPEG_MAGIC))) {
             throw new ApiException(ErrorCode.LOGO_INVALID);
         }
-        BufferedImage image = decode(file);
+        BufferedImage image = squared(decode(file));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", out);
@@ -96,7 +103,8 @@ public class CompanyLogoService {
             try {
                 reader.setInput(input, true, true);
                 int width = reader.getWidth(0);
-                if (width != reader.getHeight(0) || width < MIN_SIZE || width > MAX_SIZE) {
+                int height = reader.getHeight(0);
+                if (Math.min(width, height) < MIN_SIZE || Math.max(width, height) > MAX_SIZE) {
                     throw new ApiException(ErrorCode.LOGO_INVALID);
                 }
                 return reader.read(0);
@@ -109,6 +117,24 @@ public class CompanyLogoService {
             }
             throw new ApiException(ErrorCode.LOGO_INVALID);
         }
+    }
+
+    /** Mərkəzdən kvadrat kəsir və lazım olsa {@value #STORED_SIZE} piksələ kiçildir (şəffaflıq saxlanılır). */
+    private static BufferedImage squared(BufferedImage source) {
+        int side = Math.min(source.getWidth(), source.getHeight());
+        BufferedImage crop = source.getSubimage((source.getWidth() - side) / 2, (source.getHeight() - side) / 2,
+                side, side);
+        int target = Math.min(side, STORED_SIZE);
+        BufferedImage result = new BufferedImage(target, target, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = result.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            graphics.drawImage(crop, 0, 0, target, target, null);
+        } finally {
+            graphics.dispose();
+        }
+        return result;
     }
 
     private static boolean startsWith(byte[] data, byte[] prefix) {

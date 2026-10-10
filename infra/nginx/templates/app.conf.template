@@ -59,6 +59,13 @@ server {
         include /etc/nginx/snippets/proxy-backend.conf;
     }
 
+    # Şirkət loqosunun yüklənməsi: ümumi 64k limitindən istisna (fayl 1 MB-a qədər, backend də yoxlayır)
+    location = /api/v1/admin/settings/company/logo {
+        client_max_body_size 2m;
+        limit_req zone=api_per_ip burst=40 nodelay;
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+
     # NFC toxunuşu: kriptoqrafik yoxlama backend-dədir
     location /t/ {
         limit_req zone=tap_per_ip burst=10 nodelay;

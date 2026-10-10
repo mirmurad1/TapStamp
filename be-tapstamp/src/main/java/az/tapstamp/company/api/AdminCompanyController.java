@@ -100,7 +100,8 @@ public class AdminCompanyController {
     @PutMapping(path = "/company/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Loqonun yüklənməsi", description = """
-            Müştəri tətbiqinin başlığında göstərilir. Kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel,             256 KB-a qədər; PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.""")
+            Müştəri tətbiqinin başlığında göstərilir. PNG və ya JPEG, 1 MB-a qədər, qısa tərəfi ən az 192 piksel; \
+            mərkəzdən kvadrat kəsilir, 512 piksələ kiçildilir və PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.""")
     void uploadLogo(@AuthenticationPrincipal AdminPrincipal principal, @RequestParam("file") MultipartFile file)
             throws IOException {
         if (file.getSize() > CompanyLogoService.MAX_BYTES) {

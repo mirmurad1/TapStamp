@@ -386,7 +386,7 @@
       "logo": {
         "title": "Loqo",
         "hint": "Müştəri tətbiqinin yuxarısında, şirkətin adının yanında göstərilir. Yüklənməyibsə standart ikon görünür.",
-        "requirements": "Tələblər: kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel (tövsiyə olunur: 512×512), həcmi 256 KB-a qədər.",
+        "requirements": "Tələblər: PNG və ya JPEG, həcmi 1 MB-a qədər, qısa tərəfi ən az 192 piksel. Kvadrat (məs. 512×512) olması tövsiyə olunur — digər şəkillər mərkəzdən kvadrat kəsilir.",
         "upload": "Loqo yüklə",
         "replace": "Loqonu dəyiş",
         "remove": "Loqonu sil",
@@ -394,7 +394,7 @@
         "removed": "Loqo silindi, standart ikon göstərilir.",
         "current": "Cari loqo",
         "defaultIcon": "Standart ikon",
-        "invalid": "Fayl tələblərə uyğun deyil: kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel, 256 KB-a qədər."
+        "invalid": "Fayl tələblərə uyğun deyil: PNG və ya JPEG, 1 MB-a qədər, qısa tərəfi ən az 192 piksel."
       }
     },
     "branches": {
