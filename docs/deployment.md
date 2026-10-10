@@ -128,10 +128,14 @@ cd /opt/tapstamp && git pull
 1. Bazanın ehtiyat nüsxəsi götürülür.
 2. Köhnə backend işləyərkən yanında yeni versiya qalxır.
 3. Yeni versiya sağlam olana qədər gözlənilir. Sağlam olmasa, silinir və köhnə versiya işləməyə davam edir.
-4. nginx yeni konteynerə keçirilir (`reload` açıq bağlantıları kəsmir).
+4. nginx yeni konteynerə keçirilir (`reload` açıq bağlantıları kəsmir). Eyni `reload`-da nginx konfiqurasiyası (`infra/nginx/`) da yenilənir. Konfiqurasiyada səhv varsa (`nginx -t`), heç nə dəyişmir və köhnə versiya işləməyə davam edir.
 5. Köhnə konteyner yumşaq dayandırılır: yeni sorğu almır, başlanmış sorğuları 30 saniyəyə qədər bitirir.
 
 Frontend də eyni qaydada yenilənir.
+
+nginx üçün əlavə seçimlər:
+- `./scripts/deploy.sh --only nginx` — yalnız nginx konfiqurasiyası dəyişibsə (məs. limitlər, başlıqlar). Fasiləsizdir.
+- `./scripts/deploy.sh --build --nginx-image` — nginx-in öz image-i yenilənir (`infra/nginx/Dockerfile`, təhlükəsizlik yamaqları). İki nginx eyni portu tuta bilmədiyi üçün **1–3 saniyəlik fasilə** olur. Az yüklü vaxtda edin.
 
 Adi `docker compose up -d --build` da işləyir, amma backend yenidən başlayana qədər (20–40 san) istifadəçilər **502** görür. Ondan yalnız ilk quraşdırmada istifadə edin.
 

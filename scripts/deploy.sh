@@ -3,11 +3,15 @@
 #
 #   ./scripts/deploy.sh                 # prod: yeni image-lər, backup, backend və frontend
 #   ./scripts/deploy.sh --dev --build   # lokal sınaq: dev compose, image-lər yerində qurulur, backup-sız
+#   ./scripts/deploy.sh --only nginx    # yalnız nginx konfiqurasiyası (infra/nginx/*) — fasiləsiz
+#   ./scripts/deploy.sh --nginx-image   # əlavə olaraq nginx image-i yenilənir (yamaqlar): 1–3 san fasilə!
 #
 # Hər servis (backend, frontend) üçün:
 #   1. köhnə konteyner işləyərkən yanında yeni versiya qalxır (docker compose --scale 2 --no-recreate);
 #   2. yeni konteyner sağlam olana qədər gözlənilir (image-in HEALTHCHECK-i); olmasa — silinir, köhnə işləyir;
 #   3. bütün servislər hazır olanda nginx BİR DƏFƏ yeni konteynerlərə keçirilir (reload açıq bağlantıları kəsmir);
+#      eyni reload-da nginx konfiqurasiyası da yenilənir: fayllar (infra/nginx) konteynerə mount olunub, şablonlar
+#      (templates/*.template) yenidən emal olunur; "nginx -t" uğursuzdursa, köhnə konfiqurasiya bərpa olunur;
 #   4. köhnə konteyner yumşaq dayandırılır: yeni sorğu almır, başlanmış sorğuları bitirir (graceful shutdown).
 #
 # Baza miqrasiyaları yeni backend başlayanda tətbiq olunur. Keçid zamanı iki versiya qısa müddət eyni bazada
@@ -22,12 +26,14 @@ FILES=(-f docker-compose.yml -f docker-compose.prod.yml)
 BUILD=false
 BACKUP=true
 SERVICES=(backend frontend)
+NGINX_IMAGE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dev) FILES=(-f docker-compose.yml -f docker-compose.dev.yml); BACKUP=false ;;
     --build) BUILD=true ;;
     --no-backup) BACKUP=false ;;
-    --only) SERVICES=("$2"); shift ;;
+    --only) if [[ "$2" == nginx ]]; then SERVICES=(); else SERVICES=("$2"); fi; shift ;;
+    --nginx-image) NGINX_IMAGE=true ;;
     *) echo "Naməlum parametr: $1" >&2; exit 2 ;;
   esac
   shift
@@ -57,7 +63,7 @@ remove_extra() {
   done
 }
 
-declare -A OLD NEW
+declare -A OLD=() NEW=()
 rollback() {
   local service
   for service in "${!OLD[@]}"; do
@@ -99,12 +105,14 @@ if $BACKUP; then
   ./scripts/backup.sh
 fi
 
-if $BUILD; then
-  log "Image-lər qurulur"
-  dc build "${SERVICES[@]}"
-else
-  log "Yeni image-lər endirilir"
-  dc pull --ignore-buildable "${SERVICES[@]}" || true
+if [[ ${#SERVICES[@]} -gt 0 ]]; then
+  if $BUILD; then
+    log "Image-lər qurulur"
+    dc build "${SERVICES[@]}"
+  else
+    log "Yeni image-lər endirilir"
+    dc pull --ignore-buildable "${SERVICES[@]}" || true
+  fi
 fi
 
 for service in "${SERVICES[@]}"; do
@@ -115,21 +123,28 @@ for service in "${SERVICES[@]}"; do
   fi
 done
 
-# Mərhələ 2: nginx bir dəfə bütün yeni konteynerlərə keçirilir. Konfiqurasiya səhvdirsə (nginx -t), reload
-# edilmir və köhnə versiya işləməyə davam edir
+# Mərhələ 2: nginx bir dəfə yenidən yüklənir — yeni konteynerlərə keçid və yenilənmiş konfiqurasiya (şablonlar
+# yenidən emal olunur) birlikdə. Konfiqurasiya səhvdirsə (nginx -t), hər ikisi geri qaytarılır, reload edilmir və
+# köhnə versiya işləməyə davam edir
 if [[ ${#NEW[@]} -gt 0 ]]; then
-  log "nginx yeni konteynerlərə keçirilir: ${NEW[*]}"
-  switch=""
-  for service in "${!NEW[@]}"; do
-    switch+="echo 'server ${NEW[$service]}:8080;' > /etc/nginx/upstreams/$service.conf; "
-  done
-  if ! dc exec -T nginx sh -c "cp -r /etc/nginx/upstreams /tmp/upstreams.bak; $switch nginx -t -q && nginx -s reload \
-      || { cp /tmp/upstreams.bak/* /etc/nginx/upstreams/; exit 1; }"; then
-    log "XƏTA: nginx keçidi alınmadı — köhnə versiya işləməyə davam edir" >&2
-    rollback
-    exit 1
-  fi
-  # Köhnə nginx worker-ləri başlanmış sorğuları köhnə konteynerlərdə bitirir
+  log "nginx yeni konteynerlərə keçirilir və konfiqurasiyası yenilənir: ${NEW[*]}"
+else
+  log "nginx konfiqurasiyası yenilənir"
+fi
+switch=""
+for service in "${!NEW[@]}"; do
+  switch+="echo 'server ${NEW[$service]}:8080;' > /etc/nginx/upstreams/$service.conf; "
+done
+if ! dc exec -T nginx sh -c "rm -rf /tmp/upstreams.bak /tmp/conf.d.bak \
+    && cp -r /etc/nginx/upstreams /tmp/upstreams.bak && cp -r /etc/nginx/conf.d /tmp/conf.d.bak \
+    && /docker-entrypoint.d/20-envsubst-on-templates.sh >/dev/null && $switch nginx -t -q && nginx -s reload \
+    || { cp /tmp/upstreams.bak/* /etc/nginx/upstreams/; cp /tmp/conf.d.bak/* /etc/nginx/conf.d/; exit 1; }"; then
+  log "XƏTA: nginx yenilənmədi (konfiqurasiya səhvi?) — köhnə versiya işləməyə davam edir" >&2
+  rollback
+  exit 1
+fi
+# Köhnə nginx worker-ləri başlanmış sorğuları köhnə konteynerlərdə bitirir
+if [[ ${#NEW[@]} -gt 0 ]]; then
   sleep 3
 fi
 
@@ -139,4 +154,18 @@ for service in "${!OLD[@]}"; do
   docker stop "${OLD[$service]}" >/dev/null
   docker rm "${OLD[$service]}" >/dev/null
 done
+# Mərhələ 4 (yalnız --nginx-image): nginx-in öz image-i (Dockerfile, yamaqlar). İki nginx eyni portu tuta
+# bilmədiyi üçün konteyner yenidən yaradılır — 1–3 saniyəlik fasilə. Upstream fayllarını başlanğıc skripti
+# servis adı ilə yazır (köhnə konteynerlər artıq dayandırılıb).
+if $NGINX_IMAGE; then
+  if $BUILD; then dc build nginx; else dc pull nginx || true; fi
+  log "nginx konteyneri yenidən yaradılır (qısa fasilə)"
+  dc up -d --no-deps --force-recreate nginx
+  for _ in $(seq 1 15); do
+    if dc exec -T nginx nginx -t -q 2>/dev/null; then
+      break
+    fi
+    sleep 1
+  done
+fi
 log "Deploy tamamlandı"
