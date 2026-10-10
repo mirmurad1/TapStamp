@@ -8,7 +8,7 @@ import { Button } from '@/shared/ui/button';
 import { customerAuthApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 
-/** Möhür kartının altında: hesabdan çıxıb başqa nömrə ilə daxil olmaq. */
+/** Parametrlər ekranında: hesabdan çıxıb başqa nömrə ilə daxil olmaq. */
 export function SwitchNumber() {
   const { t } = useTranslation('profile');
   const { clear } = useCustomerSession();

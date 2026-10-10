@@ -106,9 +106,9 @@ describe('müştəri tətbiqi', () => {
     await screen.findByRole('heading', { name: 'Salam, Aysel!' });
     expect(screen.getByText('Hədiyyəyə 6 möhür qalıb')).toBeInTheDocument();
     expect(screen.getAllByRole('img', { name: 'Möhür vurulub' })).toHaveLength(3);
-    // İlk girişdən sonra: nömrə bir daha soruşulmayacaq; çıxış möhür kartının altındadır
+    // İlk girişdən sonra: nömrə bir daha soruşulmayacaq; başqa nömrəyə keçid Parametrlərdədir
     expect(screen.getByText('Nömrənizi bir daha soruşmayacağıq.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Fərqli nömrə ilə yoxla' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Fərqli nömrə ilə yoxla' })).not.toBeInTheDocument();
     await waitFor(() => expect(window.location.pathname).toBe('/'));
 
     const register = requests.find((request) => request.path === 'POST /api/v1/auth/register');
@@ -173,7 +173,7 @@ describe('müştəri tətbiqi', () => {
     expect(calls.indexOf('POST /api/v1/auth/step-up/otp/verify')).toBeLessThan(calls.indexOf('DELETE /api/v1/me'));
   });
 
-  it('səhifə yenidən açılanda izah görünmür; "Fərqli nömrə ilə yoxla" çıxış edib girişə aparır', async () => {
+  it('səhifə yenidən açılanda izah görünmür; Parametrlərdəki "Fərqli nömrə ilə yoxla" çıxış edib girişə aparır', async () => {
     const user = userEvent.setup();
     let signedIn = true;
     const calls: string[] = [];
@@ -188,6 +188,8 @@ describe('müştəri tətbiqi', () => {
         case 'GET /api/v1/me':
           return json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', card: { currentStamps: 2, stampsRequired: 9 },
             availableRewards: [], pendingConsents: [] });
+        case 'GET /api/v1/me/sessions':
+          return json([]);
         case 'POST /api/v1/auth/logout':
           signedIn = false;
           return new Response(null, { status: 204 });
@@ -206,6 +208,7 @@ describe('müştəri tətbiqi', () => {
 
     await screen.findByRole('heading', { name: 'Salam, Aysel!' });
     expect(screen.queryByText('Nömrənizi bir daha soruşmayacağıq.')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: 'Parametrlər' }));
     await user.click(screen.getByRole('button', { name: 'Fərqli nömrə ilə yoxla' }));
 
     expect(await screen.findByLabelText('Telefon nömrəsi')).toBeInTheDocument();

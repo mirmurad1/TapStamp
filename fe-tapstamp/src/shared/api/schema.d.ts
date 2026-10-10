@@ -780,6 +780,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/settings/company/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Loqonun yüklənməsi
+         * @description Müştəri tətbiqinin başlığında göstərilir. Kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel,             256 KB-a qədər; PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.
+         */
+        put: operations["uploadLogo"];
+        post?: never;
+        /**
+         * Loqonun silinməsi
+         * @description Müştəri tətbiqində standart ikon göstərilir.
+         */
+        delete: operations["removeLogo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/settings/reward-rule": {
         parameters: {
             query?: never;
@@ -791,7 +815,7 @@ export interface paths {
         get: operations["rewardRule"];
         /**
          * Hədiyyə qaydasının dəyişdirilməsi
-         * @description Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.
+         * @description Yeni versiya yaradılır; verilmiş hədiyyə kartları öz adını saxlayır. Möhür həddi dəyişəndə standart olaraq (existingCards = KEEP_RULE) yarımçıq kartlar köhnə qayda ilə bitir, yeni qayda növbəti kartdan başlayır. APPLY_NOW — kimliyin təsdiqi (step-up) tələb olunur; yeni qayda hamıya dərhal tətbiq olunur və kartında yeni həddən çox və ya bərabər möhür olan müştərilərə hədiyyə kartı verilir.
          */
         put: operations["updateRewardRule"];
         post?: never;
@@ -871,7 +895,7 @@ export interface paths {
         };
         /**
          * Son təhvillər
-         * @description Filialda son 24 saatda təhvil verilmiş hədiyyə kartları.
+         * @description Filialda istifadə olunmuş son 5 hədiyyə kartı (ən yenisi birinci).
          */
         get: operations["recent"];
         put?: never;
@@ -2151,6 +2175,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/company/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin loqosu (PNG)
+         * @description Ünvan versiyalıdır (`logoUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Loqo yoxdursa 404.
+         */
+        get: operations["logo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/icons/{name}.png": {
         parameters: {
             query?: never;
@@ -2861,6 +2905,8 @@ export interface components {
             /** @description Şirkətin standart dili: az, en və ya ru */
             defaultLanguage?: string;
             description?: components["schemas"]["LocalizedText"];
+            /** @description Loqonun ünvanı (versiyalı); yüklənməyibsə null — standart ikon göstərilir */
+            logoUrl?: string;
             name?: components["schemas"]["LocalizedText"];
             /** @description Aktiv mükafat qaydası; təyin olunmayıbsa null */
             rewardRule?: components["schemas"]["RewardRuleResponse"];
@@ -4199,6 +4245,49 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["Company"];
                 };
+            };
+        };
+    };
+    uploadLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    removeLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5910,6 +5999,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicCompanyResponse"];
+                };
+            };
+        };
+    };
+    logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
                 };
             };
         };

@@ -1,14 +1,18 @@
 package az.tapstamp.company.api;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import az.tapstamp.company.service.CompanyAdminService;
 import az.tapstamp.company.service.CompanyAdminService.BranchPolicy;
 import az.tapstamp.company.service.CompanyAdminService.BranchView;
 import az.tapstamp.company.service.CompanyAdminService.Company;
+import az.tapstamp.company.service.CompanyAdminService;
+import az.tapstamp.company.service.CompanyLogoService;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.error.ApiException;
+import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +25,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,8 +36,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /** Şirkətin məzmunu və filiallar — yalnız sahib. */
 @RestController
@@ -42,9 +49,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCompanyController {
 
     private final CompanyAdminService company;
+    private final CompanyLogoService logo;
 
-    public AdminCompanyController(CompanyAdminService company) {
+    public AdminCompanyController(CompanyAdminService company, CompanyLogoService logo) {
         this.company = company;
+        this.logo = logo;
     }
 
     @Schema(description = "Şirkətin məzmunu: ad və təsvir 3 dildə (az məcburi)")
@@ -86,6 +95,25 @@ public class AdminCompanyController {
     Company updateCompany(@AuthenticationPrincipal AdminPrincipal principal, @Valid @RequestBody CompanyRequest request) {
         return company.updateCompany(principal, new Company(request.name(), request.description(), request.timezone(),
                 request.defaultLanguage(), request.brandColor(), request.smsSenderName()));
+    }
+
+    @PutMapping(path = "/company/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Loqonun yüklənməsi", description = """
+            Müştəri tətbiqinin başlığında göstərilir. Kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel,             256 KB-a qədər; PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.""")
+    void uploadLogo(@AuthenticationPrincipal AdminPrincipal principal, @RequestParam("file") MultipartFile file)
+            throws IOException {
+        if (file.getSize() > CompanyLogoService.MAX_BYTES) {
+            throw new ApiException(ErrorCode.LOGO_INVALID);
+        }
+        logo.upload(principal, file.getBytes());
+    }
+
+    @DeleteMapping("/company/logo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Loqonun silinməsi", description = "Müştəri tətbiqində standart ikon göstərilir.")
+    void removeLogo(@AuthenticationPrincipal AdminPrincipal principal) {
+        logo.remove(principal);
     }
 
     @GetMapping("/branches")

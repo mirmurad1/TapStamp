@@ -19,7 +19,9 @@ public class CompanyQueryService {
     public PublicCompanyResponse publicCompany() {
         var profile = companies.findCompany().orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         return new PublicCompanyResponse(profile.name(), profile.description(), profile.timezone(),
-                profile.defaultLanguage(), profile.brandColor(), companies.activeBranches(),
+                profile.defaultLanguage(), profile.brandColor(),
+                companies.findLogoVersion().map(version -> "/api/v1/public/company/logo?v=" + version).orElse(null),
+                companies.activeBranches(),
                 companies.activeRewardRule().orElse(null), companies.companyStampRules().orElse(null));
     }
 }

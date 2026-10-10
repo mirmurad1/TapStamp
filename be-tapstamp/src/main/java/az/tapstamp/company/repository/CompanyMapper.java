@@ -12,6 +12,7 @@ import az.tapstamp.company.service.CompanyAdminService.BranchPolicy;
 import az.tapstamp.company.service.CompanyAdminService.Company;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.persistence.TenantMapper;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Şirkətin profili ({@code company_profile}, tək sətir), filiallar və filial üzrə möhür qaydası.
@@ -37,6 +38,20 @@ public interface CompanyMapper {
     Optional<Company> findCompany();
 
     void updateCompany(Company company, Instant now);
+
+    // --- Loqo ---
+
+    /** PNG baytları və versiya (ictimai ünvanda {@code ?v=}). */
+    record Logo(byte[] png, int version) {
+    }
+
+    Optional<Logo> findLogo();
+
+    /** Loqo yoxdursa boş. */
+    Optional<Integer> findLogoVersion();
+
+    /** {@code png} — null: loqo silinir. */
+    void updateLogo(byte @Nullable [] png, Instant now);
 
     // --- İctimai məlumat (müştəri tətbiqi) ---
 

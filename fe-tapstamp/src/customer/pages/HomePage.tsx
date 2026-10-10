@@ -13,8 +13,8 @@ import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
 import { StampCard } from '../components/StampCard';
-import { SwitchNumber } from '../components/SwitchNumber';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
+import { InstallCard } from '../pwa/InstallCard';
 
 /** Ana səhifə: daxil olmuş müştəri üçün möhür kartı, qonaq üçün kafe haqqında qısa məlumat və giriş düyməsi. */
 export function HomePage() {
@@ -58,7 +58,6 @@ function Profile({ me }: { me: Me }) {
           rewardName={resolveText(card.rewardName, lang)}
         />
       ) : null}
-      <SwitchNumber />
       {card?.pendingStamps ? (
         <p className="flex items-center gap-2 rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
           <Hourglass className="size-5 shrink-0 text-[var(--highlight-ink)]" aria-hidden="true" />
@@ -83,6 +82,7 @@ function Profile({ me }: { me: Me }) {
           <ChevronRight className="size-6 shrink-0" aria-label={t('rewards.open')} />
         </Link>
       ) : null}
+      <InstallCard />
     </>
   );
 }

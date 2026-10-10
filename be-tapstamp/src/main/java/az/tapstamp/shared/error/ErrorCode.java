@@ -20,6 +20,8 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED),
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     PAYLOAD_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE),
+    /** Loqo faylı tələblərə uyğun deyil (növ, həcm, ölçü). */
+    LOGO_INVALID(HttpStatus.BAD_REQUEST),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
     /** Sessiyanın vaxtı bitib (fəaliyyətsizlik və ya mütləq limit) — yenidən daxil olmaq lazımdır. */
     SESSION_EXPIRED(HttpStatus.UNAUTHORIZED),

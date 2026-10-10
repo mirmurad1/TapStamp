@@ -8,6 +8,7 @@
   "METHOD_NOT_ALLOWED": "Bu əməliyyat dəstəklənmir.",
   "UNSUPPORTED_MEDIA_TYPE": "Bu format dəstəklənmir.",
   "PAYLOAD_TOO_LARGE": "Göndərilən məlumat çox böyükdür.",
+  "LOGO_INVALID": "Loqo uyğun deyil: kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel, 256 KB-a qədər olmalıdır.",
   "RATE_LIMITED": "Çox sayda cəhd oldu. Bir azdan yenidən yoxlayın.",
   "TENANT_UNAVAILABLE": "Xidmət hazırda əlçatmazdır. Bir az sonra yenidən cəhd edin.",
   "INTERNAL_ERROR": "Nəsə alınmadı. Bir azdan yenidən cəhd edin.",

@@ -1453,6 +1453,46 @@
         "tags" : [ "Admin: parametrlər" ]
       }
     },
+    "/api/v1/admin/settings/company/logo" : {
+      "delete" : {
+        "description" : "Müştəri tətbiqində standart ikon göstərilir.",
+        "operationId" : "removeLogo",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Loqonun silinməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      },
+      "put" : {
+        "description" : "Müştəri tətbiqinin başlığında göstərilir. Kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel,             256 KB-a qədər; PNG kimi saxlanılır. Uyğun deyilsə `LOGO_INVALID`.",
+        "operationId" : "uploadLogo",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Loqonun yüklənməsi",
+        "tags" : [ "Admin: parametrlər" ]
+      }
+    },
     "/api/v1/admin/settings/reward-rule" : {
       "get" : {
         "operationId" : "rewardRule",
@@ -3545,6 +3585,27 @@
         "tags" : [ "Kafe" ]
       }
     },
+    "/api/v1/public/company/logo" : {
+      "get" : {
+        "description" : "Ünvan versiyalıdır (`logoUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Loqo yoxdursa 404.",
+        "operationId" : "logo",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin loqosu (PNG)",
+        "tags" : [ "Kafe" ]
+      }
+    },
     "/api/v1/public/icons/{name}.png" : {
       "get" : {
         "description" : "180, 192, 512 və ya maskable-512 (Android adaptiv ikon).",
@@ -5185,6 +5246,10 @@
           },
           "description" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "logoUrl" : {
+            "type" : "string",
+            "description" : "Loqonun ünvanı (versiyalı); yüklənməyibsə null — standart ikon göstərilir"
           },
           "name" : {
             "$ref" : "#/components/schemas/LocalizedText"

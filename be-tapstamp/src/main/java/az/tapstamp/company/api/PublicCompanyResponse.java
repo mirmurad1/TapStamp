@@ -17,6 +17,8 @@ public record PublicCompanyResponse(
         @Schema(description = "IANA saat qurşağı, məs. Asia/Baku") String timezone,
         @Schema(description = "Şirkətin standart dili: az, en və ya ru") String defaultLanguage,
         @Schema(description = "Brend rəngi (#RRGGBB): müştəri tətbiqinin əsas rəngi") String brandColor,
+        @Schema(description = "Loqonun ünvanı (versiyalı); yüklənməyibsə null — standart ikon göstərilir")
+        String logoUrl,
         List<BranchResponse> branches,
         @Schema(description = "Aktiv mükafat qaydası; təyin olunmayıbsa null") RewardRuleResponse rewardRule,
         @Schema(description = "Şirkətin möhür qaydası (istifadə şərtlərində göstərilir)") StampRulesResponse stampRules) {

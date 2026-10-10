@@ -24,7 +24,8 @@ spring:
   servlet:
     encoding:
       charset: UTF-8
-      force: true
+      # Yalnız sorğular: cavablarda məcburi charset şəkillərə də (image/png) əlavə olunardı; JSON onsuz da UTF-8-dir
+      force-request: true
   flyway:
     # Miqrasiyalar DatabaseMigrator ilə idarə olunur (platforma + hər tenant bazası)
     enabled: false

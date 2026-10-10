@@ -376,6 +376,13 @@ export interface Localized {
 export const companyApi = {
   get: () => unwrap(api.GET('/api/v1/admin/settings/company')),
   update: (body: Schemas['CompanyRequest']) => unwrap(api.PUT('/api/v1/admin/settings/company', { body })),
+  /** Loqo multipart ilə göndərilir (fayl brauzerdə ölçü və növ üzrə əvvəlcədən yoxlanılır). */
+  uploadLogo: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return unwrap(api.PUT('/api/v1/admin/settings/company/logo', { body: { file: '' }, bodySerializer: () => form }));
+  },
+  removeLogo: () => unwrap(api.DELETE('/api/v1/admin/settings/company/logo')),
   branches: () => unwrap(api.GET('/api/v1/admin/settings/branches')),
   createBranch: (body: Schemas['BranchRequest']) => unwrap(api.POST('/api/v1/admin/settings/branches', { body })),
   updateBranch: (branchId: string, body: Schemas['BranchRequest']) =>

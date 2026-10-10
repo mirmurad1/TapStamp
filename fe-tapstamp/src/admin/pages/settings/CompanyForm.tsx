@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { Building, ImageUp, Stamp, Trash2 } from 'lucide-react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 
-import { companyApi, type CompanyContent, type Localized } from '../../api/adminApi';
+import { companyApi, contextApi, type CompanyContent, type Localized } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { toLocalized } from '../../lib/localized';
@@ -72,9 +72,98 @@ export function CompanyCard() {
       <CardContent>
         <ApiErrorAlert error={company.error} />
         {company.isPending ? <InlineLoading /> : null}
+        {company.data ? <LogoField /> : null}
         {company.data ? <CompanyForm initial={company.data} /> : null}
       </CardContent>
     </Card>
+  );
+}
+
+/** Tələblər backend-dəki CompanyLogoService ilə eynidir (server də yoxlayır). */
+const LOGO_MAX_BYTES = 256 * 1024;
+const LOGO_MIN_SIZE = 192;
+const LOGO_MAX_SIZE = 1024;
+
+async function logoFits(file: File): Promise<boolean> {
+  if (file.size > LOGO_MAX_BYTES || !['image/png', 'image/jpeg'].includes(file.type)) {
+    return false;
+  }
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    bitmap.close();
+    return width === height && width >= LOGO_MIN_SIZE && width <= LOGO_MAX_SIZE;
+  } catch {
+    return false;
+  }
+}
+
+/** Müştəri tətbiqinin başlığındakı loqo: önizləmə, yükləmə və silmə; tələblər altda yazılır. */
+function LogoField() {
+  const { t } = useTranslation('admin');
+  const queryClient = useQueryClient();
+  const input = useRef<HTMLInputElement>(null);
+  const [invalid, setInvalid] = useState(false);
+  const publicCompany = useQuery({ queryKey: ['public-company'], queryFn: contextApi.company });
+  const logoUrl = publicCompany.data?.logoUrl;
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['public-company'] });
+  const upload = useMutation({ mutationFn: companyApi.uploadLogo, onSuccess: refresh });
+  const remove = useMutation({ mutationFn: companyApi.removeLogo, onSuccess: refresh });
+  const busy = upload.isPending || remove.isPending;
+
+  const choose = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) {
+      return;
+    }
+    remove.reset();
+    const fits = await logoFits(file);
+    setInvalid(!fits);
+    if (fits) {
+      upload.mutate(file);
+    }
+  };
+  const removeLogo = () => {
+    upload.reset();
+    setInvalid(false);
+    remove.mutate();
+  };
+
+  return (
+    <section className="mb-6 flex flex-col gap-3 border-b border-border pb-6" aria-labelledby="company-logo-title">
+      <h3 id="company-logo-title" className="text-sm font-medium">
+        {t('settings.company.logo.title')}
+      </h3>
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground">
+          {logoUrl ? (
+            <img src={logoUrl} alt={t('settings.company.logo.current')} className="size-full object-cover" />
+          ) : (
+            <Stamp className="size-7" aria-label={t('settings.company.logo.defaultIcon')} />
+          )}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          <input ref={input} type="file" accept="image/png,image/jpeg" className="hidden" onChange={(event) => void choose(event)} />
+          <Button type="button" variant="outline" disabled={busy} onClick={() => input.current?.click()}>
+            <ImageUp aria-hidden="true" />
+            {logoUrl ? t('settings.company.logo.replace') : t('settings.company.logo.upload')}
+          </Button>
+          {logoUrl ? (
+            <Button type="button" variant="ghost" disabled={busy} onClick={removeLogo}>
+              <Trash2 aria-hidden="true" />
+              {t('settings.company.logo.remove')}
+            </Button>
+          ) : null}
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground">{t('settings.company.logo.hint')}</p>
+      <p className="text-sm font-medium">{t('settings.company.logo.requirements')}</p>
+      {invalid ? <Alert tone="error">{t('settings.company.logo.invalid')}</Alert> : null}
+      {upload.isSuccess ? <Alert tone="success">{t('settings.company.logo.uploaded')}</Alert> : null}
+      {remove.isSuccess ? <Alert tone="success">{t('settings.company.logo.removed')}</Alert> : null}
+      <ApiErrorAlert error={upload.error ?? remove.error} />
+    </section>
   );
 }
 

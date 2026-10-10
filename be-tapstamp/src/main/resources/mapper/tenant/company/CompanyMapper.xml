@@ -27,6 +27,22 @@
         WHERE singleton
     </update>
 
+    <!-- Loqo -->
+
+    <select id="findLogo" resultType="az.tapstamp.company.repository.CompanyMapper$Logo">
+        SELECT logo AS png, logo_version AS version FROM company_profile WHERE singleton AND logo IS NOT NULL
+    </select>
+
+    <select id="findLogoVersion" resultType="java.lang.Integer">
+        SELECT logo_version FROM company_profile WHERE singleton AND logo IS NOT NULL
+    </select>
+
+    <update id="updateLogo">
+        UPDATE company_profile
+        SET logo = #{png,jdbcType=BINARY}, logo_version = logo_version + 1, updated_at = #{now}, version = version + 1
+        WHERE singleton
+    </update>
+
     <!-- İctimai məlumat -->
 
     <select id="activeBranches" resultType="az.tapstamp.company.api.PublicCompanyResponse$BranchResponse">

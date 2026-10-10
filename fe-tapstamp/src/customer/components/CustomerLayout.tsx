@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Gift, Settings, Sparkles } from 'lucide-react';
+import { Gift, Settings, Stamp } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from 'react-router';
@@ -45,13 +45,12 @@ export function CustomerLayout() {
           className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={t('profile:nav.home')}
         >
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-            {companyName ? (
-              <span className="text-lg font-bold" aria-hidden="true">
-                {companyName.charAt(0).toLocaleUpperCase()}
-              </span>
+          {/* Şirkət loqosu yükləyibsə onun şəkli, əks halda standart möhür ikonu */}
+          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground">
+            {company.data?.logoUrl ? (
+              <img src={company.data.logoUrl} alt="" className="size-full object-cover" />
             ) : (
-              <Sparkles className="size-5" aria-hidden="true" />
+              <Stamp className="size-5" aria-hidden="true" />
             )}
           </span>
           {companyName ? <span className="line-clamp-2 break-words font-display leading-tight font-bold">{companyName}</span> : null}

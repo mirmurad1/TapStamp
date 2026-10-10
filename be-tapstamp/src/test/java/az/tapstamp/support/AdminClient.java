@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.json.JsonMapper;
@@ -120,7 +121,7 @@ public final class AdminClient {
     }
 
     /** Tam yol ilə sorğu (məs. başqa modulun endpoint-i). */
-    public ResultActions perform(MockHttpServletRequestBuilder builder) throws Exception {
+    public ResultActions perform(AbstractMockHttpServletRequestBuilder<?> builder) throws Exception {
         if (csrf == null) {
             csrf = obtainCsrf();
         }

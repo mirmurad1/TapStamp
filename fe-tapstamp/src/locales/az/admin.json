@@ -382,7 +382,20 @@
       "brandColor": "Brend rəngi",
       "brandColorHint": "Müştəri tətbiqinin əsas rəngi və möhür ikonları.",
       "smsSender": "SMS göndərən adı",
-      "smsSenderHint": "Latın hərfləri və rəqəmlər, 11 simvola qədər. Provayderdə qeydiyyatdan keçməlidir."
+      "smsSenderHint": "Latın hərfləri və rəqəmlər, 11 simvola qədər. Provayderdə qeydiyyatdan keçməlidir.",
+      "logo": {
+        "title": "Loqo",
+        "hint": "Müştəri tətbiqinin yuxarısında, şirkətin adının yanında göstərilir. Yüklənməyibsə standart ikon görünür.",
+        "requirements": "Tələblər: kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel (tövsiyə olunur: 512×512), həcmi 256 KB-a qədər.",
+        "upload": "Loqo yüklə",
+        "replace": "Loqonu dəyiş",
+        "remove": "Loqonu sil",
+        "uploaded": "Loqo yeniləndi.",
+        "removed": "Loqo silindi, standart ikon göstərilir.",
+        "current": "Cari loqo",
+        "defaultIcon": "Standart ikon",
+        "invalid": "Fayl tələblərə uyğun deyil: kvadrat PNG və ya JPEG, 192×192 – 1024×1024 piksel, 256 KB-a qədər."
+      }
     },
     "branches": {
       "title": "Filiallar",

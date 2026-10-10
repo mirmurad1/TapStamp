@@ -382,7 +382,20 @@
       "brandColor": "Brand colour",
       "brandColorHint": "Main colour of the customer app and stamp icons.",
       "smsSender": "SMS sender name",
-      "smsSenderHint": "Latin letters and digits, up to 11 characters. Must be registered with the provider."
+      "smsSenderHint": "Latin letters and digits, up to 11 characters. Must be registered with the provider.",
+      "logo": {
+        "title": "Logo",
+        "hint": "Shown at the top of the customer app, next to the company name. If none is uploaded, a default icon is shown.",
+        "requirements": "Requirements: square PNG or JPEG, 192×192 – 1024×1024 pixels (recommended: 512×512), up to 256 KB.",
+        "upload": "Upload logo",
+        "replace": "Change logo",
+        "remove": "Remove logo",
+        "uploaded": "Logo updated.",
+        "removed": "Logo removed; the default icon is shown.",
+        "current": "Current logo",
+        "defaultIcon": "Default icon",
+        "invalid": "The file does not meet the requirements: square PNG or JPEG, 192×192 – 1024×1024 pixels, up to 256 KB."
+      }
     },
     "branches": {
       "title": "Branches",
