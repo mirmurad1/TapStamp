@@ -209,6 +209,16 @@ cd /opt/tapstamp && git pull && ./scripts/deploy.sh --build
 Backup → yeni versiya köhnənin yanında qalxır → sağlamdırsa nginx keçir → köhnə yumşaq dayanır. Sorğular itmir. Uğursuzdursa, köhnə versiya işləməyə davam edir. (Adi `docker compose up` 20–40 saniyəlik 502 verir — yalnız ilk quraşdırmada.)
 
 ### Loglar
+Ən asan yol — `scripts/logs.sh` (oxunaqlı format üçün bir dəfə `apt install -y jq`):
+```
+cd /opt/tapstamp
+./scripts/logs.sh                  # backend, canlı (Ctrl+C — çıxış)
+./scripts/logs.sh nginx            # başqa servis: frontend, nginx, postgres, certbot
+./scripts/logs.sh --errors         # son 24 saatın xəta və xəbərdarlıqları
+./scripts/logs.sh --trace <traceId>
+./scripts/logs.sh --status         # konteynerlərin vəziyyəti
+```
+Eyni şey docker compose ilə:
 ```
 alias dc='docker compose -f docker-compose.yml -f docker-compose.prod.yml'
 dc logs -f backend                 # canlı
