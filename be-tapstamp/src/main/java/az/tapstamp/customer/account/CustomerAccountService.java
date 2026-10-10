@@ -14,10 +14,14 @@ import az.tapstamp.customer.consent.LegalDocumentService;
 import az.tapstamp.customer.repository.CustomerAccountMapper;
 import az.tapstamp.customer.repository.CustomerMapper;
 import az.tapstamp.customer.repository.OtpChallengeMapper;
+import az.tapstamp.security.crypto.Aad;
+import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.tenancy.TenantContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,7 +41,7 @@ public class CustomerAccountService {
     public record AvailableReward(UUID id, LocalizedText name, Instant earnedAt) {
     }
 
-    public record Profile(UUID id, String name, String phoneMasked, Language language, Instant registeredAt, Card card,
+    public record Profile(UUID id, String name, String phone, Language language, Instant registeredAt, Card card,
                           List<AvailableReward> availableRewards, List<LegalDocumentService.DocumentRef> pendingConsents) {
     }
 
@@ -47,12 +51,14 @@ public class CustomerAccountService {
     private final OtpChallengeMapper challenges;
     private final LegalDocumentService legal;
     private final AuditLogger audit;
+    private final EnvelopeCipher cipher;
     private final TransactionTemplate tx;
     private final Clock clock;
 
     public CustomerAccountService(CustomerAccountMapper accounts, CustomerMapper customers,
                                   CustomerSessionService sessions, OtpChallengeMapper challenges,
                                   LegalDocumentService legal, AuditLogger audit,
+                                  @Qualifier("tenantCipher") EnvelopeCipher cipher,
                                   PlatformTransactionManager transactionManager, Clock clock) {
         this.accounts = accounts;
         this.customers = customers;
@@ -60,6 +66,7 @@ public class CustomerAccountService {
         this.challenges = challenges;
         this.legal = legal;
         this.audit = audit;
+        this.cipher = cipher;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
     }
@@ -74,7 +81,10 @@ public class CustomerAccountService {
         List<LegalDocumentService.DocumentRef> pending = legal.pendingFor(customer.id()).stream()
                 .map(document -> new LegalDocumentService.DocumentRef(document.type(), document.version()))
                 .toList();
-        return new Profile(customer.id(), customer.name(), customer.phoneMasked(), customer.language(),
+        // Müştəri öz nömrəsini tam görür (parametrlər ekranı)
+        String phone = cipher.decryptString(customer.phoneEnc(),
+                Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customer.id()));
+        return new Profile(customer.id(), customer.name(), phone, customer.language(),
                 customer.registeredAt(), card, rewards, pending);
     }
 

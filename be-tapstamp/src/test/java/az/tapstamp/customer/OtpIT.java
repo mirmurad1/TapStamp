@@ -103,7 +103,7 @@ class OtpIT extends CustomerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Aysel"))
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
-                .andExpect(jsonPath("$.phoneMasked").value("+994 55 ***-**-" + phone.substring(11)))
+                .andExpect(jsonPath("$.phone").value(phone))
                 .andExpect(jsonPath("$.card.currentStamps").value(0))
                 .andExpect(jsonPath("$.card.stampsRequired").value(9))
                 .andExpect(jsonPath("$.pendingConsents.length()").value(0));

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router';
 
 import { currentLanguage } from '@/shared/i18n/setup';
-import { formatRelative } from '@/shared/lib/format';
+import { formatPhone, formatRelative } from '@/shared/lib/format';
 import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -67,7 +67,7 @@ export function SettingsPage() {
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm text-muted-foreground">{t('settings.phone')}</span>
             <span className="font-medium" dir="ltr">
-              {me.phoneMasked}
+              {formatPhone(me.phone)}
             </span>
           </div>
           <div className="flex flex-col gap-2">

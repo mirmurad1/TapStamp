@@ -2470,7 +2470,7 @@ export interface components {
             scope?: "TENANT" | "PLATFORM" | "NONE";
             tenant?: components["schemas"]["Tenant"];
         };
-        /** @description Müştərinin profili. Telefon yalnız maskalı göstərilir. */
+        /** @description Müştərinin profili (telefon — müştərinin öz nömrəsi, tam). */
         CustomerMeResponse: {
             availableRewards?: components["schemas"]["RewardResponse"][];
             card?: components["schemas"]["CardResponse"];
@@ -2479,7 +2479,7 @@ export interface components {
             name?: string;
             /** @description Razılıq verilməli sənədlər (yeni versiya dərc olunubsa) */
             pendingConsents?: components["schemas"]["PendingConsentResponse"][];
-            phoneMasked?: string;
+            phone?: string;
             preferredLanguage?: string;
             /** Format: date-time */
             registeredAt?: string;

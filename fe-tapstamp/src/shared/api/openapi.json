@@ -4170,7 +4170,7 @@
       },
       "CustomerMeResponse" : {
         "type" : "object",
-        "description" : "Müştərinin profili. Telefon yalnız maskalı göstərilir.",
+        "description" : "Müştərinin profili (telefon — müştərinin öz nömrəsi, tam).",
         "properties" : {
           "availableRewards" : {
             "type" : "array",
@@ -4195,7 +4195,7 @@
               "$ref" : "#/components/schemas/PendingConsentResponse"
             }
           },
-          "phoneMasked" : {
+          "phone" : {
             "type" : "string"
           },
           "preferredLanguage" : {

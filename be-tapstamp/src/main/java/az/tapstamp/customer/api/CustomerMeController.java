@@ -60,8 +60,8 @@ public class CustomerMeController {
     public record PendingConsentResponse(DocumentType type, int version) {
     }
 
-    @Schema(description = "Müştərinin profili. Telefon yalnız maskalı göstərilir.")
-    public record CustomerMeResponse(UUID id, String name, String phoneMasked, String preferredLanguage, Instant registeredAt,
+    @Schema(description = "Müştərinin profili (telefon — müştərinin öz nömrəsi, tam).")
+    public record CustomerMeResponse(UUID id, String name, String phone, String preferredLanguage, Instant registeredAt,
                              CardResponse card, List<RewardResponse> availableRewards,
                              @Schema(description = "Razılıq verilməli sənədlər (yeni versiya dərc olunubsa)")
                              List<PendingConsentResponse> pendingConsents) {
@@ -83,7 +83,7 @@ public class CustomerMeController {
     CustomerMeResponse me(@AuthenticationPrincipal CustomerPrincipal principal) {
         CustomerAccountService.Profile profile = accounts.profile(principal);
         CustomerAccountService.Card card = profile.card();
-        return new CustomerMeResponse(profile.id(), profile.name(), profile.phoneMasked(), profile.language().tag(),
+        return new CustomerMeResponse(profile.id(), profile.name(), profile.phone(), profile.language().tag(),
                 profile.registeredAt(),
                 card == null ? null : new CardResponse(card.currentStamps(), card.totalStamps(), card.stampsRequired(),
                         card.rewardName(), card.rewardDescription(), card.pendingStamps(), card.nextStampAt()),

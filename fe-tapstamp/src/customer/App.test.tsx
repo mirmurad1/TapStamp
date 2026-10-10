@@ -67,7 +67,7 @@ describe('müştəri tətbiqi', () => {
           signedIn = true;
           return json({ status: 'AUTHENTICATED' }, 201);
         case 'GET /api/v1/me':
-          return json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', phoneMasked: '+994 50 ***-**-67',
+          return json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', phone: '+994501234567',
             card: { currentStamps: 3, stampsRequired: 9, rewardName: { az: 'Hədiyyə qəhvə' } },
             availableRewards: [], pendingConsents: [] });
         default:
@@ -136,7 +136,7 @@ describe('müştəri tətbiqi', () => {
           return json({ state: signedIn ? 'ACTIVE' : 'NONE' });
         case 'GET /api/v1/me':
           return signedIn
-            ? json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', phoneMasked: '+994 50 ***-**-67',
+            ? json({ id: 'u1', name: 'Aysel', preferredLanguage: 'az', phone: '+994501234567',
               card: { currentStamps: 3, stampsRequired: 9 }, availableRewards: [], pendingConsents: [] })
             : json({ code: 'UNAUTHENTICATED' }, 401);
         case 'GET /api/v1/me/sessions':

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCurrency, formatDate, formatDateTime, formatRelative, formatTime } from './format';
+import { formatCurrency, formatDate, formatDateTime, formatPhone, formatRelative, formatTime } from './format';
 
 // Intl çıxışında adi boşluq əvəzinə NBSP və ya dar NBSP ola bilər — müqayisə üçün normallaşdırırıq
 const normalize = (value: string) => value.replace(/[\u00a0\u202f]/g, ' ');
@@ -37,5 +37,11 @@ describe('lokallaşdırılmış formatlar', () => {
   it('valyuta AZN ilə', () => {
     expect(normalize(formatCurrency(4.5, 'az'))).toMatch(/4,50.*₼|₼.*4,50/);
     expect(normalize(formatCurrency(4.5, 'en'))).toContain('4.50');
+  });
+
+  it('telefon nömrəsi qruplarla (Azərbaycan), digərləri olduğu kimi', () => {
+    expect(formatPhone('+994501234567')).toBe('+994 50 123 45 67');
+    expect(formatPhone('+905321234567')).toBe('+905321234567');
+    expect(formatPhone(undefined)).toBe('');
   });
 });

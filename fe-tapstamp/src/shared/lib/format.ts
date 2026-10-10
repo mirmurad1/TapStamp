@@ -126,3 +126,9 @@ export function formatCurrency(value: number, lang: Language, currency = 'AZN'):
 export function formatPercent(value: number, lang: Language, maximumFractionDigits = 1): string {
   return new Intl.NumberFormat(lang, { style: 'percent', maximumFractionDigits }).format(value);
 }
+
+/** Telefon nömrəsi (E.164) oxunaqlı qruplarla: +994501234567 → "+994 50 123 45 67"; digər ölkələr olduğu kimi. */
+export function formatPhone(e164: string | undefined): string {
+  const az = /^\+994(\d{2})(\d{3})(\d{2})(\d{2})$/.exec(e164 ?? '');
+  return az ? `+994 ${az[1]} ${az[2]} ${az[3]} ${az[4]}` : (e164 ?? '');
+}
