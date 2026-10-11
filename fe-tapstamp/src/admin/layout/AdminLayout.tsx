@@ -6,6 +6,7 @@ import { NavLink, Outlet } from 'react-router';
 
 import type { Language } from '@/shared/i18n/languages';
 import { cn } from '@/shared/lib/cn';
+import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
 import { accountApi, simulatorApi } from '../api/adminApi';
@@ -85,6 +86,7 @@ export function AdminLayout() {
           <main className="flex-1 px-4 py-6 md:px-8">
             <Outlet />
           </main>
+          <Footer className="border-t border-border" />
         </div>
       </div>
     </StepUpProvider>

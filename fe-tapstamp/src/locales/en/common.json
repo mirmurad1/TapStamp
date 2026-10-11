@@ -49,5 +49,8 @@
   },
   "confirm": {
     "title": "Please confirm"
+  },
+  "footer": {
+    "copyright": "© 2026 Trend Solutions. All rights reserved."
   }
 }

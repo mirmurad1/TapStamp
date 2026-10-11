@@ -53,5 +53,8 @@
   },
   "confirm": {
     "title": "Подтвердите действие"
+  },
+  "footer": {
+    "copyright": "© 2026 Trend Solutions. Все права защищены."
   }
 }

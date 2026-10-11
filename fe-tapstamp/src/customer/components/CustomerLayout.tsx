@@ -9,6 +9,7 @@ import { currentLanguage } from '@/shared/i18n/setup';
 import { applyBrandColor } from '@/shared/lib/brand';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
+import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
 import { publicApi } from '../api/customerApi';
@@ -78,6 +79,7 @@ export function CustomerLayout() {
         {accountDeleted ? <Alert tone="success">{t('profile:settings.delete.done')}</Alert> : null}
         {consentGate ? <ConsentPage pending={pendingConsents} /> : <Outlet />}
       </main>
+      <Footer className="pt-6" />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Outlet } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
+import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
 import { contextApi } from '../api/adminApi';
@@ -41,6 +42,7 @@ export function AuthLayout() {
           <Outlet />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
