@@ -33,7 +33,6 @@ import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.web.ClientInfo;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
-import az.tapstamp.tenancy.registry.TenantDirectory;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,6 @@ public class OtpService {
     private final EnvelopeCipher cipher;
     private final RateLimiter rateLimiter;
     private final CompanySettings companySettings;
-    private final TenantDirectory directory;
     private final SmsProvider sms;
     private final SmsTemplates templates;
     private final TaskExecutor executor;
@@ -99,7 +97,7 @@ public class OtpService {
     public OtpService(OtpChallengeMapper challenges, TapTokenMapper tapTokens, OtpCodes codes, CustomerMapper customers,
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
                       @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
-                      CompanySettings companySettings, TenantDirectory directory, SmsProvider sms,
+                      CompanySettings companySettings, SmsProvider sms,
                       SmsTemplates templates, @Qualifier("applicationTaskExecutor") TaskExecutor executor, AuditLogger audit,
                       CustomerAuthProperties properties, PlatformTransactionManager transactionManager, Clock clock) {
         this.challenges = challenges;
@@ -111,7 +109,6 @@ public class OtpService {
         this.cipher = cipher;
         this.rateLimiter = rateLimiter;
         this.companySettings = companySettings;
-        this.directory = directory;
         this.sms = sms;
         this.templates = templates;
         this.executor = executor;
@@ -203,10 +200,11 @@ public class OtpService {
         });
 
         // SMS yalnız commit-dən sonra və arxa planda: cavab vaxtı provayderin sürətindən asılı deyil
-        String companyName = settings.smsSenderName() != null ? settings.smsSenderName() : settings.name().resolve(language);
-        String host = directory.primaryHost(tenant.id()).orElse(null);
-        SmsMessage message = new SmsMessage(phone, templates.otp(language, companyName, code, host),
-                settings.smsSenderName(), tenant.id().toString());
+        // Mətndəki ad: şirkətin "SMS-də görünən adı", yoxdursa şirkətin adı; mətn dildən asılı deyil ("<ad> OTP: <kod>"),
+        // göndərən adı (alfa-ad) isə bütün şirkətlər üçün birdir
+        String companyName = settings.smsSenderName() != null ? settings.smsSenderName()
+                : settings.name().resolve(Language.DEFAULT);
+        SmsMessage message = new SmsMessage(phone, templates.otp(companyName, code), tenant.id().toString());
         executor.execute(() -> {
             try {
                 sms.send(message);

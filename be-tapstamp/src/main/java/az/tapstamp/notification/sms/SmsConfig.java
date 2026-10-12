@@ -38,6 +38,7 @@ public class SmsConfig {
         return new HttpSmsProvider(
                 environment.getRequiredProperty("app.notifications.sms-http.url"),
                 environment.getRequiredProperty("app.notifications.sms-http.api-key"),
+                environment.getProperty("app.notifications.sms-sender", ""),
                 environment.getProperty("app.notifications.sms-http.timeout", Duration.class, Duration.ofSeconds(10)),
                 clock);
     }

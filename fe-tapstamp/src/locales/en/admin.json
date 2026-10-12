@@ -381,8 +381,8 @@
       "defaultLanguage": "Default language",
       "brandColor": "Brand colour",
       "brandColorHint": "Main colour of the customer app and stamp icons.",
-      "smsSender": "SMS sender name",
-      "smsSenderHint": "Latin letters and digits, up to 11 characters. Must be registered with the provider.",
+      "smsSender": "Name shown in SMS",
+      "smsSenderHint": "Used instead of the company name in the code message, e.g. \"HezzPoint code: 123456\". Latin letters and digits, up to 11 characters. If empty, the company name is used. The sender name is TrendStamp for all companies.",
       "logo": {
         "title": "Logo",
         "hint": "Shown at the top of the customer app, next to the company name. If none is uploaded, a default icon is shown.",

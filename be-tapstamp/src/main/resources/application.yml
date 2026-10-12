@@ -99,6 +99,8 @@ app:
     sms-provider: ${APP_SMS_PROVIDER:console}
     mail-provider: ${APP_MAIL_PROVIDER:console}
     mail-from: ${APP_MAIL_FROM:}
+    # SMS göndərən adı (alfa-ad): bütün şirkətlər üçün bir; şirkətin adı mesajın mətnində olur
+    sms-sender: ${APP_SMS_SENDER:TrendStamp}
     # Yalnız APP_SMS_PROVIDER=http olanda: real SMS provayderinin ünvanı və açarı
     sms-http:
       url: ${APP_SMS_HTTP_URL:}

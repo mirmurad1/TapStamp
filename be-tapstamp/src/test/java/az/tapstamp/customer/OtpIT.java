@@ -60,11 +60,12 @@ class OtpIT extends CustomerIntegrationTest {
     }
 
     @Test
-    void codeIsNeverStoredInPlainTextAndSmsIsInTheRequestedLanguage() throws Exception {
+    void codeIsNeverStoredInPlainTextAndSmsIsLanguageIndependent() throws Exception {
         String phone = uniquePhone();
         String[] challenge = requestCode(client(), phone, "ru");
         SmsMessage message = sms.to(phone).getFirst();
-        assertThat(message.text()).startsWith("Код Alpha Kafe RU: " + challenge[1]);
+        // Müştəri rus dilini seçsə də, mətn eynidir: "<şirkətin adı> OTP: <kod>"
+        assertThat(message.text()).isEqualTo("Alpha Kafe OTP: " + challenge[1]);
         assertThat(SmsSegments.analyze(message.text()).segments()).isEqualTo(1);
 
         UUID id = UUID.fromString(challenge[0]);

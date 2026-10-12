@@ -39,15 +39,18 @@ public class HttpSmsProvider implements SmsProvider {
 
     private final URI endpoint;
     private final String apiKey;
+    private final String sender;
     private final Duration timeout;
     private final HttpClient client;
     private final Clock clock;
     private final AtomicInteger consecutiveFailures = new AtomicInteger();
     private final AtomicReference<Instant> openUntil = new AtomicReference<>(Instant.EPOCH);
 
-    public HttpSmsProvider(String endpoint, String apiKey, Duration timeout, Clock clock) {
+    /** @param sender operatorlarda qeydiyyatdan keçmiş göndərən adı (bütün şirkətlər üçün bir); boşdursa göndərilmir */
+    public HttpSmsProvider(String endpoint, String apiKey, String sender, Duration timeout, Clock clock) {
         this.endpoint = URI.create(endpoint);
         this.apiKey = apiKey;
+        this.sender = sender == null || sender.isBlank() ? null : sender.strip();
         this.timeout = timeout;
         this.clock = clock;
         this.client = HttpClient.newBuilder().connectTimeout(timeout).build();
@@ -79,8 +82,8 @@ public class HttpSmsProvider implements SmsProvider {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("to", message.to());
         body.put("text", message.text());
-        if (message.sender() != null) {
-            body.put("sender", message.sender());
+        if (sender != null) {
+            body.put("sender", sender);
         }
         HttpRequest request = HttpRequest.newBuilder(endpoint)
                 .timeout(timeout)

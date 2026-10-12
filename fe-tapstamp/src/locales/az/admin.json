@@ -381,8 +381,8 @@
       "defaultLanguage": "Standart dil",
       "brandColor": "Brend rəngi",
       "brandColorHint": "Müştəri tətbiqinin əsas rəngi və möhür ikonları.",
-      "smsSender": "SMS göndərən adı",
-      "smsSenderHint": "Latın hərfləri və rəqəmlər, 11 simvola qədər. Provayderdə qeydiyyatdan keçməlidir.",
+      "smsSender": "SMS-də görünən ad",
+      "smsSenderHint": "Kod mesajında şirkətin adı əvəzinə yazılır, məs. \"HezzPoint kodu: 123456\". Latın hərfləri və rəqəmlər, 11 simvola qədər. Boş qalsa, şirkətin adı yazılır. Göndərən adı bütün şirkətlər üçün TrendStamp-dır.",
       "logo": {
         "title": "Loqo",
         "hint": "Müştəri tətbiqinin yuxarısında, şirkətin adının yanında göstərilir. Yüklənməyibsə standart ikon görünür.",

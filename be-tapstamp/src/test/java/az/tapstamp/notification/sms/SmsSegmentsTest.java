@@ -6,10 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import az.tapstamp.notification.sms.SmsSegments.Encoding;
-import az.tapstamp.shared.i18n.Language;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
@@ -60,37 +57,21 @@ class SmsSegmentsTest {
         assertThat(SmsSegments.analyze("€".repeat(81)).segments()).isEqualTo(2);
     }
 
-    @ParameterizedTest
-    @EnumSource(Language.class)
-    void otpMessageFitsOneSegmentEvenWithTheLongestCompanyName(Language language) {
+    @Test
+    void otpMessageFitsOneSegmentEvenWithTheLongestCompanyName() {
         SmsTemplates templates = new SmsTemplates(messages());
         for (String name : new String[] {LONG_AZ, LONG_EN, LONG_RU, "Mock Coffee House", "Demo Çay Evi", ""}) {
-            String text = templates.otp(language, name, "123456", "bonus.mockcoffee.az");
-            assertThat(SmsSegments.analyze(text).segments()).as(language + ": " + text).isEqualTo(1);
-            assertThat(text).contains("123456");
+            String text = templates.otp(name, "123456");
+            assertThat(SmsSegments.analyze(text).segments()).as(text).isEqualTo(1);
+            assertThat(text).endsWith("OTP: 123456");
         }
     }
 
     @Test
-    void messagesAreInTheCustomersLanguageAndIncludeTheCompanyName() {
+    void otpMessageIsTheSameForAllLanguages() {
         SmsTemplates templates = new SmsTemplates(messages());
-        assertThat(templates.otp(Language.AZ, "Mock Coffee House", "123456", null))
-                .isEqualTo("Mock Coffee House kodu: 123456. Heç kimə deməyin.");
-        assertThat(templates.otp(Language.EN, "Mock Coffee House", "123456", null))
-                .isEqualTo("Mock Coffee House code: 123456. Do not share it.");
-        assertThat(templates.otp(Language.RU, "Mock Coffee House", "123456", null))
-                .isEqualTo("Код Mock Coffee House: 123456. Никому не сообщайте.");
-    }
-
-    @Test
-    void webOtpLineIsAddedOnlyWhenItFits() {
-        SmsTemplates templates = new SmsTemplates(messages());
-        // en (GSM-7, 160 simvol) — yer var
-        assertThat(templates.otp(Language.EN, "Mock Coffee", "654321", "bonus.mockcoffee.az"))
-                .endsWith("\n\n@bonus.mockcoffee.az #654321");
-        // az (UCS-2, 70 simvol) — uzun domenlə yer qalmır, sətir əlavə olunmur
-        String az = templates.otp(Language.AZ, "Mock Coffee House", "654321", "bonus.mockcoffee-international.az");
-        assertThat(az).doesNotContain("#654321\n").doesNotContain("@bonus");
+        assertThat(templates.otp("HezzPoint", "123456")).isEqualTo("HezzPoint OTP: 123456");
+        assertThat(templates.otp(null, "123456")).isEqualTo("OTP: 123456");
     }
 
     private static ResourceBundleMessageSource messages() {

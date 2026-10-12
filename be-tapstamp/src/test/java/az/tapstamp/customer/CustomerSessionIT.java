@@ -206,7 +206,8 @@ class CustomerSessionIT extends CustomerIntegrationTest {
         client.patch("/api/v1/me", Map.of("preferredLanguage", "ru")).andExpect(jsonPath("$.preferredLanguage").value("ru"));
         client.delete("/api/v1/me").andExpect(jsonPath("$.title").value("Требуется подтверждение"));
         client.post("/api/v1/auth/step-up/otp/request").andExpect(status().isAccepted());
-        assertThat(sms.await(phone, 2).text()).startsWith("Код ");
+        // SMS mətni dildən asılı deyil: "<şirkət> OTP: <kod>"
+        assertThat(sms.await(phone, 2).text()).matches(".+ OTP: \\d{6}");
         client.patch("/api/v1/me", Map.of("name", "")).andExpect(jsonPath("$.name").isEmpty());
     }
 

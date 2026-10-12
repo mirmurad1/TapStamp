@@ -14,7 +14,8 @@ public class CompanySettings {
     /**
      * @param name                  şirkətin adı (3 dildə) — SMS mətnində istifadə olunur
      * @param allowedPhoneRegions   qəbul olunan nömrələrin ölkələri (ISO 3166, məs. AZ)
-     * @param smsSenderName         SMS göndərən adı (provayderdə qeydiyyatdan keçmiş; yoxdursa provayderin standart adı)
+     * @param smsSenderName         SMS mətnində şirkətin adı əvəzinə yazılan qısa ad (yoxdursa şirkətin adı); göndərən adı
+     *                              (alfa-ad) isə bütün şirkətlər üçün birdir — {@code app.notifications.sms-sender}
      * @param timezone              şirkətin saat qurşağı ("gün" — gündəlik möhür limiti, iş saatları)
      * @param brandColor            brend rəngi (#RRGGBB)
      */
