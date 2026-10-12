@@ -92,7 +92,7 @@
     "account": "Account",
     "phone": "Phone",
     "language": "Language",
-    "languageHint": "Text messages will also be sent in this language.",
+    "languageHint": "The app will be shown in this language.",
     "devices": {
       "title": "My devices",
       "subtitle": "Devices signed in to your account. Sign out of any device you don't recognise.",

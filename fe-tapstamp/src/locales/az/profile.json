@@ -92,7 +92,7 @@
     "account": "Hesab",
     "phone": "Telefon",
     "language": "Dil",
-    "languageHint": "SMS-lər də bu dildə göndəriləcək.",
+    "languageHint": "Tətbiq bu dildə göstəriləcək.",
     "devices": {
       "title": "Cihazlarım",
       "subtitle": "Hesabınıza daxil olmuş cihazlar. Tanımadığınız cihazdan çıxış edin.",

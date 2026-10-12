@@ -382,7 +382,7 @@
       "brandColor": "Brend rəngi",
       "brandColorHint": "Müştəri tətbiqinin əsas rəngi və möhür ikonları.",
       "smsSender": "SMS-də görünən ad",
-      "smsSenderHint": "Kod mesajında şirkətin adı əvəzinə yazılır, məs. \"HezzPoint kodu: 123456\". Latın hərfləri və rəqəmlər, 11 simvola qədər. Boş qalsa, şirkətin adı yazılır. Göndərən adı bütün şirkətlər üçün TrendStamp-dır.",
+      "smsSenderHint": "Məcburidir. Müştəriyə gedən kod mesajında bu ad yazılır. Latın hərfləri və rəqəmlər, 11 simvola qədər. Göndərən adı bütün şirkətlər üçün TrendStamp-dır.",
       "logo": {
         "title": "Loqo",
         "hint": "Müştəri tətbiqinin yuxarısında, şirkətin adının yanında göstərilir. Yüklənməyibsə standart ikon görünür.",
@@ -395,7 +395,8 @@
         "current": "Cari loqo",
         "defaultIcon": "Standart ikon",
         "invalid": "Fayl tələblərə uyğun deyil: PNG və ya JPEG, 1 MB-a qədər, qısa tərəfi ən az 192 piksel."
-      }
+      },
+      "smsPreview": "SMS bu formada göndəriləcək:"
     },
     "branches": {
       "title": "Filiallar",

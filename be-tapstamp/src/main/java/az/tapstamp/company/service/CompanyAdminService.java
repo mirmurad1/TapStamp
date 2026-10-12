@@ -74,14 +74,13 @@ public class CompanyAdminService {
         }
         if (!List.of("az", "en", "ru").contains(company.defaultLanguage())
                 || company.brandColor() == null || !company.brandColor().matches("^#[0-9A-Fa-f]{6}$")
-                || (company.smsSenderName() != null && !company.smsSenderName().isBlank()
-                    && !company.smsSenderName().matches("^[A-Za-z0-9 ]{1,11}$"))) {
+                || company.smsSenderName() == null
+                || !company.smsSenderName().strip().matches("^[A-Za-z0-9 ]{1,11}$")) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         companies.updateCompany(new Company(trim(company.name()), trim(company.description()), company.timezone(),
                 company.defaultLanguage(), company.brandColor().toUpperCase(java.util.Locale.ROOT),
-                company.smsSenderName() == null || company.smsSenderName().isBlank()
-                        ? null : company.smsSenderName().strip()), clock.instant());
+                company.smsSenderName().strip()), clock.instant());
         audit.tenant("COMPANY_PROFILE_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "company", null,
                 Map.of("timezone", company.timezone(), "defaultLanguage", company.defaultLanguage(),
                         "brandColor", company.brandColor()));

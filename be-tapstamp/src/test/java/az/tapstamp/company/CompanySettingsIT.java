@@ -32,6 +32,9 @@ class CompanySettingsIT extends TapIntegrationTest {
         original.put("timezone", json(before, "$.timezone"));
         original.put("defaultLanguage", json(before, "$.defaultLanguage"));
         original.put("brandColor", json(before, "$.brandColor"));
+        // SMS-də görünən ad məcburidir: əvvəl təyin olunmayıbsa, bərpada da bir ad yazılır
+        String smsName = json(before, "$.smsSenderName");
+        original.put("smsSenderName", smsName == null ? "BetaKafe" : smsName);
         try {
             owner.put("/settings/company", Map.of(
                             "name", Map.of("az", " Moyka Plus ", "en", "Moyka Plus", "ru", "Мойка Плюс"),
@@ -55,6 +58,11 @@ class CompanySettingsIT extends TapIntegrationTest {
                     "defaultLanguage", "az", "brandColor", "red")).andExpect(status().isBadRequest());
             owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
                     "defaultLanguage", "az", "brandColor", "#000000", "smsSenderName", "Ad-Soyad")).andExpect(status().isBadRequest());
+            // SMS-də görünən ad məcburidir
+            owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
+                    "defaultLanguage", "az", "brandColor", "#000000")).andExpect(status().isBadRequest());
+            owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
+                    "defaultLanguage", "az", "brandColor", "#000000", "smsSenderName", "  ")).andExpect(status().isBadRequest());
         } finally {
             owner.put("/settings/company", original).andExpect(status().isOk());
         }

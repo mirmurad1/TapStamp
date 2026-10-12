@@ -382,7 +382,7 @@
       "brandColor": "Brand colour",
       "brandColorHint": "Main colour of the customer app and stamp icons.",
       "smsSender": "Name shown in SMS",
-      "smsSenderHint": "Used instead of the company name in the code message, e.g. \"HezzPoint code: 123456\". Latin letters and digits, up to 11 characters. If empty, the company name is used. The sender name is TrendStamp for all companies.",
+      "smsSenderHint": "Required. This name appears in the code message sent to customers. Latin letters and digits, up to 11 characters. The sender name is TrendStamp for all companies.",
       "logo": {
         "title": "Logo",
         "hint": "Shown at the top of the customer app, next to the company name. If none is uploaded, a default icon is shown.",
@@ -395,7 +395,8 @@
         "current": "Current logo",
         "defaultIcon": "Default icon",
         "invalid": "The file does not meet the requirements: PNG or JPEG, up to 1 MB, shorter side at least 192 pixels."
-      }
+      },
+      "smsPreview": "The SMS will be sent like this:"
     },
     "branches": {
       "title": "Branches",

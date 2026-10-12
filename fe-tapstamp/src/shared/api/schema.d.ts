@@ -2458,8 +2458,8 @@ export interface components {
             defaultLanguage: string;
             description?: components["schemas"]["LocalizedText"];
             name: components["schemas"]["LocalizedText"];
-            /** @description SMS göndərən adı (latın hərfləri, rəqəm, boşluq; 11 simvola qədər) */
-            smsSenderName?: string;
+            /** @description SMS-də görünən ad (məcburi): "<ad> OTP: <kod>"; latın hərfləri, rəqəm, boşluq, 11 simvola qədər */
+            smsSenderName: string;
             timezone: string;
         };
         ConsentRequest: {

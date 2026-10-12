@@ -63,8 +63,8 @@ public class AdminCompanyController {
             @NotBlank @Size(max = 64) String timezone,
             @NotNull @Pattern(regexp = "az|en|ru") String defaultLanguage,
             @NotNull @Pattern(regexp = "^#[0-9A-Fa-f]{6}$") String brandColor,
-            @Schema(description = "SMS göndərən adı (latın hərfləri, rəqəm, boşluq; 11 simvola qədər)") @Size(max = 11)
-            String smsSenderName) {
+            @Schema(description = "SMS-də görünən ad (məcburi): \"<ad> OTP: <kod>\"; latın hərfləri, rəqəm, boşluq, 11 simvola qədər")
+            @NotBlank @Size(max = 11) String smsSenderName) {
     }
 
     @Schema(description = "İş saatları: {\"mon\": [[\"08:00\",\"22:00\"]], …}; günlər mon…sun")

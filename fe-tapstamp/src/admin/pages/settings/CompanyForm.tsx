@@ -190,7 +190,7 @@ function CompanyForm({ initial }: { initial: CompanyContent }) {
         timezone,
         defaultLanguage,
         brandColor,
-        smsSenderName: smsSender.trim() || undefined,
+        smsSenderName: smsSender.trim(),
       }),
     onSuccess: (updated) => {
       queryClient.setQueryData(COMPANY_KEY, updated);
@@ -245,11 +245,17 @@ function CompanyForm({ initial }: { initial: CompanyContent }) {
             <code className="text-sm uppercase">{brandColor}</code>
           </div>
         </Field>
-        <Field id="company-sms" label={t('admin:settings.company.smsSender')} hint={t('admin:settings.company.smsSenderHint')}>
-          <Input value={smsSender} maxLength={11} onChange={(event) => setSmsSender(event.target.value)} />
-        </Field>
+        <div className="flex flex-col gap-2">
+          <Field id="company-sms" label={t('admin:settings.company.smsSender')} hint={t('admin:settings.company.smsSenderHint')}>
+            <Input value={smsSender} maxLength={11} required onChange={(event) => setSmsSender(event.target.value)} />
+          </Field>
+          <p className="text-sm">
+            {t('admin:settings.company.smsPreview')}{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5">{`${smsSender.trim() || '…'} OTP: 123456`}</code>
+          </p>
+        </div>
       </div>
-      <Button type="submit" className="self-start" disabled={save.isPending || !name.az.trim()}>
+      <Button type="submit" className="self-start" disabled={save.isPending || !name.az.trim() || !smsSender.trim()}>
         {t('common:actions.save')}
       </Button>
     </form>

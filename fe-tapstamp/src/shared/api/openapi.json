@@ -4130,7 +4130,7 @@
           },
           "smsSenderName" : {
             "type" : "string",
-            "description" : "SMS göndərən adı (latın hərfləri, rəqəm, boşluq; 11 simvola qədər)",
+            "description" : "SMS-də görünən ad (məcburi): \"<ad> OTP: <kod>\"; latın hərfləri, rəqəm, boşluq, 11 simvola qədər",
             "maxLength" : 11,
             "minLength" : 0
           },
@@ -4140,7 +4140,7 @@
             "minLength" : 0
           }
         },
-        "required" : [ "brandColor", "defaultLanguage", "name", "timezone" ]
+        "required" : [ "brandColor", "defaultLanguage", "name", "smsSenderName", "timezone" ]
       },
       "ConsentRequest" : {
         "type" : "object",
