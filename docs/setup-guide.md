@@ -173,7 +173,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f backend
 
 ### 3.8. Platforma admini
 ```
-PLATFORM_ADMIN_PASSWORD='Güclü-Şifrə-2026!' docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm backend --spring.main.web-application-type=none --create-platform-admin=admin@tapstamp.az --display-name="Ad Soyad"
+PLATFORM_ADMIN_PASSWORD='Güclü-Şifrə-2026!' docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm -e PLATFORM_ADMIN_PASSWORD backend --spring.main.web-application-type=none --create-platform-admin=admin@tapstamp.az --display-name="Ad Soyad"
 ```
 10–60 dəqiqə sonra **https://platform.tapstamp.az/admin** açılır. Daxil olun və **Hesabım → İki addımlı yoxlama**-da 2FA qurun (prod-da hesablar 2FA-sız yaranır; 2FA könüllüdür, amma platforma admini üçün mütləq tövsiyə olunur).
 

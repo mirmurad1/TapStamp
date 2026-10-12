@@ -81,7 +81,7 @@ Səbəb loglarda yazılır.
 ```bash
 # Platforma admini (şifrə yalnız mühit dəyişənindən oxunur)
 PLATFORM_ADMIN_PASSWORD='<ən azı 12 simvol>' docker compose -f docker-compose.yml -f docker-compose.prod.yml \
-  run --rm backend --spring.main.web-application-type=none \
+  run --rm -e PLATFORM_ADMIN_PASSWORD backend --spring.main.web-application-type=none \
   --create-platform-admin=admin@sizinbrend.az --display-name="Ad Soyad"
 ```
 
