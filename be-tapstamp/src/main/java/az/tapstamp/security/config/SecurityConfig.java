@@ -89,7 +89,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
-                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                        // Daxili certbot hesabatı: brauzerdən gəlmir, sirr token ilə qorunur (nginx xaricə açmır)
+                        .ignoringRequestMatchers("/internal/tls/status"))
                 .addFilterBefore(new OriginCheckFilter(problemHandlers), CsrfFilter.class)
                 .addFilterBefore(new AdminSessionFilter(realms, sessionCookies, authProperties, clock),
                         AnonymousAuthenticationFilter.class)
@@ -108,6 +110,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         // Daxili TLS domen siyahısı: nginx xaricə açmır, endpoint özü sirr token tələb edir
                         .requestMatchers(HttpMethod.GET, "/internal/tls/domains").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/internal/tls/status").permitAll()
                         .requestMatchers("/api/v1/csrf", "/api/v1/context", "/api/v1/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/manifest.webmanifest").permitAll()
                         // Admin girişi (işçi və platforma). Domen yoxlaması TenantResolutionFilter-dədir.

@@ -83,4 +83,9 @@
         WHERE t.status IN ('ACTIVE', 'SUSPENDED')
         ORDER BY d.hostname
     </select>
+
+    <update id="updateTlsStatus">
+        UPDATE tenant_domains SET tls_status = #{status}
+        WHERE hostname = #{hostname} AND tls_status &lt;&gt; #{status}
+    </update>
 </mapper>

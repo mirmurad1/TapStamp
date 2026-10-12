@@ -4,6 +4,7 @@
 #  * Sertifikatı olmayan domen üçün alınır, mövcudlar vaxtı yaxınlaşanda yenilənir (certbot renew).
 #  * Fayllar nginx-in oxuduğu yerə kopyalanır: /certs/<domen>/{fullchain,privkey}.pem; nginx onları
 #    müntəzəm "reload" ilə götürür (docker-compose.prod.yml).
+#  * Hər dövrün sonunda vəziyyət backend-ə göndərilir (ISSUED / FAILED) — platforma panelində görünür.
 # Domen DNS-də bu serverə yönəlməyibsə, certbot uğursuz olur və növbəti dövrdə yenidən cəhd edilir.
 set -u
 
@@ -23,9 +24,15 @@ while :; do
     fi
   done
   certbot renew --quiet || echo "certbot: yeniləmə xətası"
+  report=""
   for domain in $domains; do
     live="/etc/letsencrypt/live/${domain}"
-    if [ -f "${live}/fullchain.pem" ]; then
+    if [ ! -f "${live}/fullchain.pem" ]; then
+      report="${report}${domain} FAILED
+"
+    else
+      report="${report}${domain} ISSUED
+"
       mkdir -p "/certs/${domain}"
       cp -L "${live}/fullchain.pem" "/certs/${domain}/fullchain.pem.tmp" && mv "/certs/${domain}/fullchain.pem.tmp" "/certs/${domain}/fullchain.pem"
       cp -L "${live}/privkey.pem" "/certs/${domain}/privkey.pem.tmp" && mv "/certs/${domain}/privkey.pem.tmp" "/certs/${domain}/privkey.pem"
@@ -35,5 +42,10 @@ while :; do
       chmod 640 "/certs/${domain}/privkey.pem"
     fi
   done
+  # Vəziyyət platforma panelində göstərilir ("Sertifikat var" / "Sertifikat xətası")
+  if [ -n "$report" ]; then
+    wget -qO- --header "X-Internal-Token: ${APP_INTERNAL_TOKEN}" --header "Content-Type: text/plain" \
+      --post-data "$report" http://backend:8080/internal/tls/status >/dev/null || echo "certbot: vəziyyət göndərilmədi"
+  fi
   sleep "$INTERVAL"
 done

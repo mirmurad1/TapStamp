@@ -51,4 +51,7 @@ public interface TenantRegistryMapper {
 
     /** Sertifikat alınmalı domenlər: aktiv və dayandırılmış şirkətlərin bütün domenləri. */
     List<String> findCertificateHostnames();
+
+    /** Sertifikatın vəziyyəti (certbot-un hesabatı): {@code ISSUED} və ya {@code FAILED}; dəyişməyibsə yazılmır. */
+    void updateTlsStatus(String hostname, String status);
 }
