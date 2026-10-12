@@ -119,6 +119,8 @@ services:
     environment:
       # Prod-da: "max-age=63072000; includeSubDomains". Dev-də boşdur (HSTS bütün *.localhost ünvanlarına təsir edir)
       NGINX_HSTS_HEADER: ${NGINX_HSTS_HEADER:-}
+      # Platforma domenində müştəri tətbiqi açılmır (bax: infra/nginx/templates/app.conf.template)
+      APP_PLATFORM_DOMAIN: ${APP_PLATFORM_DOMAIN:-platform.localhost}
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/templates:/etc/nginx/templates:ro

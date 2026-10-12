@@ -12,6 +12,14 @@ upstream frontend {
     keepalive 16;
 }
 
+# Platforma domenində yalnız admin paneli var: müştəri tətbiqinin səhifələri /admin-ə yönləndirilir, onun servis
+# işçisi (sw.js) 404 qaytarır — əvvəllər quraşdırılmış servis işçisi brauzerdə özü silinir. Sıra vacibdir.
+map "$host$uri" $platform_customer_path {
+    default "";
+    "~^${APP_PLATFORM_DOMAIN}/sw\.js$" "gone";
+    "~^${APP_PLATFORM_DOMAIN}/(?!admin(/|$)|assets/|favicon\.svg$)" "admin";
+}
+
 # HTTP: yalnız ACME (Let's Encrypt) yoxlaması və HTTPS-ə yönləndirmə
 server {
     listen 80 default_server;
@@ -95,6 +103,12 @@ server {
     }
 
     location / {
+        if ($platform_customer_path = "gone") {
+            return 404;
+        }
+        if ($platform_customer_path = "admin") {
+            return 302 /admin;
+        }
         include /etc/nginx/snippets/security-headers.conf;
         add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
         proxy_pass http://frontend;
