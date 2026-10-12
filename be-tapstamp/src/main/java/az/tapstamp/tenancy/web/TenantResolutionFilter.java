@@ -19,6 +19,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -53,10 +54,12 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
 
     private final TenantDirectory directory;
     private final AppProperties properties;
-    private final HandlerExceptionResolver resolver;
+    /** Tənbəl: veb serversiz işə salmada (CLI əmrləri) MVC bean-ləri yoxdur. */
+    private final ObjectProvider<HandlerExceptionResolver> resolver;
 
     public TenantResolutionFilter(TenantDirectory directory, AppProperties properties,
-                                  @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+                                  @Qualifier("handlerExceptionResolver")
+                                  ObjectProvider<HandlerExceptionResolver> resolver) {
         this.directory = directory;
         this.properties = properties;
         this.resolver = resolver;
@@ -76,7 +79,7 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
         String host = normalize(request.getServerName());
         if (host.equals(properties.platformDomain().toLowerCase(Locale.ROOT))) {
             if (PLATFORM_PREFIXES.stream().noneMatch(path::startsWith)) {
-                resolver.resolveException(request, response, null, new ApiException(ErrorCode.NOT_FOUND));
+                reject(request, response, ErrorCode.NOT_FOUND);
                 return;
             }
             request.setAttribute(RequestScope.ATTRIBUTE, RequestScope.PLATFORM);
@@ -85,16 +88,16 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
         }
 
         if (path.startsWith(PLATFORM_API_PREFIX)) {
-            resolver.resolveException(request, response, null, new ApiException(ErrorCode.NOT_FOUND));
+            reject(request, response, ErrorCode.NOT_FOUND);
             return;
         }
         Optional<TenantInfo> tenant = VALID_HOST.matcher(host).matches() ? directory.findByHost(host) : Optional.empty();
         if (tenant.isEmpty()) {
-            resolver.resolveException(request, response, null, new ApiException(ErrorCode.NOT_FOUND));
+            reject(request, response, ErrorCode.NOT_FOUND);
             return;
         }
         if (tenant.get().status().outOfService()) {
-            resolver.resolveException(request, response, null, new ApiException(ErrorCode.TENANT_UNAVAILABLE));
+            reject(request, response, ErrorCode.TENANT_UNAVAILABLE);
             return;
         }
 
@@ -106,6 +109,10 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
         } finally {
             TenantContext.clear();
         }
+    }
+
+    private void reject(HttpServletRequest request, HttpServletResponse response, ErrorCode code) {
+        resolver.getObject().resolveException(request, response, null, new ApiException(code));
     }
 
     private static String normalize(String host) {
