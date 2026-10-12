@@ -230,6 +230,9 @@ dc ps                              # konteynerlərin vəziyyəti
 ```
 Loglar JSON formatındadır; OTP, token, şifrə və tam telefon nömrəsi yazılmır. Hər konteynerin logu ən çox 5 × 20 MB saxlanılır.
 
+### Bazaya giriş
+Baxmaq və lazım olanda dəyişiklik etmək (psql və ya DBeaver + SSH tuneli): [database-access.md](database-access.md).
+
 ### Portların yoxlanması
 ```
 ss -tlnp
