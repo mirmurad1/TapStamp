@@ -29,7 +29,10 @@ while :; do
       mkdir -p "/certs/${domain}"
       cp -L "${live}/fullchain.pem" "/certs/${domain}/fullchain.pem.tmp" && mv "/certs/${domain}/fullchain.pem.tmp" "/certs/${domain}/fullchain.pem"
       cp -L "${live}/privkey.pem" "/certs/${domain}/privkey.pem.tmp" && mv "/certs/${domain}/privkey.pem.tmp" "/certs/${domain}/privkey.pem"
-      chmod 600 "/certs/${domain}/privkey.pem"
+      # nginx sertifikatı hər bağlantıda ($ssl_server_name) worker prosesi ilə oxuyur — worker "nginx" istifadəçisidir
+      # (rəsmi image-də gid 101): açar yalnız root və nginx qrupu üçün oxunandır
+      chown 0:101 "/certs/${domain}/privkey.pem"
+      chmod 640 "/certs/${domain}/privkey.pem"
     fi
   done
   sleep "$INTERVAL"
