@@ -121,7 +121,8 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
                 : Map.of("Originator", originator, "Encoding", "LATIN");
         return JSON.writeValueAsString(Map.of(
                 "Text", message.text(),
-                "Purpose", "OTP",
+                // Provayderlə razılaşdırılıb: hesabımızda giriş kodları da INF (məlumat mesajı) növü ilə gedir
+                "Purpose", "INF",
                 "Options", options,
                 "Receivers", List.of(Map.of("Receiver", receiver(message.to())))));
     }

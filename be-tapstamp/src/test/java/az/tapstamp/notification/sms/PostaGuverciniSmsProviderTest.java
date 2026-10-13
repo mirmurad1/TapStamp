@@ -51,7 +51,7 @@ class PostaGuverciniSmsProviderTest {
         assertThat(request.headers().firstValue("Authorization")).hasValue("Bearer priv-1");
         JsonNode body = JsonMapper.builder().build().readTree(bodies.getFirst());
         assertThat(body.path("Text").asString()).isEqualTo("Kafe OTP: 123456");
-        assertThat(body.path("Purpose").asString()).isEqualTo("OTP");
+        assertThat(body.path("Purpose").asString()).isEqualTo("INF");
         assertThat(body.path("Options").path("Originator").asString()).isEqualTo("TrendStamp");
         assertThat(body.path("Receivers").get(0).path("Receiver").asString()).isEqualTo("994501234567");
     }
