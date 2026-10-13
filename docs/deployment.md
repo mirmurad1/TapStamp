@@ -54,7 +54,7 @@ nano .env
 | `APP_PLATFORM_DOMAIN` | `platform.sizinbrend.az` |
 | `APP_PROVISIONING_ENABLED` | **`true`** — platforma panelindən yeni şirkət yaratmaq üçün (domeni yazmaq kifayətdir: baza, miqrasiyalar, domen və HTTPS avtomatik). Standart `false`-dur |
 | `ACME_EMAIL` | sertifikat bildirişləri üçün email |
-| `APP_SMS_PROVIDER`, `APP_SMS_HTTP_URL`, `APP_SMS_HTTP_API_KEY` | `http` və provayderin məlumatları |
+| `APP_SMS_PROVIDER`, `APP_SMS_PG_URL`, `APP_SMS_PG_PUBLIC_KEY`, `APP_SMS_PG_PRIVATE_KEY` | `postaguvercini` və Poçt Göyərçininin API ünvanı (yolsuz), PublicKey, PrivateKey. Başlıq (`APP_SMS_SENDER`, standart `TrendStamp`) provayderdə qeydiyyatdan keçmiş olmalıdır. Ümumi JSON adapteri üçün: `http`, `APP_SMS_HTTP_URL`, `APP_SMS_HTTP_API_KEY` |
 | `APP_MAIL_PROVIDER`, `APP_MAIL_FROM`, `SMTP_*` | `smtp` və poçt serverinin məlumatları |
 | `APP_DEV_SIMULATOR_KEY`, `DEV_SEED_*` | boş saxlayın (prod-da istifadə olunmur) |
 

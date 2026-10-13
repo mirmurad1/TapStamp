@@ -106,6 +106,11 @@ app:
       url: ${APP_SMS_HTTP_URL:}
       api-key: ${APP_SMS_HTTP_API_KEY:}
       timeout: 10s
+    # Yalnız APP_SMS_PROVIDER=postaguvercini olanda: API ünvanı (yolsuz), PublicKey və PrivateKey
+    posta-guvercini:
+      url: ${APP_SMS_PG_URL:}
+      public-key: ${APP_SMS_PG_PUBLIC_KEY:}
+      private-key: ${APP_SMS_PG_PRIVATE_KEY:}
   customer-auth:
     otp-ttl: 5m
     otp-resend-cooldown: 60s

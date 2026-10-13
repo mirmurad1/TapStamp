@@ -85,6 +85,14 @@ public class ProdSafetyGuard implements BeanFactoryPostProcessor, EnvironmentAwa
                 }
             }
         }
+        if ("postaguvercini".equals(env.getProperty("app.notifications.sms-provider", "").trim().toLowerCase(Locale.ROOT))) {
+            for (String key : List.of("app.notifications.posta-guvercini.url",
+                    "app.notifications.posta-guvercini.public-key", "app.notifications.posta-guvercini.private-key")) {
+                if (env.getProperty(key, "").isBlank()) {
+                    violations.add(key + " təyin olunmayıb (Poçt Göyərçini SMS provayderi üçün məcburidir)");
+                }
+            }
+        }
 
         if (!env.getProperty("app.security.cookie-secure", Boolean.class, true)) {
             violations.add("app.security.cookie-secure söndürülüb");

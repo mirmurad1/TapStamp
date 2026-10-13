@@ -42,4 +42,17 @@ public class SmsConfig {
                 environment.getProperty("app.notifications.sms-http.timeout", Duration.class, Duration.ofSeconds(10)),
                 clock);
     }
+
+    /** Poçt Göyərçini (Figensoft) SMS API. */
+    @Bean
+    @ConditionalOnProperty(name = "app.notifications.sms-provider", havingValue = "postaguvercini")
+    SmsProvider postaGuverciniSmsProvider(Environment environment, Clock clock) {
+        return new PostaGuverciniSmsProvider(
+                environment.getRequiredProperty("app.notifications.posta-guvercini.url"),
+                environment.getRequiredProperty("app.notifications.posta-guvercini.public-key"),
+                environment.getRequiredProperty("app.notifications.posta-guvercini.private-key"),
+                environment.getProperty("app.notifications.sms-sender", ""),
+                environment.getProperty("app.notifications.sms-http.timeout", Duration.class, Duration.ofSeconds(10)),
+                clock);
+    }
 }

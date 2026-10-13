@@ -51,6 +51,17 @@ class ProdSafetyGuardTest {
     }
 
     @Test
+    void postaGuverciniRequiresUrlAndKeys() {
+        MockEnvironment env = safeProdEnvironment();
+        env.setProperty("app.notifications.sms-provider", "postaguvercini");
+        env.setProperty("app.notifications.posta-guvercini.url", "https://sms.provider.az");
+        env.setProperty("app.notifications.posta-guvercini.public-key", "Pk7pQ2mN9vR4tY8w");
+        assertThat(ProdSafetyGuard.checkEnvironment(env))
+                .anySatisfy(v -> assertThat(v).contains("posta-guvercini.private-key"))
+                .noneSatisfy(v -> assertThat(v).contains("posta-guvercini.url"));
+    }
+
+    @Test
     void httpSmsProviderRequiresEndpointAndKey() {
         MockEnvironment env = safeProdEnvironment();
         env.setProperty("app.notifications.sms-http.api-key", "");
