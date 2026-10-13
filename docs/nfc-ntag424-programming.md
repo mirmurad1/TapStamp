@@ -6,13 +6,16 @@ Bu təlimat admin panelindən alınan **provisioning paketi** (çipi proqramlaş
 
 - NTAG 424 DNA çipi: stiker və ya kart.
 - PC/SC NFC oxuyucusu, məsələn ACR1252U.
-- NXP **TagXplorer** proqramı (NXP saytından pulsuz).
+- **JDK 21** (Java) — repodakı proqramlaşdırma aləti [`tools/nfc/ProgramTag.java`](../tools/nfc/ProgramTag.java) bununla işləyir; başqa heç nə quraşdırmaq lazım deyil. (NXP-nin TagXplorer proqramı dayandırılıb.)
 - **Platforma admini** hesabı (Platforma → şirkət → **NFC çipləri**). Şirkət sahibi çipləri yalnız görür. Paketi yükləmək üçün kimlik yenidən təsdiqlənir (step-up): 2FA aktivdirsə kodla, deyilsə şifrə ilə.
 
 ## 1. Çipi qeydiyyatdan keçirin
 
 1. Admin panelində **NFC çipləri → Çip əlavə et** açın.
-2. Çipin UID-ini daxil edin. Bu, 7 baytdır və TagXplorer-də görünür.
+2. Çipin UID-ini daxil edin (7 bayt, 14 hex simvol). Oxumaq üçün çipi oxuyucuya qoyun və repo qovluğunda işlədin:
+   ```
+   java tools/nfc/ProgramTag.java --uid
+   ```
 3. Etiketi (məs. "Piştaxta 1") və filialı seçin.
 
 Server 3 təsadüfi AES-128 açarı yaradır və onları şifrəli saxlayır. Açarların statusu **PENDING**-dir:
@@ -29,7 +32,7 @@ Server 3 təsadüfi AES-128 açarı yaradır və onları şifrəli saxlayır. A�
 2. Kimliyinizi təsdiqləyin (kod və ya şifrə).
 3. Açılan pəncərədə URL, açarlar və ofsetlər göstərilir. **JSON yüklə** ilə faylı saxlayın.
 
-> **Diqqət:** Açarlar yalnız bir dəfə göstərilir. Paketin yüklənməsi audit jurnalına yazılır. Proqramlaşdırmadan sonra JSON faylını silin.
+> **Diqqət:** Açarlar yalnız bir dəfə göstərilir. Paketin yüklənməsi audit jurnalına yazılır. Proqramlaşdırmadan sonra JSON faylını silin (açarı gələcəkdə yeniləmək istəyirsinizsə, şifrəli yerdə saxlayın — bax: "Açarın yenilənməsi").
 
 Paketdəki sahələr:
 
@@ -44,20 +47,38 @@ Ofsetlər NDEF faylının əvvəlindən sayılır:
 - 5 bayt URI qeydinin başlığı (`D1 01 <len> 55 04`, `04` = `https://`);
 - `https://`-suz URL-də yerin indeksi.
 
-## 3. Çipi TagXplorer ilə proqramlaşdırın
+## 3. Çipi proqramlaşdırın
 
-1. Çipi oxuyucuya qoyun və **ISO 7816 / NTAG 424 DNA** bölməsində tətbiqi seçin (`D2760000850101`).
-2. Standart açarla (`00…00`) autentifikasiya edin.
-3. **NDEF faylına** (fayl 02) paketdəki `url`-i URI qeydi kimi yazın.
-4. **Change File Settings** (fayl 02) bölməsində SDM-i aktivləşdirin:
-   - *SDM enabled*, *UID mirroring*, *SDMReadCtr mirroring* — açıq;
-   - *SDMMetaRead* açarı → **K1** (açar nömrəsi 1);
-   - *SDMFileRead* açarı → **K2** (açar nömrəsi 2);
-   - *PICCDataOffset* → `piccDataOffset`;
-   - *SDMMACInputOffset* və *SDMMACOffset* → paketdəki dəyərlər;
-   - faylın oxunması hamıya açıq (free read), yazılması yalnız K0 ilə.
-5. **Change Key** ilə açarları dəyişin. Əvvəlcə K1 və K2, sonda **K0**.
-6. Çipi telefonla oxuyun. Link `picc` və `cmac` dəyərləri dolu halda açılmalıdır.
+Çipi oxuyucuya qoyun və işlədin:
+```
+java tools/nfc/ProgramTag.java paket.json
+```
+
+Alət ardıcıl olaraq:
+1. çipin UID-ini paketdəki ilə müqayisə edir (başqa çipə yazmağın qarşısını alır);
+2. tətbiqi (`D2760000850101`) seçir və zavod açarı (`00…00`) ilə autentifikasiya edir (AuthenticateEV2First);
+3. NDEF faylına (fayl 02) paketdəki `url`-i URI qeydi kimi yazır;
+4. SDM-i aktivləşdirir (ChangeFileSettings): UID və sayğac güzgüsü, PICCData **K1** ilə, CMAC **K2** ilə, ofsetlər paketdən; faylın oxunması hamıya açıq, yazılması və ayarların dəyişməsi yalnız **K0** ilə;
+5. açarları dəyişir: K1, K2, sonda **K0**;
+6. çipi açarsız (telefon kimi) oxuyur və linkdəki imzanı yeni açarlarla yoxlayır.
+
+Sonda `HAZIRDIR` görünməlidir. Sonra çipə telefonla toxunun — link `picc` və `cmac` dolu halda açılmalıdır.
+
+Xəta olarsa, alət səbəbi yazır və dayanır. Ən çox rast gəlinənlər:
+
+| Mesaj | Səbəb |
+|---|---|
+| `NFC oxuyucu tapılmadı` | oxuyucu qoşulmayıb və ya drayveri yoxdur |
+| `Bu çip paketdəki çip deyil` | oxuyucuda başqa çip var |
+| `Çipin açarı uyğun gəlmir` | çip artıq proqramlaşdırılıb — rotasiya kimi `--old` ilə köhnə paketi verin |
+| `SW=…` | çip əmri rədd etdi (məs. çip NTAG 424 DNA deyil) |
+
+Kriptoqrafiyanın düzgünlüyünü oxuyucusuz yoxlamaq olar (NXP AN12196 və RFC 4493 rəsmi test vektorları):
+```
+java tools/nfc/ProgramTag.java --self-test
+```
+
+Windows konsolunda Azərbaycan hərfləri `?` kimi görünürsə, əvvəlcə `chcp 65001` işlədin.
 
 ## 4. Aktivləşdirmə
 
@@ -69,7 +90,11 @@ Proqramlaşdırılmış çipə ilk toxunuş açarları **PENDING**-dən **ACTIVE
 
 1. Çipin kartında **Açarı yenilə** düyməsini basın. Yeni PENDING dəst yaranır.
 2. Yeni provisioning paketini yükləyin.
-3. Çipi **cari K0** ilə autentifikasiya edib K1, K2 və K0-ı yeni dəyərlərlə dəyişin.
+3. Çipi yeni və **köhnə** paketlə proqramlaşdırın (çipdəki cari açarlar köhnə paketdədir):
+   ```
+   java tools/nfc/ProgramTag.java yeni.json --old kohne.json
+   ```
+   NTAG 424 DNA-da K1 və K2-ni dəyişmək üçün onların köhnə dəyərləri lazımdır. Ona görə rotasiya planlaşdırırsınızsa, köhnə paketi silmək əvəzinə təhlükəsiz yerdə (şifrəli parol meneceri) saxlayın; köhnə paket yoxdursa, çipi rotasiya etmək mümkün deyil — onu deaktiv edib yeni çip qoyun.
 4. Yeni açarla ilk toxunuşda keçid avtomatik olur: köhnə dəst RETIRED olur.
 
 Keçidə qədər köhnə açar işləməyə davam edir — xidmət dayanmır.

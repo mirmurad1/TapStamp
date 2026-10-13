@@ -716,7 +716,7 @@ sequenceDiagram
 |---|---|
 | Qeydiyyat | OWNER UID-i, filialı və etiketi ("Piştaxta 1") daxil edir. Server 3 təsadüfi açar yaradır (PENDING) və şifrələnmiş saxlayır. |
 | Provisioning paketi | OWNER üçün, TOTP step-up ilə. **Yalnız bir dəfə** yüklənir (JSON: şirkətin domeni ilə URL şablonu, ofsetlər, K0/K1/K2, SDM parametrləri) və auditə yazılır. |
-| Proqramlaşdırma | NXP TagXplorer və PC/SC NFC oxuyucusu (məs. ACR1252U) ilə. Addım-addım təlimat `docs/nfc-ntag424-programming.md` faylında olacaq. |
+| Proqramlaşdırma | Repodakı `tools/nfc/ProgramTag.java` aləti (JDK 21, `javax.smartcardio`) və istənilən PC/SC NFC oxuyucusu (məs. ACR1252U) ilə; provisioning paketini birbaşa oxuyur. NXP TagXplorer dayandırıldığı üçün ondan imtina edildi. Təlimat: `docs/nfc-ntag424-programming.md`. |
 | Aktivləşdirmə | Proqramlaşdırılmış çipə ilk toxunuş PENDING açarla doğrulanır və açar ACTIVE olur. |
 | Açarın yenilənməsi | Yeni PENDING dəst yaradılır, çip cari K0 ilə yenidən proqramlaşdırılır, ilk uğurlu toxunuşda keçid avtomatik baş verir. Keçidə qədər köhnə açar işləyir, xidmət dayanmır. |
 | Deaktivasiya | Dərhal qüvvəyə minir: bütün toxunuşlar `TAG_DISABLED` alır. |

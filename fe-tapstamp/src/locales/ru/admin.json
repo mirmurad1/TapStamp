@@ -622,7 +622,7 @@
     },
     "package": {
       "title": "Пакет настройки: {{uid}} (v{{version}})",
-      "description": "Запрограммируйте метку этими данными с помощью NXP TagXplorer и NFC-ридера (см. docs/nfc-ntag424-programming.md).",
+      "description": "Скачайте JSON-файл и запрограммируйте метку NFC-ридером: java tools/nfc/ProgramTag.java package.json (см. docs/nfc-ntag424-programming.md).",
       "once": "Ключи показываются только сейчас и больше не будут показаны. Храните файл в надёжном месте и удалите его после программирования.",
       "download": "Скачать JSON"
     },
