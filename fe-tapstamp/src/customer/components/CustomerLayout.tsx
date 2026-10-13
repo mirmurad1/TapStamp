@@ -6,7 +6,7 @@ import { Link, Outlet, useLocation } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { applyBrandColor } from '@/shared/lib/brand';
+import { applyBrandColor, applyIconVersion } from '@/shared/lib/brand';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Footer } from '@/shared/ui/Footer';
@@ -29,6 +29,9 @@ export function CustomerLayout() {
   // Şirkətin brend rəngi tətbiqin əsas rəngi olur
   const brandColor = company.data?.brandColor;
   useEffect(() => applyBrandColor(brandColor), [brandColor]);
+  // Ana ekran ikonu (iPhone) rəng və ya loqo dəyişəndə yenisi ilə əvəz olunsun
+  const logoUrl = company.data?.logoUrl;
+  useEffect(() => applyIconVersion(brandColor, logoUrl), [brandColor, logoUrl]);
 
   useEffect(() => {
     document.title = companyName ? `${companyName} · ${t('common:app.loyaltyCard')}` : t('common:app.loyaltyCard');

@@ -1,6 +1,29 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyBrandColor, contrastRatio, formatCountdown, readableForeground } from './brand';
+import { applyBrandColor, applyIconVersion, contrastRatio, formatCountdown, readableForeground } from './brand';
+
+describe('ikon versiyası', () => {
+  const head = () => {
+    const el = document.createElement('head');
+    el.innerHTML =
+      '<link rel="icon" href="/api/v1/public/icons/192.png"><link rel="apple-touch-icon" href="/api/v1/public/icons/180.png">' +
+      '<link rel="manifest" href="/manifest.webmanifest">';
+    return el;
+  };
+  const hrefs = (el: HTMLElement) => [...el.querySelectorAll('link')].map((l) => l.getAttribute('href'));
+
+  it('rəng və loqo versiyası ikon ünvanlarına yazılır, manifestə toxunulmur', () => {
+    const el = head();
+    applyIconVersion('#7C3AED', '/api/v1/public/company/logo?v=3', el);
+    expect(hrefs(el)).toEqual([
+      '/api/v1/public/icons/192.png?v=7c3aed-l3',
+      '/api/v1/public/icons/180.png?v=7c3aed-l3',
+      '/manifest.webmanifest',
+    ]);
+    applyIconVersion('#7C3AED', undefined, el);
+    expect(hrefs(el)[1]).toBe('/api/v1/public/icons/180.png?v=7c3aed');
+  });
+});
 
 describe('brend rəngi', () => {
   it('kontrasta görə mətn rəngi seçir', () => {

@@ -69,6 +69,29 @@ export function applyBrandColor(hex: string | undefined, root: HTMLElement = doc
   root.style.setProperty('--brand-light-foreground', readableForeground(light));
 }
 
+/**
+ * index.html-dəki ikon ünvanlarına (iPhone-un ana ekran ikonu və brauzer tabı) versiya əlavə edir: rəng və ya loqo
+ * dəyişəndə ünvan dəyişir, telefon köhnə ikonu keşdən götürmür. Versiya serverin manifestdəki versiyası ilə eyni
+ * formadadır ("<rəng>" və ya "<rəng>-l<loqo versiyası>").
+ */
+export function applyIconVersion(
+  brandColor: string | undefined,
+  logoUrl: string | undefined,
+  head: HTMLElement = document.head,
+): void {
+  if (!brandColor || !HEX.test(brandColor)) {
+    return;
+  }
+  const logoVersion = logoUrl ? /[?&]v=([^&]+)/.exec(logoUrl)?.[1] : undefined;
+  const version = brandColor.slice(1).toLowerCase() + (logoVersion ? `-l${logoVersion}` : '');
+  head.querySelectorAll<HTMLLinkElement>('link[rel="apple-touch-icon"], link[rel="icon"]').forEach((link) => {
+    const path = link.getAttribute('href')?.split('?')[0];
+    if (path?.startsWith('/api/v1/public/icons/')) {
+      link.setAttribute('href', `${path}?v=${version}`);
+    }
+  });
+}
+
 /** Saniyəni geri sayım formatına çevirir: 75 → "1:15", 3725 → "1:02:05". */
 export function formatCountdown(totalSeconds: number): string {
   const seconds = Math.max(0, Math.ceil(totalSeconds));
