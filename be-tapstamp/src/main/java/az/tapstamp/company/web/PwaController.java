@@ -8,6 +8,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,6 +20,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import az.tapstamp.company.api.PublicCompanyResponse;
+import az.tapstamp.company.service.CompanyLogoService;
 import az.tapstamp.company.service.CompanyQueryService;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
@@ -40,7 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
  * (tenant) seçilir — {@code moyka.mockcoffe.com}-dan quraşdırılan tətbiq telefonda "Moyka" adı və öz rəngi ilə görünür.
  *
  * <p>İkonlar şrift tələb etmədən çəkilir (brend rəngində fon, ağ halqa və ulduz — möhür izi kimi), ona görə
- * minimal Docker image-də də işləyir. Şirkət və rəng üzrə yaddaşda keşlənir.
+ * minimal Docker image-də də işləyir. Şirkət loqo yükləyibsə, ikon loqodan hazırlanır (ana ekrana əlavə edəndə də
+ * loqo görünür). Şirkət, rəng və loqonun versiyası üzrə yaddaşda keşlənir.
  */
 @RestController
 @Tag(name = "İctimai: PWA")
@@ -51,10 +54,12 @@ public class PwaController {
     private static final CacheControl ICON_CACHE = CacheControl.maxAge(Duration.ofDays(1)).cachePublic();
 
     private final CompanyQueryService company;
+    private final CompanyLogoService logos;
     private final Cache<String, byte[]> icons = Caffeine.newBuilder().maximumSize(500).build();
 
-    public PwaController(CompanyQueryService company) {
+    public PwaController(CompanyQueryService company, CompanyLogoService logos) {
         this.company = company;
+        this.logos = logos;
     }
 
     @GetMapping(value = "/manifest.webmanifest", produces = "application/manifest+json")
@@ -64,7 +69,7 @@ public class PwaController {
         Language language = Language.fromTag(info.defaultLanguage()).orElse(Language.DEFAULT);
         String name = info.name().resolve(language);
         String color = info.brandColor();
-        String version = color.substring(1).toLowerCase(java.util.Locale.ROOT);
+        String version = iconVersion(info);
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("id", "/");
         manifest.put("name", name);
@@ -102,10 +107,57 @@ public class PwaController {
         if (!SIZES.contains(size)) {
             throw new ApiException(ErrorCode.NOT_FOUND);
         }
-        String color = company.publicCompany().brandColor();
-        String key = TenantContext.require().id() + ":" + color + ":" + name;
-        byte[] png = icons.get(key, k -> render(size, Color.decode(color), maskable));
+        PublicCompanyResponse info = company.publicCompany();
+        String key = TenantContext.require().id() + ":" + iconVersion(info) + ":" + name;
+        byte[] png = icons.get(key, k -> logos.logo()
+                .filter(logo -> info.logoUrl() != null)
+                .map(logo -> renderLogo(logo.png(), size, maskable))
+                .orElseGet(() -> render(size, Color.decode(info.brandColor()), maskable)));
         return ResponseEntity.ok().cacheControl(ICON_CACHE).contentType(MediaType.IMAGE_PNG).body(png);
+    }
+
+    /** İkonun versiyası: rəng və ya loqo dəyişəndə dəyişir (telefon və brauzer yeni ikonu yükləyir). */
+    private static String iconVersion(PublicCompanyResponse info) {
+        String version = info.brandColor().substring(1).toLowerCase(java.util.Locale.ROOT);
+        String logo = info.logoUrl();
+        return logo == null ? version : version + "-l" + logo.substring(logo.indexOf("?v=") + 3);
+    }
+
+    /**
+     * Loqodan ikon: adi variantda loqo bütün kvadratı tutur (künclər telefonun özü tərəfindən yuvarlaqlaşdırılır).
+     * Maskable variantda (Android adaptiv ikon) loqo təhlükəsiz zonaya (mərkəzi 80%) yerləşdirilir, ətrafı ağ olur.
+     * Şəffaf hissələr ağ fonda göstərilir (iPhone şəffaf ikonu qara edir).
+     */
+    static byte[] renderLogo(byte[] logoPng, int size, boolean maskable) {
+        BufferedImage logo;
+        try {
+            logo = ImageIO.read(new ByteArrayInputStream(logoPng));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, size, size);
+            int inner = maskable ? Math.round(size * 0.8f) : size;
+            int offset = (size - inner) / 2;
+            g.drawImage(logo, offset, offset, inner, inner, null);
+        } finally {
+            g.dispose();
+        }
+        return png(image);
+    }
+
+    private static byte[] png(BufferedImage image) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ImageIO.write(image, "png", out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static Map<String, String> icon(String src, String sizes, String purpose) {
@@ -151,11 +203,6 @@ public class PwaController {
         } finally {
             g.dispose();
         }
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            ImageIO.write(image, "png", out);
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return png(image);
     }
 }

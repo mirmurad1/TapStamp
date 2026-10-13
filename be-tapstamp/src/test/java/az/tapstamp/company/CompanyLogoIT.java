@@ -49,6 +49,11 @@ class CompanyLogoIT extends TapIntegrationTest {
             assertThat(stored.getWidth()).isEqualTo(512);
             assertThat(stored.getHeight()).isEqualTo(512);
 
+            // Ana ekran ikonu da loqodan hazırlanır (test loqosu qaradır; standart ikonun mərkəzi ağ ulduzdur)
+            on(host, "/manifest.webmanifest").andExpect(jsonPath("$.icons[0].src",
+                    org.hamcrest.Matchers.matchesPattern(".*\\?v=[0-9a-f]{6}-l\\d+$")));
+            assertThat(iconCenter(host)).isEqualTo(0x000000);
+
             // Uyğun olmayanlar: qısa tərəf çox kiçik, şəkil deyil
             upload(owner, image(400, 150, "png")).andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("LOGO_INVALID"));
@@ -57,9 +62,23 @@ class CompanyLogoIT extends TapIntegrationTest {
 
             owner.delete("/settings/company/logo").andExpect(status().isNoContent());
             publicCompany(host).andExpect(jsonPath("$.logoUrl").doesNotExist());
+            // Loqo silinəndə standart ikon qayıdır
+            assertThat(iconCenter(host)).isEqualTo(0xFFFFFF);
         } finally {
             owner.delete("/settings/company/logo");
         }
+    }
+
+    private ResultActions on(String host, String path) throws Exception {
+        return mvc.perform(get(path).with(r -> {
+            r.setServerName(host);
+            return r;
+        })).andExpect(status().isOk());
+    }
+
+    private int iconCenter(String host) throws Exception {
+        byte[] png = on(host, "/api/v1/public/icons/192.png").andReturn().getResponse().getContentAsByteArray();
+        return ImageIO.read(new ByteArrayInputStream(png)).getRGB(96, 96) & 0xFFFFFF;
     }
 
     private ResultActions upload(AdminClient owner, byte[] content) throws Exception {
