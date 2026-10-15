@@ -13,9 +13,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param otpMaxAttempts     bir kod üçün cəhd sayı (sonra kod LOCKED olur)
  * @param registrationTtl    yeni nömrə təsdiqlənəndən sonra qeydiyyatı tamamlamaq üçün vaxt
  * @param accessTtl          access tokenin ömrü
- * @param refreshTtl         refresh tokenin ömrü (hər yeniləmədə uzanır)
- * @param refreshRaceWindow  istifadə olunmuş refresh tokeni bu müddət ərzində yenidən gələrsə — iki tabın yarışıdır,
- *                           sessiya ləğv olunmur
+ * @param refreshTtl         refresh tokenin ömrü (hər yeniləmədə uzanır; token özü dəyişmir)
  * @param accessCacheTtl     access tokenin yoxlanması üçün yaddaş keşi (ləğvetmədə dərhal təmizlənir)
  * @param stepUpValidity     hesabın silinməsi kimi əməliyyatlar üçün OTP təkrar təsdiqinin etibarlılıq müddəti
  */
@@ -27,7 +25,6 @@ public record CustomerAuthProperties(
         @DefaultValue("10m") Duration registrationTtl,
         @DefaultValue("15m") Duration accessTtl,
         @DefaultValue("180d") Duration refreshTtl,
-        @DefaultValue("10s") Duration refreshRaceWindow,
         @DefaultValue("15s") Duration accessCacheTtl,
         @DefaultValue("10m") Duration stepUpValidity) {
 }

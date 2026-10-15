@@ -34,8 +34,8 @@
         FOR UPDATE OF rt, s
     </select>
 
-    <update id="consumeRefreshToken">
-        UPDATE customer_refresh_tokens SET consumed_at = #{now} WHERE id = #{tokenId}
+    <update id="extendRefreshToken">
+        UPDATE customer_refresh_tokens SET expires_at = #{expiresAt} WHERE id = #{tokenId}
     </update>
 
     <update id="rotateAccess">

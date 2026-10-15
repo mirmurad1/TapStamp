@@ -77,22 +77,22 @@ class CustomerSessionIT extends CustomerIntegrationTest {
     }
 
     @Test
-    void refreshRotatesBothTokensAndToleratesTheTwoTabRace() throws Exception {
+    void refreshIssuesNewAccessAndKeepsTheRefreshToken() throws Exception {
         CustomerClient tab1 = signedIn(uniquePhone());
         String oldAccess = tab1.cookie(AT);
-        String oldRefresh = tab1.cookie(RT);
+        String refresh = tab1.cookie(RT);
 
         tab1.post("/api/v1/auth/refresh").andExpect(status().isOk()).andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         assertThat(tab1.cookie(AT)).isNotEqualTo(oldAccess);
-        assertThat(tab1.cookie(RT)).isNotEqualTo(oldRefresh);
+        assertThat(tab1.cookie(RT)).isEqualTo(refresh);
         tab1.get("/api/v1/me").andExpect(status().isOk());
 
-        // İkinci tab eyni anda köhnə refresh token ilə gəlir: sessiya ləğv olunmur
-        CustomerClient tab2 = client();
-        tab2.setCookie(RT, oldRefresh, "/api/v1/auth");
-        tab2.post("/api/v1/auth/refresh").andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("REFRESH_RACE"));
-        tab1.get("/api/v1/me").andExpect(status().isOk());
+        // Cavabı itirmiş klient (məs. iPhone tətbiqi arxa plana keçib) eyni refresh tokenlə istənilən vaxt qayıda bilər
+        clock.advance(Duration.ofHours(5));
+        CustomerClient lostResponse = client();
+        lostResponse.setCookie(RT, refresh, "/api/v1/auth");
+        lostResponse.post("/api/v1/auth/refresh").andExpect(status().isOk());
+        lostResponse.get("/api/v1/me").andExpect(status().isOk());
 
         // Köhnə access token artıq etibarsızdır
         CustomerClient stale = client();
@@ -102,22 +102,19 @@ class CustomerSessionIT extends CustomerIntegrationTest {
     }
 
     @Test
-    void reuseOfAnOldRefreshTokenRevokesTheWholeSession() throws Exception {
-        CustomerClient victim = signedIn(uniquePhone());
-        String stolenRefresh = victim.cookie(RT);
-        victim.post("/api/v1/auth/refresh").andExpect(status().isOk());
+    void refreshTokenSlidesAndExpiresOnlyAfter180DaysWithoutUse() throws Exception {
+        CustomerClient client = signedIn(uniquePhone());
+        // Hər 100 gündən bir istifadə: sessiya 180 günü keçsə də davam edir
+        clock.advance(Duration.ofDays(100));
+        client.post("/api/v1/auth/refresh").andExpect(status().isOk());
+        clock.advance(Duration.ofDays(100));
+        client.post("/api/v1/auth/refresh").andExpect(status().isOk());
+        client.get("/api/v1/me").andExpect(status().isOk());
 
-        clock.advance(Duration.ofSeconds(11));
-        CustomerClient attacker = client();
-        attacker.setCookie(RT, stolenRefresh, "/api/v1/auth");
-        attacker.post("/api/v1/auth/refresh").andExpect(status().isUnauthorized())
+        // 180 gündən çox istifadə olunmayıbsa, yenidən giriş lazımdır
+        clock.advance(Duration.ofDays(181));
+        client.post("/api/v1/auth/refresh").andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
-
-        // Qurbanın yeni tokenləri də ləğv olunub — hücumçunun ələ keçirdiyi sessiya tam bağlanır
-        victim.get("/api/v1/me").andExpect(status().isUnauthorized());
-        victim.post("/api/v1/auth/refresh").andExpect(status().isUnauthorized());
-        assertThat(query("SELECT count(*) FROM audit_logs WHERE action = 'CUSTOMER_REFRESH_REUSE_DETECTED'",
-                Integer.class, Map.of())).isPositive();
     }
 
     @Test

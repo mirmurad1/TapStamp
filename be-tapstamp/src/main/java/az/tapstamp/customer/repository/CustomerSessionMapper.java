@@ -45,7 +45,8 @@ public interface CustomerSessionMapper {
     /** Refresh tokeni sətir kilidi ilə oxuyur: eyni tokenlə paralel iki yeniləmə ardıcıl işlənir. */
     Optional<RefreshRow> lockRefreshToken(byte[] tokenHash);
 
-    void consumeRefreshToken(UUID tokenId, Instant now);
+    /** Refresh tokenin müddəti sürüşür (token özü dəyişmir). */
+    void extendRefreshToken(UUID tokenId, Instant expiresAt);
 
     /** Yeni access token; refresh müddəti sürüşür (hər yeniləmədə 180 gün). */
     void rotateAccess(UUID sessionId, byte[] accessHash, Instant accessExpiresAt, Instant refreshExpiresAt, String ip,

@@ -197,10 +197,9 @@ public class CustomerAuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Sessiyanın yenilənməsi (refresh token rotasiyası)", description = """
-            Yeni access və refresh cookie-ləri qoyulur. Eyni anda iki tabdan gələn yeniləmədə ikincisi 409 \
-            `REFRESH_RACE` alır (sorğunu təkrarlamaq kifayətdir). Köhnə refresh tokenin təkrar istifadəsi sessiyanı \
-            ləğv edir.""")
+    @Operation(summary = "Sessiyanın yenilənməsi", description = """
+            Yeni access cookie-si qoyulur. Refresh token dəyişmir, müddəti yenidən 180 gün olur (cookie də yenidən \
+            yazılır). Sessiya müştəri çıxana, ləğv olunana və ya 180 gün istifadə olunmayana qədər qalır.""")
     AuthStatusResponse refresh(HttpServletRequest http, HttpServletResponse response) {
         String token = cookies.readRefresh(http).orElseThrow(() -> new ApiException(ErrorCode.UNAUTHENTICATED));
         try {

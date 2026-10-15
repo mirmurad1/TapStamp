@@ -4,12 +4,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.customer.repository.CustomerSessionMapper;
 import az.tapstamp.security.token.SecureTokens;
 import az.tapstamp.shared.error.ApiException;
@@ -21,23 +19,17 @@ import az.tapstamp.tenancy.TenantContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Müştəri sessiyaları: qısaömürlü access token (15 dəq) + uzunömürlü refresh token (180 gün, sürüşən, hər istifadədə
- * yenilənir).
+ * Müştəri sessiyaları: qısaömürlü access token (15 dəq) + uzunömürlü refresh token (180 gün, sürüşən).
  *
- * <p>Refresh rotasiyası:
- * <ul>
- *   <li>aktiv token istifadə olunur → yeni access və refresh tokenlər;</li>
- *   <li>token son 10 saniyədə artıq istifadə olunubsa — iki tab eyni anda yeniləyib: sessiya ləğv olunmur,
- *       {@code REFRESH_RACE} (klient sorğunu təkrarlayır, yeni cookie artıq brauzerdədir);</li>
- *   <li>token daha əvvəl istifadə olunubsa — oğurlanmış tokenin təkrar istifadəsi: bütün sessiya ləğv olunur.</li>
- * </ul>
+ * <p>Refresh token dəyişmir (rotasiya yoxdur): hər yeniləmədə yalnız yeni access token verilir, refresh tokenin müddəti
+ * isə yenidən 180 gün olur. Müştəri özü çıxana, sessiya ləğv olunana və ya 180 gün tətbiqə girmədikdə sessiya bitir.
+ * Rotasiyadan imtina edildi: telefon yeniləmə cavabını ala bilmədikdə (məs. iPhone tətbiqi sorğu zamanı arxa plana
+ * keçib) köhnə tokenin yenidən gəlməsi oğurluq sayılır və müştəri səbəbsiz çıxarılırdı.
  * Access token hər sorğuda yoxlanılır (ən çox 15 saniyəlik keşlə; ləğvetmədə bu instansiyanın keşi dərhal təmizlənir).
  */
 @Service
@@ -54,20 +46,16 @@ public class CustomerSessionService {
                                  Instant lastSeenAt) {
     }
 
-    private static final Logger log = LoggerFactory.getLogger(CustomerSessionService.class);
-
     private final CustomerSessionMapper sessions;
     private final CustomerAuthProperties properties;
-    private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
     private final Cache<String, CachedSession> cache;
 
-    public CustomerSessionService(CustomerSessionMapper sessions, CustomerAuthProperties properties, AuditLogger audit,
+    public CustomerSessionService(CustomerSessionMapper sessions, CustomerAuthProperties properties,
                                   PlatformTransactionManager transactionManager, Clock clock) {
         this.sessions = sessions;
         this.properties = properties;
-        this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
         this.cache = Caffeine.newBuilder()
@@ -118,53 +106,30 @@ public class CustomerSessionService {
         return Optional.of(cached.principal());
     }
 
-    /** Refresh token rotasiyası (bax: sinifin təsviri). */
+    /**
+     * Yeni access token; refresh token eyni qalır, müddəti 180 gün uzanır (bax: sinifin təsviri). Cavabda refresh
+     * cookie-si də yenidən yazılır ki, brauzerdəki müddəti də sürüşsün.
+     */
     public IssuedTokens refresh(String refreshToken, ClientInfo client) {
         Instant now = clock.instant();
-        Outcome outcome = Objects.requireNonNull(tx.execute(status -> rotate(refreshToken, client, now)));
-        if (outcome.reuseDetectedSession() != null) {
-            evictSession(outcome.reuseDetectedSession());
-            log.warn("Refresh tokenin təkrar istifadəsi aşkarlandı: sessiya ləğv olundu ({})", outcome.reuseDetectedSession());
-            throw new ApiException(ErrorCode.SESSION_EXPIRED);
-        }
-        if (outcome.error() != null) {
-            throw new ApiException(outcome.error());
-        }
-        return outcome.tokens();
+        IssuedTokens tokens = Objects.requireNonNull(tx.execute(status -> renew(refreshToken, client, now)));
+        evictSession(tokens.sessionId());
+        return tokens;
     }
 
-    private record Outcome(IssuedTokens tokens, ErrorCode error, UUID reuseDetectedSession) {
-    }
-
-    private Outcome rotate(String refreshToken, ClientInfo client, Instant now) {
-        Optional<CustomerSessionMapper.RefreshRow> found = sessions.lockRefreshToken(SecureTokens.hash(refreshToken));
-        if (found.isEmpty()) {
-            return new Outcome(null, ErrorCode.SESSION_EXPIRED, null);
-        }
-        CustomerSessionMapper.RefreshRow row = found.get();
+    private IssuedTokens renew(String refreshToken, ClientInfo client, Instant now) {
+        CustomerSessionMapper.RefreshRow row = sessions.lockRefreshToken(SecureTokens.hash(refreshToken))
+                .orElseThrow(() -> new ApiException(ErrorCode.SESSION_EXPIRED));
         if (row.sessionRevokedAt() != null || !row.expiresAt().isAfter(now)
                 || !row.sessionRefreshExpiresAt().isAfter(now) || !"ACTIVE".equals(row.customerStatus())) {
-            return new Outcome(null, ErrorCode.SESSION_EXPIRED, null);
+            throw new ApiException(ErrorCode.SESSION_EXPIRED);
         }
-        if (row.consumedAt() != null) {
-            if (row.consumedAt().plus(properties.refreshRaceWindow()).isAfter(now)) {
-                return new Outcome(null, ErrorCode.REFRESH_RACE, null);
-            }
-            // Köhnə (artıq dəyişdirilmiş) token yenidən gəlib — oğurlanma əlaməti: sessiya bütünlüklə bağlanır
-            sessions.revoke(row.sessionId(), "REFRESH_REUSE", now);
-            audit.tenant("CUSTOMER_REFRESH_REUSE_DETECTED", AuditLogger.ActorType.SYSTEM, null, "session",
-                    row.sessionId(), Map.of("customerId", row.customerId().toString()));
-            return new Outcome(null, null, row.sessionId());
-        }
-        sessions.consumeRefreshToken(row.tokenId(), now);
+        Instant refreshExpiresAt = now.plus(properties.refreshTtl());
+        sessions.extendRefreshToken(row.tokenId(), refreshExpiresAt);
         String access = SecureTokens.generate();
-        String refresh = SecureTokens.generate();
         sessions.rotateAccess(row.sessionId(), SecureTokens.hash(access), now.plus(properties.accessTtl()),
-                now.plus(properties.refreshTtl()), client.ip(), now);
-        sessions.insertRefreshToken(Ids.newId(), row.sessionId(), SecureTokens.hash(refresh), now,
-                now.plus(properties.refreshTtl()));
-        evictSession(row.sessionId());
-        return new Outcome(new IssuedTokens(row.sessionId(), access, refresh), null, null);
+                refreshExpiresAt, client.ip(), now);
+        return new IssuedTokens(row.sessionId(), access, refreshToken);
     }
 
     /** Çıxış: cari sessiya access token və ya (access token-in vaxtı keçibsə) refresh token ilə tapılır. */

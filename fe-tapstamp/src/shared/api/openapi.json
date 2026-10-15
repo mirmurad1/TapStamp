@@ -2112,7 +2112,7 @@
     },
     "/api/v1/auth/refresh" : {
       "post" : {
-        "description" : "Yeni access və refresh cookie-ləri qoyulur. Eyni anda iki tabdan gələn yeniləmədə ikincisi 409 `REFRESH_RACE` alır (sorğunu təkrarlamaq kifayətdir). Köhnə refresh tokenin təkrar istifadəsi sessiyanı ləğv edir.",
+        "description" : "Yeni access cookie-si qoyulur. Refresh token dəyişmir, müddəti yenidən 180 gün olur (cookie də yenidən yazılır). Sessiya müştəri çıxana, ləğv olunana və ya 180 gün istifadə olunmayana qədər qalır.",
         "operationId" : "refresh",
         "responses" : {
           "200" : {
@@ -2126,7 +2126,7 @@
             "description" : "OK"
           }
         },
-        "summary" : "Sessiyanın yenilənməsi (refresh token rotasiyası)",
+        "summary" : "Sessiyanın yenilənməsi",
         "tags" : [ "Müştəri: autentifikasiya" ]
       }
     },

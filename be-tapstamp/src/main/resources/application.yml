@@ -117,7 +117,6 @@ app:
     otp-max-attempts: 5
     access-ttl: 15m
     refresh-ttl: 180d
-    refresh-race-window: 10s
   admin-auth:
     session-absolute: 8h
     session-idle: 30m
