@@ -2857,7 +2857,7 @@
     },
     "/api/v1/platform/sms-usage" : {
       "get" : {
-        "description" : "`from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. Yalnız SMS göndərmiş şirkətlər, ən çox seqmentdən aza sıralanır.",
+        "description" : "Yalnız uğurla göndərilmiş SMS-lər sayılır. `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. SMS göndərmiş şirkətlər, ən çoxdan aza sıralanır.",
         "operationId" : "usage",
         "parameters" : [ {
           "in" : "query",
@@ -5589,21 +5589,13 @@
       },
       "SmsUsageReport" : {
         "type" : "object",
-        "description" : "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm",
+        "description" : "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər)",
         "properties" : {
-          "failed" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "from" : {
             "type" : "string",
             "format" : "date"
           },
           "messages" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "segments" : {
             "type" : "integer",
             "format" : "int64"
           },
@@ -5621,20 +5613,12 @@
       },
       "SmsUsageRow" : {
         "type" : "object",
-        "description" : "Şirkətin dövr üzrə SMS istifadəsi. segments — provayderin hesabladığı vahid (yalnız göndərilənlər)",
+        "description" : "Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı",
         "properties" : {
           "displayName" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },
-          "failed" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "messages" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "segments" : {
             "type" : "integer",
             "format" : "int64"
           },

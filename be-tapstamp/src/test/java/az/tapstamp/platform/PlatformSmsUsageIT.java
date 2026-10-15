@@ -60,7 +60,7 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
         admin.get(path).andExpect(status().isOk())
                 .andExpect(jsonPath("$.tenants[?(@.slug == '" + alpha().slug() + "')].messages").isNotEmpty())
                 .andExpect(jsonPath("$.messages").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.segments").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.segments").doesNotExist());
 
         // Keçmiş dövrdə heç nə yoxdur; səhv aralıq rədd olunur
         admin.get("/sms-usage?from=2020-01-01&to=2020-01-31").andExpect(status().isOk())

@@ -11,14 +11,11 @@
     </insert>
 
     <select id="usage" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Usage">
-        SELECT t.id AS tenant_id, t.slug, t.display_name,
-               count(*) AS messages,
-               coalesce(sum(m.segments) FILTER (WHERE m.status = 'SENT'), 0) AS segments,
-               count(*) FILTER (WHERE m.status = 'FAILED') AS failed
+        SELECT t.id AS tenant_id, t.slug, t.display_name, count(*) AS messages
         FROM sms_messages m
         JOIN tenants t ON t.id = m.tenant_id
-        WHERE m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
+        WHERE m.status = 'SENT' AND m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
         GROUP BY t.id, t.slug, t.display_name
-        ORDER BY segments DESC, messages DESC, t.slug
+        ORDER BY messages DESC, t.slug
     </select>
 </mapper>

@@ -295,7 +295,7 @@
       "to": "To",
       "invalidRange": "The start date cannot be after the end date.",
       "empty": "No SMS were sent in this period.",
-      "note": "Days are counted in Baku time. A segment is the unit the provider bills (a long message takes several segments); only successfully sent messages are counted.",
+      "note": "Only successfully sent SMS are counted. Days are counted in Baku time.",
       "periods": {
         "thisMonth": "This month",
         "lastMonth": "Last month",
@@ -306,10 +306,9 @@
       },
       "columns": {
         "company": "Company",
-        "messages": "SMS sent",
-        "segments": "Segments",
-        "failed": "Failed"
-      }
+        "messages": "SMS count"
+      },
+      "total": "Successful SMS (total)"
     }
   },
   "staffConsole": {

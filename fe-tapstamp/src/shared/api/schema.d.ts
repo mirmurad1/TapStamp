@@ -1807,7 +1807,7 @@ export interface paths {
         };
         /**
          * Şirkətlər üzrə SMS istifadəsi
-         * @description `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. Yalnız SMS göndərmiş şirkətlər, ən çox seqmentdən aza sıralanır.
+         * @description Yalnız uğurla göndərilmiş SMS-lər sayılır. `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. SMS göndərmiş şirkətlər, ən çoxdan aza sıralanır.
          */
         get: operations["usage"];
         put?: never;
@@ -3061,29 +3061,21 @@ export interface components {
         SessionStateResponse: {
             state?: string;
         };
-        /** @description Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm */
+        /** @description Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər) */
         SmsUsageReport: {
-            /** Format: int64 */
-            failed?: number;
             /** Format: date */
             from?: string;
             /** Format: int64 */
             messages?: number;
-            /** Format: int64 */
-            segments?: number;
             tenants?: components["schemas"]["SmsUsageRow"][];
             /** Format: date */
             to?: string;
         };
-        /** @description Şirkətin dövr üzrə SMS istifadəsi. segments — provayderin hesabladığı vahid (yalnız göndərilənlər) */
+        /** @description Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı */
         SmsUsageRow: {
             displayName?: components["schemas"]["LocalizedText"];
             /** Format: int64 */
-            failed?: number;
-            /** Format: int64 */
             messages?: number;
-            /** Format: int64 */
-            segments?: number;
             slug?: string;
             /** Format: uuid */
             tenantId?: string;

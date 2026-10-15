@@ -17,12 +17,12 @@ public interface SmsLogMapper {
                  String encoding, int segments, String status, @Nullable String error, Instant createdAt) {
     }
 
-    /** Şirkət üzrə cəm: mesaj, seqment (provayder seqmentə görə hesablayır) və uğursuz göndərişlər. */
-    record Usage(UUID tenantId, String slug, LocalizedText displayName, long messages, long segments, long failed) {
+    /** Şirkət üzrə uğurla göndərilmiş SMS-lərin sayı. */
+    record Usage(UUID tenantId, String slug, LocalizedText displayName, long messages) {
     }
 
     void insert(Entry entry);
 
-    /** [from, to) aralığında SMS göndərmiş şirkətlər, ən çox seqmentdən aza. */
+    /** [from, to) aralığında uğurla SMS göndərmiş şirkətlər, ən çoxdan aza. */
     List<Usage> usage(Instant from, Instant to);
 }

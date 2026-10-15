@@ -15,7 +15,6 @@ import { InlineLoading } from '../../components/FullPageState';
 
 const PERIODS = ['thisMonth', 'lastMonth', 'last7', 'last30', 'thisYear', 'custom'] as const;
 type Period = (typeof PERIODS)[number];
-const TOTALS = ['messages', 'segments', 'failed'] as const;
 
 /** Bakı vaxtı ilə bu gün (YYYY-MM-DD) — backend də günləri Bakı vaxtı ilə sayır. */
 function bakuToday(): string {
@@ -97,16 +96,12 @@ export function SmsUsagePage() {
       {!valid ? <p className="text-sm text-destructive">{t('platform.sms.invalidRange')}</p> : null}
 
       {report.data ? (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {TOTALS.map((key) => (
-            <Card key={key}>
-              <CardContent className="pt-5 sm:pt-6">
-                <p className="text-sm text-muted-foreground">{t(`platform.sms.columns.${key}`)}</p>
-                <p className="mt-1 font-display text-2xl font-semibold">{formatNumber(report.data[key] ?? 0, lang)}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="sm:max-w-xs">
+          <CardContent className="pt-5 sm:pt-6">
+            <p className="text-sm text-muted-foreground">{t('platform.sms.total')}</p>
+            <p className="mt-1 font-display text-2xl font-semibold">{formatNumber(report.data.messages ?? 0, lang)}</p>
+          </CardContent>
+        </Card>
       ) : null}
 
       <Card>
@@ -122,9 +117,7 @@ export function SmsUsagePage() {
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
                     <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
-                    <th className="py-2 pr-4 text-right font-medium">{t('platform.sms.columns.messages')}</th>
-                    <th className="py-2 pr-4 text-right font-medium">{t('platform.sms.columns.segments')}</th>
-                    <th className="py-2 text-right font-medium">{t('platform.sms.columns.failed')}</th>
+                    <th className="py-2 text-right font-medium">{t('platform.sms.columns.messages')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -134,9 +127,7 @@ export function SmsUsagePage() {
                         <span className="font-medium">{resolveText(row.displayName, lang)}</span>
                         <span className="ml-2 text-muted-foreground">{row.slug}</span>
                       </td>
-                      <td className="py-2 pr-4 text-right tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
-                      <td className="py-2 pr-4 text-right tabular-nums">{formatNumber(row.segments ?? 0, lang)}</td>
-                      <td className="py-2 text-right tabular-nums">{formatNumber(row.failed ?? 0, lang)}</td>
+                      <td className="py-2 text-right tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
                     </tr>
                   ))}
                 </tbody>

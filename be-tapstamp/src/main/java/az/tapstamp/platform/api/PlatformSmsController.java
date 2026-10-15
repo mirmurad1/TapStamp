@@ -34,29 +34,26 @@ public class PlatformSmsController {
         this.smsLog = smsLog;
     }
 
-    @Schema(description = "Şirkətin dövr üzrə SMS istifadəsi. segments — provayderin hesabladığı vahid (yalnız göndərilənlər)")
-    public record SmsUsageRow(UUID tenantId, String slug, LocalizedText displayName, long messages, long segments,
-                              long failed) {
+    @Schema(description = "Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı")
+    public record SmsUsageRow(UUID tenantId, String slug, LocalizedText displayName, long messages) {
     }
 
-    @Schema(description = "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm")
-    public record SmsUsageReport(LocalDate from, LocalDate to, List<SmsUsageRow> tenants, long messages, long segments,
-                                 long failed) {
+    @Schema(description = "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər)")
+    public record SmsUsageReport(LocalDate from, LocalDate to, List<SmsUsageRow> tenants, long messages) {
     }
 
     @GetMapping
     @Operation(summary = "Şirkətlər üzrə SMS istifadəsi", description = """
-            `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. Yalnız SMS göndərmiş şirkətlər, ən çox \
-            seqmentdən aza sıralanır.""")
+            Yalnız uğurla göndərilmiş SMS-lər sayılır. `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox \
+            2 il. SMS göndərmiş şirkətlər, ən çoxdan aza sıralanır.""")
     SmsUsageReport usage(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         if (to.isBefore(from) || from.plusDays(MAX_DAYS).isBefore(to)) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         List<SmsUsageRow> rows = smsLog.usage(from, to).stream()
-                .map(u -> new SmsUsageRow(u.tenantId(), u.slug(), u.displayName(), u.messages(), u.segments(), u.failed()))
+                .map(u -> new SmsUsageRow(u.tenantId(), u.slug(), u.displayName(), u.messages()))
                 .toList();
-        return new SmsUsageReport(from, to, rows, rows.stream().mapToLong(SmsUsageRow::messages).sum(),
-                rows.stream().mapToLong(SmsUsageRow::segments).sum(), rows.stream().mapToLong(SmsUsageRow::failed).sum());
+        return new SmsUsageReport(from, to, rows, rows.stream().mapToLong(SmsUsageRow::messages).sum());
     }
 }

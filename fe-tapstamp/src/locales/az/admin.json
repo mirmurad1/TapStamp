@@ -295,7 +295,7 @@
       "to": "Son",
       "invalidRange": "Başlanğıc tarixi son tarixdən sonra ola bilməz.",
       "empty": "Bu dövrdə SMS göndərilməyib.",
-      "note": "Günlər Bakı vaxtı ilə sayılır. Seqment — provayderin hesabladığı vahiddir (uzun mesaj bir neçə seqment olur); yalnız uğurla göndərilənlər sayılır.",
+      "note": "Yalnız uğurla göndərilmiş SMS-lər sayılır. Günlər Bakı vaxtı ilə sayılır.",
       "periods": {
         "thisMonth": "Bu ay",
         "lastMonth": "Keçən ay",
@@ -306,10 +306,9 @@
       },
       "columns": {
         "company": "Şirkət",
-        "messages": "SMS sayı",
-        "segments": "Seqment",
-        "failed": "Uğursuz"
-      }
+        "messages": "SMS sayı"
+      },
+      "total": "Uğurlu SMS-lər (cəmi)"
     }
   },
   "staffConsole": {
