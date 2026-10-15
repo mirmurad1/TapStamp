@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Müştərilərin CSV ixracı (yalnız sahib, step-up ilə). Başlıqlar adminin dilindədir, fayl UTF-8 BOM ilə başlayır
- * (Excel Azərbaycan və rus hərflərini düzgün açsın). Tam telefon nömrəsi ixrac olunmur — yalnız maskalanmış.
+ * (Excel Azərbaycan və rus hərflərini düzgün açsın). Telefon nömrəsi tam, yalnız rəqəmlərlə yazılır.
  *
  * <p><b>CSV injection</b> (formula yeridilməsi) qorunması: {@code = + - @}, tab və ya CR ilə başlayan xana
  * apostrofla başlayır ki, Excel onu formula kimi icra etməsin.
@@ -70,7 +70,7 @@ public class CustomerCsvExporter {
             writeLine(writer, COLUMNS.stream().map(c -> messages.getMessage("csv.customers." + c, null, locale)).toList());
             directory.forEach(principal, filter, row -> {
                 try {
-                    writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), row.phone(),
+                    writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), phone(row.phone()),
                             row.language(), Objects.requireNonNullElse(
                                     messages.getMessage("csv.customers.status." + row.status(), null, row.status(),
                                             locale), row.status()),
@@ -108,6 +108,11 @@ public class CustomerCsvExporter {
 
     private static String format(Instant instant, ZoneId zone) {
         return instant == null ? "" : DATE_TIME.format(instant.atZone(zone));
+    }
+
+    /** Nömrə yalnız rəqəmlərlə, "+" olmadan ({@code +994513102967} → {@code 994513102967}): apostrof əlavə olunmur. */
+    static String phone(String value) {
+        return value == null ? "" : value.replaceAll("\\D", "");
     }
 
     private static String nullToEmpty(String value) {

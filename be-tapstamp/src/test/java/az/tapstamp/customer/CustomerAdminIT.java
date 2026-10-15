@@ -192,7 +192,9 @@ class CustomerAdminIT extends TapIntegrationTest {
         assertThat(lines[1]).contains(f.customerId().toString())
                 .contains("\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\"")
                 .contains(",Aktiv,")
-                .contains(f.phone());
+                // Nömrə "+" və apostrofsuz, yalnız rəqəmlər: +994551234567 → 994551234567
+                .contains("," + f.phone().substring(1) + ",")
+                .doesNotContain("'+");
         assertThat(count("SELECT count(*) FROM audit_logs WHERE action = 'CUSTOMERS_EXPORTED' AND details ->> 'rows' = '1'",
                 Map.of())).isGreaterThanOrEqualTo(1);
     }
