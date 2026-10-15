@@ -17,40 +17,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
-/** SMS jurnalı (hər OTP yazılır, kod gizlədilir, nömrə şifrəlidir) və platformanın SMS hesabatı. */
+/** SMS jurnalı (hər OTP yazılır, mətndə kod gizlədilir, kod ayrıca şifrəlidir) və platformanın SMS hesabatı. */
 class PlatformSmsUsageIT extends TapIntegrationTest {
 
     @Autowired
     @Qualifier("platformJdbc")
     private JdbcClient platformJdbc;
 
-    private int logged(String phoneMasked) {
-        return platformJdbc.sql("SELECT count(*) FROM sms_messages WHERE phone_masked = :p")
-                .param("p", phoneMasked).query(Integer.class).single();
+    private int logged(String phone) {
+        return platformJdbc.sql("SELECT count(*) FROM sms_messages WHERE phone = :p")
+                .param("p", phone).query(Integer.class).single();
     }
 
     @Test
     void everyOtpIsLoggedWithoutTheCodeAndReportedPerCompany() throws Exception {
         String phone = uniquePhone();
         String[] challenge = requestCode(client(), phone, "az");
-        String masked = az.tapstamp.shared.pii.PhoneMasker.mask(phone);
-        Awaitility.await().atMost(Duration.ofSeconds(10)).until(() -> logged(masked) == 1);
+        Awaitility.await().atMost(Duration.ofSeconds(10)).until(() -> logged(phone) == 1);
 
         var row = platformJdbc.sql("""
                         SELECT text, status, segments, encoding, tenant_id,
-                               position(convert_to(:digits, 'UTF8') in phone_enc) AS plain_phone
-                        FROM sms_messages WHERE phone_masked = :p""")
-                .param("p", masked).param("digits", phone.substring(4))
+                               coalesce(octet_length(code_enc), 0) AS code_bytes,
+                               position(convert_to(:code, 'UTF8') in code_enc) AS plain_code
+                        FROM sms_messages WHERE phone = :p""")
+                .param("p", phone).param("code", challenge[1])
                 .query((rs, n) -> new Object[] {rs.getString("text"), rs.getString("status"), rs.getInt("segments"),
-                        rs.getString("encoding"), rs.getObject("tenant_id", UUID.class), rs.getInt("plain_phone")})
+                        rs.getString("encoding"), rs.getObject("tenant_id", UUID.class), rs.getInt("code_bytes"),
+                        rs.getInt("plain_code")})
                 .single();
-        // Mətn saxlanılır, kod isə yox; nömrə şifrəlidir
+        // Nömrə açıq, mətndə kod gizlədilib, kodun özü ayrıca şifrəli saxlanılır
         assertThat(row[0]).isEqualTo("Alpha Kafe OTP: ******").asString().doesNotContain(challenge[1]);
         assertThat(row[1]).isEqualTo("SENT");
         assertThat(row[2]).isEqualTo(1);
         assertThat(row[3]).isEqualTo("GSM_7");
         assertThat(row[4]).isEqualTo(alpha().id());
-        assertThat(row[5]).isEqualTo(0);
+        assertThat((Integer) row[5]).isPositive();
+        assertThat(row[6]).isEqualTo(0);
 
         LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
         AdminClient admin = signedInPlatformAdmin();

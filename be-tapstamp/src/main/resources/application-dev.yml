@@ -32,3 +32,5 @@ app:
 logging:
   level:
     az.tapstamp: DEBUG
+    # SMS jurnalında nömrə açıqdır — MyBatis-in SQL parametrlərini loga yazmaması üçün (LogLeakIT)
+    az.tapstamp.notification.sms.repository: INFO

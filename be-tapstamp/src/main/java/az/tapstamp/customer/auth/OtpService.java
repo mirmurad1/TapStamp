@@ -209,7 +209,7 @@ public class OtpService {
         String companyName = settings.smsSenderName() != null ? settings.smsSenderName()
                 : settings.name().resolve(Language.DEFAULT);
         SmsMessage message = new SmsMessage(phone, templates.otp(companyName, code), tenant.id().toString());
-        // Jurnalda (SMS hesabatı) kod gizlədilir: jurnala baxan kodla daxil ola bilməz
+        // Jurnalda (SMS hesabatı) mətndəki kod gizlədilir, özü ayrıca şifrəli saxlanılır: jurnala baxan kodla daxil ola bilməz
         String storedText = templates.otp(companyName, "*".repeat(code.length()));
         executor.execute(() -> {
             String error = null;
@@ -219,7 +219,7 @@ public class OtpService {
                 error = e.getClass().getSimpleName() + ": " + e.getMessage();
                 log.warn("OTP SMS göndərilmədi: {} ({})", message, e.getClass().getSimpleName());
             }
-            smsLog.record(tenant.id(), phone, message.text(), storedText, error);
+            smsLog.record(tenant.id(), phone, message.text(), storedText, code, error);
         });
         return new Issued(id, expiresAt, now.plus(properties.otpResendCooldown()));
     }

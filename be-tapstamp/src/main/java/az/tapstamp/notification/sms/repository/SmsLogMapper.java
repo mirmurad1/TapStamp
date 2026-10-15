@@ -12,7 +12,8 @@ import org.jspecify.annotations.Nullable;
 @PlatformMapper
 public interface SmsLogMapper {
 
-    record Entry(UUID id, UUID tenantId, byte[] phoneEnc, String phoneMasked, String text, String purpose,
+    /** {@code text} — kod gizlədilmiş mətn; {@code codeEnc} — OTP kodu şifrəli (mətndə kod yoxdursa null). */
+    record Entry(UUID id, UUID tenantId, String phone, String text, byte @Nullable [] codeEnc, String purpose,
                  String encoding, int segments, String status, @Nullable String error, Instant createdAt) {
     }
 

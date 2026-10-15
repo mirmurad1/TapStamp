@@ -4,10 +4,10 @@
 <mapper namespace="az.tapstamp.notification.sms.repository.SmsLogMapper">
 
     <insert id="insert">
-        INSERT INTO sms_messages (id, tenant_id, phone_enc, phone_masked, text, purpose, encoding, segments, status,
-                                  error, created_at)
-        VALUES (#{id}, #{tenantId}, #{phoneEnc}, #{phoneMasked}, #{text}, #{purpose}, #{encoding}, #{segments},
-                #{status}, #{error}, #{createdAt})
+        INSERT INTO sms_messages (id, tenant_id, phone, text, code_enc, purpose, encoding, segments, status, error,
+                                  created_at)
+        VALUES (#{id}, #{tenantId}, #{phone}, #{text}, #{codeEnc}, #{purpose}, #{encoding}, #{segments}, #{status},
+                #{error}, #{createdAt})
     </insert>
 
     <select id="usage" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Usage">

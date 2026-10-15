@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Göndərilən SMS-lərin jurnalı (platforma bazası, {@code sms_messages}): hansı şirkət, hansı nömrəyə (şifrəli), hansı
- * mətn (OTP kodu gizlədilmiş), neçə seqment, nəticə. Platforma panelindəki "SMS hesabatı" buradan oxunur.
+ * Göndərilən SMS-lərin jurnalı (platforma bazası, {@code sms_messages}): hansı şirkət, hansı nömrəyə, hansı mətn (OTP
+ * kodu mətndə gizlədilir, özü ayrıca şifrəli saxlanılır), neçə seqment, nəticə. Platforma panelindəki "SMS hesabatı" buradan oxunur.
  *
  * <p>Jurnala yazmaq alınmasa, SMS göndərişi pozulmur — yalnız log yazılır.
  */
@@ -46,15 +46,18 @@ public class SmsLog {
     /**
      * @param sentText    göndərilən mətn (seqmentlər bununla hesablanır)
      * @param storedText  jurnalda saxlanılan mətn (OTP kodu gizlədilmiş)
+     * @param code        mətndəki OTP kodu — yalnız şifrəli saxlanılır (kod yoxdursa null)
      * @param error       göndəriş alınmayıbsa — səbəb (provayderin xəta kodu; mətn və açar daxil deyil)
      */
-    public void record(UUID tenantId, String phone, String sentText, String storedText, @Nullable String error) {
+    public void record(UUID tenantId, String phone, String sentText, String storedText, @Nullable String code,
+                       @Nullable String error) {
         try {
             UUID id = Ids.newId();
             SmsSegments.Info info = SmsSegments.analyze(sentText);
-            mapper.insert(new SmsLogMapper.Entry(id, tenantId,
-                    cipher.encryptString(KeyPurpose.PII, phone, Aad.platformField("sms_messages", "phone_enc", id)),
-                    PhoneMasker.mask(phone), storedText, "OTP", info.encoding().name(), info.segments(),
+            byte[] codeEnc = code == null ? null
+                    : cipher.encryptString(KeyPurpose.PII, code, Aad.platformField("sms_messages", "code_enc", id));
+            mapper.insert(new SmsLogMapper.Entry(id, tenantId, phone, storedText, codeEnc, "OTP",
+                    info.encoding().name(), info.segments(),
                     error == null ? "SENT" : "FAILED",
                     error == null || error.length() <= MAX_ERROR_LENGTH ? error : error.substring(0, MAX_ERROR_LENGTH),
                     clock.instant()));
