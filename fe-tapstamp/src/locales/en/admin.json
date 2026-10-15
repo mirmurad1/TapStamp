@@ -15,7 +15,8 @@
     "account": "My account",
     "tenants": "Companies",
     "simulator": "NFC simulator",
-    "tags": "NFC tags"
+    "tags": "NFC tags",
+    "smsUsage": "SMS report"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -285,6 +286,30 @@
     "audit": {
       "title": "Platform audit log",
       "subtitle": "Company creation and suspension, domains and owners’ 2FA."
+    },
+    "sms": {
+      "title": "SMS report",
+      "subtitle": "SMS messages used by companies in the selected period.",
+      "period": "Period",
+      "from": "From",
+      "to": "To",
+      "invalidRange": "The start date cannot be after the end date.",
+      "empty": "No SMS were sent in this period.",
+      "note": "Days are counted in Baku time. A segment is the unit the provider bills (a long message takes several segments); only successfully sent messages are counted.",
+      "periods": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "last7": "Last 7 days",
+        "last30": "Last 30 days",
+        "thisYear": "This year",
+        "custom": "Date range"
+      },
+      "columns": {
+        "company": "Company",
+        "messages": "SMS sent",
+        "segments": "Segments",
+        "failed": "Failed"
+      }
     }
   },
   "staffConsole": {

@@ -2855,6 +2855,43 @@
         "tags" : [ "Platforma: hesab" ]
       }
     },
+    "/api/v1/platform/sms-usage" : {
+      "get" : {
+        "description" : "`from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. Yalnız SMS göndərmiş şirkətlər, ən çox seqmentdən aza sıralanır.",
+        "operationId" : "usage",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SmsUsageReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətlər üzrə SMS istifadəsi",
+        "tags" : [ "Platforma: SMS hesabatı" ]
+      }
+    },
     "/api/v1/platform/tenants" : {
       "get" : {
         "operationId" : "list",
@@ -5547,6 +5584,66 @@
         "properties" : {
           "state" : {
             "type" : "string"
+          }
+        }
+      },
+      "SmsUsageReport" : {
+        "type" : "object",
+        "description" : "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm",
+        "properties" : {
+          "failed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "from" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "messages" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "segments" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "tenants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SmsUsageRow"
+            }
+          },
+          "to" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "SmsUsageRow" : {
+        "type" : "object",
+        "description" : "Şirkətin dövr üzrə SMS istifadəsi. segments — provayderin hesabladığı vahid (yalnız göndərilənlər)",
+        "properties" : {
+          "displayName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "messages" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "segments" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "tenantId" : {
+            "type" : "string",
+            "format" : "uuid"
           }
         }
       },

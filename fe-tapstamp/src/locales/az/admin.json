@@ -15,7 +15,8 @@
     "account": "Hesabım",
     "tenants": "Şirkətlər",
     "simulator": "NFC simulyatoru",
-    "tags": "NFC çipləri"
+    "tags": "NFC çipləri",
+    "smsUsage": "SMS hesabatı"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -285,6 +286,30 @@
     "audit": {
       "title": "Platforma audit jurnalı",
       "subtitle": "Şirkətlərin yaradılması, dayandırılması, domenlər və sahiblərin 2FA-sı."
+    },
+    "sms": {
+      "title": "SMS hesabatı",
+      "subtitle": "Şirkətlərin seçilmiş dövrdə istifadə etdiyi SMS-lər.",
+      "period": "Dövr",
+      "from": "Başlanğıc",
+      "to": "Son",
+      "invalidRange": "Başlanğıc tarixi son tarixdən sonra ola bilməz.",
+      "empty": "Bu dövrdə SMS göndərilməyib.",
+      "note": "Günlər Bakı vaxtı ilə sayılır. Seqment — provayderin hesabladığı vahiddir (uzun mesaj bir neçə seqment olur); yalnız uğurla göndərilənlər sayılır.",
+      "periods": {
+        "thisMonth": "Bu ay",
+        "lastMonth": "Keçən ay",
+        "last7": "Son 7 gün",
+        "last30": "Son 30 gün",
+        "thisYear": "Bu il",
+        "custom": "Tarix aralığı"
+      },
+      "columns": {
+        "company": "Şirkət",
+        "messages": "SMS sayı",
+        "segments": "Seqment",
+        "failed": "Uğursuz"
+      }
     }
   },
   "staffConsole": {

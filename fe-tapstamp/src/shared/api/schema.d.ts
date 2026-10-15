@@ -1211,8 +1211,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Sessiyanın yenilənməsi (refresh token rotasiyası)
-         * @description Yeni access və refresh cookie-ləri qoyulur. Eyni anda iki tabdan gələn yeniləmədə ikincisi 409 `REFRESH_RACE` alır (sorğunu təkrarlamaq kifayətdir). Köhnə refresh tokenin təkrar istifadəsi sessiyanı ləğv edir.
+         * Sessiyanın yenilənməsi
+         * @description Yeni access cookie-si qoyulur. Refresh token dəyişmir, müddəti yenidən 180 gün olur (cookie də yenidən yazılır). Sessiya müştəri çıxana, ləğv olunana və ya 180 gün istifadə olunmayana qədər qalır.
          */
         post: operations["refresh"];
         delete?: never;
@@ -1793,6 +1793,26 @@ export interface paths {
         post?: never;
         /** Sessiyanın ləğvi (cihazdan çıxış) */
         delete: operations["revokeSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/sms-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətlər üzrə SMS istifadəsi
+         * @description `from` və `to` daxil olmaqla (YYYY-MM-DD, Bakı vaxtı), ən çox 2 il. Yalnız SMS göndərmiş şirkətlər, ən çox seqmentdən aza sıralanır.
+         */
+        get: operations["usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3040,6 +3060,33 @@ export interface components {
         /** @description Cari sessiyanın vəziyyəti: NONE — daxil olmayıb, PENDING_MFA — TOTP gözlənilir, MFA_ENROLLMENT — TOTP qurulmalıdır, ACTIVE — tam daxil olub */
         SessionStateResponse: {
             state?: string;
+        };
+        /** @description Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm */
+        SmsUsageReport: {
+            /** Format: int64 */
+            failed?: number;
+            /** Format: date */
+            from?: string;
+            /** Format: int64 */
+            messages?: number;
+            /** Format: int64 */
+            segments?: number;
+            tenants?: components["schemas"]["SmsUsageRow"][];
+            /** Format: date */
+            to?: string;
+        };
+        /** @description Şirkətin dövr üzrə SMS istifadəsi. segments — provayderin hesabladığı vahid (yalnız göndərilənlər) */
+        SmsUsageRow: {
+            displayName?: components["schemas"]["LocalizedText"];
+            /** Format: int64 */
+            failed?: number;
+            /** Format: int64 */
+            messages?: number;
+            /** Format: int64 */
+            segments?: number;
+            slug?: string;
+            /** Format: uuid */
+            tenantId?: string;
         };
         StampDecisionResponse: {
             /** Format: uuid */
@@ -5470,6 +5517,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    usage: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SmsUsageReport"];
+                };
             };
         };
     };

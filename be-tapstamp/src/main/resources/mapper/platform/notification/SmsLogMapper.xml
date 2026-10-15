@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Göndərilən SMS-lərin jurnalı və şirkətlər üzrə hesabat -->
+<mapper namespace="az.tapstamp.notification.sms.repository.SmsLogMapper">
+
+    <insert id="insert">
+        INSERT INTO sms_messages (id, tenant_id, phone_enc, phone_masked, text, purpose, encoding, segments, status,
+                                  error, created_at)
+        VALUES (#{id}, #{tenantId}, #{phoneEnc}, #{phoneMasked}, #{text}, #{purpose}, #{encoding}, #{segments},
+                #{status}, #{error}, #{createdAt})
+    </insert>
+
+    <select id="usage" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Usage">
+        SELECT t.id AS tenant_id, t.slug, t.display_name,
+               count(*) AS messages,
+               coalesce(sum(m.segments) FILTER (WHERE m.status = 'SENT'), 0) AS segments,
+               count(*) FILTER (WHERE m.status = 'FAILED') AS failed
+        FROM sms_messages m
+        JOIN tenants t ON t.id = m.tenant_id
+        WHERE m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
+        GROUP BY t.id, t.slug, t.display_name
+        ORDER BY segments DESC, messages DESC, t.slug
+    </select>
+</mapper>

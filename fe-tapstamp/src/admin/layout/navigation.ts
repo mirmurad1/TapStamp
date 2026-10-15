@@ -2,6 +2,7 @@ import {
   Building2,
   ClipboardList,
   LayoutDashboard,
+  MessageSquareText,
   Nfc,
   Settings,
   ShieldCheck,
@@ -22,6 +23,7 @@ export type AdminSection =
   | 'settings'
   | 'audit'
   | 'tenants'
+  | 'smsUsage'
   | 'account'
   | 'simulator';
 
@@ -48,6 +50,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
 
 const PLATFORM_ITEMS: readonly NavItem[] = [
   { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'] },
+  { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'] },
   { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'] },
 ];

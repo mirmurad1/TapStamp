@@ -16,6 +16,7 @@ import az.tapstamp.customer.repository.OtpChallengeMapper.Purpose;
 import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.nfc.BrowserIdCookie;
 import az.tapstamp.nfc.repository.TapTokenMapper;
+import az.tapstamp.notification.sms.SmsLog;
 import az.tapstamp.notification.sms.SmsMessage;
 import az.tapstamp.notification.sms.SmsProvider;
 import az.tapstamp.notification.sms.SmsTemplates;
@@ -88,6 +89,7 @@ public class OtpService {
     private final CompanySettings companySettings;
     private final SmsProvider sms;
     private final SmsTemplates templates;
+    private final SmsLog smsLog;
     private final TaskExecutor executor;
     private final AuditLogger audit;
     private final CustomerAuthProperties properties;
@@ -98,7 +100,8 @@ public class OtpService {
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
                       @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
                       CompanySettings companySettings, SmsProvider sms,
-                      SmsTemplates templates, @Qualifier("applicationTaskExecutor") TaskExecutor executor, AuditLogger audit,
+                      SmsTemplates templates, SmsLog smsLog,
+                      @Qualifier("applicationTaskExecutor") TaskExecutor executor, AuditLogger audit,
                       CustomerAuthProperties properties, PlatformTransactionManager transactionManager, Clock clock) {
         this.challenges = challenges;
         this.tapTokens = tapTokens;
@@ -111,6 +114,7 @@ public class OtpService {
         this.companySettings = companySettings;
         this.sms = sms;
         this.templates = templates;
+        this.smsLog = smsLog;
         this.executor = executor;
         this.audit = audit;
         this.properties = properties;
@@ -205,12 +209,17 @@ public class OtpService {
         String companyName = settings.smsSenderName() != null ? settings.smsSenderName()
                 : settings.name().resolve(Language.DEFAULT);
         SmsMessage message = new SmsMessage(phone, templates.otp(companyName, code), tenant.id().toString());
+        // Jurnalda (SMS hesabatı) kod gizlədilir: jurnala baxan kodla daxil ola bilməz
+        String storedText = templates.otp(companyName, "*".repeat(code.length()));
         executor.execute(() -> {
+            String error = null;
             try {
                 sms.send(message);
             } catch (RuntimeException e) {
+                error = e.getClass().getSimpleName() + ": " + e.getMessage();
                 log.warn("OTP SMS göndərilmədi: {} ({})", message, e.getClass().getSimpleName());
             }
+            smsLog.record(tenant.id(), phone, message.text(), storedText, error);
         });
         return new Issued(id, expiresAt, now.plus(properties.otpResendCooldown()));
     }
