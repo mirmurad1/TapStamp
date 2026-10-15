@@ -1,0 +1,49 @@
+# Prod deploy: yalnız əl ilə (GitHub → Actions → Deploy → Run workflow) — bir kliklə təsdiq.
+# main-in son commit-i deploy olunur, o da yalnız həmin commit üçün CI (testlər) uğurla bitibsə.
+# Serverdə SSH açarı yalnız scripts/remote-deploy.sh-ı işlədə bilər (bax: docs/deployment.md, "Avtomatik deploy").
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+# Eyni anda bir deploy; yenisi növbədə gözləyir, işləyən deploy heç vaxt kəsilmir
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Prod deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - name: Bu commit üçün CI uğurludur
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" \
+            --event push --json status,conclusion \
+            --jq '[.[] | select(.status == "completed")][0].conclusion // "none"')
+          if [ "$conclusion" != "success" ]; then
+            echo "::error::CI bu commit (${GITHUB_SHA::7}) üçün uğurlu deyil: $conclusion. CI bitənə qədər gözləyin və ya xətanı düzəldin."
+            exit 1
+          fi
+
+      - name: Serverdə deploy
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ vars.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # Serverdəki məcburi əmr (remote-deploy.sh) yalnız commit SHA-nı arqument kimi qəbul edir
+          ssh -i ~/.ssh/deploy -o BatchMode=yes -o ServerAliveInterval=30 "root@$HOST" "$GITHUB_SHA"

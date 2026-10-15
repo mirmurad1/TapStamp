@@ -148,6 +148,31 @@ Baza miqrasiyaları (Flyway) başlanğıcda avtomatik işləyir: əvvəl platfor
 
 **Yeniləmədən əvvəl ehtiyat nüsxə götürün.**
 
+### GitHub-dan deploy (bir kliklə)
+
+GitHub → **Actions** → **Deploy** → **Run workflow** (`main`). Workflow ([`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)):
+1. `main`-in son commit-i üçün CI-in (testlərin) uğurla bitdiyini yoxlayır. Bitməyibsə və ya uğursuzdursa, deploy olmur.
+2. Serverə SSH ilə qoşulur. Serverdə [`scripts/remote-deploy.sh`](../scripts/remote-deploy.sh) işləyir: kilid (eyni anda bir deploy) → həmin commit-ə `git merge --ff-only` → `./scripts/deploy.sh --build` (ehtiyat nüsxə daxil).
+3. Uğursuz olarsa, köhnə versiya işləməyə davam edir, GitHub-da isə xəta görünür.
+
+SSH bağlantısı kəsilsə də deploy serverdə sona qədər gedir. Log: `/var/log/tapstamp-deploy.log`.
+
+**Bir dəfəlik quraşdırma.**
+
+1. Serverdə deploy açarı. Açar `authorized_keys`-də **yalnız** deploy skriptinə bağlanır (shell, port yönləndirmə yoxdur):
+   ```bash
+   chmod +x /opt/tapstamp/scripts/remote-deploy.sh
+   ssh-keygen -t ed25519 -N '' -C github-deploy -f /root/github_deploy
+   echo "command=\"/opt/tapstamp/scripts/remote-deploy.sh\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty $(cat /root/github_deploy.pub)" >> /root/.ssh/authorized_keys
+   ```
+2. GitHub → repo → **Settings** → **Secrets and variables** → **Actions**:
+   - **Secrets** → `DEPLOY_SSH_KEY`: `cat /root/github_deploy` çıxışının hamısı (`-----BEGIN` … `END-----` daxil);
+   - **Secrets** → `DEPLOY_KNOWN_HOSTS`: `echo "169.58.189.40 $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"` çıxışı (GitHub yalnız bu serverə qoşulur — saxta server ola bilməz);
+   - **Variables** → `DEPLOY_HOST`: `169.58.189.40`.
+3. Serverdə açarın gizli hissəsini silin (artıq yalnız GitHub-dadır): `rm /root/github_deploy /root/github_deploy.pub`.
+
+Açarı ləğv etmək üçün `authorized_keys`-dən `github-deploy` sətrini silmək kifayətdir.
+
 ## 10. Yoxlama siyahısı
 
 - [ ] `https://platform.sizinbrend.az/admin` açılır, sertifikat etibarlıdır.
