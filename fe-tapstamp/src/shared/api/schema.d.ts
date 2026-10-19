@@ -2593,6 +2593,8 @@ export interface components {
              * @description Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)
              */
             inactiveDays?: number;
+            /** @description Mətn "Hörmətli <ad>," ilə başlasın (adı yoxdursa "Hörmətli istifadəçi,") */
+            personalized?: boolean;
             text: string;
         };
         /** @description Kampaniya və vəziyyəti */
@@ -2613,6 +2615,7 @@ export interface components {
             id?: string;
             /** Format: int32 */
             inactiveDays?: number;
+            personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
             rejectReason?: string;
@@ -3079,6 +3082,7 @@ export interface components {
             id?: string;
             /** Format: int32 */
             inactiveDays?: number;
+            personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
             rejectReason?: string;
@@ -3117,8 +3121,12 @@ export interface components {
             latinText?: string;
             /** Format: int64 */
             latinTotalSms?: number;
+            /** Format: int32 */
+            minSegments?: number;
+            personalized?: boolean;
             /** Format: int64 */
             recipients?: number;
+            sampleWithoutName?: string;
             /** Format: int32 */
             segments?: number;
             /** Format: int64 */

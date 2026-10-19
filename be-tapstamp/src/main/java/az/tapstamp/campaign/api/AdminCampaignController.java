@@ -48,15 +48,17 @@ public class AdminCampaignController {
             @NotBlank @Size(max = 1000) String text,
             @NotNull Audience audience,
             @Schema(description = "Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)") @Min(7) @Max(365) Integer inactiveDays,
-            @Schema(description = "Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı") UUID branchId) {
+            @Schema(description = "Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı") UUID branchId,
+            @Schema(description = "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")")
+            Boolean personalized) {
 
         Draft draft() {
-            return new Draft(text, audience, inactiveDays, branchId);
+            return new Draft(text, audience, inactiveDays, branchId, Boolean.TRUE.equals(personalized));
         }
     }
 
     @Schema(description = "Kampaniya və vəziyyəti")
-    public record CampaignView(UUID id, String text, Audience audience, Integer inactiveDays, UUID branchId,
+    public record CampaignView(UUID id, String text, boolean personalized, Audience audience, Integer inactiveDays, UUID branchId,
                                int recipients, int segmentsPerMessage, int totalSms,
                                @Schema(allowableValues = {"PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED",
                                        "CANCELLED"}) String status,
@@ -64,7 +66,7 @@ public class AdminCampaignController {
                                Instant finishedAt) {
 
         public static CampaignView from(Campaign c) {
-            return new CampaignView(c.id(), c.text(), Audience.valueOf(c.audience()), c.inactiveDays(), c.branchId(),
+            return new CampaignView(c.id(), c.text(), c.personalized(), Audience.valueOf(c.audience()), c.inactiveDays(), c.branchId(),
                     c.recipients(), c.segmentsPerMessage(), c.totalSms(), c.status(), c.rejectReason(), c.createdAt(),
                     c.decidedAt(), c.sentCount(), c.failedCount(), c.finishedAt());
         }

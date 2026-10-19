@@ -746,7 +746,9 @@
       "branch": "Branch",
       "allBranches": "All branches",
       "submit": "Send for approval",
-      "sent": "The campaign was sent for platform approval. It will be approved and sent after payment."
+      "sent": "The campaign was sent for platform approval. It will be approved and sent after payment.",
+      "personalized": "Start with a greeting",
+      "personalizedHint": "Each SMS starts with \"Hörmətli <customer name>,\"; customers without a name get \"Hörmətli istifadəçi,\"."
     },
     "preview": {
       "title": "Preview",
@@ -754,7 +756,10 @@
       "total": "Total {{total}} SMS",
       "latinAdvice": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü) — one SMS holds 70 characters instead of 160. With Latin letters it would be {{segments}} SMS per customer, {{total}} SMS in total:",
       "useLatin": "Use the Latin version",
-      "unicodeNote": "The text contains Azerbaijani letters: one SMS holds 70 characters."
+      "unicodeNote": "The text contains Azerbaijani letters: one SMS holds 70 characters.",
+      "withName": "To a customer with a name:",
+      "withoutName": "To a customer without a name:",
+      "personalizedNote": "The word \"Hörmətli\" contains \"ö\": one SMS holds 70 characters. The SMS count is calculated with each customer's own name."
     },
     "list": {
       "title": "My campaigns",
@@ -764,7 +769,9 @@
       "pendingNote": "It will be approved by the platform after payment. Sending happens between 09:00 and 21:00.",
       "cancel": "Cancel",
       "cancelConfirm": "Cancel this campaign?",
-      "rejectReason": "Rejection reason: {{reason}}"
+      "rejectReason": "Rejection reason: {{reason}}",
+      "personalized": "Personal greeting",
+      "greetingPrefix": "Hörmətli <name>,"
     },
     "status": {
       "PENDING_APPROVAL": "Awaiting approval",

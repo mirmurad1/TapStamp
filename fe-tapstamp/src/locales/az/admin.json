@@ -746,7 +746,9 @@
       "branch": "Filial",
       "allBranches": "Bütün filiallar",
       "submit": "Təsdiqə göndər",
-      "sent": "Kampaniya platformanın təsdiqinə göndərildi. Ödəniş alındıqdan sonra təsdiqlənəcək və göndəriləcək."
+      "sent": "Kampaniya platformanın təsdiqinə göndərildi. Ödəniş alındıqdan sonra təsdiqlənəcək və göndəriləcək.",
+      "personalized": "Müraciətlə başla",
+      "personalizedHint": "Hər SMS \"Hörmətli <müştərinin adı>,\" ilə başlayacaq; adı olmayan müştəriyə \"Hörmətli istifadəçi,\"."
     },
     "preview": {
       "title": "Önizləmə",
@@ -754,7 +756,10 @@
       "total": "Cəmi {{total}} SMS",
       "latinAdvice": "Mətndə Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) var — bir SMS 160 yox, 70 simvol tutur. Latın hərfləri ilə hər müştəriyə {{segments}} SMS, cəmi {{total}} SMS gedər:",
       "useLatin": "Latın variantını istifadə et",
-      "unicodeNote": "Mətndə Azərbaycan hərfləri var: bir SMS 70 simvol tutur."
+      "unicodeNote": "Mətndə Azərbaycan hərfləri var: bir SMS 70 simvol tutur.",
+      "withName": "Adı olan müştəriyə:",
+      "withoutName": "Adı olmayan müştəriyə:",
+      "personalizedNote": "\"Hörmətli\" sözündə \"ö\" hərfi var: bir SMS 70 simvol tutur. SMS sayı hər müştərinin öz adı ilə hesablanıb."
     },
     "list": {
       "title": "Kampaniyalarım",
@@ -764,7 +769,9 @@
       "pendingNote": "Ödəniş alındıqdan sonra platforma tərəfindən təsdiqlənəcək. Göndəriş 09:00–21:00 arası olur.",
       "cancel": "Ləğv et",
       "cancelConfirm": "Kampaniya ləğv edilsin?",
-      "rejectReason": "Rədd səbəbi: {{reason}}"
+      "rejectReason": "Rədd səbəbi: {{reason}}",
+      "personalized": "Fərdi müraciət",
+      "greetingPrefix": "Hörmətli <ad>,"
     },
     "status": {
       "PENDING_APPROVAL": "Təsdiq gözləyir",

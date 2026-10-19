@@ -42,6 +42,7 @@ public class PlatformCampaignController {
 
     @Schema(description = "Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət")
     public record PlatformCampaignView(UUID tenantId, String slug, LocalizedText displayName, UUID id, String text,
+                                       boolean personalized,
                                        Audience audience, Integer inactiveDays, int recipients, int segmentsPerMessage,
                                        int totalSms, String status, String rejectReason, Instant createdAt,
                                        Instant decidedAt, int sentCount, int failedCount, Instant finishedAt) {
@@ -49,7 +50,7 @@ public class PlatformCampaignController {
         static PlatformCampaignView from(TenantCampaign tc) {
             Campaign c = tc.campaign();
             return new PlatformCampaignView(tc.tenant().id(), tc.tenant().slug(), tc.tenant().displayName(), c.id(),
-                    c.text(), Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
+                    c.text(), c.personalized(), Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
                     c.totalSms(), c.status(), c.rejectReason(), c.createdAt(), c.decidedAt(), c.sentCount(),
                     c.failedCount(), c.finishedAt());
         }

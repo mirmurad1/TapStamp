@@ -102,8 +102,9 @@ public class CampaignSender {
         if (recipients.isEmpty()) {
             return;
         }
-        String text = CampaignTexts.compose(companyName(), campaign.text());
+        String company = companyName();
         for (CampaignMapper.Recipient recipient : recipients) {
+            String text = CampaignTexts.compose(company, campaign.text(), campaign.personalized(), recipient.name());
             String error = null;
             String phone = null;
             try {

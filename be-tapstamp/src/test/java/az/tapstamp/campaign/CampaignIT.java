@@ -103,6 +103,35 @@ class CampaignIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.rejectReason").value("Ödəniş alınmayıb"));
     }
 
+    @Test
+    void personalizedCampaignGreetsByNameOrAsUser() throws Exception {
+        String named = uniquePhone();
+        signedIn(named).patch("/api/v1/me", Map.of("name", "Aysel")).andExpect(status().isOk());
+        String unnamed = uniquePhone();
+        // Boş sətir adı silir
+        signedIn(unnamed).patch("/api/v1/me", Map.of("name", "")).andExpect(status().isOk());
+
+        AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
+        String text = "Bu hefte ikinci qehve hediyyedir!";
+        Map<String, Object> request = Map.of("text", text, "audience", "ALL", "personalized", true);
+        // "Hörmətli" sözündə ö var: mesaj UCS-2 olur, latın variantı tövsiyə olunur
+        owner.post("/campaigns/preview", request).andExpect(status().isOk())
+                .andExpect(jsonPath("$.personalized").value(true))
+                .andExpect(jsonPath("$.fullText").value(org.hamcrest.Matchers.matchesPattern("Alpha Kafe: Hörmətli .+, " + text)))
+                .andExpect(jsonPath("$.sampleWithoutName").value("Alpha Kafe: Hörmətli istifadəçi, " + text))
+                .andExpect(jsonPath("$.encoding").value("UCS_2"))
+                .andExpect(jsonPath("$.latinText").value(org.hamcrest.Matchers.startsWith("Alpha Kafe: Hormetli ")));
+
+        String id = json(owner.post("/campaigns", request).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.personalized").value(true)), "$.id");
+        signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
+        sendAll();
+
+        assertThat(sms.to(named)).anySatisfy(m -> assertThat(m.text()).isEqualTo("Alpha Kafe: Hörmətli Aysel, " + text));
+        assertThat(sms.to(unnamed)).anySatisfy(m -> assertThat(m.text())
+                .isEqualTo("Alpha Kafe: Hörmətli istifadəçi, " + text));
+    }
+
     /** Saatı şirkətin 09:00–21:00 pəncərəsinə gətirib göndərişi bitənə qədər işlədir. */
     private void sendAll() {
         LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();

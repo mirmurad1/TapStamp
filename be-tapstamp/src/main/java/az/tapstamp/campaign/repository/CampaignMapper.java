@@ -13,7 +13,8 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface CampaignMapper {
 
-    record Campaign(UUID id, String text, String audience, @Nullable Integer inactiveDays, @Nullable UUID branchId,
+    record Campaign(UUID id, String text, boolean personalized, String audience, @Nullable Integer inactiveDays,
+                    @Nullable UUID branchId,
                     int recipients, int segmentsPerMessage, int totalSms, String status, @Nullable String rejectReason,
                     UUID createdBy, Instant createdAt, @Nullable Instant decidedAt, int sentCount, int failedCount,
                     @Nullable Instant finishedAt) {
@@ -24,19 +25,25 @@ public interface CampaignMapper {
     }
 
     /** Göndərişə götürülmüş alıcı. */
-    record Recipient(UUID customerId, byte[] phoneEnc) {
+    record Recipient(UUID customerId, byte[] phoneEnc, @Nullable String name) {
     }
 
     long countAudience(@Param("a") Audience audience);
 
     boolean branchExists(UUID branchId);
 
+    /** Auditoriyadakı müştərilərin adları (adı yoxdursa null) — fərdi müraciətdə SMS sayını hesablamaq üçün. */
+    List<@Nullable String> audienceNames(@Param("a") Audience audience);
+
+    /** Kampaniyanın alıcılarının adları (adı yoxdursa null). */
+    List<@Nullable String> recipientNames(UUID campaignId);
+
     void insert(Campaign campaign);
 
     /** Auditoriyanı kampaniyanın alıcıları kimi yazır; yazılan sayı qaytarır. */
     int insertRecipients(@Param("campaignId") UUID campaignId, @Param("a") Audience audience);
 
-    void updateCounts(UUID id, int recipients, int totalSms);
+    void updateCounts(UUID id, int recipients, int segmentsPerMessage, int totalSms);
 
     List<Campaign> list(int limit);
 

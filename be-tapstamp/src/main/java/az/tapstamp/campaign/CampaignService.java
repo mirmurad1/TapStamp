@@ -34,15 +34,21 @@ public class CampaignService {
 
     public enum Audience { ALL, INACTIVE, NEAR_REWARD, UNUSED_GIFT_CARD }
 
-    /** Kampaniyanın parametrləri. {@code inactiveDays} yalnız INACTIVE üçün (7–365). */
-    public record Draft(String text, Audience audience, @Nullable Integer inactiveDays, @Nullable UUID branchId) {
+    /**
+     * Kampaniyanın parametrləri. {@code inactiveDays} yalnız INACTIVE üçün (7–365); {@code personalized} — mətn
+     * "Hörmətli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Hörmətli istifadəçi,").
+     */
+    public record Draft(String text, Audience audience, @Nullable Integer inactiveDays, @Nullable UUID branchId,
+                        boolean personalized) {
     }
 
     /**
-     * Önizləmə: göndəriləcək tam mətn və onun SMS sayı, həmçinin latın hərfləri ilə variantı (Azərbaycan hərfləri
-     * bir SMS-i 160 yox, 70 simvol edir).
+     * Önizləmə: nümunə mətn (fərdi müraciətdə auditoriyadan adı olan müştəri ilə; {@code sampleWithoutName} — adı
+     * olmayan üçün), hər müştəriyə ən az/ən çox SMS və cəmi (hər müştərinin adı ilə hesablanır); həmçinin latın
+     * hərfləri ilə variant (Azərbaycan hərfləri bir SMS-i 160 yox, 70 simvol edir).
      */
-    public record Preview(long recipients, String fullText, String encoding, int characters, int segments, long totalSms,
+    public record Preview(long recipients, boolean personalized, String fullText, @Nullable String sampleWithoutName,
+                          String encoding, int characters, int segments, int minSegments, long totalSms,
                           String latinText, int latinSegments, long latinTotalSms, boolean latinCheaper) {
     }
 
@@ -75,15 +81,18 @@ public class CampaignService {
         Instant now = clock.instant();
         Campaign created = Objects.requireNonNull(tx.execute(status -> {
             CampaignMapper.Audience audience = audience(draft, now);
-            Campaign row = new Campaign(id, draft.text().strip(), draft.audience().name(), draft.inactiveDays(),
-                    draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null, principal.userId(), now,
-                    null, 0, 0, null);
+            Campaign row = new Campaign(id, draft.text().strip(), draft.personalized(), draft.audience().name(),
+                    draft.inactiveDays(), draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null,
+                    principal.userId(), now, null, 0, 0, null);
             campaigns.insert(row);
             int recipients = campaigns.insertRecipients(id, audience);
             if (recipients == 0) {
                 throw new ApiException(ErrorCode.CAMPAIGN_NO_RECIPIENTS);
             }
-            campaigns.updateCounts(id, recipients, recipients * preview.segments());
+            // Dəqiq SMS sayı: alıcıların özləri (fərdi müraciətdə adları) ilə
+            CampaignTexts.Totals totals = CampaignTexts.totals(companyName(), draft.text(), draft.personalized(),
+                    campaigns.recipientNames(id), false);
+            campaigns.updateCounts(id, recipients, totals.maxSegments(), Math.toIntExact(totals.total()));
             return campaigns.find(id).orElseThrow();
         }));
         audit.tenant("CAMPAIGN_CREATED", AuditLogger.ActorType.STAFF, principal.userId(), "campaign", id,
@@ -142,14 +151,25 @@ public class CampaignService {
 
     private Preview preview(Draft draft) {
         validate(draft);
-        String full = CampaignTexts.compose(companyName(), draft.text());
+        String company = companyName();
+        CampaignMapper.Audience audience = audience(draft, clock.instant());
+        List<@Nullable String> names = draft.personalized() ? campaigns.audienceNames(audience) : null;
+        long recipients = names != null ? names.size() : campaigns.countAudience(audience);
+        // Nümunə: auditoriyadan adı olan ilk müştəri; adsız variant ayrıca göstərilir
+        String sampleName = names == null ? null
+                : names.stream().filter(n -> n != null && !n.isBlank()).findFirst().orElse(null);
+        String full = CampaignTexts.compose(company, draft.text(), draft.personalized(), sampleName);
+        String withoutName = draft.personalized() && sampleName != null
+                ? CampaignTexts.compose(company, draft.text(), true, null) : null;
         String latin = CampaignTexts.latin(full);
         SmsSegments.Info info = CampaignTexts.analyze(full);
-        SmsSegments.Info latinInfo = CampaignTexts.analyze(latin);
-        long recipients = campaigns.countAudience(audience(draft, clock.instant()));
-        return new Preview(recipients, full, info.encoding().name(), info.units(), info.segments(),
-                recipients * info.segments(), latin, latinInfo.segments(), recipients * latinInfo.segments(),
-                latinInfo.segments() < info.segments());
+        List<@Nullable String> forTotals = names != null ? names : java.util.Collections.nCopies((int) recipients, null);
+        CampaignTexts.Totals totals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals, false);
+        CampaignTexts.Totals latinTotals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals,
+                true);
+        return new Preview(recipients, draft.personalized(), full, withoutName, info.encoding().name(), info.units(),
+                totals.maxSegments(), totals.minSegments(), totals.total(), latin, latinTotals.maxSegments(),
+                latinTotals.total(), latinTotals.total() < totals.total());
     }
 
     private void validate(Draft draft) {

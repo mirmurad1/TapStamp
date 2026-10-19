@@ -86,7 +86,10 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
           </div>
           <span className="text-muted-foreground">{campaign.createdAt ? formatDateTime(campaign.createdAt, lang) : null}</span>
         </div>
-        <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">{campaign.text}</p>
+        <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">
+          {campaign.personalized ? `${t('admin:campaigns.list.greetingPrefix')} ` : null}
+          {campaign.text}
+        </p>
         <p className="text-muted-foreground">
           {t(`admin:campaigns.audience.${campaign.audience ?? 'ALL'}`)}
           {campaign.audience === 'INACTIVE' ? ` (${t('admin:campaigns.new.days', { count: campaign.inactiveDays ?? 0 })})` : null}

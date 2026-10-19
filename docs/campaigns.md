@@ -8,6 +8,11 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
 1. **Sahib** — admin panel → **Kampaniyalar** → **Yeni kampaniya**:
    - mətn (1000 simvola qədər); əvvəlinə şirkətin "SMS-də görünən adı" avtomatik əlavə olunur: `Kafe: <mətn>`
      (göndərən adı bütün şirkətlər üçün `TrendStamp`-dır — müştəri SMS-in kimdən olduğunu adla bilir);
+   - **"Müraciətlə başla"** (istəyə bağlı): hər SMS `Kafe: Hörmətli <ad>, <mətn>` olur, adı olmayan müştəriyə
+     `Kafe: Hörmətli istifadəçi, <mətn>`. "Hörmətli" sözündə `ö` olduğu üçün mesaj UCS-2-yə keçir (70 simvol/SMS);
+     SMS sayı hər müştərinin öz adı ilə hesablanır (önizləmədə "hər müştəriyə 1–2 SMS" kimi aralıq görünə bilər),
+     cəmi kampaniya yaradılanda alıcıların adları ilə dəqiqləşir. Önizləmədə adı olan (auditoriyadan) və adı
+     olmayan müştəri üçün nümunə göstərilir;
    - auditoriya: bütün müştərilər / uzun müddət gəlməyənlər (30, 60, 90 gün) / hədiyyəyə 1–2 möhür qalanlar /
      istifadə olunmamış hədiyyə kartı olanlar; istəyə bağlı filial (həmin filialda möhürü olanlar);
    - **önizləmə**: alıcı sayı, tam mətn, simvol sayı, hər müştəriyə neçə SMS, **cəmi SMS**. Mətndə Azərbaycan

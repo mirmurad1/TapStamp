@@ -37,6 +37,11 @@ export function CampaignsPage() {
   );
 }
 
+/** Hər müştəriyə düşən SMS: hamıya eynidirsə bir rəqəm, fərdi müraciətdə adlara görə aralıq (məs. 1–2). */
+function segmentRange(min: number | undefined, max: number | undefined): string {
+  return min !== undefined && max !== undefined && min !== max ? `${min}–${max}` : String(max ?? 0);
+}
+
 /** Yazmaq dayananda (400 ms) dəyər yenilənir — önizləmə hər hərfdə sorğu göndərmir. */
 function useDebounced<T>(value: T, delay = 400): T {
   const [debounced, setDebounced] = useState(value);
@@ -55,6 +60,7 @@ function NewCampaignCard() {
   const [audience, setAudience] = useState<CampaignAudience>('ALL');
   const [inactiveDays, setInactiveDays] = useState<number>(30);
   const [branchId, setBranchId] = useState('');
+  const [personalized, setPersonalized] = useState(false);
   const branches = useQuery({ queryKey: ['settings-branches'], queryFn: companyApi.branches });
 
   const request: CampaignRequest = {
@@ -62,6 +68,7 @@ function NewCampaignCard() {
     audience,
     inactiveDays: audience === 'INACTIVE' ? inactiveDays : undefined,
     branchId: branchId || undefined,
+    personalized,
   };
   const debounced = useDebounced(request);
   const preview = useQuery({
@@ -115,6 +122,18 @@ function NewCampaignCard() {
               className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-base text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
             />
           </Field>
+          <label className="flex cursor-pointer items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-5 shrink-0 accent-primary"
+              checked={personalized}
+              onChange={(event) => setPersonalized(event.target.checked)}
+            />
+            <span>
+              <span className="font-medium">{t('campaigns.new.personalized')}</span>
+              <span className="block text-muted-foreground">{t('campaigns.new.personalizedHint')}</span>
+            </span>
+          </label>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field id="campaign-audience" label={t('campaigns.new.audience')}>
               <Select value={audience} onChange={(event) => setAudience(event.target.value as CampaignAudience)}>
@@ -151,14 +170,24 @@ function NewCampaignCard() {
           {data ? (
             <div className="flex flex-col gap-3 rounded-xl bg-muted p-4 text-sm">
               <p className="font-medium">{t('campaigns.preview.title')}</p>
-              <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.fullText}</p>
+              {data.sampleWithoutName ? (
+                <>
+                  <p className="text-muted-foreground">{t('campaigns.preview.withName')}</p>
+                  <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.fullText}</p>
+                  <p className="text-muted-foreground">{t('campaigns.preview.withoutName')}</p>
+                  <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.sampleWithoutName}</p>
+                </>
+              ) : (
+                <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.fullText}</p>
+              )}
               <p>
                 {t('campaigns.preview.summary', {
                   recipients: formatNumber(data.recipients ?? 0, lang),
                   characters: data.characters ?? 0,
-                  segments: data.segments ?? 0,
+                  segments: segmentRange(data.minSegments, data.segments),
                 })}
               </p>
+              {data.personalized ? <p className="text-muted-foreground">{t('campaigns.preview.personalizedNote')}</p> : null}
               <p className="font-display text-xl font-semibold">
                 {t('campaigns.preview.total', { total: formatNumber(data.totalSms ?? 0, lang) })}
               </p>
@@ -223,6 +252,7 @@ function CampaignList() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={campaignStatusTone(campaign.status)}>{t(`campaigns.status.${campaignStatus(campaign.status)}`)}</Badge>
+                  {campaign.personalized ? <Badge>{t('campaigns.list.personalized')}</Badge> : null}
                   <span className="text-muted-foreground">
                     {campaign.createdAt ? formatDateTime(campaign.createdAt, lang) : null}
                     {' · '}

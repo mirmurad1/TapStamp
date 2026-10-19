@@ -4372,6 +4372,10 @@
             "maximum" : 365,
             "minimum" : 7
           },
+          "personalized" : {
+            "type" : "boolean",
+            "description" : "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")"
+          },
           "text" : {
             "type" : "string",
             "maxLength" : 1000,
@@ -4415,6 +4419,9 @@
           "inactiveDays" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "personalized" : {
+            "type" : "boolean"
           },
           "recipients" : {
             "type" : "integer",
@@ -5566,6 +5573,9 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "personalized" : {
+            "type" : "boolean"
+          },
           "recipients" : {
             "type" : "integer",
             "format" : "int32"
@@ -5662,9 +5672,19 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "minSegments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "personalized" : {
+            "type" : "boolean"
+          },
           "recipients" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "sampleWithoutName" : {
+            "type" : "string"
           },
           "segments" : {
             "type" : "integer",
