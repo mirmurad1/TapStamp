@@ -115,6 +115,11 @@
       "codeHint": "Enter the code sent to your phone to confirm.",
       "confirm": "Delete my account permanently",
       "done": "Your account has been deleted. We hope to see you again!"
+    },
+    "marketing": {
+      "title": "Promotional SMS",
+      "description": "SMS about discounts and gifts. You can turn them off at any time.",
+      "label": "Receive promotional SMS"
     }
   },
   "legal": {

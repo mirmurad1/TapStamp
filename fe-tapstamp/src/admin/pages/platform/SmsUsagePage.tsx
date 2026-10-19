@@ -126,9 +126,12 @@ function UsageSection({ today }: { today: string }) {
 
   /** Excel üçün CSV: şirkət, kod, uğurlu SMS sayı və cəm sətri. */
   const exportCsv = () => {
-    const header = [t('platform.sms.columns.company'), t('platform.sms.columns.slug'), t('platform.sms.columns.messages')];
-    const lines = rows.map((row) => [resolveText(row.displayName, lang), row.slug ?? '', row.messages ?? 0]);
-    const total = [t('platform.sms.export.total'), '', report.data?.messages ?? 0];
+    const header = [t('platform.sms.columns.company'), t('platform.sms.columns.slug'), t('platform.sms.columns.otp'),
+      t('platform.sms.columns.campaign'), t('platform.sms.columns.messages')];
+    const lines = rows.map((row) => [resolveText(row.displayName, lang), row.slug ?? '', row.otp ?? 0, row.campaign ?? 0,
+      row.messages ?? 0]);
+    const total = [t('platform.sms.export.total'), '', report.data?.otp ?? 0, report.data?.campaign ?? 0,
+      report.data?.messages ?? 0];
     downloadBlob(toCsv([header, ...lines, total]), `sms-${range.from}_${range.to}.csv`);
   };
 
@@ -160,6 +163,8 @@ function UsageSection({ today }: { today: string }) {
               <thead>
                 <tr className="border-b border-border text-left text-muted-foreground">
                   <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
+                  <th className="py-2 pr-4 text-right font-medium">{t('platform.sms.columns.otp')}</th>
+                  <th className="py-2 pr-4 text-right font-medium">{t('platform.sms.columns.campaign')}</th>
                   <th className="py-2 text-right font-medium">{t('platform.sms.columns.messages')}</th>
                 </tr>
               </thead>
@@ -170,7 +175,9 @@ function UsageSection({ today }: { today: string }) {
                       <span className="font-medium">{resolveText(row.displayName, lang)}</span>
                       <span className="ml-2 text-muted-foreground">{row.slug}</span>
                     </td>
-                    <td className="py-2 text-right tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
+                    <td className="py-2 pr-4 text-right tabular-nums">{formatNumber(row.otp ?? 0, lang)}</td>
+                    <td className="py-2 pr-4 text-right tabular-nums">{formatNumber(row.campaign ?? 0, lang)}</td>
+                    <td className="py-2 text-right font-medium tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -280,7 +287,12 @@ function MessagesSection({ today, mode }: { today: string; mode: MessagesMode })
                     </td>
                     <td className="py-2 pr-4">{resolveText(item.displayName, lang)}</td>
                     <td className="whitespace-nowrap py-2 pr-4 tabular-nums">{item.phone}</td>
-                    <td className="py-2 pr-4">{item.text}</td>
+                    <td className="py-2 pr-4">
+                      {item.purpose === 'CAMPAIGN' ? (
+                        <Badge className="mb-1">{t('platform.sms.purposes.CAMPAIGN')}</Badge>
+                      ) : null}
+                      <p>{item.text}</p>
+                    </td>
                     {mode === 'search' ? (
                       <td className="whitespace-nowrap py-2 pr-4">
                         <Badge tone={item.status === 'SENT' ? 'success' : 'danger'}>

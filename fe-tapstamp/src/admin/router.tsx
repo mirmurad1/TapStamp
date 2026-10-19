@@ -5,6 +5,7 @@ import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
 import { AuditPage } from './pages/audit/AuditPage';
+import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -17,6 +18,7 @@ import { SimulatorPage } from './pages/dev/SimulatorPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
+import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
 import { SmsUsagePage } from './pages/platform/SmsUsagePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
@@ -74,6 +76,7 @@ export const adminRouter = createBrowserRouter(
                       children: [
                         { path: 'settings/*', element: <SettingsPage /> },
                         { path: 'audit', element: <AuditPage /> },
+                        { path: 'campaigns', element: <CampaignsPage /> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },
@@ -87,6 +90,7 @@ export const adminRouter = createBrowserRouter(
                     { path: 'tenants/:tenantId', element: <TenantDetailPage /> },
                     { path: 'platform-audit', element: <PlatformAuditPage /> },
                     { path: 'sms-usage', element: <SmsUsagePage /> },
+                    { path: 'platform-campaigns', element: <PlatformCampaignsPage /> },
                   ],
                 },
                 { path: '*', element: <NotFound /> },

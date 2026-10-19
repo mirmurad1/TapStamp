@@ -76,5 +76,7 @@ Aşağıdakı cədvəldə mətnlər Azərbaycan dilindədir (`messages_az.proper
 | `TAG_ROTATION_IN_PROGRESS` | 409 | Açar yenilənməsi davam edir | Yeni açarlar artıq ixrac olunub. Əvvəlcə proqramlaşdırılmış çipə toxunun ki, keçid tamamlansın. |
 | `PROVISIONING_ALREADY_EXPORTED` | 409 | Açarlar artıq göstərilib | Təhlükəsizlik üçün çip açarları yalnız bir dəfə göstərilir. Yenidən lazımdırsa, açarı yeniləyin. |
 | `DOMAIN_IS_PRIMARY` | 409 | Əsas domen silinə bilməz | Əvvəlcə başqa domeni əsas edin. Çiplərdəki linklər əsas domenə yazılıb. |
+| `CAMPAIGN_NO_RECIPIENTS` | 409 | Alıcı yoxdur | Seçilmiş auditoriyada kampaniya SMS-i ala bilən müştəri yoxdur. |
+| `CAMPAIGN_STATE_CHANGED` | 409 | Kampaniyanın vəziyyəti dəyişib | Kampaniya artıq təsdiqlənib, rədd edilib və ya ləğv olunub. Səhifəni yeniləyin. |
 | `TENANT_UNAVAILABLE` | 503 | Xidmət müvəqqəti əlçatmazdır | Bu şirkətin loyallıq xidməti hazırda işləmir. Bir az sonra yenidən cəhd edin. |
 | `INTERNAL_ERROR` | 500 | Gözlənilməz xəta | Nəsə alınmadı. Bir azdan yenidən cəhd edin. |

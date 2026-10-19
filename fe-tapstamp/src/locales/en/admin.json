@@ -16,7 +16,8 @@
     "tenants": "Companies",
     "simulator": "NFC simulator",
     "tags": "NFC tags",
-    "smsUsage": "SMS report"
+    "smsUsage": "SMS report",
+    "campaigns": "Campaigns"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -306,8 +307,10 @@
       },
       "columns": {
         "company": "Company",
-        "messages": "SMS count",
-        "slug": "Code"
+        "messages": "Total",
+        "slug": "Code",
+        "otp": "Login codes",
+        "campaign": "Campaigns"
       },
       "total": "Successful SMS (total)",
       "usageTitle": "Successful SMS by company",
@@ -342,7 +345,32 @@
         "ALL": "All",
         "SENT": "Sent",
         "FAILED": "Failed"
+      },
+      "purposes": {
+        "OTP": "Login code",
+        "CAMPAIGN": "Campaign"
       }
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "subtitle": "Company SMS campaigns. Approve after payment — sending starts automatically between 09:00 and 21:00.",
+      "filter": "Show",
+      "filters": {
+        "PENDING": "Awaiting approval",
+        "ALL": "All"
+      },
+      "empty": {
+        "PENDING": "No campaigns awaiting approval.",
+        "ALL": "No campaigns."
+      },
+      "recipients": "Recipients",
+      "perMessage": "SMS per customer",
+      "totalSms": "Total SMS",
+      "delivery": "Sent / failed",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectReason": "Rejection reason",
+      "approveConfirm": "Has the payment been received? {{total}} SMS will be sent after approval."
     }
   },
   "staffConsole": {
@@ -702,5 +730,55 @@
       "SYSTEM": "System"
     },
     "empty": "No entries found."
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "subtitle": "Send SMS campaigns to your customers. A campaign is sent after platform approval.",
+    "new": {
+      "title": "New campaign",
+      "description": "Write the text and pick the audience — the number of SMS is calculated right away.",
+      "text": "Text",
+      "textHint": "Your company SMS name is added to the beginning automatically.",
+      "audience": "Audience",
+      "inactiveDays": "Not visited for",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "branch": "Branch",
+      "allBranches": "All branches",
+      "submit": "Send for approval",
+      "sent": "The campaign was sent for platform approval. It will be approved and sent after payment."
+    },
+    "preview": {
+      "title": "Preview",
+      "summary": "{{recipients}} recipients · {{characters}} characters · {{segments}} SMS per customer",
+      "total": "Total {{total}} SMS",
+      "latinAdvice": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü) — one SMS holds 70 characters instead of 160. With Latin letters it would be {{segments}} SMS per customer, {{total}} SMS in total:",
+      "useLatin": "Use the Latin version",
+      "unicodeNote": "The text contains Azerbaijani letters: one SMS holds 70 characters."
+    },
+    "list": {
+      "title": "My campaigns",
+      "empty": "No campaigns yet.",
+      "counts": "{{recipients}} recipients · {{total}} SMS",
+      "delivery": "sent: {{sent}}, failed: {{failed}}",
+      "pendingNote": "It will be approved by the platform after payment. Sending happens between 09:00 and 21:00.",
+      "cancel": "Cancel",
+      "cancelConfirm": "Cancel this campaign?",
+      "rejectReason": "Rejection reason: {{reason}}"
+    },
+    "status": {
+      "PENDING_APPROVAL": "Awaiting approval",
+      "APPROVED": "Approved",
+      "SENDING": "Sending",
+      "SENT": "Sent",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled"
+    },
+    "audience": {
+      "ALL": "All customers",
+      "INACTIVE": "Customers who have not visited for a while",
+      "NEAR_REWARD": "1–2 stamps away from a reward",
+      "UNUSED_GIFT_CARD": "With an unused gift card"
+    }
   }
 }

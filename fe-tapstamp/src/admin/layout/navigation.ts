@@ -2,6 +2,7 @@ import {
   Building2,
   ClipboardList,
   LayoutDashboard,
+  Megaphone,
   MessageSquareText,
   Nfc,
   Settings,
@@ -24,6 +25,7 @@ export type AdminSection =
   | 'audit'
   | 'tenants'
   | 'smsUsage'
+  | 'campaigns'
   | 'account'
   | 'simulator';
 
@@ -43,6 +45,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'staffConsole', to: '/staff-console', icon: ClipboardList, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
   { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
+  { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'] },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
@@ -51,6 +54,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
 const PLATFORM_ITEMS: readonly NavItem[] = [
   { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'] },
   { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'] },
+  { section: 'campaigns', to: '/platform-campaigns', icon: Megaphone, roles: ['SUPER_ADMIN'] },
   { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'] },
 ];

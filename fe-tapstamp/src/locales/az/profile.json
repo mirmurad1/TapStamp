@@ -115,6 +115,11 @@
       "codeHint": "Təsdiq üçün telefonunuza göndərilən kodu daxil edin.",
       "confirm": "Hesabı birdəfəlik sil",
       "done": "Hesabınız silindi. Sizi yenidən gözləyirik!"
+    },
+    "marketing": {
+      "title": "Kampaniya SMS-ləri",
+      "description": "Endirim və hədiyyələr haqqında SMS-lər. İstənilən an söndürə bilərsiniz.",
+      "label": "Kampaniya SMS-lərini almaq"
     }
   },
   "legal": {

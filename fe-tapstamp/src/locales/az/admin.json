@@ -16,7 +16,8 @@
     "tenants": "Şirkətlər",
     "simulator": "NFC simulyatoru",
     "tags": "NFC çipləri",
-    "smsUsage": "SMS hesabatı"
+    "smsUsage": "SMS hesabatı",
+    "campaigns": "Kampaniyalar"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -306,8 +307,10 @@
       },
       "columns": {
         "company": "Şirkət",
-        "messages": "SMS sayı",
-        "slug": "Kod"
+        "messages": "Cəmi",
+        "slug": "Kod",
+        "otp": "Giriş kodu",
+        "campaign": "Kampaniya"
       },
       "total": "Uğurlu SMS-lər (cəmi)",
       "usageTitle": "Uğurlu SMS-lər şirkətlər üzrə",
@@ -342,7 +345,32 @@
         "ALL": "Hamısı",
         "SENT": "Göndərilib",
         "FAILED": "Xəta"
+      },
+      "purposes": {
+        "OTP": "Giriş kodu",
+        "CAMPAIGN": "Kampaniya"
       }
+    },
+    "campaigns": {
+      "title": "Kampaniyalar",
+      "subtitle": "Şirkətlərin SMS kampaniyaları. Ödəniş alındıqdan sonra təsdiqləyin — göndəriş 09:00–21:00 arası avtomatik başlayır.",
+      "filter": "Göstər",
+      "filters": {
+        "PENDING": "Təsdiq gözləyənlər",
+        "ALL": "Hamısı"
+      },
+      "empty": {
+        "PENDING": "Təsdiq gözləyən kampaniya yoxdur.",
+        "ALL": "Kampaniya yoxdur."
+      },
+      "recipients": "Alıcı",
+      "perMessage": "Hər müştəriyə SMS",
+      "totalSms": "Cəmi SMS",
+      "delivery": "Göndərilib / xəta",
+      "approve": "Təsdiqlə",
+      "reject": "Rədd et",
+      "rejectReason": "Rədd səbəbi",
+      "approveConfirm": "Ödəniş alınıb? Təsdiqdən sonra {{total}} SMS göndəriləcək."
     }
   },
   "staffConsole": {
@@ -702,5 +730,55 @@
       "SYSTEM": "Sistem"
     },
     "empty": "Qeyd tapılmadı."
+  },
+  "campaigns": {
+    "title": "Kampaniyalar",
+    "subtitle": "Müştərilərinizə SMS kampaniyası göndərin. Kampaniya platformanın təsdiqindən sonra gedir.",
+    "new": {
+      "title": "Yeni kampaniya",
+      "description": "Mətni yazın və auditoriyanı seçin — neçə SMS gedəcəyi dərhal hesablanır.",
+      "text": "Mətn",
+      "textHint": "Mətnin əvvəlinə şirkətinizin SMS adı avtomatik əlavə olunur.",
+      "audience": "Auditoriya",
+      "inactiveDays": "Neçə gündür gəlməyənlər",
+      "days_one": "{{count}} gün",
+      "days_other": "{{count}} gün",
+      "branch": "Filial",
+      "allBranches": "Bütün filiallar",
+      "submit": "Təsdiqə göndər",
+      "sent": "Kampaniya platformanın təsdiqinə göndərildi. Ödəniş alındıqdan sonra təsdiqlənəcək və göndəriləcək."
+    },
+    "preview": {
+      "title": "Önizləmə",
+      "summary": "{{recipients}} alıcı · {{characters}} simvol · hər müştəriyə {{segments}} SMS",
+      "total": "Cəmi {{total}} SMS",
+      "latinAdvice": "Mətndə Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) var — bir SMS 160 yox, 70 simvol tutur. Latın hərfləri ilə hər müştəriyə {{segments}} SMS, cəmi {{total}} SMS gedər:",
+      "useLatin": "Latın variantını istifadə et",
+      "unicodeNote": "Mətndə Azərbaycan hərfləri var: bir SMS 70 simvol tutur."
+    },
+    "list": {
+      "title": "Kampaniyalarım",
+      "empty": "Hələ kampaniya yoxdur.",
+      "counts": "{{recipients}} alıcı · {{total}} SMS",
+      "delivery": "göndərilib: {{sent}}, xəta: {{failed}}",
+      "pendingNote": "Ödəniş alındıqdan sonra platforma tərəfindən təsdiqlənəcək. Göndəriş 09:00–21:00 arası olur.",
+      "cancel": "Ləğv et",
+      "cancelConfirm": "Kampaniya ləğv edilsin?",
+      "rejectReason": "Rədd səbəbi: {{reason}}"
+    },
+    "status": {
+      "PENDING_APPROVAL": "Təsdiq gözləyir",
+      "APPROVED": "Təsdiqlənib",
+      "SENDING": "Göndərilir",
+      "SENT": "Göndərilib",
+      "REJECTED": "Rədd edilib",
+      "CANCELLED": "Ləğv edilib"
+    },
+    "audience": {
+      "ALL": "Bütün müştərilər",
+      "INACTIVE": "Uzun müddət gəlməyənlər",
+      "NEAR_REWARD": "Hədiyyəyə 1–2 möhür qalanlar",
+      "UNUSED_GIFT_CARD": "İstifadə olunmamış hədiyyə kartı olanlar"
+    }
   }
 }

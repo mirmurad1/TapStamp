@@ -415,6 +415,34 @@ export const platformAuditApi = {
 
 export type SmsUsageReport = Schemas['SmsUsageReport'];
 
+export type CampaignRequest = Schemas['CampaignRequest'];
+export type CampaignView = Schemas['CampaignView'];
+export type CampaignPreview = Schemas['Preview'];
+export type PlatformCampaign = Schemas['PlatformCampaignView'];
+
+/** Kampaniya SMS-ləri (şirkət sahibi). */
+export const campaignsApi = {
+  preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
+  create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
+  list: () => unwrap(api.GET('/api/v1/admin/campaigns')),
+  cancel: (campaignId: string) =>
+    unwrap(api.POST('/api/v1/admin/campaigns/{campaignId}/cancel', { params: { path: { campaignId } } })),
+};
+
+/** Kampaniyalar (platforma): təsdiq gözləyənlər və qərar. */
+export const platformCampaignsApi = {
+  list: (status: 'PENDING' | 'ALL') => unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status } } })),
+  approve: (tenantId: string, campaignId: string) =>
+    unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve', { params: { path: { tenantId, campaignId } } })),
+  reject: (tenantId: string, campaignId: string, reason: string) =>
+    unwrap(
+      api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject', {
+        params: { path: { tenantId, campaignId } },
+        body: { reason },
+      }),
+    ),
+};
+
 export const platformSmsApi = {
   /** Günlər daxil (YYYY-MM-DD, Bakı vaxtı). */
   usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
