@@ -25,10 +25,10 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
 
 ## Müştəri
 
-- Razılıq məxfilik siyasəti ilə alınır (ayrıca qutu yoxdur — istifadəçi qərarı).
-- Müştərinin **Parametrlər** bölməsində **"Kampaniya SMS-ləri"** açarı (standart olaraq açıq). Söndürən müştəri
-  yeni kampaniyalara düşmür; təsdiqlənmiş, amma hələ göndərilməmiş kampaniyada da ona SMS getmir (`SKIPPED`).
-- Bloklanmış, silinmiş müştəriyə SMS getmir.
+- Razılıq məxfilik siyasəti ilə alınır; müştəri tətbiqində ayrıca açar və söndürmə imkanı yoxdur (istifadəçi
+  qərarı). Bazadakı `customers.marketing_opt_out_at` sütunu gələcək üçün saxlanılıb (hazırda həmişə boşdur).
+- Bloklanmış, silinmiş müştəriyə SMS getmir; təsdiqlənmiş kampaniyada göndərişə qədər bloklanan müştəri `SKIPPED`
+  olur.
 
 ## Təhlükəsizlik və etibarlılıq
 

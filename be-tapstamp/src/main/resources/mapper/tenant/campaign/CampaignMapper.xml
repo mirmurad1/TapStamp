@@ -128,11 +128,4 @@
                           WHERE campaign_id = c.id AND status IN ('PENDING', 'SENDING'))
     </update>
 
-    <update id="setMarketingOptOut">
-        UPDATE customers SET marketing_opt_out_at = #{optOutAt}, updated_at = now() WHERE id = #{customerId}
-    </update>
-
-    <select id="isMarketingOptedOut" resultType="boolean">
-        SELECT marketing_opt_out_at IS NOT NULL FROM customers WHERE id = #{customerId}
-    </select>
 </mapper>

@@ -10,7 +10,6 @@ import java.util.Map;
 
 import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.support.AdminClient;
-import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.TapIntegrationTest;
 import az.tapstamp.tenancy.TenantContext;
 import org.junit.jupiter.api.Test;
@@ -35,10 +34,11 @@ class CampaignIT extends TapIntegrationTest {
     void ownerCreatesPlatformApprovesAndSmsAreSentToConsentingCustomers() throws Exception {
         String receiver = uniquePhone();
         signedIn(receiver);
-        String optedOut = uniquePhone();
-        CustomerClient refuser = signedIn(optedOut);
-        refuser.patch("/api/v1/me/marketing", Map.of("enabled", false)).andExpect(status().isOk());
-        refuser.get("/api/v1/me/marketing").andExpect(jsonPath("$.enabled").value(false));
+        // Bloklanmış müştəriyə kampaniya SMS-i getmir
+        String blocked = uniquePhone();
+        String blockedId = json(signedIn(blocked).get("/api/v1/me"), "$.id");
+        TenantContext.runAs(alpha(), () -> tenantJdbc.sql("UPDATE customers SET status = 'BLOCKED' WHERE id = CAST(:id AS uuid)")
+                .param("id", blockedId).update());
 
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
         // Azərbaycan hərfləri: UCS-2 (70 simvol/SMS); latın variantı ucuzdur
@@ -63,7 +63,7 @@ class CampaignIT extends TapIntegrationTest {
         assertThat(recipients).isPositive();
         assertThat(count("""
                 SELECT count(*) FROM campaign_recipients r JOIN customers c ON c.id = r.customer_id
-                WHERE r.campaign_id = CAST(:id AS uuid) AND c.marketing_opt_out_at IS NOT NULL""", Map.of("id", id)))
+                WHERE r.campaign_id = CAST(:id AS uuid) AND c.status <> 'ACTIVE'""", Map.of("id", id)))
                 .isZero();
 
         // Təsdiqdən əvvəl heç nə getmir
@@ -84,7 +84,7 @@ class CampaignIT extends TapIntegrationTest {
         owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"))
                 .andExpect(jsonPath("$.sentCount").value(recipients));
         assertThat(sms.to(receiver)).anySatisfy(m -> assertThat(m.text()).isEqualTo("Alpha Kafe: " + latin));
-        assertThat(sms.to(optedOut)).noneSatisfy(m -> assertThat(m.text()).contains(latin));
+        assertThat(sms.to(blocked)).noneSatisfy(m -> assertThat(m.text()).contains(latin));
         assertThat(platformJdbc.sql("SELECT count(*) FROM sms_messages WHERE phone = :p AND purpose = 'CAMPAIGN'")
                 .param("p", receiver).query(Integer.class).single()).isOne();
     }

@@ -54,9 +54,6 @@ export const meApi = {
   revokeDevice: (sessionId: string) =>
     unwrap(api.DELETE('/api/v1/me/sessions/{sessionId}', { params: { path: { sessionId } } })),
   revokeOtherDevices: () => unwrap(api.POST('/api/v1/me/sessions/revoke-others')),
-  /** Kampaniya SMS-ləri (standart olaraq açıq). */
-  marketing: () => unwrap(api.GET('/api/v1/me/marketing')),
-  setMarketing: (enabled: boolean) => unwrap(api.PATCH('/api/v1/me/marketing', { body: { enabled } })),
 };
 
 /** NFC toxunuşundan sonrakı səhifə: tokenin vəziyyəti və möhürün alınması. */

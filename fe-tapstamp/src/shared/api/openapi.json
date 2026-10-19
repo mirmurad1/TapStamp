@@ -684,7 +684,7 @@
     },
     "/api/v1/admin/campaigns/{campaignId}" : {
       "get" : {
-        "operationId" : "get_3",
+        "operationId" : "get_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "campaignId",
@@ -954,7 +954,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_2",
+        "operationId" : "get_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -2476,53 +2476,6 @@
         "tags" : [ "Müştəri: hədiyyə kartları" ]
       }
     },
-    "/api/v1/me/marketing" : {
-      "get" : {
-        "operationId" : "get",
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MarketingSettings"
-                }
-              }
-            },
-            "description" : "OK"
-          }
-        },
-        "summary" : "Kampaniya SMS-ləri: cari seçim",
-        "tags" : [ "Müştəri: profil" ]
-      },
-      "patch" : {
-        "description" : "Söndürülsə, gələcək kampaniyalara düşmür; artıq təsdiqlənmiş kampaniyada da SMS getmir.",
-        "operationId" : "set",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MarketingSettings"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MarketingSettings"
-                }
-              }
-            },
-            "description" : "OK"
-          }
-        },
-        "summary" : "Kampaniya SMS-lərini açmaq və ya söndürmək",
-        "tags" : [ "Müştəri: profil" ]
-      }
-    },
     "/api/v1/me/sessions" : {
       "get" : {
         "operationId" : "sessions_1",
@@ -3310,7 +3263,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}" : {
       "get" : {
-        "operationId" : "get_1",
+        "operationId" : "get",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -5174,16 +5127,6 @@
             "enum" : [ "AUTHENTICATED", "MFA_REQUIRED", "MFA_ENROLLMENT_REQUIRED" ]
           }
         }
-      },
-      "MarketingSettings" : {
-        "type" : "object",
-        "description" : "Kampaniya SMS-ləri: true — alır",
-        "properties" : {
-          "enabled" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "enabled" ]
       },
       "MeResponse" : {
         "type" : "object",

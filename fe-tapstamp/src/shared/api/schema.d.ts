@@ -410,7 +410,7 @@ export interface paths {
             cookie?: never;
         };
         /** Kampaniya */
-        get: operations["get_3"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -507,7 +507,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_2"];
+        get: operations["get_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1470,27 +1470,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/me/marketing": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Kampaniya SMS-ləri: cari seçim */
-        get: operations["get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Kampaniya SMS-lərini açmaq və ya söndürmək
-         * @description Söndürülsə, gələcək kampaniyalara düşmür; artıq təsdiqlənmiş kampaniyada da SMS getmir.
-         */
-        patch: operations["set"];
-        trace?: never;
-    };
     "/api/v1/me/sessions": {
         parameters: {
             query?: never;
@@ -2026,7 +2005,7 @@ export interface paths {
             cookie?: never;
         };
         /** Şirkət haqqında məlumat */
-        get: operations["get_1"];
+        get: operations["get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2922,10 +2901,6 @@ export interface components {
         LoginResponse: {
             /** @enum {string} */
             status?: "AUTHENTICATED" | "MFA_REQUIRED" | "MFA_ENROLLMENT_REQUIRED";
-        };
-        /** @description Kampaniya SMS-ləri: true — alır */
-        MarketingSettings: {
-            enabled: boolean;
         };
         /** @description Daxil olmuş admin haqqında məlumat */
         MeResponse: {
@@ -4051,7 +4026,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4177,7 +4152,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5473,50 +5448,6 @@ export interface operations {
             };
         };
     };
-    get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MarketingSettings"];
-                };
-            };
-        };
-    };
-    set: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MarketingSettings"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MarketingSettings"];
-                };
-            };
-        };
-    };
     sessions_1: {
         parameters: {
             query?: never;
@@ -6153,7 +6084,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get: {
         parameters: {
             query?: never;
             header?: never;

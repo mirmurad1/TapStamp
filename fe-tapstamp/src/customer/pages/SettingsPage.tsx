@@ -80,8 +80,6 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      <MarketingCard />
-
       <SwitchNumber />
 
       <DevicesCard />
@@ -106,42 +104,6 @@ export function SettingsPage() {
 
       <DeleteAccount onDeleted={() => void leave({ accountDeleted: true })} />
     </div>
-  );
-}
-
-/** Kampaniya SMS-ləri: müştəri istənilən an söndürə bilər (məxfilik siyasəti). */
-function MarketingCard() {
-  const { t } = useTranslation('profile');
-  const queryClient = useQueryClient();
-  const key = ['me', 'marketing'] as const;
-  const marketing = useQuery({ queryKey: key, queryFn: meApi.marketing });
-  const save = useMutation({
-    mutationFn: (enabled: boolean) => meApi.setMarketing(enabled),
-    onSuccess: (updated) => queryClient.setQueryData(key, updated),
-  });
-  const enabled = save.isPending ? Boolean(save.variables) : Boolean(marketing.data?.enabled);
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('settings.marketing.title')}</CardTitle>
-        <CardDescription>{t('settings.marketing.description')}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3">
-          <span className="font-medium">{t('settings.marketing.label')}</span>
-          <input
-            type="checkbox"
-            role="switch"
-            className="size-5 accent-primary"
-            checked={enabled}
-            disabled={marketing.isPending || save.isPending}
-            onChange={(event) => save.mutate(event.target.checked)}
-          />
-        </label>
-        {save.error || marketing.error ? <ErrorMessage error={save.error ?? marketing.error} /> : null}
-      </CardContent>
-    </Card>
   );
 }
 

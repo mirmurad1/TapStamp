@@ -64,9 +64,4 @@ public interface CampaignMapper {
 
     /** PENDING və SENDING qalmayıbsa kampaniyanı SENT edir, sayları yazır; 1 — bitdi. */
     int finishIfDone(UUID campaignId, Instant now);
-
-    /** Müştərinin kampaniya SMS-lərindən imtinası (null — yenidən alır). */
-    void setMarketingOptOut(UUID customerId, @Nullable Instant optOutAt);
-
-    boolean isMarketingOptedOut(UUID customerId);
 }

@@ -129,17 +129,6 @@ public class CampaignService {
         return campaigns.find(id).orElseThrow();
     }
 
-    // ---------------------------------------------------------------- müştəri
-
-    public boolean marketingEnabled(UUID customerId) {
-        return !campaigns.isMarketingOptedOut(customerId);
-    }
-
-    public void setMarketingEnabled(UUID customerId, boolean enabled) {
-        campaigns.setMarketingOptOut(customerId, enabled ? null : clock.instant());
-        audit.tenant(enabled ? "CUSTOMER_MARKETING_ENABLED" : "CUSTOMER_MARKETING_DISABLED",
-                AuditLogger.ActorType.CUSTOMER, customerId, "customer", customerId, Map.of());
-    }
 
     // ---------------------------------------------------------------- köməkçilər
 
