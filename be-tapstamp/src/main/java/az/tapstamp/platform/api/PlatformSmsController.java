@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,26 +61,31 @@ public class PlatformSmsController {
         return new SmsUsageReport(from, to, rows, rows.stream().mapToLong(SmsUsageRow::messages).sum());
     }
 
-    @Schema(description = "Göndərilə bilməyən SMS: şirkət, nömrə, mətn (kod gizlədilmiş) və səbəb")
-    public record SmsFailureRow(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName,
-                                String phone, String text, String error) {
+    @Schema(description = "Jurnaldakı SMS: şirkət, nömrə, mətn (OTP kodu gizlədilmiş), nəticə və xəta (uğursuzdursa)")
+    public record SmsMessageRow(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName,
+                                String phone, String text,
+                                @Schema(allowableValues = {"SENT", "FAILED"}) String status, String error) {
     }
 
-    @Schema(description = "Uğursuz SMS-lərin bir səhifəsi; total — dövrdəki ümumi say")
-    public record SmsFailurePage(List<SmsFailureRow> items, int page, int size, long total) {
+    @Schema(description = "SMS-lərin bir səhifəsi; total — filtrə uyğun ümumi say")
+    public record SmsMessagePage(List<SmsMessageRow> items, int page, int size, long total) {
     }
 
-    @GetMapping("/failures")
-    @Operation(summary = "Uğursuz SMS-lər və səbəbləri", description = """
-            `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).""")
-    SmsFailurePage failures(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+    @GetMapping("/messages")
+    @Operation(summary = "SMS axtarışı", description = """
+            Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — \
+            SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). \
+            Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).""")
+    SmsMessagePage messages(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                            @RequestParam(required = false) @Pattern(regexp = "SENT|FAILED") String status,
+                            @RequestParam(required = false) @Size(max = 32) String phone,
                             @RequestParam(defaultValue = "0") @Min(0) @Max(100_000) int page) {
         requireRange(from, to);
-        SmsLog.FailurePage result = smsLog.failures(from, to, page, PAGE_SIZE);
-        return new SmsFailurePage(result.items().stream()
-                .map(f -> new SmsFailureRow(f.id(), f.createdAt(), f.tenantId(), f.slug(), f.displayName(), f.phone(),
-                        f.text(), f.error()))
+        SmsLog.MessagePage result = smsLog.messages(from, to, status, phone, page, PAGE_SIZE);
+        return new SmsMessagePage(result.items().stream()
+                .map(m -> new SmsMessageRow(m.id(), m.createdAt(), m.tenantId(), m.slug(), m.displayName(), m.phone(),
+                        m.text(), m.status(), m.error()))
                 .toList(), result.page(), result.size(), result.total());
     }
 

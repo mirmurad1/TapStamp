@@ -21,17 +21,23 @@ public interface SmsLogMapper {
     record Usage(UUID tenantId, String slug, LocalizedText displayName, long messages) {
     }
 
-    /** Göndərilə bilməyən SMS və səbəbi. */
-    record Failure(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName, String phone,
-                   String text, @Nullable String error) {
+    /** Jurnaldakı SMS: şirkət, nömrə, mətn (kod gizlədilmiş), nəticə və xəta. */
+    record Message(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName, String phone,
+                   String text, String status, @Nullable String error) {
     }
 
     void insert(Entry entry);
 
-    /** [from, to) aralığında uğursuz SMS-lər, yenidən köhnəyə. */
-    List<Failure> failures(Instant from, Instant to, int limit, int offset);
+    /**
+     * [from, to) aralığında SMS-lər, yenidən köhnəyə.
+     *
+     * @param status      SENT / FAILED; null — hamısı
+     * @param phoneDigits nömrənin rəqəmləri (tam və ya hissə); null — hamısı
+     */
+    List<Message> messages(Instant from, Instant to, @Nullable String status, @Nullable String phoneDigits, int limit,
+                           int offset);
 
-    long countFailures(Instant from, Instant to);
+    long countMessages(Instant from, Instant to, @Nullable String status, @Nullable String phoneDigits);
 
     /** [from, to) aralığında uğurla SMS göndərmiş şirkətlər, ən çoxdan aza. */
     List<Usage> usage(Instant from, Instant to);

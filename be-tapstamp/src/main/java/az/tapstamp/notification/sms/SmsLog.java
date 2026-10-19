@@ -73,13 +73,34 @@ public class SmsLog {
         return mapper.usage(start(from), start(to.plusDays(1)));
     }
 
-    public record FailurePage(List<SmsLogMapper.Failure> items, int page, int size, long total) {
+    public record MessagePage(List<SmsLogMapper.Message> items, int page, int size, long total) {
     }
 
-    /** [from, to] günləri üzrə uğursuz SMS-lər, səhifə-səhifə (page 0-dan başlayır). */
-    public FailurePage failures(LocalDate from, LocalDate to, int page, int size) {
-        return new FailurePage(mapper.failures(start(from), start(to.plusDays(1)), size, page * size), page, size,
-                mapper.countFailures(start(from), start(to.plusDays(1))));
+    /**
+     * [from, to] günləri üzrə SMS-lər, səhifə-səhifə (page 0-dan başlayır).
+     *
+     * @param status SENT / FAILED; null — hamısı
+     * @param phone  nömrə və ya onun hissəsi (məs. "+994 50 123", "0501234567"); null və ya boş — hamısı
+     */
+    public MessagePage messages(LocalDate from, LocalDate to, @Nullable String status, @Nullable String phone, int page,
+                                int size) {
+        String digits = phoneDigits(phone);
+        Instant start = start(from);
+        Instant end = start(to.plusDays(1));
+        return new MessagePage(mapper.messages(start, end, status, digits, size, page * size), page, size,
+                mapper.countMessages(start, end, status, digits));
+    }
+
+    /** Axtarış üçün nömrənin rəqəmləri; yerli yazılış (050…) beynəlxalqa (99450…) çevrilir. */
+    static @Nullable String phoneDigits(@Nullable String phone) {
+        if (phone == null) {
+            return null;
+        }
+        String digits = phone.replaceAll("\\D", "");
+        if (digits.isEmpty()) {
+            return null;
+        }
+        return digits.length() == 10 && digits.startsWith("0") ? "994" + digits.substring(1) : digits;
     }
 
     private static Instant start(LocalDate day) {

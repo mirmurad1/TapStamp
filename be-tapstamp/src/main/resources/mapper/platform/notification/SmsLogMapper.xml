@@ -19,17 +19,24 @@
         ORDER BY messages DESC, t.slug
     </select>
 
-    <select id="failures" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Failure">
-        SELECT m.id, m.created_at, t.id AS tenant_id, t.slug, t.display_name, m.phone, m.text, m.error
+    <sql id="messageFilter">
+        WHERE m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
+        <if test="status != null">AND m.status = #{status}</if>
+        <!-- phoneDigits yalnız rəqəmlərdir (servis yoxlayır) -->
+        <if test="phoneDigits != null">AND m.phone LIKE '%' || #{phoneDigits} || '%'</if>
+    </sql>
+
+    <select id="messages" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Message">
+        SELECT m.id, m.created_at, t.id AS tenant_id, t.slug, t.display_name, m.phone, m.text, m.status, m.error
         FROM sms_messages m
         JOIN tenants t ON t.id = m.tenant_id
-        WHERE m.status = 'FAILED' AND m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
+        <include refid="messageFilter"/>
         ORDER BY m.created_at DESC, m.id DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="countFailures" resultType="long">
-        SELECT count(*) FROM sms_messages
-        WHERE status = 'FAILED' AND created_at &gt;= #{from} AND created_at &lt; #{to}
+    <select id="countMessages" resultType="long">
+        SELECT count(*) FROM sms_messages m
+        <include refid="messageFilter"/>
     </select>
 </mapper>

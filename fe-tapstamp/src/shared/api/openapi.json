@@ -2892,10 +2892,10 @@
         "tags" : [ "Platforma: SMS hesabatı" ]
       }
     },
-    "/api/v1/platform/sms-usage/failures" : {
+    "/api/v1/platform/sms-usage/messages" : {
       "get" : {
-        "description" : "`from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).",
-        "operationId" : "failures",
+        "description" : "Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).",
+        "operationId" : "messages",
         "parameters" : [ {
           "in" : "query",
           "name" : "from",
@@ -2914,6 +2914,23 @@
           }
         }, {
           "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "SENT|FAILED"
+          }
+        }, {
+          "in" : "query",
+          "name" : "phone",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 32,
+            "minLength" : 0
+          }
+        }, {
+          "in" : "query",
           "name" : "page",
           "required" : false,
           "schema" : {
@@ -2929,14 +2946,14 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SmsFailurePage"
+                  "$ref" : "#/components/schemas/SmsMessagePage"
                 }
               }
             },
             "description" : "OK"
           }
         },
-        "summary" : "Uğursuz SMS-lər və səbəbləri",
+        "summary" : "SMS axtarışı",
         "tags" : [ "Platforma: SMS hesabatı" ]
       }
     },
@@ -5635,14 +5652,14 @@
           }
         }
       },
-      "SmsFailurePage" : {
+      "SmsMessagePage" : {
         "type" : "object",
-        "description" : "Uğursuz SMS-lərin bir səhifəsi; total — dövrdəki ümumi say",
+        "description" : "SMS-lərin bir səhifəsi; total — filtrə uyğun ümumi say",
         "properties" : {
           "items" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/SmsFailureRow"
+              "$ref" : "#/components/schemas/SmsMessageRow"
             }
           },
           "page" : {
@@ -5659,9 +5676,9 @@
           }
         }
       },
-      "SmsFailureRow" : {
+      "SmsMessageRow" : {
         "type" : "object",
-        "description" : "Göndərilə bilməyən SMS: şirkət, nömrə, mətn (kod gizlədilmiş) və səbəb",
+        "description" : "Jurnaldakı SMS: şirkət, nömrə, mətn (OTP kodu gizlədilmiş), nəticə və xəta (uğursuzdursa)",
         "properties" : {
           "createdAt" : {
             "type" : "string",
@@ -5682,6 +5699,10 @@
           },
           "slug" : {
             "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "SENT", "FAILED" ]
           },
           "tenantId" : {
             "type" : "string",

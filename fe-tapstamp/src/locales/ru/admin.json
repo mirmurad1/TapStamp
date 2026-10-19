@@ -310,7 +310,8 @@
       },
       "columns": {
         "company": "Компания",
-        "messages": "Количество SMS"
+        "messages": "Количество SMS",
+        "slug": "Код"
       },
       "total": "Успешные SMS (всего)",
       "usageTitle": "Успешные SMS по компаниям",
@@ -328,6 +329,27 @@
         "previous": "Назад",
         "next": "Далее",
         "page": "Страница {{page}} из {{pages}}"
+      },
+      "export": {
+        "button": "Экспорт в Excel",
+        "total": "Итого"
+      },
+      "search": {
+        "title": "Поиск SMS",
+        "count_one": "Найдено {{count}} SMS",
+        "count_few": "Найдено {{count}} SMS",
+        "count_many": "Найдено {{count}} SMS",
+        "count_other": "Найдено {{count}} SMS",
+        "empty": "По этому фильтру SMS не найдены.",
+        "phone": "Номер",
+        "phoneHint": "Полностью или частично: +994501234567, 0501234567, 50123",
+        "status": "Статус",
+        "submit": "Найти"
+      },
+      "statuses": {
+        "ALL": "Все",
+        "SENT": "Отправлено",
+        "FAILED": "Ошибка"
       }
     }
   },

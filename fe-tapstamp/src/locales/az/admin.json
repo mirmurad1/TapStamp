@@ -306,7 +306,8 @@
       },
       "columns": {
         "company": "Şirkət",
-        "messages": "SMS sayı"
+        "messages": "SMS sayı",
+        "slug": "Kod"
       },
       "total": "Uğurlu SMS-lər (cəmi)",
       "usageTitle": "Uğurlu SMS-lər şirkətlər üzrə",
@@ -322,6 +323,25 @@
         "previous": "Əvvəlki",
         "next": "Növbəti",
         "page": "Səhifə {{page}} / {{pages}}"
+      },
+      "export": {
+        "button": "Excel-ə ixrac",
+        "total": "Cəmi"
+      },
+      "search": {
+        "title": "SMS axtarışı",
+        "count_one": "{{count}} SMS tapıldı",
+        "count_other": "{{count}} SMS tapıldı",
+        "empty": "Bu filtrlə SMS tapılmadı.",
+        "phone": "Nömrə",
+        "phoneHint": "Tam və ya hissə: +994501234567, 0501234567, 50123",
+        "status": "Status",
+        "submit": "Axtar"
+      },
+      "statuses": {
+        "ALL": "Hamısı",
+        "SENT": "Göndərilib",
+        "FAILED": "Xəta"
       }
     }
   },

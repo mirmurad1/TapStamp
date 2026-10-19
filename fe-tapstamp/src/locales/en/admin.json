@@ -306,7 +306,8 @@
       },
       "columns": {
         "company": "Company",
-        "messages": "SMS count"
+        "messages": "SMS count",
+        "slug": "Code"
       },
       "total": "Successful SMS (total)",
       "usageTitle": "Successful SMS by company",
@@ -322,6 +323,25 @@
         "previous": "Previous",
         "next": "Next",
         "page": "Page {{page}} of {{pages}}"
+      },
+      "export": {
+        "button": "Export to Excel",
+        "total": "Total"
+      },
+      "search": {
+        "title": "SMS search",
+        "count_one": "{{count}} SMS found",
+        "count_other": "{{count}} SMS found",
+        "empty": "No SMS match this filter.",
+        "phone": "Number",
+        "phoneHint": "Full or partial: +994501234567, 0501234567, 50123",
+        "status": "Status",
+        "submit": "Search"
+      },
+      "statuses": {
+        "ALL": "All",
+        "SENT": "Sent",
+        "FAILED": "Failed"
       }
     }
   },

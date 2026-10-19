@@ -1818,7 +1818,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/platform/sms-usage/failures": {
+    "/api/v1/platform/sms-usage/messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -1826,10 +1826,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Uğursuz SMS-lər və səbəbləri
-         * @description `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).
+         * SMS axtarışı
+         * @description Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).
          */
-        get: operations["failures"];
+        get: operations["messages"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3081,9 +3081,9 @@ export interface components {
         SessionStateResponse: {
             state?: string;
         };
-        /** @description Uğursuz SMS-lərin bir səhifəsi; total — dövrdəki ümumi say */
-        SmsFailurePage: {
-            items?: components["schemas"]["SmsFailureRow"][];
+        /** @description SMS-lərin bir səhifəsi; total — filtrə uyğun ümumi say */
+        SmsMessagePage: {
+            items?: components["schemas"]["SmsMessageRow"][];
             /** Format: int32 */
             page?: number;
             /** Format: int32 */
@@ -3091,8 +3091,8 @@ export interface components {
             /** Format: int64 */
             total?: number;
         };
-        /** @description Göndərilə bilməyən SMS: şirkət, nömrə, mətn (kod gizlədilmiş) və səbəb */
-        SmsFailureRow: {
+        /** @description Jurnaldakı SMS: şirkət, nömrə, mətn (OTP kodu gizlədilmiş), nəticə və xəta (uğursuzdursa) */
+        SmsMessageRow: {
             /** Format: date-time */
             createdAt?: string;
             displayName?: components["schemas"]["LocalizedText"];
@@ -3101,6 +3101,8 @@ export interface components {
             id?: string;
             phone?: string;
             slug?: string;
+            /** @enum {string} */
+            status?: "SENT" | "FAILED";
             /** Format: uuid */
             tenantId?: string;
             text?: string;
@@ -5579,11 +5581,13 @@ export interface operations {
             };
         };
     };
-    failures: {
+    messages: {
         parameters: {
             query: {
                 from: string;
                 to: string;
+                status?: string;
+                phone?: string;
                 page?: number;
             };
             header?: never;
@@ -5598,7 +5602,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["SmsFailurePage"];
+                    "*/*": components["schemas"]["SmsMessagePage"];
                 };
             };
         };

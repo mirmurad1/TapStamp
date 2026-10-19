@@ -1,10 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatDateTime, formatNumber } from '@/shared/lib/format';
+import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
@@ -13,6 +15,8 @@ import { Input, Select } from '@/shared/ui/input';
 import { platformSmsApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
+import { toCsv } from '../../lib/csv';
+import { downloadBlob } from '../../lib/download';
 
 const PERIODS = ['thisMonth', 'lastMonth', 'last7', 'last30', 'thisYear', 'custom'] as const;
 type Period = (typeof PERIODS)[number];
@@ -102,7 +106,8 @@ export function SmsUsagePage() {
         <p className="mt-1 text-muted-foreground">{t('platform.sms.subtitle')}</p>
       </div>
       <UsageSection today={today} />
-      <FailuresSection today={today} />
+      <MessagesSection today={today} mode="failures" />
+      <MessagesSection today={today} mode="search" />
     </div>
   );
 }
@@ -119,10 +124,22 @@ function UsageSection({ today }: { today: string }) {
   });
   const rows = report.data?.tenants ?? [];
 
+  /** Excel üçün CSV: şirkət, kod, uğurlu SMS sayı və cəm sətri. */
+  const exportCsv = () => {
+    const header = [t('platform.sms.columns.company'), t('platform.sms.columns.slug'), t('platform.sms.columns.messages')];
+    const lines = rows.map((row) => [resolveText(row.displayName, lang), row.slug ?? '', row.messages ?? 0]);
+    const total = [t('platform.sms.export.total'), '', report.data?.messages ?? 0];
+    downloadBlob(toCsv([header, ...lines, total]), `sms-${range.from}_${range.to}.csv`);
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle>{t('platform.sms.usageTitle')}</CardTitle>
+        <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
+          <Download className="size-4" aria-hidden="true" />
+          {t('platform.sms.export.button')}
+        </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <PeriodPicker id="sms-usage" today={today} state={period} />
@@ -166,43 +183,81 @@ function UsageSection({ today }: { today: string }) {
   );
 }
 
-function FailuresSection({ today }: { today: string }) {
+type MessagesMode = 'failures' | 'search';
+const STATUSES = ['', 'SENT', 'FAILED'] as const;
+type StatusFilter = (typeof STATUSES)[number];
+
+/**
+ * SMS siyahısı səhifə-səhifə: "failures" — yalnız göndərilə bilməyənlər (səbəbi ilə), "search" — nömrəyə və statusa
+ * görə axtarış (hansı nömrəyə hansı mesaj getdi).
+ */
+function MessagesSection({ today, mode }: { today: string; mode: MessagesMode }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const period = usePeriod(today);
   const { range, valid } = period;
+  const [phoneInput, setPhoneInput] = useState('');
+  const [phone, setPhone] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
+  const status = mode === 'failures' ? 'FAILED' : statusFilter || undefined;
   const [page, setPage] = useState(0);
-  // Dövr dəyişəndə birinci səhifəyə qayıdırıq
-  const [lastRange, setLastRange] = useState(range);
-  if (lastRange.from !== range.from || lastRange.to !== range.to) {
-    setLastRange(range);
+  // Filtr dəyişəndə birinci səhifəyə qayıdırıq
+  const filterKey = `${range.from}|${range.to}|${phone}|${status ?? ''}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (lastFilterKey !== filterKey) {
+    setLastFilterKey(filterKey);
     setPage(0);
   }
-  const failures = useQuery({
-    queryKey: ['platform-sms-failures', range.from, range.to, page],
-    queryFn: () => platformSmsApi.failures(range.from, range.to, page),
+  const messages = useQuery({
+    queryKey: ['platform-sms-messages', range.from, range.to, status, phone, page],
+    queryFn: () => platformSmsApi.messages({ from: range.from, to: range.to, status, phone: phone || undefined, page }),
     enabled: valid,
     placeholderData: keepPreviousData,
   });
-  const items = failures.data?.items ?? [];
-  const total = failures.data?.total ?? 0;
-  const size = failures.data?.size ?? 20;
+  const items = messages.data?.items ?? [];
+  const total = messages.data?.total ?? 0;
+  const size = messages.data?.size ?? 20;
   const pages = Math.max(1, Math.ceil(total / size));
+  const prefix = mode === 'failures' ? 'sms-failures' : 'sms-search';
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('platform.sms.failures.title')}</CardTitle>
+        <CardTitle>{t(`platform.sms.${mode}.title`)}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <PeriodPicker id="sms-failures" today={today} state={period} />
-        <ApiErrorAlert error={failures.error} />
-        {failures.isFetching && !failures.data ? <InlineLoading /> : null}
-        {failures.data ? (
-          <p className="text-sm text-muted-foreground">{t('platform.sms.failures.count', { count: total })}</p>
+        <PeriodPicker id={prefix} today={today} state={period} />
+        {mode === 'search' ? (
+          <form
+            className="flex flex-wrap items-end gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setPhone(phoneInput.trim());
+            }}
+          >
+            <Field id={`${prefix}-phone`} label={t('platform.sms.search.phone')} hint={t('platform.sms.search.phoneHint')}>
+              <Input type="search" inputMode="tel" value={phoneInput} maxLength={32}
+                     onChange={(event) => setPhoneInput(event.target.value)} />
+            </Field>
+            <Field id={`${prefix}-status`} label={t('platform.sms.search.status')}>
+              <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
+                {STATUSES.map((value) => (
+                  <option key={value || 'all'} value={value}>
+                    {t(`platform.sms.statuses.${value || 'ALL'}`)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Button type="submit">{t('platform.sms.search.submit')}</Button>
+          </form>
         ) : null}
-        {failures.data && items.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">{t('platform.sms.failures.empty')}</p>
+        <ApiErrorAlert error={messages.error} />
+        {messages.isFetching && !messages.data ? <InlineLoading /> : null}
+        {messages.data ? (
+          <p className="text-sm text-muted-foreground">{t(`platform.sms.${mode}.count`, { count: total })}</p>
+        ) : null}
+        {messages.data && items.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t(`platform.sms.${mode}.empty`)}</p>
         ) : null}
         {items.length > 0 ? (
           <div className="overflow-x-auto">
@@ -213,6 +268,7 @@ function FailuresSection({ today }: { today: string }) {
                   <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
                   <th className="py-2 pr-4 font-medium">{t('platform.sms.failures.phone')}</th>
                   <th className="py-2 pr-4 font-medium">{t('platform.sms.failures.text')}</th>
+                  {mode === 'search' ? <th className="py-2 pr-4 font-medium">{t('platform.sms.search.status')}</th> : null}
                   <th className="py-2 font-medium">{t('platform.sms.failures.error')}</th>
                 </tr>
               </thead>
@@ -225,6 +281,13 @@ function FailuresSection({ today }: { today: string }) {
                     <td className="py-2 pr-4">{resolveText(item.displayName, lang)}</td>
                     <td className="whitespace-nowrap py-2 pr-4 tabular-nums">{item.phone}</td>
                     <td className="py-2 pr-4">{item.text}</td>
+                    {mode === 'search' ? (
+                      <td className="whitespace-nowrap py-2 pr-4">
+                        <Badge tone={item.status === 'SENT' ? 'success' : 'danger'}>
+                          {t(`platform.sms.statuses.${item.status ?? 'SENT'}`)}
+                        </Badge>
+                      </td>
+                    ) : null}
                     <td className="break-all py-2 text-destructive">{item.error}</td>
                   </tr>
                 ))}
@@ -234,13 +297,13 @@ function FailuresSection({ today }: { today: string }) {
         ) : null}
         {total > size ? (
           <div className="flex items-center justify-between gap-3">
-            <Button variant="outline" disabled={page === 0 || failures.isFetching} onClick={() => setPage(page - 1)}>
+            <Button variant="outline" disabled={page === 0 || messages.isFetching} onClick={() => setPage(page - 1)}>
               {t('platform.sms.failures.previous')}
             </Button>
             <span className="text-sm text-muted-foreground">
               {t('platform.sms.failures.page', { page: page + 1, pages })}
             </span>
-            <Button variant="outline" disabled={page + 1 >= pages || failures.isFetching} onClick={() => setPage(page + 1)}>
+            <Button variant="outline" disabled={page + 1 >= pages || messages.isFetching} onClick={() => setPage(page + 1)}>
               {t('platform.sms.failures.next')}
             </Button>
           </div>

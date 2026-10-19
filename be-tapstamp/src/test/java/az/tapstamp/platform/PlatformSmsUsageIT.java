@@ -81,19 +81,38 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
         }
         LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
         AdminClient admin = signedInPlatformAdmin();
-        String path = "/sms-usage/failures?from=" + today + "&to=" + today;
+        String path = "/sms-usage/messages?status=FAILED&from=" + today + "&to=" + today;
 
         admin.get(path).andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(20))
                 .andExpect(jsonPath("$.total").value(org.hamcrest.Matchers.greaterThanOrEqualTo(21)))
+                .andExpect(jsonPath("$.items[0].status").value("FAILED"))
                 .andExpect(jsonPath("$.items[0].error").value(org.hamcrest.Matchers.containsString("ERRSMS4102")))
                 .andExpect(jsonPath("$.items[0].text").value("Alpha Kafe OTP: ******"))
                 .andExpect(jsonPath("$.items[0].slug").value(alpha().slug()));
         admin.get(path + "&page=1").andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.items").isNotEmpty());
-        // Uğursuzlar uğurlu SMS hesabatına düşmür
-        admin.get("/sms-usage/failures?from=2020-01-01&to=2020-01-31").andExpect(jsonPath("$.total").value(0));
+        admin.get("/sms-usage/messages?status=FAILED&from=2020-01-01&to=2020-01-31").andExpect(jsonPath("$.total").value(0));
         admin.get(path + "&page=-1").andExpect(status().isBadRequest());
+        admin.get(path + "&status=LOST").andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void messagesAreSearchableByNumberInAnyNotation() throws Exception {
+        String phone = uniquePhone();
+        smsLog.record(alpha().id(), phone, "Alpha Kafe OTP: 654321", "Alpha Kafe OTP: ******", "654321", null);
+        LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
+        AdminClient admin = signedInPlatformAdmin();
+        String base = "/sms-usage/messages?from=" + today + "&to=" + today + "&phone=";
+        // +994551234567 → beynəlxalq (994…), yerli (055…) və hissə (55123) ilə tapılır
+        String local = "0" + phone.substring(4);
+        for (String query : new String[] {phone.substring(1), local, phone.substring(4, 9)}) {
+            admin.get(base + query)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.items[?(@.phone == '" + phone + "')].status").value(
+                            org.hamcrest.Matchers.contains("SENT")));
+        }
+        admin.get(base + "994000000000").andExpect(jsonPath("$.total").value(0));
     }
 }
