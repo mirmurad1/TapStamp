@@ -35,6 +35,13 @@ public final class CampaignTexts {
         return "Hörmətli " + (customerName == null || customerName.isBlank() ? "istifadəçi" : customerName.strip());
     }
 
+    /** Göndəriləcək mesaj: {@code latin} olanda bütün mətn (müraciət və ad daxil) latın hərfləri ilə. */
+    public static String message(String companyName, String text, boolean personalized, @Nullable String customerName,
+                                 boolean latin) {
+        String full = compose(companyName, text, personalized, customerName);
+        return latin ? latin(full) : full;
+    }
+
     /** Azərbaycan hərfləri latın qarşılığı ilə (ə→e, ş→s, ğ→g, ı→i, ç→c, ö→o, ü→u). */
     public static String latin(String text) {
         StringBuilder out = new StringBuilder(text.length());

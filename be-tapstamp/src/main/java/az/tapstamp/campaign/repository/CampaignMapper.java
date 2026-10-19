@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface CampaignMapper {
 
-    record Campaign(UUID id, String text, boolean personalized, String audience, @Nullable Integer inactiveDays,
+    record Campaign(UUID id, String text, boolean personalized, boolean latin, String audience, @Nullable Integer inactiveDays,
                     @Nullable UUID branchId,
                     int recipients, int segmentsPerMessage, int totalSms, String status, @Nullable String rejectReason,
                     UUID createdBy, Instant createdAt, @Nullable Instant decidedAt, int sentCount, int failedCount,

@@ -61,6 +61,7 @@ function NewCampaignCard() {
   const [inactiveDays, setInactiveDays] = useState<number>(30);
   const [branchId, setBranchId] = useState('');
   const [personalized, setPersonalized] = useState(false);
+  const [latin, setLatin] = useState(false);
   const branches = useQuery({ queryKey: ['settings-branches'], queryFn: companyApi.branches });
 
   const request: CampaignRequest = {
@@ -69,6 +70,7 @@ function NewCampaignCard() {
     inactiveDays: audience === 'INACTIVE' ? inactiveDays : undefined,
     branchId: branchId || undefined,
     personalized,
+    latin,
   };
   const debounced = useDebounced(request);
   const preview = useQuery({
@@ -81,6 +83,7 @@ function NewCampaignCard() {
     mutationFn: () => campaignsApi.create(request),
     onSuccess: () => {
       setText('');
+      setLatin(false);
       void queryClient.invalidateQueries({ queryKey: LIST_KEY });
     },
   });
@@ -90,14 +93,6 @@ function NewCampaignCard() {
   };
 
   const data = text.trim() ? preview.data : undefined;
-  // Latın variantından istifadə: şirkət adı prefiksini ("Kafe: ") çıxarıb yalnız istifadəçinin mətnini dəyişirik
-  const useLatin = () => {
-    if (!data?.latinText || !data.fullText) {
-      return;
-    }
-    const prefix = data.fullText.length - text.trim().length;
-    setText(data.latinText.slice(prefix));
-  };
 
   return (
     <Card>
@@ -191,23 +186,30 @@ function NewCampaignCard() {
               <p className="font-display text-xl font-semibold">
                 {t('campaigns.preview.total', { total: formatNumber(data.totalSms ?? 0, lang) })}
               </p>
-              {data.latinCheaper ? (
+              {data.latin ? (
                 <Alert tone="info" className="bg-card">
                   <div className="flex flex-col gap-2">
-                    <p>
-                      {t('campaigns.preview.latinAdvice', {
-                        segments: data.latinSegments ?? 0,
-                        total: formatNumber(data.latinTotalSms ?? 0, lang),
-                      })}
-                    </p>
-                    <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">{data.latinText}</p>
-                    <Button type="button" variant="outline" className="self-start" onClick={useLatin}>
-                      {t('campaigns.preview.useLatin')}
+                    <p>{t('campaigns.preview.latinOn')}</p>
+                    <Button type="button" variant="outline" className="self-start" onClick={() => setLatin(false)}>
+                      {t('campaigns.preview.useAzerbaijani')}
                     </Button>
                   </div>
                 </Alert>
               ) : data.encoding === 'UCS_2' ? (
-                <p className="text-muted-foreground">{t('campaigns.preview.unicodeNote')}</p>
+                <Alert tone="info" className="bg-card">
+                  <div className="flex flex-col gap-2">
+                    <p>
+                      {t(data.latinCheaper ? 'campaigns.preview.latinAdvice' : 'campaigns.preview.latinSame', {
+                        segments: segmentRange(undefined, data.latinSegments),
+                        total: formatNumber(data.latinTotalSms ?? 0, lang),
+                      })}
+                    </p>
+                    <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">{data.latinText}</p>
+                    <Button type="button" variant="outline" className="self-start" onClick={() => setLatin(true)}>
+                      {t('campaigns.preview.useLatin')}
+                    </Button>
+                  </div>
+                </Alert>
               ) : null}
             </div>
           ) : null}
@@ -253,6 +255,7 @@ function CampaignList() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={campaignStatusTone(campaign.status)}>{t(`campaigns.status.${campaignStatus(campaign.status)}`)}</Badge>
                   {campaign.personalized ? <Badge>{t('campaigns.list.personalized')}</Badge> : null}
+                  {campaign.latin ? <Badge>{t('campaigns.list.latin')}</Badge> : null}
                   <span className="text-muted-foreground">
                     {campaign.createdAt ? formatDateTime(campaign.createdAt, lang) : null}
                     {' · '}

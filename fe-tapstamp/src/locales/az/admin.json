@@ -755,11 +755,13 @@
       "summary": "{{recipients}} alıcı · {{characters}} simvol · hər müştəriyə {{segments}} SMS",
       "total": "Cəmi {{total}} SMS",
       "latinAdvice": "Mətndə Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) var — bir SMS 160 yox, 70 simvol tutur. Latın hərfləri ilə hər müştəriyə {{segments}} SMS, cəmi {{total}} SMS gedər:",
-      "useLatin": "Latın variantını istifadə et",
-      "unicodeNote": "Mətndə Azərbaycan hərfləri var: bir SMS 70 simvol tutur.",
+      "useLatin": "Latın hərfləri ilə göndər",
       "withName": "Adı olan müştəriyə:",
       "withoutName": "Adı olmayan müştəriyə:",
-      "personalizedNote": "\"Hörmətli\" sözündə \"ö\" hərfi var: bir SMS 70 simvol tutur. SMS sayı hər müştərinin öz adı ilə hesablanıb."
+      "personalizedNote": "\"Hörmətli\" sözündə \"ö\" hərfi var: bir SMS 70 simvol tutur. SMS sayı hər müştərinin öz adı ilə hesablanıb.",
+      "latinSame": "Mətndə Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) olduğu üçün bir SMS-ə 160 yox, 70 simvol sığır. Latın hərfləri ilə də hər müştəriyə {{segments}} SMS, cəmi {{total}} SMS gedər:",
+      "latinOn": "SMS latın hərfləri ilə gedəcək: müraciət, müştərinin adı və mətn daxil (ə→e, ş→s, ğ→g, ı→i, ç→c, ö→o, ü→u). Bir SMS-ə 160 simvol sığır.",
+      "useAzerbaijani": "Azərbaycan hərfləri ilə göndər"
     },
     "list": {
       "title": "Kampaniyalarım",
@@ -771,7 +773,8 @@
       "cancelConfirm": "Kampaniya ləğv edilsin?",
       "rejectReason": "Rədd səbəbi: {{reason}}",
       "personalized": "Fərdi müraciət",
-      "greetingPrefix": "Hörmətli <ad>,"
+      "greetingPrefix": "Hörmətli <ad>,",
+      "latin": "Latın hərfləri"
     },
     "status": {
       "PENDING_APPROVAL": "Təsdiq gözləyir",

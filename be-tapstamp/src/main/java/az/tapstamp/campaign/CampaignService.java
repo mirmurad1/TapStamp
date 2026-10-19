@@ -39,15 +39,15 @@ public class CampaignService {
      * "Hörmətli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Hörmətli istifadəçi,").
      */
     public record Draft(String text, Audience audience, @Nullable Integer inactiveDays, @Nullable UUID branchId,
-                        boolean personalized) {
+                        boolean personalized, boolean latin) {
     }
 
     /**
-     * Önizləmə: nümunə mətn (fərdi müraciətdə auditoriyadan adı olan müştəri ilə; {@code sampleWithoutName} — adı
+     * Önizləmə ({@code latin} — mesaj latın hərfləri ilə gedəcək, nümunələr və saylar da buna görə): nümunə mətn (fərdi müraciətdə auditoriyadan adı olan müştəri ilə; {@code sampleWithoutName} — adı
      * olmayan üçün), hər müştəriyə ən az/ən çox SMS və cəmi (hər müştərinin adı ilə hesablanır); həmçinin latın
      * hərfləri ilə variant (Azərbaycan hərfləri bir SMS-i 160 yox, 70 simvol edir).
      */
-    public record Preview(long recipients, boolean personalized, String fullText, @Nullable String sampleWithoutName,
+    public record Preview(long recipients, boolean personalized, boolean latin, String fullText, @Nullable String sampleWithoutName,
                           String encoding, int characters, int segments, int minSegments, long totalSms,
                           String latinText, int latinSegments, long latinTotalSms, boolean latinCheaper) {
     }
@@ -81,7 +81,8 @@ public class CampaignService {
         Instant now = clock.instant();
         Campaign created = Objects.requireNonNull(tx.execute(status -> {
             CampaignMapper.Audience audience = audience(draft, now);
-            Campaign row = new Campaign(id, draft.text().strip(), draft.personalized(), draft.audience().name(),
+            Campaign row = new Campaign(id, draft.text().strip(), draft.personalized(), draft.latin(),
+                    draft.audience().name(),
                     draft.inactiveDays(), draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null,
                     principal.userId(), now, null, 0, 0, null);
             campaigns.insert(row);
@@ -91,7 +92,7 @@ public class CampaignService {
             }
             // Dəqiq SMS sayı: alıcıların özləri (fərdi müraciətdə adları) ilə
             CampaignTexts.Totals totals = CampaignTexts.totals(companyName(), draft.text(), draft.personalized(),
-                    campaigns.recipientNames(id), false);
+                    campaigns.recipientNames(id), draft.latin());
             campaigns.updateCounts(id, recipients, totals.maxSegments(), Math.toIntExact(totals.total()));
             return campaigns.find(id).orElseThrow();
         }));
@@ -158,18 +159,19 @@ public class CampaignService {
         // Nümunə: auditoriyadan adı olan ilk müştəri; adsız variant ayrıca göstərilir
         String sampleName = names == null ? null
                 : names.stream().filter(n -> n != null && !n.isBlank()).findFirst().orElse(null);
-        String full = CampaignTexts.compose(company, draft.text(), draft.personalized(), sampleName);
+        String full = CampaignTexts.message(company, draft.text(), draft.personalized(), sampleName, draft.latin());
         String withoutName = draft.personalized() && sampleName != null
-                ? CampaignTexts.compose(company, draft.text(), true, null) : null;
+                ? CampaignTexts.message(company, draft.text(), true, null, draft.latin()) : null;
         String latin = CampaignTexts.latin(full);
         SmsSegments.Info info = CampaignTexts.analyze(full);
         List<@Nullable String> forTotals = names != null ? names : java.util.Collections.nCopies((int) recipients, null);
-        CampaignTexts.Totals totals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals, false);
+        CampaignTexts.Totals totals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals,
+                draft.latin());
         CampaignTexts.Totals latinTotals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals,
                 true);
-        return new Preview(recipients, draft.personalized(), full, withoutName, info.encoding().name(), info.units(),
-                totals.maxSegments(), totals.minSegments(), totals.total(), latin, latinTotals.maxSegments(),
-                latinTotals.total(), latinTotals.total() < totals.total());
+        return new Preview(recipients, draft.personalized(), draft.latin(), full, withoutName, info.encoding().name(),
+                info.units(), totals.maxSegments(), totals.minSegments(), totals.total(), latin,
+                latinTotals.maxSegments(), latinTotals.total(), latinTotals.total() < totals.total());
     }
 
     private void validate(Draft draft) {

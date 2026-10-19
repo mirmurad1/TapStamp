@@ -2593,6 +2593,8 @@ export interface components {
              * @description Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)
              */
             inactiveDays?: number;
+            /** @description Bütün mesaj latın hərfləri ilə göndərilsin (ə→e, ş→s, ...): 160 simvol/SMS */
+            latin?: boolean;
             /** @description Mətn "Hörmətli <ad>," ilə başlasın (adı yoxdursa "Hörmətli istifadəçi,") */
             personalized?: boolean;
             text: string;
@@ -2615,6 +2617,7 @@ export interface components {
             id?: string;
             /** Format: int32 */
             inactiveDays?: number;
+            latin?: boolean;
             personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
@@ -3082,6 +3085,7 @@ export interface components {
             id?: string;
             /** Format: int32 */
             inactiveDays?: number;
+            latin?: boolean;
             personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
@@ -3115,6 +3119,7 @@ export interface components {
             characters?: number;
             encoding?: string;
             fullText?: string;
+            latin?: boolean;
             latinCheaper?: boolean;
             /** Format: int32 */
             latinSegments?: number;

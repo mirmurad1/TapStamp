@@ -13,11 +13,12 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
      SMS sayı hər müştərinin öz adı ilə hesablanır (önizləmədə "hər müştəriyə 1–2 SMS" kimi aralıq görünə bilər),
      cəmi kampaniya yaradılanda alıcıların adları ilə dəqiqləşir. Önizləmədə adı olan (auditoriyadan) və adı
      olmayan müştəri üçün nümunə göstərilir;
+   - **"Latın hərfləri ilə göndər"** — mətndə Azərbaycan hərfləri olanda önizləmədə həmişə görünür (latın variantı
+     və onun SMS sayı ilə). Seçiləndə bütün mesaj — müraciət (`Hormetli`), müştərinin adı və mətn — göndəriləndə
+     latına çevrilir (160 simvol/SMS); önizləmə və SMS sayı da buna görədir; geri qaytarmaq olar;
    - auditoriya: bütün müştərilər / uzun müddət gəlməyənlər (30, 60, 90 gün) / hədiyyəyə 1–2 möhür qalanlar /
      istifadə olunmamış hədiyyə kartı olanlar; istəyə bağlı filial (həmin filialda möhürü olanlar);
-   - **önizləmə**: alıcı sayı, tam mətn, simvol sayı, hər müştəriyə neçə SMS, **cəmi SMS**. Mətndə Azərbaycan
-     hərfləri varsa (bir SMS 160 yox, 70 simvol tutur), latın variantı və onun SMS sayı göstərilir; bir kliklə
-     latın variantına keçmək olar.
+   - **önizləmə**: alıcı sayı, tam mətn, simvol sayı, hər müştəriyə neçə SMS, **cəmi SMS**.
 2. **Təsdiqə göndər** — alıcılar və SMS sayı həmin an müəyyənləşir (`campaign_recipients`), status
    `PENDING_APPROVAL`. Sahib təsdiqə qədər ləğv edə bilər.
 3. **Platforma admini** — platforma paneli → **Kampaniyalar**: şirkət, mətn, auditoriya, alıcı sayı və cəmi SMS.

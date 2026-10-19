@@ -755,11 +755,13 @@
       "summary": "{{recipients}} recipients · {{characters}} characters · {{segments}} SMS per customer",
       "total": "Total {{total}} SMS",
       "latinAdvice": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü) — one SMS holds 70 characters instead of 160. With Latin letters it would be {{segments}} SMS per customer, {{total}} SMS in total:",
-      "useLatin": "Use the Latin version",
-      "unicodeNote": "The text contains Azerbaijani letters: one SMS holds 70 characters.",
+      "useLatin": "Send in Latin letters",
       "withName": "To a customer with a name:",
       "withoutName": "To a customer without a name:",
-      "personalizedNote": "The word \"Hörmətli\" contains \"ö\": one SMS holds 70 characters. The SMS count is calculated with each customer's own name."
+      "personalizedNote": "The word \"Hörmətli\" contains \"ö\": one SMS holds 70 characters. The SMS count is calculated with each customer's own name.",
+      "latinSame": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü), so one SMS holds 70 characters instead of 160. In Latin letters it would also be {{segments}} SMS per customer, {{total}} SMS in total:",
+      "latinOn": "The SMS will be sent in Latin letters, including the greeting, the customer name and the text (ə→e, ş→s, ğ→g, ı→i, ç→c, ö→o, ü→u). One SMS holds 160 characters.",
+      "useAzerbaijani": "Send with Azerbaijani letters"
     },
     "list": {
       "title": "My campaigns",
@@ -771,7 +773,8 @@
       "cancelConfirm": "Cancel this campaign?",
       "rejectReason": "Rejection reason: {{reason}}",
       "personalized": "Personal greeting",
-      "greetingPrefix": "Hörmətli <name>,"
+      "greetingPrefix": "Hörmətli <name>,",
+      "latin": "Latin letters"
     },
     "status": {
       "PENDING_APPROVAL": "Awaiting approval",

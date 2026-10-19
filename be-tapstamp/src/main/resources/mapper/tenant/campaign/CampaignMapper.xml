@@ -45,9 +45,9 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO campaigns (id, text, personalized, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms,
+        INSERT INTO campaigns (id, text, personalized, latin, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms,
                                status, created_by, created_at)
-        VALUES (#{id}, #{text}, #{personalized}, #{audience}, #{inactiveDays}, #{branchId}, #{recipients}, #{segmentsPerMessage},
+        VALUES (#{id}, #{text}, #{personalized}, #{latin}, #{audience}, #{inactiveDays}, #{branchId}, #{recipients}, #{segmentsPerMessage},
                 #{totalSms}, #{status}, #{createdBy}, #{createdAt})
     </insert>
 
@@ -63,7 +63,7 @@
     </update>
 
     <sql id="campaign">
-        SELECT id, text, personalized, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms, status,
+        SELECT id, text, personalized, latin, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms, status,
                reject_reason, created_by, created_at, decided_at, sent_count, failed_count, finished_at
         FROM campaigns
     </sql>

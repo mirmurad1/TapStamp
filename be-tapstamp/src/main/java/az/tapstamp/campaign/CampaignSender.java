@@ -104,7 +104,8 @@ public class CampaignSender {
         }
         String company = companyName();
         for (CampaignMapper.Recipient recipient : recipients) {
-            String text = CampaignTexts.compose(company, campaign.text(), campaign.personalized(), recipient.name());
+            String text = CampaignTexts.message(company, campaign.text(), campaign.personalized(), recipient.name(),
+                    campaign.latin());
             String error = null;
             String phone = null;
             try {

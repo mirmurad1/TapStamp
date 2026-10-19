@@ -132,6 +132,25 @@ class CampaignIT extends TapIntegrationTest {
                 .isEqualTo("Alpha Kafe: Hörmətli istifadəçi, " + text));
     }
 
+    @Test
+    void latinCampaignTransliteratesTheWholeMessageIncludingGreetingAndName() throws Exception {
+        String phone = uniquePhone();
+        signedIn(phone).patch("/api/v1/me", Map.of("name", "Gülşən")).andExpect(status().isOk());
+        AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
+        Map<String, Object> request = Map.of("text", "Şənbə günü endirim var!", "audience", "ALL",
+                "personalized", true, "latin", true);
+        owner.post("/campaigns/preview", request).andExpect(status().isOk())
+                .andExpect(jsonPath("$.latin").value(true))
+                .andExpect(jsonPath("$.encoding").value("GSM_7"))
+                .andExpect(jsonPath("$.sampleWithoutName").value("Alpha Kafe: Hormetli istifadeci, Senbe gunu endirim var!"));
+        String id = json(owner.post("/campaigns", request).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.latin").value(true)), "$.id");
+        signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
+        sendAll();
+        assertThat(sms.to(phone)).anySatisfy(m -> assertThat(m.text())
+                .isEqualTo("Alpha Kafe: Hormetli Gulsen, Senbe gunu endirim var!"));
+    }
+
     /** Saatı şirkətin 09:00–21:00 pəncərəsinə gətirib göndərişi bitənə qədər işlədir. */
     private void sendAll() {
         LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();

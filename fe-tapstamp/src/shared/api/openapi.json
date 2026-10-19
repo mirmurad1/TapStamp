@@ -4372,6 +4372,10 @@
             "maximum" : 365,
             "minimum" : 7
           },
+          "latin" : {
+            "type" : "boolean",
+            "description" : "Bütün mesaj latın hərfləri ilə göndərilsin (ə→e, ş→s, ...): 160 simvol/SMS"
+          },
           "personalized" : {
             "type" : "boolean",
             "description" : "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")"
@@ -4419,6 +4423,9 @@
           "inactiveDays" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "latin" : {
+            "type" : "boolean"
           },
           "personalized" : {
             "type" : "boolean"
@@ -5573,6 +5580,9 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "latin" : {
+            "type" : "boolean"
+          },
           "personalized" : {
             "type" : "boolean"
           },
@@ -5657,6 +5667,9 @@
           },
           "fullText" : {
             "type" : "string"
+          },
+          "latin" : {
+            "type" : "boolean"
           },
           "latinCheaper" : {
             "type" : "boolean"

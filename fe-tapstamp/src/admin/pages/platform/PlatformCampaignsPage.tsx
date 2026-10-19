@@ -82,6 +82,7 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{resolveText(campaign.displayName, lang)}</span>
             <span className="text-muted-foreground">{campaign.slug}</span>
+            {campaign.latin ? <Badge>{t('admin:campaigns.list.latin')}</Badge> : null}
             <Badge tone={campaignStatusTone(campaign.status)}>{t(`admin:campaigns.status.${campaignStatus(campaign.status)}`)}</Badge>
           </div>
           <span className="text-muted-foreground">{campaign.createdAt ? formatDateTime(campaign.createdAt, lang) : null}</span>
