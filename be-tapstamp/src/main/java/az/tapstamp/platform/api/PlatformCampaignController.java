@@ -1,0 +1,85 @@
+package az.tapstamp.platform.api;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import az.tapstamp.campaign.CampaignService.Audience;
+import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
+import az.tapstamp.platform.service.PlatformCampaignService;
+import az.tapstamp.platform.service.PlatformCampaignService.TenantCampaign;
+import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.i18n.LocalizedText;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/** Şirkətlərin kampaniya SMS-ləri: siyahı və qərar (ödənişdən sonra təsdiq və ya rədd). */
+@RestController
+@RequestMapping("/api/v1/platform/campaigns")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+@Tag(name = "Platforma: kampaniyalar")
+public class PlatformCampaignController {
+
+    private final PlatformCampaignService campaigns;
+
+    public PlatformCampaignController(PlatformCampaignService campaigns) {
+        this.campaigns = campaigns;
+    }
+
+    @Schema(description = "Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət")
+    public record PlatformCampaignView(UUID tenantId, String slug, LocalizedText displayName, UUID id, String text,
+                                       Audience audience, Integer inactiveDays, int recipients, int segmentsPerMessage,
+                                       int totalSms, String status, String rejectReason, Instant createdAt,
+                                       Instant decidedAt, int sentCount, int failedCount, Instant finishedAt) {
+
+        static PlatformCampaignView from(TenantCampaign tc) {
+            Campaign c = tc.campaign();
+            return new PlatformCampaignView(tc.tenant().id(), tc.tenant().slug(), tc.tenant().displayName(), c.id(),
+                    c.text(), Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
+                    c.totalSms(), c.status(), c.rejectReason(), c.createdAt(), c.decidedAt(), c.sentCount(),
+                    c.failedCount(), c.finishedAt());
+        }
+    }
+
+    @Schema(description = "Rədd səbəbi (şirkət sahibinə göstərilir)")
+    public record RejectRequest(@NotBlank @Size(max = 300) String reason) {
+    }
+
+    @GetMapping
+    @Operation(summary = "Kampaniyalar", description = """
+            `status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).""")
+    List<PlatformCampaignView> list(@RequestParam(defaultValue = "PENDING") @Pattern(regexp = "PENDING|ALL") String status) {
+        List<String> statuses = "PENDING".equals(status) ? List.of("PENDING_APPROVAL")
+                : List.of("PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED", "CANCELLED");
+        return campaigns.list(statuses).stream().map(PlatformCampaignView::from).toList();
+    }
+
+    @PostMapping("/{tenantId}/{campaignId}/approve")
+    @Operation(summary = "Kampaniyanı təsdiqləmək", description = """
+            Ödəniş alındıqdan sonra. Göndəriş 09:00–21:00 arası (şirkətin saatı ilə) avtomatik başlayır.""")
+    PlatformCampaignView approve(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                                 @PathVariable UUID campaignId) {
+        return PlatformCampaignView.from(campaigns.decide(principal, tenantId, campaignId, true, null));
+    }
+
+    @PostMapping("/{tenantId}/{campaignId}/reject")
+    @Operation(summary = "Kampaniyanı rədd etmək")
+    PlatformCampaignView reject(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                                @PathVariable UUID campaignId, @Valid @RequestBody RejectRequest request) {
+        return PlatformCampaignView.from(campaigns.decide(principal, tenantId, campaignId, false, request.reason()));
+    }
+}

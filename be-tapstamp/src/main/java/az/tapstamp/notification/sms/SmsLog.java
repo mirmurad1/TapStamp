@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsLog {
 
+    /** SMS-in növü: giriş kodu və ya kampaniya. */
+    public enum Purpose { OTP, CAMPAIGN }
+
     /** Hesabat üçün günlər Bakı vaxtı ilə sayılır. */
     public static final ZoneId REPORT_ZONE = ZoneId.of("Asia/Baku");
 
@@ -50,14 +53,14 @@ public class SmsLog {
      * @param code        mətndəki OTP kodu — yalnız şifrəli saxlanılır (kod yoxdursa null)
      * @param error       göndəriş alınmayıbsa — səbəb (provayderin xəta kodu; mətn və açar daxil deyil)
      */
-    public void record(UUID tenantId, String phone, String sentText, String storedText, @Nullable String code,
-                       @Nullable String error) {
+    public void record(UUID tenantId, String phone, Purpose purpose, String sentText, String storedText,
+                       @Nullable String code, @Nullable String error) {
         try {
             UUID id = Ids.newId();
             SmsSegments.Info info = SmsSegments.analyze(sentText);
             byte[] codeEnc = code == null ? null
                     : cipher.encryptString(KeyPurpose.PII, code, Aad.platformField("sms_messages", "code_enc", id));
-            mapper.insert(new SmsLogMapper.Entry(id, tenantId, phone, storedText, codeEnc, "OTP",
+            mapper.insert(new SmsLogMapper.Entry(id, tenantId, phone, storedText, codeEnc, purpose.name(),
                     info.encoding().name(), info.segments(),
                     error == null ? "SENT" : "FAILED",
                     error == null || error.length() <= MAX_ERROR_LENGTH ? error : error.substring(0, MAX_ERROR_LENGTH),

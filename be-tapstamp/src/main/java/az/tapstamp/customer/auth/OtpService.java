@@ -219,7 +219,7 @@ public class OtpService {
                 error = e.getClass().getSimpleName() + ": " + e.getMessage();
                 log.warn("OTP SMS göndərilmədi: {} ({})", message, e.getClass().getSimpleName());
             }
-            smsLog.record(tenant.id(), phone, message.text(), storedText, code, error);
+            smsLog.record(tenant.id(), phone, SmsLog.Purpose.OTP, message.text(), storedText, code, error);
         });
         return new Issued(id, expiresAt, now.plus(properties.otpResendCooldown()));
     }

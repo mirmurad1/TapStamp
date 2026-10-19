@@ -54,5 +54,7 @@
   "STAMP_ADJUSTMENT_TOO_LARGE": "Cannot remove that many stamps: the card and unused gift cards do not have enough.",
   "TAG_ROTATION_IN_PROGRESS": "Key rotation in progress: tap the reprogrammed tag first.",
   "PROVISIONING_ALREADY_EXPORTED": "Keys are shown only once. Rotate the keys if needed.",
-  "DOMAIN_IS_PRIMARY": "The primary domain cannot be removed: make another domain primary first."
+  "DOMAIN_IS_PRIMARY": "The primary domain cannot be removed: make another domain primary first.",
+  "CAMPAIGN_NO_RECIPIENTS": "No customer in the selected audience can receive campaign SMS.",
+  "CAMPAIGN_STATE_CHANGED": "The campaign status has already changed. Refresh the page."
 }

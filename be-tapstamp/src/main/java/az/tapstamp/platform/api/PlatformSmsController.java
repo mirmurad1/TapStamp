@@ -41,11 +41,13 @@ public class PlatformSmsController {
     }
 
     @Schema(description = "Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı")
-    public record SmsUsageRow(UUID tenantId, String slug, LocalizedText displayName, long messages) {
+    public record SmsUsageRow(UUID tenantId, String slug, LocalizedText displayName, long messages, long otp,
+                              long campaign) {
     }
 
     @Schema(description = "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər)")
-    public record SmsUsageReport(LocalDate from, LocalDate to, List<SmsUsageRow> tenants, long messages) {
+    public record SmsUsageReport(LocalDate from, LocalDate to, List<SmsUsageRow> tenants, long messages, long otp,
+                                 long campaign) {
     }
 
     @GetMapping
@@ -56,14 +58,16 @@ public class PlatformSmsController {
                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         requireRange(from, to);
         List<SmsUsageRow> rows = smsLog.usage(from, to).stream()
-                .map(u -> new SmsUsageRow(u.tenantId(), u.slug(), u.displayName(), u.messages()))
+                .map(u -> new SmsUsageRow(u.tenantId(), u.slug(), u.displayName(), u.messages(), u.otp(), u.campaign()))
                 .toList();
-        return new SmsUsageReport(from, to, rows, rows.stream().mapToLong(SmsUsageRow::messages).sum());
+        return new SmsUsageReport(from, to, rows, rows.stream().mapToLong(SmsUsageRow::messages).sum(),
+                rows.stream().mapToLong(SmsUsageRow::otp).sum(), rows.stream().mapToLong(SmsUsageRow::campaign).sum());
     }
 
     @Schema(description = "Jurnaldakı SMS: şirkət, nömrə, mətn (OTP kodu gizlədilmiş), nəticə və xəta (uğursuzdursa)")
     public record SmsMessageRow(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName,
                                 String phone, String text,
+                                @Schema(allowableValues = {"OTP", "CAMPAIGN"}) String purpose,
                                 @Schema(allowableValues = {"SENT", "FAILED"}) String status, String error) {
     }
 
@@ -85,7 +89,7 @@ public class PlatformSmsController {
         SmsLog.MessagePage result = smsLog.messages(from, to, status, phone, page, PAGE_SIZE);
         return new SmsMessagePage(result.items().stream()
                 .map(m -> new SmsMessageRow(m.id(), m.createdAt(), m.tenantId(), m.slug(), m.displayName(), m.phone(),
-                        m.text(), m.status(), m.error()))
+                        m.text(), m.purpose(), m.status(), m.error()))
                 .toList(), result.page(), result.size(), result.total());
     }
 

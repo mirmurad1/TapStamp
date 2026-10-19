@@ -76,7 +76,7 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
     void failedSmsAreListedWithReasonPageByPage() throws Exception {
         String phone = uniquePhone();
         for (int i = 0; i < 21; i++) {
-            smsLog.record(alpha().id(), phone, "Alpha Kafe OTP: 123456", "Alpha Kafe OTP: ******", "123456",
+            smsLog.record(alpha().id(), phone, SmsLog.Purpose.OTP, "Alpha Kafe OTP: 123456", "Alpha Kafe OTP: ******", "123456",
                     "SmsDeliveryException: SMS receiver rejected: ERRSMS4102");
         }
         LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
@@ -101,7 +101,7 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
     @Test
     void messagesAreSearchableByNumberInAnyNotation() throws Exception {
         String phone = uniquePhone();
-        smsLog.record(alpha().id(), phone, "Alpha Kafe OTP: 654321", "Alpha Kafe OTP: ******", "654321", null);
+        smsLog.record(alpha().id(), phone, SmsLog.Purpose.OTP, "Alpha Kafe OTP: 654321", "Alpha Kafe OTP: ******", "654321", null);
         LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
         AdminClient admin = signedInPlatformAdmin();
         String base = "/sms-usage/messages?from=" + today + "&to=" + today + "&phone=";

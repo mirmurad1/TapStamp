@@ -11,7 +11,9 @@
     </insert>
 
     <select id="usage" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Usage">
-        SELECT t.id AS tenant_id, t.slug, t.display_name, count(*) AS messages
+        SELECT t.id AS tenant_id, t.slug, t.display_name, count(*) AS messages,
+               count(*) FILTER (WHERE m.purpose = 'OTP') AS otp,
+               count(*) FILTER (WHERE m.purpose = 'CAMPAIGN') AS campaign
         FROM sms_messages m
         JOIN tenants t ON t.id = m.tenant_id
         WHERE m.status = 'SENT' AND m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
@@ -27,7 +29,8 @@
     </sql>
 
     <select id="messages" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Message">
-        SELECT m.id, m.created_at, t.id AS tenant_id, t.slug, t.display_name, m.phone, m.text, m.status, m.error
+        SELECT m.id, m.created_at, t.id AS tenant_id, t.slug, t.display_name, m.phone, m.text, m.purpose, m.status,
+               m.error
         FROM sms_messages m
         JOIN tenants t ON t.id = m.tenant_id
         <include refid="messageFilter"/>

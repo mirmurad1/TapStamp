@@ -112,7 +112,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
          */
-        get: operations["list_7"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -358,6 +358,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kampaniyalar
+         * @description Yenidən köhnəyə, son 100.
+         */
+        get: operations["list_2"];
+        put?: never;
+        /**
+         * Kampaniya yaratmaq
+         * @description Alıcılar və SMS sayı bu an müəyyənləşir; kampaniya platformanın təsdiqini gözləyir (PENDING_APPROVAL). Alıcı yoxdursa `CAMPAIGN_NO_RECIPIENTS`.
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/campaigns/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kampaniyanın önizləməsi
+         * @description Alıcı sayı, göndəriləcək tam mətn, simvol və SMS sayı; həmçinin latın hərfləri ilə variant və onun SMS sayı (Azərbaycan hərfləri bir SMS-i 160 yox, 70 simvol edir).
+         */
+        post: operations["preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/campaigns/{campaignId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kampaniya */
+        get: operations["get_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/campaigns/{campaignId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kampaniyanı ləğv etmək
+         * @description Yalnız təsdiqə qədər; sonra `CAMPAIGN_STATE_CHANGED`.
+         */
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/customers": {
         parameters: {
             query?: never;
@@ -369,7 +450,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).
          */
-        get: operations["list_6"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -426,7 +507,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_1"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -959,7 +1040,7 @@ export interface paths {
          * Möhürü rədd et
          * @description Səbəb məcburidir və auditə yazılır.
          */
-        post: operations["reject"];
+        post: operations["reject_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -977,7 +1058,7 @@ export interface paths {
          * Çiplərin siyahısı
          * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.
          */
-        get: operations["list_5"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1380,13 +1461,34 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_4"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/marketing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kampaniya SMS-ləri: cari seçim */
+        get: operations["get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Kampaniya SMS-lərini açmaq və ya söndürmək
+         * @description Söndürülsə, gələcək kampaniyalara düşmür; artıq təsdiqlənmiş kampaniyada da SMS getmir.
+         */
+        patch: operations["set"];
         trace?: never;
     };
     "/api/v1/me/sessions": {
@@ -1451,7 +1553,7 @@ export interface paths {
          * Platforma audit jurnalı
          * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.
          */
-        get: operations["list_3"];
+        get: operations["list_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1634,6 +1736,63 @@ export interface paths {
          * @description 2FA aktivdirsə TOTP kodu, deyilsə cari şifrə ilə; 10 dəqiqə ərzində həssas əməliyyatlara (işçinin 2FA-sının sıfırlanması, bərpa kodları, şirkətin dayandırılması) icazə verir.
          */
         post: operations["stepUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kampaniyalar
+         * @description `status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).
+         */
+        get: operations["list_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kampaniyanı təsdiqləmək
+         * @description Ödəniş alındıqdan sonra. Göndəriş 09:00–21:00 arası (şirkətin saatı ilə) avtomatik başlayır.
+         */
+        post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kampaniyanı rədd etmək */
+        post: operations["reject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1867,7 +2026,7 @@ export interface paths {
             cookie?: never;
         };
         /** Şirkət haqqında məlumat */
-        get: operations["get"];
+        get: operations["get_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2246,7 +2405,7 @@ export interface paths {
          * Cari hüquqi sənədlər
          * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
          */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2440,6 +2599,53 @@ export interface components {
             name?: components["schemas"]["LocalizedText"];
             policyOverridden?: boolean;
             status?: string;
+        };
+        /** @description Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial */
+        CampaignRequest: {
+            /** @enum {string} */
+            audience: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            /**
+             * Format: uuid
+             * @description Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı
+             */
+            branchId?: string;
+            /**
+             * Format: int32
+             * @description Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)
+             */
+            inactiveDays?: number;
+            text: string;
+        };
+        /** @description Kampaniya və vəziyyəti */
+        CampaignView: {
+            /** @enum {string} */
+            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            /** Format: int32 */
+            failedCount?: number;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            inactiveDays?: number;
+            /** Format: int32 */
+            recipients?: number;
+            rejectReason?: string;
+            /** Format: int32 */
+            segmentsPerMessage?: number;
+            /** Format: int32 */
+            sentCount?: number;
+            /** @enum {string} */
+            status?: "PENDING_APPROVAL" | "APPROVED" | "SENDING" | "SENT" | "REJECTED" | "CANCELLED";
+            text?: string;
+            /** Format: int32 */
+            totalSms?: number;
         };
         CardResponse: {
             /** Format: int32 */
@@ -2717,6 +2923,10 @@ export interface components {
             /** @enum {string} */
             status?: "AUTHENTICATED" | "MFA_REQUIRED" | "MFA_ENROLLMENT_REQUIRED";
         };
+        /** @description Kampaniya SMS-ləri: true — alır */
+        MarketingSettings: {
+            enabled: boolean;
+        };
         /** @description Daxil olmuş admin haqqında məlumat */
         MeResponse: {
             displayName?: string;
@@ -2877,6 +3087,38 @@ export interface components {
             targetId?: string;
             targetType?: string;
         };
+        /** @description Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət */
+        PlatformCampaignView: {
+            /** @enum {string} */
+            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            displayName?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            failedCount?: number;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            inactiveDays?: number;
+            /** Format: int32 */
+            recipients?: number;
+            rejectReason?: string;
+            /** Format: int32 */
+            segmentsPerMessage?: number;
+            /** Format: int32 */
+            sentCount?: number;
+            slug?: string;
+            status?: string;
+            /** Format: uuid */
+            tenantId?: string;
+            text?: string;
+            /** Format: int32 */
+            totalSms?: number;
+        };
         /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
         PlatformTagRegisterRequest: {
             /** Format: uuid */
@@ -2888,6 +3130,24 @@ export interface components {
             /** Format: uuid */
             branchId?: string;
             label?: string;
+        };
+        Preview: {
+            /** Format: int32 */
+            characters?: number;
+            encoding?: string;
+            fullText?: string;
+            latinCheaper?: boolean;
+            /** Format: int32 */
+            latinSegments?: number;
+            latinText?: string;
+            /** Format: int64 */
+            latinTotalSms?: number;
+            /** Format: int64 */
+            recipients?: number;
+            /** Format: int32 */
+            segments?: number;
+            /** Format: int64 */
+            totalSms?: number;
         };
         ProvisionRequest: {
             defaultLanguage: string;
@@ -2941,6 +3201,10 @@ export interface components {
             language: string;
             name?: string;
             registrationToken: string;
+        };
+        /** @description Rədd səbəbi (şirkət sahibinə göstərilir) */
+        RejectRequest: {
+            reason: string;
         };
         RejectStampRequest: {
             reason: string;
@@ -3100,6 +3364,8 @@ export interface components {
             /** Format: uuid */
             id?: string;
             phone?: string;
+            /** @enum {string} */
+            purpose?: "OTP" | "CAMPAIGN";
             slug?: string;
             /** @enum {string} */
             status?: "SENT" | "FAILED";
@@ -3109,19 +3375,27 @@ export interface components {
         };
         /** @description Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər) */
         SmsUsageReport: {
+            /** Format: int64 */
+            campaign?: number;
             /** Format: date */
             from?: string;
             /** Format: int64 */
             messages?: number;
+            /** Format: int64 */
+            otp?: number;
             tenants?: components["schemas"]["SmsUsageRow"][];
             /** Format: date */
             to?: string;
         };
         /** @description Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı */
         SmsUsageRow: {
+            /** Format: int64 */
+            campaign?: number;
             displayName?: components["schemas"]["LocalizedText"];
             /** Format: int64 */
             messages?: number;
+            /** Format: int64 */
+            otp?: number;
             slug?: string;
             /** Format: uuid */
             tenantId?: string;
@@ -3419,7 +3693,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_9: {
         parameters: {
             query?: {
                 action?: string;
@@ -3709,7 +3983,119 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignView"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignView"];
+                };
+            };
+        };
+    };
+    preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Preview"];
+                };
+            };
+        };
+    };
+    get_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignView"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignView"];
+                };
+            };
+        };
+    };
+    list_8: {
         parameters: {
             query?: {
                 q?: string;
@@ -3791,7 +4177,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4555,7 +4941,7 @@ export interface operations {
             };
         };
     };
-    reject: {
+    reject_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4581,7 +4967,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_7: {
         parameters: {
             query?: {
                 branchId?: string;
@@ -5067,7 +5453,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -5083,6 +5469,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GiftCardResponse"][];
+                };
+            };
+        };
+    };
+    get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MarketingSettings"];
+                };
+            };
+        };
+    };
+    set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarketingSettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MarketingSettings"];
                 };
             };
         };
@@ -5147,7 +5577,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_5: {
         parameters: {
             query?: {
                 action?: string;
@@ -5363,6 +5793,78 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: {
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformCampaignView"][];
+                };
+            };
+        };
+    };
+    approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformCampaignView"];
+                };
+            };
+        };
+    };
+    reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformCampaignView"];
+                };
             };
         };
     };
@@ -5651,7 +6153,7 @@ export interface operations {
             };
         };
     };
-    get: {
+    get_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6134,7 +6636,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;

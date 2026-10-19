@@ -54,5 +54,7 @@
   "STAMP_ADJUSTMENT_TOO_LARGE": "Bu qədər möhür silmək olmaz: kartda və istifadə olunmamış hədiyyələrdə kifayət qədər möhür yoxdur.",
   "TAG_ROTATION_IN_PROGRESS": "Açar yenilənməsi davam edir: əvvəlcə yeni proqramlaşdırılmış çipə toxunun.",
   "PROVISIONING_ALREADY_EXPORTED": "Açarlar yalnız bir dəfə göstərilir. Lazımdırsa, açarı yeniləyin.",
-  "DOMAIN_IS_PRIMARY": "Əsas domen silinə bilməz: əvvəlcə başqa domeni əsas edin."
+  "DOMAIN_IS_PRIMARY": "Əsas domen silinə bilməz: əvvəlcə başqa domeni əsas edin.",
+  "CAMPAIGN_NO_RECIPIENTS": "Seçilmiş auditoriyada kampaniya SMS-i ala bilən müştəri yoxdur.",
+  "CAMPAIGN_STATE_CHANGED": "Kampaniyanın vəziyyəti artıq dəyişib. Səhifəni yeniləyin."
 }

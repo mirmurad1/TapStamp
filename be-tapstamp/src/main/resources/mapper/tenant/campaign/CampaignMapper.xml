@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Kampaniya SMS-ləri: auditoriya, alıcılar və göndəriş vəziyyəti -->
+<mapper namespace="az.tapstamp.campaign.repository.CampaignMapper">
+
+    <!-- Kampaniya SMS-i ala bilən müştərilər (aktiv, imtina etməyib, nömrəsi var) + auditoriya şərti -->
+    <sql id="audience">
+        FROM customers c
+        LEFT JOIN loyalty_accounts la ON la.customer_id = c.id
+        LEFT JOIN reward_rules rr ON rr.id = coalesce(la.reward_rule_id, (SELECT id FROM reward_rules WHERE active))
+        WHERE c.status = 'ACTIVE' AND c.marketing_opt_out_at IS NULL AND c.phone_enc IS NOT NULL
+        <if test="a.branchId != null">
+            AND EXISTS (SELECT 1 FROM stamps s
+                        WHERE s.customer_id = c.id AND s.branch_id = #{a.branchId} AND s.status = 'CONFIRMED')
+        </if>
+        <choose>
+            <when test="a.audience == 'INACTIVE'">
+                AND coalesce(c.last_visit_at, c.registered_at) &lt; #{a.inactiveSince}
+            </when>
+            <when test="a.audience == 'NEAR_REWARD'">
+                AND la.current_stamps &gt; 0 AND la.current_stamps &lt; rr.stamps_required
+                AND la.current_stamps &gt;= rr.stamps_required - 2
+            </when>
+            <when test="a.audience == 'UNUSED_GIFT_CARD'">
+                AND EXISTS (SELECT 1 FROM rewards w WHERE w.customer_id = c.id AND w.status = 'AVAILABLE')
+            </when>
+        </choose>
+    </sql>
+
+    <select id="countAudience" resultType="long">
+        SELECT count(*) <include refid="audience"/>
+    </select>
+
+    <select id="branchExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId})
+    </select>
+
+    <insert id="insert">
+        INSERT INTO campaigns (id, text, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms,
+                               status, created_by, created_at)
+        VALUES (#{id}, #{text}, #{audience}, #{inactiveDays}, #{branchId}, #{recipients}, #{segmentsPerMessage},
+                #{totalSms}, #{status}, #{createdBy}, #{createdAt})
+    </insert>
+
+    <insert id="insertRecipients">
+        INSERT INTO campaign_recipients (campaign_id, customer_id, status)
+        SELECT #{campaignId}, c.id, 'PENDING' <include refid="audience"/>
+    </insert>
+
+    <update id="updateCounts">
+        UPDATE campaigns SET recipients = #{recipients}, total_sms = #{totalSms} WHERE id = #{id}
+    </update>
+
+    <sql id="campaign">
+        SELECT id, text, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms, status,
+               reject_reason, created_by, created_at, decided_at, sent_count, failed_count, finished_at
+        FROM campaigns
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
+        <include refid="campaign"/>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="listByStatus" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
+        <include refid="campaign"/>
+        WHERE status IN <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="find" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
+        <include refid="campaign"/>
+        WHERE id = #{id}
+    </select>
+
+    <update id="changeStatus">
+        UPDATE campaigns
+        SET status = #{to},
+            decided_at = coalesce(#{decidedAt}, decided_at),
+            decided_by = coalesce(#{decidedBy}, decided_by),
+            reject_reason = coalesce(#{rejectReason}, reject_reason)
+        WHERE id = #{id} AND status = #{from}
+    </update>
+
+    <select id="sendable" resultType="java.util.UUID">
+        SELECT id FROM campaigns WHERE status IN ('APPROVED', 'SENDING') ORDER BY decided_at, id
+    </select>
+
+    <update id="skipIneligible">
+        UPDATE campaign_recipients r SET status = 'SKIPPED'
+        FROM customers c
+        WHERE r.campaign_id = #{campaignId} AND r.status = 'PENDING' AND c.id = r.customer_id
+          AND (c.status &lt;&gt; 'ACTIVE' OR c.marketing_opt_out_at IS NOT NULL OR c.phone_enc IS NULL)
+    </update>
+
+    <update id="failStale">
+        UPDATE campaign_recipients SET status = 'FAILED', sent_at = #{now}, error = 'Göndəriş yarımçıq qaldı'
+        WHERE campaign_id = #{campaignId} AND status = 'SENDING' AND claimed_at &lt; #{claimedBefore}
+    </update>
+
+    <select id="claim" resultType="az.tapstamp.campaign.repository.CampaignMapper$Recipient">
+        UPDATE campaign_recipients r SET status = 'SENDING', claimed_at = #{now}
+        FROM customers c
+        WHERE c.id = r.customer_id
+          AND (r.campaign_id, r.customer_id) IN (
+              SELECT campaign_id, customer_id FROM campaign_recipients
+              WHERE campaign_id = #{campaignId} AND status = 'PENDING'
+              ORDER BY customer_id
+              LIMIT #{limit}
+              FOR UPDATE SKIP LOCKED)
+        RETURNING r.customer_id, c.phone_enc
+    </select>
+
+    <update id="markRecipient">
+        UPDATE campaign_recipients SET status = #{status}, sent_at = #{now}, error = #{error}
+        WHERE campaign_id = #{campaignId} AND customer_id = #{customerId}
+    </update>
+
+    <update id="finishIfDone">
+        UPDATE campaigns c
+        SET status = 'SENT', finished_at = #{now},
+            sent_count = (SELECT count(*) FROM campaign_recipients WHERE campaign_id = c.id AND status = 'SENT'),
+            failed_count = (SELECT count(*) FROM campaign_recipients WHERE campaign_id = c.id AND status = 'FAILED')
+        WHERE c.id = #{campaignId} AND c.status IN ('APPROVED', 'SENDING')
+          AND NOT EXISTS (SELECT 1 FROM campaign_recipients
+                          WHERE campaign_id = c.id AND status IN ('PENDING', 'SENDING'))
+    </update>
+
+    <update id="setMarketingOptOut">
+        UPDATE customers SET marketing_opt_out_at = #{optOutAt}, updated_at = now() WHERE id = #{customerId}
+    </update>
+
+    <select id="isMarketingOptedOut" resultType="boolean">
+        SELECT marketing_opt_out_at IS NOT NULL FROM customers WHERE id = #{customerId}
+    </select>
+</mapper>

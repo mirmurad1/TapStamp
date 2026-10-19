@@ -17,13 +17,13 @@ public interface SmsLogMapper {
                  String encoding, int segments, String status, @Nullable String error, Instant createdAt) {
     }
 
-    /** Şirkət üzrə uğurla göndərilmiş SMS-lərin sayı. */
-    record Usage(UUID tenantId, String slug, LocalizedText displayName, long messages) {
+    /** Şirkət üzrə uğurla göndərilmiş SMS-lərin sayı: cəmi, giriş kodları və kampaniyalar. */
+    record Usage(UUID tenantId, String slug, LocalizedText displayName, long messages, long otp, long campaign) {
     }
 
     /** Jurnaldakı SMS: şirkət, nömrə, mətn (kod gizlədilmiş), nəticə və xəta. */
     record Message(UUID id, Instant createdAt, UUID tenantId, String slug, LocalizedText displayName, String phone,
-                   String text, String status, @Nullable String error) {
+                   String text, String purpose, String status, @Nullable String error) {
     }
 
     void insert(Entry entry);

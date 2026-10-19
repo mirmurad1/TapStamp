@@ -246,7 +246,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
-        "operationId" : "list_7",
+        "operationId" : "list_9",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -601,10 +601,148 @@
         "tags" : [ "Admin: autentifikasiya" ]
       }
     },
+    "/api/v1/admin/campaigns" : {
+      "get" : {
+        "description" : "Yenidən köhnəyə, son 100.",
+        "operationId" : "list_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CampaignView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyalar",
+        "tags" : [ "Admin: kampaniyalar" ]
+      },
+      "post" : {
+        "description" : "Alıcılar və SMS sayı bu an müəyyənləşir; kampaniya platformanın təsdiqini gözləyir (PENDING_APPROVAL). Alıcı yoxdursa `CAMPAIGN_NO_RECIPIENTS`.",
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Kampaniya yaratmaq",
+        "tags" : [ "Admin: kampaniyalar" ]
+      }
+    },
+    "/api/v1/admin/campaigns/preview" : {
+      "post" : {
+        "description" : "Alıcı sayı, göndəriləcək tam mətn, simvol və SMS sayı; həmçinin latın hərfləri ilə variant və onun SMS sayı (Azərbaycan hərfləri bir SMS-i 160 yox, 70 simvol edir).",
+        "operationId" : "preview",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Preview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyanın önizləməsi",
+        "tags" : [ "Admin: kampaniyalar" ]
+      }
+    },
+    "/api/v1/admin/campaigns/{campaignId}" : {
+      "get" : {
+        "operationId" : "get_3",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniya",
+        "tags" : [ "Admin: kampaniyalar" ]
+      }
+    },
+    "/api/v1/admin/campaigns/{campaignId}/cancel" : {
+      "post" : {
+        "description" : "Yalnız təsdiqə qədər; sonra `CAMPAIGN_STATE_CHANGED`.",
+        "operationId" : "cancel",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyanı ləğv etmək",
+        "tags" : [ "Admin: kampaniyalar" ]
+      }
+    },
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).",
-        "operationId" : "list_6",
+        "operationId" : "list_8",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -816,7 +954,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_1",
+        "operationId" : "get_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -1745,7 +1883,7 @@
     "/api/v1/admin/staff-console/pending-stamps/{stampId}/reject" : {
       "post" : {
         "description" : "Səbəb məcburidir və auditə yazılır.",
-        "operationId" : "reject",
+        "operationId" : "reject_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "stampId",
@@ -1784,7 +1922,7 @@
     "/api/v1/admin/tags" : {
       "get" : {
         "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.",
-        "operationId" : "list_5",
+        "operationId" : "list_7",
         "parameters" : [ {
           "in" : "query",
           "name" : "branchId",
@@ -2318,7 +2456,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_4",
+        "operationId" : "list_6",
         "responses" : {
           "200" : {
             "content" : {
@@ -2336,6 +2474,53 @@
         },
         "summary" : "Hədiyyə kartları",
         "tags" : [ "Müştəri: hədiyyə kartları" ]
+      }
+    },
+    "/api/v1/me/marketing" : {
+      "get" : {
+        "operationId" : "get",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MarketingSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniya SMS-ləri: cari seçim",
+        "tags" : [ "Müştəri: profil" ]
+      },
+      "patch" : {
+        "description" : "Söndürülsə, gələcək kampaniyalara düşmür; artıq təsdiqlənmiş kampaniyada da SMS getmir.",
+        "operationId" : "set",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MarketingSettings"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MarketingSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniya SMS-lərini açmaq və ya söndürmək",
+        "tags" : [ "Müştəri: profil" ]
       }
     },
     "/api/v1/me/sessions" : {
@@ -2403,7 +2588,7 @@
     "/api/v1/platform/audit-logs" : {
       "get" : {
         "description" : "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.",
-        "operationId" : "list_3",
+        "operationId" : "list_5",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -2650,6 +2835,122 @@
         },
         "summary" : "Həssas əməliyyat üçün təkrar təsdiq",
         "tags" : [ "Platforma: autentifikasiya" ]
+      }
+    },
+    "/api/v1/platform/campaigns" : {
+      "get" : {
+        "description" : "`status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).",
+        "operationId" : "list_4",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "PENDING",
+            "pattern" : "PENDING|ALL"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlatformCampaignView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyalar",
+        "tags" : [ "Platforma: kampaniyalar" ]
+      }
+    },
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve" : {
+      "post" : {
+        "description" : "Ödəniş alındıqdan sonra. Göndəriş 09:00–21:00 arası (şirkətin saatı ilə) avtomatik başlayır.",
+        "operationId" : "approve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlatformCampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyanı təsdiqləmək",
+        "tags" : [ "Platforma: kampaniyalar" ]
+      }
+    },
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject" : {
+      "post" : {
+        "operationId" : "reject",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RejectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlatformCampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyanı rədd etmək",
+        "tags" : [ "Platforma: kampaniyalar" ]
       }
     },
     "/api/v1/platform/me" : {
@@ -3009,7 +3310,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}" : {
       "get" : {
-        "operationId" : "get",
+        "operationId" : "get_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -3711,7 +4012,7 @@
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "responses" : {
           "200" : {
             "content" : {
@@ -4095,6 +4396,98 @@
           },
           "status" : {
             "type" : "string"
+          }
+        }
+      },
+      "CampaignRequest" : {
+        "type" : "object",
+        "description" : "Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial",
+        "properties" : {
+          "audience" : {
+            "type" : "string",
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı"
+          },
+          "inactiveDays" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)",
+            "maximum" : 365,
+            "minimum" : 7
+          },
+          "text" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "audience", "text" ]
+      },
+      "CampaignView" : {
+        "type" : "object",
+        "description" : "Kampaniya və vəziyyəti",
+        "properties" : {
+          "audience" : {
+            "type" : "string",
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "decidedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "failedCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "finishedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "inactiveDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "recipients" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "rejectReason" : {
+            "type" : "string"
+          },
+          "segmentsPerMessage" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sentCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED", "CANCELLED" ]
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "totalSms" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -4782,6 +5175,16 @@
           }
         }
       },
+      "MarketingSettings" : {
+        "type" : "object",
+        "description" : "Kampaniya SMS-ləri: true — alır",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "enabled" ]
+      },
       "MeResponse" : {
         "type" : "object",
         "description" : "Daxil olmuş admin haqqında məlumat",
@@ -5185,6 +5588,75 @@
           }
         }
       },
+      "PlatformCampaignView" : {
+        "type" : "object",
+        "description" : "Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət",
+        "properties" : {
+          "audience" : {
+            "type" : "string",
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "decidedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "displayName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "failedCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "finishedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "inactiveDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "recipients" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "rejectReason" : {
+            "type" : "string"
+          },
+          "segmentsPerMessage" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sentCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "tenantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "totalSms" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "PlatformTagRegisterRequest" : {
         "type" : "object",
         "description" : "Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər)",
@@ -5217,6 +5689,47 @@
             "type" : "string",
             "maxLength" : 60,
             "minLength" : 1
+          }
+        }
+      },
+      "Preview" : {
+        "type" : "object",
+        "properties" : {
+          "characters" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "encoding" : {
+            "type" : "string"
+          },
+          "fullText" : {
+            "type" : "string"
+          },
+          "latinCheaper" : {
+            "type" : "boolean"
+          },
+          "latinSegments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "latinText" : {
+            "type" : "string"
+          },
+          "latinTotalSms" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "recipients" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "segments" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalSms" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
@@ -5373,6 +5886,18 @@
           }
         },
         "required" : [ "acceptedDocuments", "language", "registrationToken" ]
+      },
+      "RejectRequest" : {
+        "type" : "object",
+        "description" : "Rədd səbəbi (şirkət sahibinə göstərilir)",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "reason" ]
       },
       "RejectStampRequest" : {
         "type" : "object",
@@ -5697,6 +6222,10 @@
           "phone" : {
             "type" : "string"
           },
+          "purpose" : {
+            "type" : "string",
+            "enum" : [ "OTP", "CAMPAIGN" ]
+          },
           "slug" : {
             "type" : "string"
           },
@@ -5717,11 +6246,19 @@
         "type" : "object",
         "description" : "Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər)",
         "properties" : {
+          "campaign" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "from" : {
             "type" : "string",
             "format" : "date"
           },
           "messages" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "otp" : {
             "type" : "integer",
             "format" : "int64"
           },
@@ -5741,10 +6278,18 @@
         "type" : "object",
         "description" : "Şirkətin dövr ərzində uğurla göndərilmiş SMS-lərinin sayı",
         "properties" : {
+          "campaign" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "displayName" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },
           "messages" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "otp" : {
             "type" : "integer",
             "format" : "int64"
           },
