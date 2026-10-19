@@ -206,13 +206,16 @@ describe('müştəri tətbiqi', () => {
       </QueryClientProvider>,
     );
 
-    await screen.findByRole('heading', { name: 'Salam, Aysel!' });
+    // Yavaş maşında render və naviqasiya (React Router keçidləri) standart 1 saniyədən uzun çəkə bilər
+    const slow = { timeout: 5_000 };
+    await screen.findByRole('heading', { name: 'Salam, Aysel!' }, slow);
     expect(screen.queryByText('Nömrənizi bir daha soruşmayacağıq.')).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Parametrlər' }));
-    await user.click(screen.getByRole('button', { name: 'Fərqli nömrə ilə yoxla' }));
+    // Parametrlər səhifəsi keçid (transition) kimi render olunur — düyməni gözləyirik
+    await user.click(await screen.findByRole('button', { name: 'Fərqli nömrə ilə yoxla' }, slow));
 
-    expect(await screen.findByLabelText('Telefon nömrəsi')).toBeInTheDocument();
-    expect(window.location.pathname).toBe('/login');
+    expect(await screen.findByLabelText('Telefon nömrəsi', {}, slow)).toBeInTheDocument();
+    await waitFor(() => expect(window.location.pathname).toBe('/login'), slow);
     expect(calls).toContain('POST /api/v1/auth/logout');
   });
 });

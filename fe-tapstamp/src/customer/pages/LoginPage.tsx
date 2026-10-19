@@ -26,7 +26,7 @@ type Step =
 
 /** Giriş: telefon → SMS kodu → (yeni nömrədirsə) qeydiyyatın tamamlanması. Dil dəyişəndə daxil edilmiş məlumat qalır. */
 export function LoginPage() {
-  const { status, refresh } = useCustomerSession();
+  const { status, refresh, clear } = useCustomerSession();
   const navigate = useNavigate();
   const switchingNumber = Boolean((useLocation().state as { switchNumber?: boolean } | null)?.switchNumber);
   const tapToken = useTapToken();
@@ -34,8 +34,18 @@ export function LoginPage() {
   const afterLogin = tapToken ? `/tap/${encodeURIComponent(tapToken)}` : '/';
   const [step, setStep] = useState<Step>({ name: 'phone' });
 
+  // 'Fərqli nömrə ilə yoxla': serverdə çıxış artıq olub, sessiya keşi isə burada — bu səhifə ekrana gələndən sonra
+  // təmizlənir. Parametrlərdə təmizlənsəydi, naviqasiya (keçid) bitməmiş Parametrlər səhifəsi istifadəçini "qonaq"
+  // görüb ana səhifəyə yönləndirə bilərdi (yavaş cihazda giriş forması əvəzinə ana səhifə açılırdı).
+  const clearAfterSwitch = switchingNumber && status === 'signedIn';
+  useEffect(() => {
+    if (clearAfterSwitch) {
+      clear();
+    }
+  }, [clearAfterSwitch, clear]);
+
   if (status === 'signedIn') {
-    // 'Fərqli nömrə ilə yoxla': çıxış bitənə qədər bir an daxil olmuş görünür — geri yönləndirilmir
+    // Nömrə dəyişdirilir: keş təmizlənənə qədər bir an daxil olmuş görünür — geri yönləndirilmir
     return switchingNumber ? null : <Navigate to={afterLogin} replace />;
   }
 
