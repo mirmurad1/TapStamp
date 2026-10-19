@@ -117,8 +117,11 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
 
     /** Göndəriləcək JSON (testlər üçün paket səviyyəsində). */
     String body(SmsMessage message) {
-        Map<String, Object> options = originator == null ? Map.of("Encoding", "LATIN")
-                : Map.of("Originator", originator, "Encoding", "LATIN");
+        // LATIN yalnız ASCII-ni olduğu kimi saxlayır (ə, ş, ü ... latına çevrilir) — belə mətn UNICODE ilə gedir
+        // (provayderdə hesab üçün UNICODE icazəsi açılmalıdır)
+        String encoding = SmsSegments.analyze(message.text()).encoding() == SmsSegments.Encoding.GSM_7 ? "LATIN" : "UNICODE";
+        Map<String, Object> options = originator == null ? Map.of("Encoding", encoding)
+                : Map.of("Originator", originator, "Encoding", encoding);
         return JSON.writeValueAsString(Map.of(
                 "Text", message.text(),
                 // Provayderlə razılaşdırılıb: hesabımızda giriş kodları da INF (məlumat mesajı) növü ilə gedir

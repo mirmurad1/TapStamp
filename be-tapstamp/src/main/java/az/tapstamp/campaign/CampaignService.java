@@ -84,7 +84,7 @@ public class CampaignService {
             Campaign row = new Campaign(id, draft.text().strip(), draft.personalized(), draft.latin(),
                     draft.audience().name(),
                     draft.inactiveDays(), draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null,
-                    principal.userId(), now, null, 0, 0, null);
+                    principal.userId(), now, null, null, 0, 0, null);
             campaigns.insert(row);
             int recipients = campaigns.insertRecipients(id, audience);
             if (recipients == 0) {
@@ -112,7 +112,37 @@ public class CampaignService {
         return campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
-    /** Sahib təsdiqə qədər ləğv edə bilər. */
+    /**
+     * Təsdiq gözləyən kampaniyanı dəyişmək: mətn, seçimlər və auditoriya; alıcılar və SMS sayı yenidən hesablanır.
+     * Təsdiqlənib, rədd və ya ləğv edilibsə — {@code CAMPAIGN_STATE_CHANGED}.
+     */
+    public Campaign update(AdminPrincipal principal, UUID id, Draft draft) {
+        AccessPolicy.requireCompanyWide(principal);
+        campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        validate(draft);
+        Instant now = clock.instant();
+        Campaign updated = Objects.requireNonNull(tx.execute(status -> {
+            if (campaigns.updateDraft(id, draft.text().strip(), draft.personalized(), draft.latin(),
+                    draft.audience().name(), draft.inactiveDays(), draft.branchId(), now) == 0) {
+                throw new ApiException(ErrorCode.CAMPAIGN_STATE_CHANGED);
+            }
+            campaigns.deleteRecipients(id);
+            int recipients = campaigns.insertRecipients(id, audience(draft, now));
+            if (recipients == 0) {
+                throw new ApiException(ErrorCode.CAMPAIGN_NO_RECIPIENTS);
+            }
+            CampaignTexts.Totals totals = CampaignTexts.totals(companyName(), draft.text(), draft.personalized(),
+                    campaigns.recipientNames(id), draft.latin());
+            campaigns.updateCounts(id, recipients, totals.maxSegments(), Math.toIntExact(totals.total()));
+            return campaigns.find(id).orElseThrow();
+        }));
+        audit.tenant("CAMPAIGN_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "campaign", id,
+                Map.of("audience", draft.audience().name(), "recipients", updated.recipients(),
+                        "totalSms", updated.totalSms()));
+        return updated;
+    }
+
+    /** Sahib təsdiqə qədər ləğv edə bilər (tarixçədə "ləğv edilib" kimi qalır). */
     public Campaign cancel(AdminPrincipal principal, UUID id) {
         AccessPolicy.requireCompanyWide(principal);
         change(id, "PENDING_APPROVAL", "CANCELLED", null, null);

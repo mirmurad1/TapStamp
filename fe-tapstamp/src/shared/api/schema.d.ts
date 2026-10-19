@@ -410,8 +410,12 @@ export interface paths {
             cookie?: never;
         };
         /** Kampaniya */
-        get: operations["get_2"];
-        put?: never;
+        get: operations["get"];
+        /**
+         * Kampaniyanı dəyişmək
+         * @description Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.
+         */
+        put: operations["update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -507,7 +511,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_1"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -614,7 +618,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_3"];
+        patch: operations["update_4"];
         trace?: never;
     };
     "/api/v1/admin/me/mfa/pause": {
@@ -1447,7 +1451,7 @@ export interface paths {
          * Ad və dilin dəyişdirilməsi
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
-        patch: operations["update_2"];
+        patch: operations["update_3"];
         trace?: never;
     };
     "/api/v1/me/gift-cards": {
@@ -1770,7 +1774,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Kampaniyanı rədd etmək */
+        /**
+         * Kampaniyanı ləğv etmək (rədd)
+         * @description Səbəb sahibə göstərilir. Platforma kampaniyanı dəyişə bilməz.
+         */
         post: operations["reject"];
         delete?: never;
         options?: never;
@@ -1799,7 +1806,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_1"];
+        patch: operations["update_2"];
         trace?: never;
     };
     "/api/v1/platform/me/mfa/pause": {
@@ -2005,7 +2012,7 @@ export interface paths {
             cookie?: never;
         };
         /** Şirkət haqqında məlumat */
-        get: operations["get"];
+        get: operations["get_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2213,7 +2220,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** Etiket və ya filialın dəyişdirilməsi */
-        patch: operations["update"];
+        patch: operations["update_1"];
         trace?: never;
     };
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable": {
@@ -2631,6 +2638,8 @@ export interface components {
             text?: string;
             /** Format: int32 */
             totalSms?: number;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         CardResponse: {
             /** Format: int32 */
@@ -3101,6 +3110,8 @@ export interface components {
             text?: string;
             /** Format: int32 */
             totalSms?: number;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
         PlatformTagRegisterRequest: {
@@ -4039,7 +4050,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get: {
         parameters: {
             query?: never;
             header?: never;
@@ -4049,6 +4060,32 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignView"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -4165,7 +4202,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4306,7 +4343,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -5417,7 +5454,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5832,7 +5869,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -6097,7 +6134,7 @@ export interface operations {
             };
         };
     };
-    get: {
+    get_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6376,7 +6413,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;

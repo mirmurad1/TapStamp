@@ -54,6 +54,16 @@ class PostaGuverciniSmsProviderTest {
         assertThat(body.path("Purpose").asString()).isEqualTo("INF");
         assertThat(body.path("Options").path("Originator").asString()).isEqualTo("TrendStamp");
         assertThat(body.path("Receivers").get(0).path("Receiver").asString()).isEqualTo("994501234567");
+        assertThat(body.path("Options").path("Encoding").asString()).isEqualTo("LATIN");
+    }
+
+    @Test
+    void azerbaijaniLettersAreSentAsUnicode() {
+        // LATIN-də provayder ə, ş, ü ... hərflərini latına çevirir — mətn dəyişməsin deyə UNICODE
+        provider().send(new SmsMessage("+994501234567", "Kafe: Hörmətli Gülşən, şənbə endirim var!", "t1"));
+        JsonNode body = JsonMapper.builder().build().readTree(bodies.getFirst());
+        assertThat(body.path("Options").path("Encoding").asString()).isEqualTo("UNICODE");
+        assertThat(body.path("Text").asString()).isEqualTo("Kafe: Hörmətli Gülşən, şənbə endirim var!");
     }
 
     @Test

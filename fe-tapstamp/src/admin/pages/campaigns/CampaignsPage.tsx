@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Megaphone, Send } from 'lucide-react';
+import { Megaphone, Pencil, Send, Trash2 } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,14 +25,21 @@ const MAX_TEXT = 1000;
 /** Kampaniya SMS-ləri: yaratmaq (önizləmə ilə) və vəziyyətini izləmək. */
 export function CampaignsPage() {
   const { t } = useTranslation('admin');
+  // Dəyişdirilən (təsdiq gözləyən) kampaniya: forma onun dəyərləri ilə açılır
+  const [editing, setEditing] = useState<CampaignView>();
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-display text-2xl font-semibold">{t('campaigns.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('campaigns.subtitle')}</p>
       </div>
-      <NewCampaignCard />
-      <CampaignList />
+      <NewCampaignCard key={editing?.id ?? 'new'} editing={editing} onDone={() => setEditing(undefined)} />
+      <CampaignList
+        onEdit={(campaign) => {
+          setEditing(campaign);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }
@@ -45,23 +52,25 @@ function segmentRange(min: number | undefined, max: number | undefined): string 
 /** Yazmaq dayananda (400 ms) dəyər yenilənir — önizləmə hər hərfdə sorğu göndərmir. */
 function useDebounced<T>(value: T, delay = 400): T {
   const [debounced, setDebounced] = useState(value);
+  // Obyekt hər render-də yenidir — məzmuna görə müqayisə edirik (əks halda taymer hər dəfə yenidən başlayır)
+  const key = JSON.stringify(value);
   useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
+    const timer = setTimeout(() => setDebounced(JSON.parse(key) as T), delay);
     return () => clearTimeout(timer);
-  }, [value, delay]);
+  }, [key, delay]);
   return debounced;
 }
 
-function NewCampaignCard() {
+function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: () => void }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const queryClient = useQueryClient();
-  const [text, setText] = useState('');
-  const [audience, setAudience] = useState<CampaignAudience>('ALL');
-  const [inactiveDays, setInactiveDays] = useState<number>(30);
-  const [branchId, setBranchId] = useState('');
-  const [personalized, setPersonalized] = useState(false);
-  const [latin, setLatin] = useState(false);
+  const [text, setText] = useState(editing?.text ?? '');
+  const [audience, setAudience] = useState<CampaignAudience>(editing?.audience ?? 'ALL');
+  const [inactiveDays, setInactiveDays] = useState<number>(editing?.inactiveDays ?? 30);
+  const [branchId, setBranchId] = useState(editing?.branchId ?? '');
+  const [personalized, setPersonalized] = useState(editing?.personalized ?? false);
+  const [latin, setLatin] = useState(editing?.latin ?? false);
   const branches = useQuery({ queryKey: ['settings-branches'], queryFn: companyApi.branches });
 
   const request: CampaignRequest = {
@@ -80,11 +89,15 @@ function NewCampaignCard() {
     placeholderData: keepPreviousData,
   });
   const create = useMutation({
-    mutationFn: () => campaignsApi.create(request),
+    mutationFn: () => (editing?.id ? campaignsApi.update(editing.id, request) : campaignsApi.create(request)),
     onSuccess: () => {
       setText('');
       setLatin(false);
+      setPersonalized(false);
       void queryClient.invalidateQueries({ queryKey: LIST_KEY });
+      if (editing) {
+        onDone();
+      }
     },
   });
   const submit = (event: FormEvent) => {
@@ -99,7 +112,7 @@ function NewCampaignCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Megaphone className="size-5 text-primary" aria-hidden="true" />
-          {t('campaigns.new.title')}
+          {editing ? t('campaigns.edit.title') : t('campaigns.new.title')}
         </CardTitle>
         <CardDescription>{t('campaigns.new.description')}</CardDescription>
       </CardHeader>
@@ -215,17 +228,24 @@ function NewCampaignCard() {
           ) : null}
           <ApiErrorAlert error={text.trim() ? preview.error : null} />
 
-          <Button type="submit" className="self-start" disabled={!text.trim() || create.isPending || !data?.recipients}>
-            <Send className="size-4" aria-hidden="true" />
-            {t('campaigns.new.submit')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" disabled={!text.trim() || create.isPending || !data?.recipients}>
+              <Send className="size-4" aria-hidden="true" />
+              {editing ? t('campaigns.edit.save') : t('campaigns.new.submit')}
+            </Button>
+            {editing ? (
+              <Button type="button" variant="ghost" onClick={onDone}>
+                {t('campaigns.edit.cancel')}
+              </Button>
+            ) : null}
+          </div>
         </form>
       </CardContent>
     </Card>
   );
 }
 
-function CampaignList() {
+function CampaignList({ onEdit }: { onEdit: (campaign: CampaignView) => void }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const confirm = useConfirm();
@@ -263,20 +283,32 @@ function CampaignList() {
                   </span>
                 </div>
                 {campaign.status === 'PENDING_APPROVAL' ? (
-                  <Button
-                    variant="ghost"
-                    disabled={cancel.isPending}
-                    onClick={async () => {
-                      if (await confirm({ message: t('campaigns.list.cancelConfirm'), danger: true })) {
-                        cancel.mutate(campaign.id ?? '');
-                      }
-                    }}
-                  >
-                    {t('campaigns.list.cancel')}
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button variant="outline" onClick={() => onEdit(campaign)}>
+                      <Pencil className="size-4" aria-hidden="true" />
+                      {t('campaigns.list.edit')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      disabled={cancel.isPending}
+                      onClick={async () => {
+                        if (await confirm({ message: t('campaigns.list.cancelConfirm'), danger: true })) {
+                          cancel.mutate(campaign.id ?? '');
+                        }
+                      }}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                      {t('campaigns.list.cancel')}
+                    </Button>
+                  </div>
                 ) : null}
               </div>
               <p className="whitespace-pre-wrap">{campaign.text}</p>
+              {campaign.updatedAt ? (
+                <p className="text-xs text-muted-foreground">
+                  {t('campaigns.list.updated', { time: formatDateTime(campaign.updatedAt, lang) })}
+                </p>
+              ) : null}
               <p className="text-muted-foreground">
                 {t('campaigns.list.counts', {
                   recipients: formatNumber(campaign.recipients ?? 0, lang),

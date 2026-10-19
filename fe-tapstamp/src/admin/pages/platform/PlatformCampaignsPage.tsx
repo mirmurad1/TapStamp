@@ -117,6 +117,11 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
             </div>
           ) : null}
         </div>
+        {campaign.updatedAt ? (
+          <p className="text-xs text-muted-foreground">
+            {t('admin:campaigns.list.updated', { time: formatDateTime(campaign.updatedAt, lang) })}
+          </p>
+        ) : null}
         {campaign.rejectReason ? (
           <p className="text-destructive">{t('admin:campaigns.list.rejectReason', { reason: campaign.rejectReason })}</p>
         ) : null}

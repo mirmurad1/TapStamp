@@ -4,11 +4,13 @@ package az.tapstamp.notification.sms;
  * SMS-in neçə hissəyə (seqmentə) bölünəcəyinin hesablanması. Hər seqment ayrıca ödənilir.
  *
  * <ul>
- *   <li>GSM-7 əlifbası (latın hərfləri, rəqəmlər, bəzi simvollar): 1 seqment — 160 simvol, çox seqmentdə 153;</li>
- *   <li>əlifbada olmayan hər hansı simvol (məs. ə, ş, ğ, ı, ç və kiril hərfləri) bütün mesajı UCS-2-yə keçirir:
- *       1 seqment — 70 simvol, çox seqmentdə 67.</li>
+ *   <li>GSM-7 (yalnız ASCII: latın hərfləri, rəqəmlər, işarələr): 1 seqment — 160 simvol, çox seqmentdə 153;</li>
+ *   <li>hər hansı başqa simvol (ə, ş, ğ, ı, ç, ö, ü, kiril hərfləri) bütün mesajı UCS-2-yə keçirir: 1 seqment —
+ *       70 simvol, çox seqmentdə 67.</li>
  * </ul>
- * Deməli, Azərbaycan dilindəki SMS də, rus dilindəki kimi, 70 simvola sığmalıdır.
+ * GSM-7 standart cədvəlində ü, ö, Ç kimi bir neçə hərf olsa da, SMS provayderi (Poçt Göyərçini) "LATIN" kodlaşdırmasında
+ * yalnız ASCII-ni olduğu kimi saxlayır — qalanını latına çevirir. Ona görə ASCII olmayan hər simvol UCS-2 sayılır və
+ * belə mesaj provayderə UNICODE ilə göndərilir: hesablanan say provayderin hesabladığı ilə eyni olur.
  */
 public final class SmsSegments {
 
@@ -37,9 +39,9 @@ public final class SmsSegments {
         int septets = 0;
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (GSM_BASIC.indexOf(c) >= 0) {
+            if (c < 128 && GSM_BASIC.indexOf(c) >= 0) {
                 septets++;
-            } else if (GSM_EXTENSION.indexOf(c) >= 0) {
+            } else if (c < 128 && GSM_EXTENSION.indexOf(c) >= 0) {
                 septets += 2;
             } else {
                 int units = text.length();

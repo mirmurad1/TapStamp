@@ -368,8 +368,8 @@
       "totalSms": "Total SMS",
       "delivery": "Sent / failed",
       "approve": "Approve",
-      "reject": "Reject",
-      "rejectReason": "Rejection reason",
+      "reject": "Cancel",
+      "rejectReason": "Cancellation reason",
       "approveConfirm": "Has the payment been received? {{total}} SMS will be sent after approval."
     }
   },
@@ -769,12 +769,14 @@
       "counts": "{{recipients}} recipients · {{total}} SMS",
       "delivery": "sent: {{sent}}, failed: {{failed}}",
       "pendingNote": "It will be approved by the platform after payment. Sending happens between 09:00 and 21:00.",
-      "cancel": "Cancel",
-      "cancelConfirm": "Cancel this campaign?",
+      "cancel": "Delete",
+      "cancelConfirm": "Delete this campaign? It will stay in the history as \"Cancelled\".",
       "rejectReason": "Rejection reason: {{reason}}",
       "personalized": "Personal greeting",
       "greetingPrefix": "Hörmətli <name>,",
-      "latin": "Latin letters"
+      "latin": "Latin letters",
+      "edit": "Edit",
+      "updated": "Edited: {{time}}"
     },
     "status": {
       "PENDING_APPROVAL": "Awaiting approval",
@@ -789,6 +791,11 @@
       "INACTIVE": "Customers who have not visited for a while",
       "NEAR_REWARD": "1–2 stamps away from a reward",
       "UNUSED_GIFT_CARD": "With an unused gift card"
+    },
+    "edit": {
+      "title": "Edit campaign",
+      "save": "Save",
+      "cancel": "Discard"
     }
   }
 }

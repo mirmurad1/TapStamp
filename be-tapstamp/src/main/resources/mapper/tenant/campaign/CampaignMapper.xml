@@ -62,9 +62,20 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateDraft">
+        UPDATE campaigns
+        SET text = #{text}, personalized = #{personalized}, latin = #{latin}, audience = #{audience},
+            inactive_days = #{inactiveDays}, branch_id = #{branchId}, updated_at = #{now}
+        WHERE id = #{id} AND status = 'PENDING_APPROVAL'
+    </update>
+
+    <delete id="deleteRecipients">
+        DELETE FROM campaign_recipients WHERE campaign_id = #{campaignId}
+    </delete>
+
     <sql id="campaign">
         SELECT id, text, personalized, latin, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms, status,
-               reject_reason, created_by, created_at, decided_at, sent_count, failed_count, finished_at
+               reject_reason, created_by, created_at, updated_at, decided_at, sent_count, failed_count, finished_at
         FROM campaigns
     </sql>
 

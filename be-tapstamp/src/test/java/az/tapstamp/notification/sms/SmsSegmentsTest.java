@@ -33,8 +33,11 @@ class SmsSegmentsTest {
         for (String letter : new String[] {"ə", "ş", "ğ", "ı", "ç", "Ə", "Ş", "Ğ", "İ"}) {
             assertThat(SmsSegments.analyze("kod " + letter).encoding()).as(letter).isEqualTo(Encoding.UCS_2);
         }
-        // ö, ü və Ç GSM-7 əlifbasındadır
-        assertThat(SmsSegments.analyze("Göy Ünvan Çay").encoding()).isEqualTo(Encoding.GSM_7);
+        // ö, ü, Ç GSM-7 cədvəlində olsa da, provayderin LATIN kodlaşdırması yalnız ASCII-ni saxlayır — UCS-2 sayılır
+        for (String letter : new String[] {"ö", "ü", "Ç", "Ö", "Ü", "é"}) {
+            assertThat(SmsSegments.analyze("kod " + letter).encoding()).as(letter).isEqualTo(Encoding.UCS_2);
+        }
+        assertThat(SmsSegments.analyze("Goy Unvan Cay").encoding()).isEqualTo(Encoding.GSM_7);
     }
 
     @Test
@@ -51,10 +54,12 @@ class SmsSegmentsTest {
 
     @Test
     void extensionCharactersTakeTwoSeptets() {
-        SmsSegments.Info info = SmsSegments.analyze("€".repeat(80));
+        SmsSegments.Info info = SmsSegments.analyze("{".repeat(80));
         assertThat(info.encoding()).isEqualTo(Encoding.GSM_7);
         assertThat(info.units()).isEqualTo(160);
-        assertThat(SmsSegments.analyze("€".repeat(81)).segments()).isEqualTo(2);
+        assertThat(SmsSegments.analyze("[".repeat(81)).segments()).isEqualTo(2);
+        // € ASCII deyil — UCS-2
+        assertThat(SmsSegments.analyze("€").encoding()).isEqualTo(Encoding.UCS_2);
     }
 
     @Test

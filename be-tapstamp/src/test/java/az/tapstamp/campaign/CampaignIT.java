@@ -151,6 +151,32 @@ class CampaignIT extends TapIntegrationTest {
                 .isEqualTo("Alpha Kafe: Hormetli Gulsen, Senbe gunu endirim var!"));
     }
 
+    @Test
+    void pendingCampaignCanBeEditedOrCancelledOnlyBeforeApproval() throws Exception {
+        signedIn(uniquePhone());
+        AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
+        String id = json(owner.post("/campaigns", Map.of("text", "Ilk metn", "audience", "ALL"))
+                .andExpect(status().isCreated()), "$.id");
+        owner.put("/campaigns/" + id, Map.of("text", "Yeni mətn", "audience", "ALL", "latin", true))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text").value("Yeni mətn"))
+                .andExpect(jsonPath("$.latin").value(true))
+                .andExpect(jsonPath("$.status").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.updatedAt").isNotEmpty());
+        signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
+        // Təsdiqdən sonra nə dəyişmək, nə ləğv etmək olmur; tarixçədə qalır
+        owner.put("/campaigns/" + id, Map.of("text", "Gec", "audience", "ALL")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("CAMPAIGN_STATE_CHANGED"));
+        owner.post("/campaigns/" + id + "/cancel").andExpect(status().isConflict());
+
+        String cancelled = json(owner.post("/campaigns", Map.of("text", "Legv olunacaq", "audience", "ALL"))
+                .andExpect(status().isCreated()), "$.id");
+        owner.post("/campaigns/" + cancelled + "/cancel").andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"));
+        owner.get("/campaigns").andExpect(jsonPath("$[?(@.id == '" + cancelled + "')].status")
+                .value(org.hamcrest.Matchers.contains("CANCELLED")));
+    }
+
     /** Saatı şirkətin 09:00–21:00 pəncərəsinə gətirib göndərişi bitənə qədər işlədir. */
     private void sendAll() {
         LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();

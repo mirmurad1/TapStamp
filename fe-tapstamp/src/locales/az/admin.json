@@ -368,8 +368,8 @@
       "totalSms": "Cəmi SMS",
       "delivery": "Göndərilib / xəta",
       "approve": "Təsdiqlə",
-      "reject": "Rədd et",
-      "rejectReason": "Rədd səbəbi",
+      "reject": "Ləğv et",
+      "rejectReason": "Ləğv səbəbi",
       "approveConfirm": "Ödəniş alınıb? Təsdiqdən sonra {{total}} SMS göndəriləcək."
     }
   },
@@ -769,12 +769,14 @@
       "counts": "{{recipients}} alıcı · {{total}} SMS",
       "delivery": "göndərilib: {{sent}}, xəta: {{failed}}",
       "pendingNote": "Ödəniş alındıqdan sonra platforma tərəfindən təsdiqlənəcək. Göndəriş 09:00–21:00 arası olur.",
-      "cancel": "Ləğv et",
-      "cancelConfirm": "Kampaniya ləğv edilsin?",
+      "cancel": "Sil",
+      "cancelConfirm": "Kampaniya silinsin? Tarixçədə \"Ləğv edilib\" kimi qalacaq.",
       "rejectReason": "Rədd səbəbi: {{reason}}",
       "personalized": "Fərdi müraciət",
       "greetingPrefix": "Hörmətli <ad>,",
-      "latin": "Latın hərfləri"
+      "latin": "Latın hərfləri",
+      "edit": "Dəyiş",
+      "updated": "Dəyişdirilib: {{time}}"
     },
     "status": {
       "PENDING_APPROVAL": "Təsdiq gözləyir",
@@ -789,6 +791,11 @@
       "INACTIVE": "Uzun müddət gəlməyənlər",
       "NEAR_REWARD": "Hədiyyəyə 1–2 möhür qalanlar",
       "UNUSED_GIFT_CARD": "İstifadə olunmamış hədiyyə kartı olanlar"
+    },
+    "edit": {
+      "title": "Kampaniyanı dəyiş",
+      "save": "Yadda saxla",
+      "cancel": "İmtina"
     }
   }
 }

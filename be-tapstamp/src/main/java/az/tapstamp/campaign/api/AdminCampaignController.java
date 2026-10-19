@@ -25,6 +25,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -65,12 +66,14 @@ public class AdminCampaignController {
                                int recipients, int segmentsPerMessage, int totalSms,
                                @Schema(allowableValues = {"PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED",
                                        "CANCELLED"}) String status,
-                               String rejectReason, Instant createdAt, Instant decidedAt, int sentCount, int failedCount,
+                               String rejectReason, Instant createdAt, Instant updatedAt, Instant decidedAt,
+                               int sentCount, int failedCount,
                                Instant finishedAt) {
 
         public static CampaignView from(Campaign c) {
             return new CampaignView(c.id(), c.text(), c.personalized(), c.latin(), Audience.valueOf(c.audience()), c.inactiveDays(), c.branchId(),
                     c.recipients(), c.segmentsPerMessage(), c.totalSms(), c.status(), c.rejectReason(), c.createdAt(),
+                    c.updatedAt(),
                     c.decidedAt(), c.sentCount(), c.failedCount(), c.finishedAt());
         }
     }
@@ -102,6 +105,14 @@ public class AdminCampaignController {
     @Operation(summary = "Kampaniya")
     CampaignView get(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId) {
         return CampaignView.from(campaigns.get(principal, campaignId));
+    }
+
+    @PutMapping("/{campaignId}")
+    @Operation(summary = "Kampaniyanı dəyişmək", description = """
+            Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.""")
+    CampaignView update(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId,
+                        @Valid @RequestBody CampaignRequest request) {
+        return CampaignView.from(campaigns.update(principal, campaignId, request.draft()));
     }
 
     @PostMapping("/{campaignId}/cancel")

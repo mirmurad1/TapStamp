@@ -45,13 +45,14 @@ public class PlatformCampaignController {
                                        boolean personalized, boolean latin,
                                        Audience audience, Integer inactiveDays, int recipients, int segmentsPerMessage,
                                        int totalSms, String status, String rejectReason, Instant createdAt,
+                                       Instant updatedAt,
                                        Instant decidedAt, int sentCount, int failedCount, Instant finishedAt) {
 
         static PlatformCampaignView from(TenantCampaign tc) {
             Campaign c = tc.campaign();
             return new PlatformCampaignView(tc.tenant().id(), tc.tenant().slug(), tc.tenant().displayName(), c.id(),
                     c.text(), c.personalized(), c.latin(), Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
-                    c.totalSms(), c.status(), c.rejectReason(), c.createdAt(), c.decidedAt(), c.sentCount(),
+                    c.totalSms(), c.status(), c.rejectReason(), c.createdAt(), c.updatedAt(), c.decidedAt(), c.sentCount(),
                     c.failedCount(), c.finishedAt());
         }
     }
@@ -78,7 +79,7 @@ public class PlatformCampaignController {
     }
 
     @PostMapping("/{tenantId}/{campaignId}/reject")
-    @Operation(summary = "Kampaniyanı rədd etmək")
+    @Operation(summary = "Kampaniyanı ləğv etmək (rədd)", description = "Səbəb sahibə göstərilir. Platforma kampaniyanı dəyişə bilməz.")
     PlatformCampaignView reject(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
                                 @PathVariable UUID campaignId, @Valid @RequestBody RejectRequest request) {
         return PlatformCampaignView.from(campaigns.decide(principal, tenantId, campaignId, false, request.reason()));

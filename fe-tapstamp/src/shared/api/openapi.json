@@ -684,7 +684,7 @@
     },
     "/api/v1/admin/campaigns/{campaignId}" : {
       "get" : {
-        "operationId" : "get_2",
+        "operationId" : "get",
         "parameters" : [ {
           "in" : "path",
           "name" : "campaignId",
@@ -707,6 +707,43 @@
           }
         },
         "summary" : "Kampaniya",
+        "tags" : [ "Admin: kampaniyalar" ]
+      },
+      "put" : {
+        "description" : "Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kampaniyanı dəyişmək",
         "tags" : [ "Admin: kampaniyalar" ]
       }
     },
@@ -954,7 +991,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_1",
+        "operationId" : "get_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -1151,7 +1188,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2426,7 +2463,7 @@
       },
       "patch" : {
         "description" : "Dil SMS-lərə və bütün cihazlara tətbiq olunur.",
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2862,6 +2899,7 @@
     },
     "/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject" : {
       "post" : {
+        "description" : "Səbəb sahibə göstərilir. Platforma kampaniyanı dəyişə bilməz.",
         "operationId" : "reject",
         "parameters" : [ {
           "in" : "path",
@@ -2902,7 +2940,7 @@
             "description" : "OK"
           }
         },
-        "summary" : "Kampaniyanı rədd etmək",
+        "summary" : "Kampaniyanı ləğv etmək (rədd)",
         "tags" : [ "Platforma: kampaniyalar" ]
       }
     },
@@ -2927,7 +2965,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -3263,7 +3301,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}" : {
       "get" : {
-        "operationId" : "get",
+        "operationId" : "get_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -3661,7 +3699,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}" : {
       "patch" : {
-        "operationId" : "update",
+        "operationId" : "update_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -4455,6 +4493,10 @@
           "totalSms" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -5617,6 +5659,10 @@
           "totalSms" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },

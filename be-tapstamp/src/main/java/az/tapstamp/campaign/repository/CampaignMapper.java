@@ -13,11 +13,11 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface CampaignMapper {
 
-    record Campaign(UUID id, String text, boolean personalized, boolean latin, String audience, @Nullable Integer inactiveDays,
-                    @Nullable UUID branchId,
+    record Campaign(UUID id, String text, boolean personalized, boolean latin, String audience,
+                    @Nullable Integer inactiveDays, @Nullable UUID branchId,
                     int recipients, int segmentsPerMessage, int totalSms, String status, @Nullable String rejectReason,
-                    UUID createdBy, Instant createdAt, @Nullable Instant decidedAt, int sentCount, int failedCount,
-                    @Nullable Instant finishedAt) {
+                    UUID createdBy, Instant createdAt, @Nullable Instant updatedAt, @Nullable Instant decidedAt,
+                    int sentCount, int failedCount, @Nullable Instant finishedAt) {
     }
 
     /** Auditoriya filtri: {@code inactiveSince} — INACTIVE üçün, {@code branchId} — istəyə bağlı. */
@@ -44,6 +44,13 @@ public interface CampaignMapper {
     int insertRecipients(@Param("campaignId") UUID campaignId, @Param("a") Audience audience);
 
     void updateCounts(UUID id, int recipients, int segmentsPerMessage, int totalSms);
+
+    /** Təsdiq gözləyən kampaniyanın mətni və auditoriyası dəyişir; 0 — artıq təsdiq gözləmir. */
+    int updateDraft(UUID id, String text, boolean personalized, boolean latin, String audience,
+                    @Nullable Integer inactiveDays, @Nullable UUID branchId, Instant now);
+
+    /** Alıcılar yenidən müəyyənləşəndən əvvəl köhnələri silinir (yalnız təsdiq gözləyən kampaniya). */
+    void deleteRecipients(UUID campaignId);
 
     List<Campaign> list(int limit);
 

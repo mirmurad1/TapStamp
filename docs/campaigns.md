@@ -20,10 +20,12 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
      istifadə olunmamış hədiyyə kartı olanlar; istəyə bağlı filial (həmin filialda möhürü olanlar);
    - **önizləmə**: alıcı sayı, tam mətn, simvol sayı, hər müştəriyə neçə SMS, **cəmi SMS**.
 2. **Təsdiqə göndər** — alıcılar və SMS sayı həmin an müəyyənləşir (`campaign_recipients`), status
-   `PENDING_APPROVAL`. Sahib təsdiqə qədər ləğv edə bilər.
+   `PENDING_APPROVAL`. Təsdiqə qədər sahib kampaniyanı **dəyişə** (mətn, seçimlər, auditoriya — alıcılar və SMS sayı
+   yenidən hesablanır; tarixçədə "Dəyişdirilib: <vaxt>") və ya **silə** bilər (tarixçədə "Ləğv edilib" kimi qalır).
+   Təsdiqdən sonra heç biri mümkün deyil (`CAMPAIGN_STATE_CHANGED`).
 3. **Platforma admini** — platforma paneli → **Kampaniyalar**: şirkət, mətn, auditoriya, alıcı sayı və cəmi SMS.
-   Ödəniş alındıqdan sonra **Təsdiqlə** (`APPROVED`) və ya səbəb yazaraq **Rədd et** (`REJECTED`, səbəb sahibə
-   görünür).
+   Ödəniş alındıqdan sonra **Təsdiqlə** (`APPROVED`) və ya səbəb yazaraq **Ləğv et** (`REJECTED`, səbəb sahibə
+   görünür). Platforma kampaniyanı dəyişə bilməz.
 4. **Göndəriş** — fon işi (`CampaignSender`, hər 30 saniyə): yalnız şirkətin saatı ilə **09:00–21:00**, hər
    kampaniya üçün addımda ən çox 100 SMS. `SENDING` → `SENT`; göndərilmiş və xətalı sayları kampaniyada görünür.
 5. **Hesabat** — hər SMS platformanın SMS jurnalına `purpose = CAMPAIGN` ilə yazılır; SMS hesabatında giriş kodları
@@ -43,6 +45,14 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
   olur — təkrar göndərmək riskinə girmirik.
 - Kampaniyanın yaradılması, ləğvi, təsdiqi və rəddi şirkətin audit jurnalına, təsdiq və rədd həm də platformanın
   audit jurnalına yazılır.
+
+## SMS kodlaşdırması
+
+Mətndə yalnız ASCII simvollar (latın hərfləri, rəqəmlər, işarələr) varsa, SMS provayderə `LATIN` ilə gedir (160
+simvol/SMS). Hər hansı başqa simvol (ə, ş, ğ, ı, ç, ö, ü və s.) olsa, `UNICODE` ilə gedir (70 simvol/SMS) — `LATIN`
+ilə göndərilsəydi, provayder bu hərfləri öz tərəfində latına çevirərdi. SMS sayı da bu qayda ilə hesablanır
+(GSM-7 cədvəlindəki ü, ö, Ç kimi hərflər də UCS-2 sayılır). **Provayderdə hesab üçün UNICODE icazəsi açılmalıdır**;
+açılmayıbsa, belə SMS-lər "Göndərilə bilməyən SMS-lər" siyahısına düşür.
 
 ## Açıq məsələlər
 

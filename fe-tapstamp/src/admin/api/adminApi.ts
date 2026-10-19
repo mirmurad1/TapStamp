@@ -425,6 +425,9 @@ export const campaignsApi = {
   preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
   create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
   list: () => unwrap(api.GET('/api/v1/admin/campaigns')),
+  /** Yalnız təsdiq gözləyən kampaniya. */
+  update: (campaignId: string, body: CampaignRequest) =>
+    unwrap(api.PUT('/api/v1/admin/campaigns/{campaignId}', { params: { path: { campaignId } }, body })),
   cancel: (campaignId: string) =>
     unwrap(api.POST('/api/v1/admin/campaigns/{campaignId}/cancel', { params: { path: { campaignId } } })),
 };
