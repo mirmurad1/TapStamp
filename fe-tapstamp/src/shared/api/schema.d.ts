@@ -1818,6 +1818,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/sms-usage/failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Uğursuz SMS-lər və səbəbləri
+         * @description `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).
+         */
+        get: operations["failures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants": {
         parameters: {
             query?: never;
@@ -3060,6 +3080,30 @@ export interface components {
         /** @description Cari sessiyanın vəziyyəti: NONE — daxil olmayıb, PENDING_MFA — TOTP gözlənilir, MFA_ENROLLMENT — TOTP qurulmalıdır, ACTIVE — tam daxil olub */
         SessionStateResponse: {
             state?: string;
+        };
+        /** @description Uğursuz SMS-lərin bir səhifəsi; total — dövrdəki ümumi say */
+        SmsFailurePage: {
+            items?: components["schemas"]["SmsFailureRow"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        /** @description Göndərilə bilməyən SMS: şirkət, nömrə, mətn (kod gizlədilmiş) və səbəb */
+        SmsFailureRow: {
+            /** Format: date-time */
+            createdAt?: string;
+            displayName?: components["schemas"]["LocalizedText"];
+            error?: string;
+            /** Format: uuid */
+            id?: string;
+            phone?: string;
+            slug?: string;
+            /** Format: uuid */
+            tenantId?: string;
+            text?: string;
         };
         /** @description Dövr (hər iki gün daxil, Bakı vaxtı), şirkətlər üzrə sətirlər və cəm (yalnız uğurlu SMS-lər) */
         SmsUsageReport: {
@@ -5531,6 +5575,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SmsUsageReport"];
+                };
+            };
+        };
+    };
+    failures: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SmsFailurePage"];
                 };
             };
         };

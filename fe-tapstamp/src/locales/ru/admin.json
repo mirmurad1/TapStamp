@@ -312,7 +312,23 @@
         "company": "Компания",
         "messages": "Количество SMS"
       },
-      "total": "Успешные SMS (всего)"
+      "total": "Успешные SMS (всего)",
+      "usageTitle": "Успешные SMS по компаниям",
+      "failures": {
+        "title": "Неотправленные SMS",
+        "count_one": "{{count}} SMS с ошибкой",
+        "count_few": "{{count}} SMS с ошибкой",
+        "count_many": "{{count}} SMS с ошибкой",
+        "count_other": "{{count}} SMS с ошибкой",
+        "empty": "За этот период ошибок нет.",
+        "time": "Время",
+        "phone": "Номер",
+        "text": "Текст",
+        "error": "Ошибка",
+        "previous": "Назад",
+        "next": "Далее",
+        "page": "Страница {{page}} из {{pages}}"
+      }
     }
   },
   "staffConsole": {

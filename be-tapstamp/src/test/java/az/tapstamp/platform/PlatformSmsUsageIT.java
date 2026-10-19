@@ -68,4 +68,32 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
         admin.get("/sms-usage?from=" + today + "&to=" + today.minusDays(1)).andExpect(status().isBadRequest());
         admin.get("/sms-usage?from=2020-01-01&to=2025-01-01").andExpect(status().isBadRequest());
     }
+
+    @Autowired
+    private SmsLog smsLog;
+
+    @Test
+    void failedSmsAreListedWithReasonPageByPage() throws Exception {
+        String phone = uniquePhone();
+        for (int i = 0; i < 21; i++) {
+            smsLog.record(alpha().id(), phone, "Alpha Kafe OTP: 123456", "Alpha Kafe OTP: ******", "123456",
+                    "SmsDeliveryException: SMS receiver rejected: ERRSMS4102");
+        }
+        LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
+        AdminClient admin = signedInPlatformAdmin();
+        String path = "/sms-usage/failures?from=" + today + "&to=" + today;
+
+        admin.get(path).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(20))
+                .andExpect(jsonPath("$.total").value(org.hamcrest.Matchers.greaterThanOrEqualTo(21)))
+                .andExpect(jsonPath("$.items[0].error").value(org.hamcrest.Matchers.containsString("ERRSMS4102")))
+                .andExpect(jsonPath("$.items[0].text").value("Alpha Kafe OTP: ******"))
+                .andExpect(jsonPath("$.items[0].slug").value(alpha().slug()));
+        admin.get(path + "&page=1").andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.items").isNotEmpty());
+        // Uğursuzlar uğurlu SMS hesabatına düşmür
+        admin.get("/sms-usage/failures?from=2020-01-01&to=2020-01-31").andExpect(jsonPath("$.total").value(0));
+        admin.get(path + "&page=-1").andExpect(status().isBadRequest());
+    }
 }

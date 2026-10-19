@@ -1,6 +1,7 @@
 package az.tapstamp.notification.sms;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -69,7 +70,19 @@ public class SmsLog {
 
     /** [from, to] günləri (hər ikisi daxil, Bakı vaxtı) üzrə şirkətlərin SMS istifadəsi. */
     public List<SmsLogMapper.Usage> usage(LocalDate from, LocalDate to) {
-        return mapper.usage(from.atStartOfDay(REPORT_ZONE).toInstant(),
-                to.plusDays(1).atStartOfDay(REPORT_ZONE).toInstant());
+        return mapper.usage(start(from), start(to.plusDays(1)));
+    }
+
+    public record FailurePage(List<SmsLogMapper.Failure> items, int page, int size, long total) {
+    }
+
+    /** [from, to] günləri üzrə uğursuz SMS-lər, səhifə-səhifə (page 0-dan başlayır). */
+    public FailurePage failures(LocalDate from, LocalDate to, int page, int size) {
+        return new FailurePage(mapper.failures(start(from), start(to.plusDays(1)), size, page * size), page, size,
+                mapper.countFailures(start(from), start(to.plusDays(1))));
+    }
+
+    private static Instant start(LocalDate day) {
+        return day.atStartOfDay(REPORT_ZONE).toInstant();
     }
 }

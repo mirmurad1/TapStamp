@@ -418,4 +418,7 @@ export type SmsUsageReport = Schemas['SmsUsageReport'];
 export const platformSmsApi = {
   /** Günlər daxil (YYYY-MM-DD, Bakı vaxtı). */
   usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
+  /** Uğursuz SMS-lər, 20-lik səhifələr (page 0-dan). */
+  failures: (from: string, to: string, page: number) =>
+    unwrap(api.GET('/api/v1/platform/sms-usage/failures', { params: { query: { from, to, page } } })),
 };

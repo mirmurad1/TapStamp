@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { formatNumber } from '@/shared/lib/format';
-import { Card, CardContent } from '@/shared/ui/card';
+import { formatDateTime, formatNumber } from '@/shared/lib/format';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 
@@ -15,6 +16,7 @@ import { InlineLoading } from '../../components/FullPageState';
 
 const PERIODS = ['thisMonth', 'lastMonth', 'last7', 'last30', 'thisYear', 'custom'] as const;
 type Period = (typeof PERIODS)[number];
+type Range = { from: string; to: string };
 
 /** Bakı vaxtı ilə bu gün (YYYY-MM-DD) — backend də günləri Bakı vaxtı ilə sayır. */
 function bakuToday(): string {
@@ -28,7 +30,7 @@ function shiftDays(isoDate: string, days: number): string {
 }
 
 /** Seçilmiş dövrün günləri (hər ikisi daxil). */
-function periodRange(period: Exclude<Period, 'custom'>, today: string): { from: string; to: string } {
+function periodRange(period: Exclude<Period, 'custom'>, today: string): Range {
   const [year, month] = today.split('-');
   switch (period) {
     case 'thisMonth':
@@ -47,16 +49,69 @@ function periodRange(period: Exclude<Period, 'custom'>, today: string): { from: 
   }
 }
 
-/** SMS hesabatı: hansı şirkət seçilmiş dövrdə nə qədər SMS istifadə edib. */
-export function SmsUsagePage() {
-  const { t } = useTranslation('admin');
-  const lang = currentLanguage();
-  const today = bakuToday();
+/** Dövr seçimi (hazır dövrlər və ya tarix aralığı); seçilmiş aralığı və onun düzgünlüyünü qaytarır. */
+function usePeriod(today: string) {
   const [period, setPeriod] = useState<Period>('thisMonth');
   const [custom, setCustom] = useState(() => periodRange('thisMonth', today));
   const range = period === 'custom' ? custom : periodRange(period, today);
   const valid = Boolean(range.from && range.to && range.from <= range.to);
+  return { period, setPeriod, custom, setCustom, range, valid };
+}
 
+function PeriodPicker({ id, today, state }: { id: string; today: string; state: ReturnType<typeof usePeriod> }) {
+  const { t } = useTranslation('admin');
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-end gap-4">
+        <Field id={`${id}-period`} label={t('platform.sms.period')}>
+          <Select value={state.period} onChange={(event) => state.setPeriod(event.target.value as Period)}>
+            {PERIODS.map((value) => (
+              <option key={value} value={value}>
+                {t(`platform.sms.periods.${value}`)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        {state.period === 'custom' ? (
+          <>
+            <Field id={`${id}-from`} label={t('platform.sms.from')}>
+              <Input type="date" value={state.custom.from} max={today}
+                     onChange={(e) => state.setCustom({ ...state.custom, from: e.target.value })} />
+            </Field>
+            <Field id={`${id}-to`} label={t('platform.sms.to')}>
+              <Input type="date" value={state.custom.to} max={today}
+                     onChange={(e) => state.setCustom({ ...state.custom, to: e.target.value })} />
+            </Field>
+          </>
+        ) : null}
+      </div>
+      {!state.valid ? <p className="text-sm text-destructive">{t('platform.sms.invalidRange')}</p> : null}
+    </div>
+  );
+}
+
+/** SMS hesabatı: şirkətlər üzrə uğurlu SMS-lər və ayrıca cədvəldə göndərilə bilməyənlər (səbəbi ilə). */
+export function SmsUsagePage() {
+  const { t } = useTranslation('admin');
+  const today = bakuToday();
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="font-display text-2xl font-semibold">{t('platform.sms.title')}</h1>
+        <p className="mt-1 text-muted-foreground">{t('platform.sms.subtitle')}</p>
+      </div>
+      <UsageSection today={today} />
+      <FailuresSection today={today} />
+    </div>
+  );
+}
+
+function UsageSection({ today }: { today: string }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const period = usePeriod(today);
+  const { range, valid } = period;
   const report = useQuery({
     queryKey: ['platform-sms-usage', range.from, range.to],
     queryFn: () => platformSmsApi.usage(range.from, range.to),
@@ -65,78 +120,132 @@ export function SmsUsagePage() {
   const rows = report.data?.tenants ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold">{t('platform.sms.title')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('platform.sms.subtitle')}</p>
-      </div>
-
-      <div className="flex flex-wrap items-end gap-4">
-        <Field id="sms-period" label={t('platform.sms.period')}>
-          <Select value={period} onChange={(event) => setPeriod(event.target.value as Period)}>
-            {PERIODS.map((value) => (
-              <option key={value} value={value}>
-                {t(`platform.sms.periods.${value}`)}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        {period === 'custom' ? (
-          <>
-            <Field id="sms-from" label={t('platform.sms.from')}>
-              <Input type="date" value={custom.from} max={today} onChange={(e) => setCustom({ ...custom, from: e.target.value })} />
-            </Field>
-            <Field id="sms-to" label={t('platform.sms.to')}>
-              <Input type="date" value={custom.to} max={today} onChange={(e) => setCustom({ ...custom, to: e.target.value })} />
-            </Field>
-          </>
-        ) : null}
-      </div>
-
-      {!valid ? <p className="text-sm text-destructive">{t('platform.sms.invalidRange')}</p> : null}
-
-      {report.data ? (
-        <Card className="sm:max-w-xs">
-          <CardContent className="pt-5 sm:pt-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('platform.sms.usageTitle')}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <PeriodPicker id="sms-usage" today={today} state={period} />
+        <ApiErrorAlert error={report.error} />
+        {report.isFetching && !report.data ? <InlineLoading /> : null}
+        {report.data ? (
+          <div>
             <p className="text-sm text-muted-foreground">{t('platform.sms.total')}</p>
             <p className="mt-1 font-display text-2xl font-semibold">{formatNumber(report.data.messages ?? 0, lang)}</p>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <Card>
-        <CardContent className="flex flex-col gap-3 pt-5 sm:pt-6">
-          <ApiErrorAlert error={report.error} />
-          {report.isFetching && !report.data ? <InlineLoading /> : null}
-          {report.data && rows.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">{t('platform.sms.empty')}</p>
-          ) : null}
-          {rows.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-muted-foreground">
-                    <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
-                    <th className="py-2 text-right font-medium">{t('platform.sms.columns.messages')}</th>
+          </div>
+        ) : null}
+        {report.data && rows.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('platform.sms.empty')}</p>
+        ) : null}
+        {rows.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground">
+                  <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
+                  <th className="py-2 text-right font-medium">{t('platform.sms.columns.messages')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((row) => (
+                  <tr key={row.tenantId}>
+                    <td className="py-2 pr-4">
+                      <span className="font-medium">{resolveText(row.displayName, lang)}</span>
+                      <span className="ml-2 text-muted-foreground">{row.slug}</span>
+                    </td>
+                    <td className="py-2 text-right tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {rows.map((row) => (
-                    <tr key={row.tenantId}>
-                      <td className="py-2 pr-4">
-                        <span className="font-medium">{resolveText(row.displayName, lang)}</span>
-                        <span className="ml-2 text-muted-foreground">{row.slug}</span>
-                      </td>
-                      <td className="py-2 text-right tabular-nums">{formatNumber(row.messages ?? 0, lang)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-          <p className="text-xs text-muted-foreground">{t('platform.sms.note')}</p>
-        </CardContent>
-      </Card>
-    </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+        <p className="text-xs text-muted-foreground">{t('platform.sms.note')}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function FailuresSection({ today }: { today: string }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const period = usePeriod(today);
+  const { range, valid } = period;
+  const [page, setPage] = useState(0);
+  // Dövr dəyişəndə birinci səhifəyə qayıdırıq
+  const [lastRange, setLastRange] = useState(range);
+  if (lastRange.from !== range.from || lastRange.to !== range.to) {
+    setLastRange(range);
+    setPage(0);
+  }
+  const failures = useQuery({
+    queryKey: ['platform-sms-failures', range.from, range.to, page],
+    queryFn: () => platformSmsApi.failures(range.from, range.to, page),
+    enabled: valid,
+    placeholderData: keepPreviousData,
+  });
+  const items = failures.data?.items ?? [];
+  const total = failures.data?.total ?? 0;
+  const size = failures.data?.size ?? 20;
+  const pages = Math.max(1, Math.ceil(total / size));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('platform.sms.failures.title')}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <PeriodPicker id="sms-failures" today={today} state={period} />
+        <ApiErrorAlert error={failures.error} />
+        {failures.isFetching && !failures.data ? <InlineLoading /> : null}
+        {failures.data ? (
+          <p className="text-sm text-muted-foreground">{t('platform.sms.failures.count', { count: total })}</p>
+        ) : null}
+        {failures.data && items.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('platform.sms.failures.empty')}</p>
+        ) : null}
+        {items.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground">
+                  <th className="py-2 pr-4 font-medium">{t('platform.sms.failures.time')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('platform.sms.columns.company')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('platform.sms.failures.phone')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('platform.sms.failures.text')}</th>
+                  <th className="py-2 font-medium">{t('platform.sms.failures.error')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {items.map((item) => (
+                  <tr key={item.id} className="align-top">
+                    <td className="whitespace-nowrap py-2 pr-4 tabular-nums">
+                      {item.createdAt ? formatDateTime(item.createdAt, lang) : null}
+                    </td>
+                    <td className="py-2 pr-4">{resolveText(item.displayName, lang)}</td>
+                    <td className="whitespace-nowrap py-2 pr-4 tabular-nums">{item.phone}</td>
+                    <td className="py-2 pr-4">{item.text}</td>
+                    <td className="break-all py-2 text-destructive">{item.error}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+        {total > size ? (
+          <div className="flex items-center justify-between gap-3">
+            <Button variant="outline" disabled={page === 0 || failures.isFetching} onClick={() => setPage(page - 1)}>
+              {t('platform.sms.failures.previous')}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {t('platform.sms.failures.page', { page: page + 1, pages })}
+            </span>
+            <Button variant="outline" disabled={page + 1 >= pages || failures.isFetching} onClick={() => setPage(page + 1)}>
+              {t('platform.sms.failures.next')}
+            </Button>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

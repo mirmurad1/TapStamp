@@ -18,4 +18,18 @@
         GROUP BY t.id, t.slug, t.display_name
         ORDER BY messages DESC, t.slug
     </select>
+
+    <select id="failures" resultType="az.tapstamp.notification.sms.repository.SmsLogMapper$Failure">
+        SELECT m.id, m.created_at, t.id AS tenant_id, t.slug, t.display_name, m.phone, m.text, m.error
+        FROM sms_messages m
+        JOIN tenants t ON t.id = m.tenant_id
+        WHERE m.status = 'FAILED' AND m.created_at &gt;= #{from} AND m.created_at &lt; #{to}
+        ORDER BY m.created_at DESC, m.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countFailures" resultType="long">
+        SELECT count(*) FROM sms_messages
+        WHERE status = 'FAILED' AND created_at &gt;= #{from} AND created_at &lt; #{to}
+    </select>
 </mapper>

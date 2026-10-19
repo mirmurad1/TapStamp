@@ -308,7 +308,21 @@
         "company": "Company",
         "messages": "SMS count"
       },
-      "total": "Successful SMS (total)"
+      "total": "Successful SMS (total)",
+      "usageTitle": "Successful SMS by company",
+      "failures": {
+        "title": "SMS that could not be sent",
+        "count_one": "{{count}} failed SMS",
+        "count_other": "{{count}} failed SMS",
+        "empty": "No failed SMS in this period.",
+        "time": "Time",
+        "phone": "Number",
+        "text": "Text",
+        "error": "Error",
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page {{page}} of {{pages}}"
+      }
     }
   },
   "staffConsole": {

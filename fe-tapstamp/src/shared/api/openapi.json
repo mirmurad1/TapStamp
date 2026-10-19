@@ -2892,6 +2892,54 @@
         "tags" : [ "Platforma: SMS hesabatı" ]
       }
     },
+    "/api/v1/platform/sms-usage/failures" : {
+      "get" : {
+        "description" : "`from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).",
+        "operationId" : "failures",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "maximum" : 100000,
+            "minimum" : 0
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SmsFailurePage"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Uğursuz SMS-lər və səbəbləri",
+        "tags" : [ "Platforma: SMS hesabatı" ]
+      }
+    },
     "/api/v1/platform/tenants" : {
       "get" : {
         "operationId" : "list",
@@ -5583,6 +5631,63 @@
         "description" : "Cari sessiyanın vəziyyəti: NONE — daxil olmayıb, PENDING_MFA — TOTP gözlənilir, MFA_ENROLLMENT — TOTP qurulmalıdır, ACTIVE — tam daxil olub",
         "properties" : {
           "state" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SmsFailurePage" : {
+        "type" : "object",
+        "description" : "Uğursuz SMS-lərin bir səhifəsi; total — dövrdəki ümumi say",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SmsFailureRow"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "SmsFailureRow" : {
+        "type" : "object",
+        "description" : "Göndərilə bilməyən SMS: şirkət, nömrə, mətn (kod gizlədilmiş) və səbəb",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "displayName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "tenantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "text" : {
             "type" : "string"
           }
         }

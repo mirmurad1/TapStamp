@@ -308,7 +308,21 @@
         "company": "Şirkət",
         "messages": "SMS sayı"
       },
-      "total": "Uğurlu SMS-lər (cəmi)"
+      "total": "Uğurlu SMS-lər (cəmi)",
+      "usageTitle": "Uğurlu SMS-lər şirkətlər üzrə",
+      "failures": {
+        "title": "Göndərilə bilməyən SMS-lər",
+        "count_one": "{{count}} xətalı SMS",
+        "count_other": "{{count}} xətalı SMS",
+        "empty": "Bu dövrdə xətalı SMS yoxdur.",
+        "time": "Vaxt",
+        "phone": "Nömrə",
+        "text": "Mətn",
+        "error": "Xəta",
+        "previous": "Əvvəlki",
+        "next": "Növbəti",
+        "page": "Səhifə {{page}} / {{pages}}"
+      }
     }
   },
   "staffConsole": {
