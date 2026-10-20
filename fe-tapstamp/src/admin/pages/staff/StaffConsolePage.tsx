@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Hourglass, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { contextApi, staffConsoleApi, type PendingStamp } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
@@ -71,9 +73,11 @@ function PendingStamps({ branchId }: { branchId: string }) {
   const key = ['pending-stamps', branchId];
   const [notice, setNotice] = useState<string>();
   const [rejecting, setRejecting] = useState<PendingStamp>();
+  const paging = usePagination(branchId);
   const pending = useQuery({
-    queryKey: key,
-    queryFn: () => staffConsoleApi.pendingStamps(branchId),
+    queryKey: [...key, paging.page, paging.size],
+    queryFn: () => staffConsoleApi.pendingStamps(branchId, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
     refetchInterval: 5_000,
     refetchIntervalInBackground: false,
   });
@@ -98,9 +102,9 @@ function PendingStamps({ branchId }: { branchId: string }) {
         {notice ? <Alert tone="success">{notice}</Alert> : null}
         <ApiErrorAlert error={pending.error ?? confirm.error} />
         {pending.isPending ? <InlineLoading /> : null}
-        {pending.data?.length === 0 ? <p className="text-muted-foreground">{t('staffConsole.pending.empty')}</p> : null}
+        {pending.data?.items?.length === 0 ? <p className="text-muted-foreground">{t('staffConsole.pending.empty')}</p> : null}
         <ul className="flex flex-col divide-y divide-border">
-          {(pending.data ?? []).map((stamp) => (
+          {(pending.data?.items ?? []).map((stamp) => (
             <li key={stamp.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
               <div className="min-w-0">
                 <p className="font-semibold">{stamp.customerName || t('staffConsole.pending.anonymous')}</p>
@@ -125,6 +129,7 @@ function PendingStamps({ branchId }: { branchId: string }) {
             </li>
           ))}
         </ul>
+        <Pagination state={paging} total={pending.data?.total ?? 0} />
       </CardContent>
       <RejectDialog
         stamp={rejecting}

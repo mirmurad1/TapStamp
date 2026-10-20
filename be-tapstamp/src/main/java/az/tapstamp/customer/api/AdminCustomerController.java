@@ -15,6 +15,8 @@ import az.tapstamp.customer.admin.CustomerDirectory.Sort;
 import az.tapstamp.customer.admin.CustomerDirectory.TimelineItem;
 import az.tapstamp.customer.admin.CustomerDirectory;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -77,7 +79,7 @@ public class AdminCustomerController {
     @Operation(summary = "Müştərilərin siyahısı", description = """
             Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, \
             `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` \
-            (ən çox 100).""")
+            (5, 10, 20, 50).""")
     Page list(@AuthenticationPrincipal AdminPrincipal principal,
               @RequestParam(required = false) @Size(max = 80) String q,
               @RequestParam(required = false) String language,
@@ -89,7 +91,7 @@ public class AdminCustomerController {
               @RequestParam(defaultValue = "REGISTERED_AT") Sort sort,
               @RequestParam(defaultValue = "desc") @Pattern(regexp = "asc|desc") String direction,
               @RequestParam(defaultValue = "0") int page,
-              @RequestParam(defaultValue = "25") int size) {
+              @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
         return directory.list(principal, new CustomerDirectory.Filter(q, language, status, inactiveDays, branchId,
                 registeredFrom, registeredTo, sort, direction.equals("desc")), page, size);
     }
@@ -101,10 +103,11 @@ public class AdminCustomerController {
     }
 
     @GetMapping("/{customerId}/timeline")
-    @Operation(summary = "Möhür və hədiyyə tarixçəsi", description = "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.")
-    List<TimelineItem> timeline(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId,
-                                @RequestParam(required = false) Instant before) {
-        return directory.timeline(principal, customerId, before);
+    @Operation(summary = "Möhür və hədiyyə tarixçəsi", description = "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<TimelineItem> timeline(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId,
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return directory.timeline(principal, customerId, PageQuery.of(page, size));
     }
 
     @PostMapping("/{customerId}/stamp-adjustments")
@@ -131,8 +134,10 @@ public class AdminCustomerController {
 
     @GetMapping("/{customerId}/fraud-flags")
     @Operation(summary = "Fırıldaq işarələri")
-    List<FraudFlag> fraudFlags(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId) {
-        return admin.fraudFlags(principal, customerId);
+    PageResult<FraudFlag> fraudFlags(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID customerId,
+                                     @RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return admin.fraudFlags(principal, customerId, PageQuery.of(page, size));
     }
 
     @PostMapping("/fraud-flags/{flagId}/resolve")

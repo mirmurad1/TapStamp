@@ -12,5 +12,7 @@ public interface PlatformAuditLogMapper {
 
     void insert(AuditRecord record);
 
-    List<PlatformAuditEntry> list(String action, Instant before, int limit);
+    List<PlatformAuditEntry> list(String action, int limit, long offset);
+
+    long count(String action);
 }

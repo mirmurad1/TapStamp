@@ -61,15 +61,15 @@ class TagAdminIT extends TapIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // Say: ilk çip pulsuzdur, qalanları pullu; cəmi = pulsuz + pullu
-        ResultActions overview = admin.get(base).andExpect(status().isOk())
+        ResultActions overview = admin.get(base + "?size=50").andExpect(status().isOk())
                 .andExpect(jsonPath("$.usage.freeLimit").value(1))
                 .andExpect(jsonPath("$.usage.free").value(1))
                 .andExpect(jsonPath("$.branches[?(@.id == '" + branchId + "')]").isNotEmpty())
-                .andExpect(jsonPath("$.tags[?(@.id == '" + tagId + "')]").isNotEmpty());
+                .andExpect(jsonPath("$.tags.items[?(@.id == '" + tagId + "')]").isNotEmpty());
         int total = Integer.parseInt(json(overview, "$.usage.total"));
         int paid = Integer.parseInt(json(overview, "$.usage.paid"));
         assertThat(paid).isEqualTo(total - 1);
-        overview.andExpect(jsonPath("$.tags[?(@.free == true && @.type != 'SIMULATED')]").value(org.hamcrest.Matchers.hasSize(1)));
+        overview.andExpect(jsonPath("$.tags.items[?(@.free == true && @.type != 'SIMULATED')]").value(org.hamcrest.Matchers.hasSize(1)));
 
         // Paket: step-up ilə, yalnız bir dəfə
         String pkgPath = base + "/" + tagId + "/provisioning-package";
@@ -93,9 +93,9 @@ class TagAdminIT extends TapIntegrationTest {
         customer.post(claimPath(tapToken(customer, tag, 1))).andExpect(status().isOk());
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
         owner.get("/tags?branchId=" + branchId)
-                .andExpect(jsonPath("$[0].activeKeyVersion").value(1))
-                .andExpect(jsonPath("$[0].pendingKeyVersion").doesNotExist())
-                .andExpect(jsonPath("$[0].tapsLast7Days").value(1));
+                .andExpect(jsonPath("$.items[0].activeKeyVersion").value(1))
+                .andExpect(jsonPath("$.items[0].pendingKeyVersion").doesNotExist())
+                .andExpect(jsonPath("$.items[0].tapsLast7Days").value(1));
 
         // Rotasiya: ixrac olunmamış PENDING dəst əvəzlənir; ixracdan sonra yeni rotasiya bloklanır
         String rotations = base + "/" + tagId + "/key-rotations";
@@ -106,7 +106,7 @@ class TagAdminIT extends TapIntegrationTest {
         // Keçidə qədər köhnə açar işləyir, yeni açarla ilk toxunuşda keçid baş verir
         assertThat(tap(customer, tapPath(tag, 2))).startsWith("/tap/").doesNotStartWith("/tap/error");
         assertThat(tap(customer, tapPath(rotated, 3))).startsWith("/tap/").doesNotStartWith("/tap/error");
-        owner.get("/tags?branchId=" + branchId).andExpect(jsonPath("$[0].activeKeyVersion").value(2));
+        owner.get("/tags?branchId=" + branchId).andExpect(jsonPath("$.items[0].activeKeyVersion").value(2));
         assertThat(tap(customer, tapPath(tag, 4))).isEqualTo("/tap/error?code=TAP_SIGNATURE_INVALID");
 
         // Deaktivasiya dərhal qüvvəyə minir
@@ -115,17 +115,17 @@ class TagAdminIT extends TapIntegrationTest {
         admin.post(base + "/" + tagId + "/enable").andExpect(jsonPath("$.status").value("ACTIVE"));
         admin.patch(base + "/" + tagId, Map.of("label", "Kassa yanı")).andExpect(jsonPath("$.label").value("Kassa yanı"));
 
-        admin.get(base + "/" + tagId + "/events")
-                .andExpect(jsonPath("$[?(@.outcome == 'REJECTED')].reason").value(org.hamcrest.Matchers.hasItem("TAG_DISABLED")))
-                .andExpect(jsonPath("$[?(@.outcome == 'ACCEPTED')]").isNotEmpty());
+        admin.get(base + "/" + tagId + "/events?size=50")
+                .andExpect(jsonPath("$.items[?(@.outcome == 'REJECTED')].reason").value(org.hamcrest.Matchers.hasItem("TAG_DISABLED")))
+                .andExpect(jsonPath("$.items[?(@.outcome == 'ACCEPTED')]").isNotEmpty());
 
         // Audit: şirkətin jurnalında (aktor — platforma) və platforma jurnalında
-        owner.get("/audit-logs?action=TAG_PROVISIONING_EXPORTED")
-                .andExpect(jsonPath("$[?(@.targetId == '" + tagId + "')]").isNotEmpty());
+        owner.get("/audit-logs?size=50&action=TAG_PROVISIONING_EXPORTED")
+                .andExpect(jsonPath("$.items[?(@.targetId == '" + tagId + "')]").isNotEmpty());
         owner.get("/audit-logs/actions").andExpect(jsonPath("$").value(org.hamcrest.Matchers.hasItem("TAG_REGISTERED")));
         owner.get("/audit-logs?action=bad-action").andExpect(status().isBadRequest());
-        admin.get("/audit-logs?action=TENANT_TAG_REGISTERED")
-                .andExpect(jsonPath("$[?(@.targetId == '" + alpha().id() + "')]").isNotEmpty());
+        admin.get("/audit-logs?size=50&action=TENANT_TAG_REGISTERED")
+                .andExpect(jsonPath("$.items[?(@.targetId == '" + alpha().id() + "')]").isNotEmpty());
     }
 
     @Test
@@ -135,7 +135,7 @@ class TagAdminIT extends TapIntegrationTest {
         String tagPath = "/tags/" + tag.id();
 
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
-        owner.get("/tags").andExpect(jsonPath("$[?(@.id == '" + tag.id() + "')]").isNotEmpty());
+        owner.get("/tags?size=50").andExpect(jsonPath("$.items[?(@.id == '" + tag.id() + "')]").isNotEmpty());
         owner.get(tagPath + "/events").andExpect(status().isOk());
         // Sahib çip əlavə edə və ya dəyişə bilməz: bu endpoint-lər artıq yoxdur
         owner.post("/tags", Map.of("uid", randomUid(), "branchId", branchId, "label", "Yeni"))
@@ -147,12 +147,12 @@ class TagAdminIT extends TapIntegrationTest {
                 .andExpect(status().isNotFound());
 
         AdminClient manager = signedInStaff(HOST, AdminRole.BRANCH_MANAGER, branchId);
-        manager.get("/tags").andExpect(jsonPath("$[?(@.id == '" + tag.id() + "')]").isNotEmpty());
+        manager.get("/tags?size=50").andExpect(jsonPath("$.items[?(@.id == '" + tag.id() + "')]").isNotEmpty());
         manager.get(tagPath + "/events").andExpect(status().isOk());
         manager.get("/audit-logs").andExpect(status().isForbidden());
 
         AdminClient other = signedInStaff(HOST, AdminRole.BRANCH_MANAGER, newBranch(Policy.relaxed()));
-        other.get("/tags").andExpect(jsonPath("$[?(@.id == '" + tag.id() + "')]").isEmpty());
+        other.get("/tags?size=50").andExpect(jsonPath("$.items[?(@.id == '" + tag.id() + "')]").isEmpty());
         other.get(tagPath + "/events").andExpect(status().isNotFound());
         signedInBarista(branchId).get("/tags").andExpect(status().isForbidden());
     }

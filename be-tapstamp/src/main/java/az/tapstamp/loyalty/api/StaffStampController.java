@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import az.tapstamp.loyalty.stamp.StampApprovalService;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,12 +47,13 @@ public class StaffStampController {
     }
 
     @GetMapping
-    @Operation(summary = "Gözləyən möhürlər", description = "Yalnız işçinin öz filialı; başqa filial üçün 404.")
-    List<PendingStampResponse> pending(@RequestParam UUID branchId, @AuthenticationPrincipal AdminPrincipal principal) {
-        return approvals.pending(principal, branchId).stream()
+    @Operation(summary = "Gözləyən möhürlər", description = "Yalnız işçinin öz filialı; başqa filial üçün 404. Ən köhnəsi birinci; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<PendingStampResponse> pending(@RequestParam UUID branchId, @AuthenticationPrincipal AdminPrincipal principal,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return approvals.pending(principal, branchId, PageQuery.of(page, size))
                 .map(stamp -> new PendingStampResponse(stamp.id(), stamp.branchId(), stamp.customerName(),
-                        stamp.phoneMasked(), stamp.createdAt(), stamp.expiresAt()))
-                .toList();
+                        stamp.phoneMasked(), stamp.createdAt(), stamp.expiresAt()));
     }
 
     @PostMapping("/{stampId}/confirm")

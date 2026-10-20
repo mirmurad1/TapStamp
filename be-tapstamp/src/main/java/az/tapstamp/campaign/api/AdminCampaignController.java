@@ -11,6 +11,8 @@ import az.tapstamp.campaign.CampaignService.Preview;
 import az.tapstamp.campaign.CampaignService.Type;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -110,18 +112,21 @@ public class AdminCampaignController {
     }
 
     @GetMapping
-    @Operation(summary = "Kampaniyalar", description = "Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.")
-    List<CampaignView> list(@AuthenticationPrincipal AdminPrincipal principal,
-                            @RequestParam(defaultValue = "SMS") Type type) {
-        return campaigns.list(principal, type).stream().map(CampaignView::from).toList();
+    @Operation(summary = "Kampaniyalar", description = "Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<CampaignView> list(@AuthenticationPrincipal AdminPrincipal principal,
+                                  @RequestParam(defaultValue = "SMS") Type type,
+                                  @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return campaigns.list(principal, type, PageQuery.of(page, size)).map(CampaignView::from);
     }
 
     @GetMapping("/{campaignId}/failures")
     @Operation(summary = "SMS-i göndərilməyən müştərilər", description = "Ad, tam nömrə və səbəb; möhür də verilməyib.")
-    List<CampaignFailureView> failures(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId) {
-        return campaigns.failures(principal, campaignId).stream()
-                .map(f -> new CampaignFailureView(f.customerId(), f.name(), f.phone(), f.error(), f.at()))
-                .toList();
+    PageResult<CampaignFailureView> failures(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return campaigns.failures(principal, campaignId, PageQuery.of(page, size))
+                .map(f -> new CampaignFailureView(f.customerId(), f.name(), f.phone(), f.error(), f.at()));
     }
 
     @GetMapping("/{campaignId}")

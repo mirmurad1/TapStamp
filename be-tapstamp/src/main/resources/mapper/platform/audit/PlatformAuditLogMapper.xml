@@ -17,9 +17,15 @@
         LEFT JOIN platform_admins p ON p.id = a.actor_id
         <where>
             <if test="action != null">a.action = #{action}</if>
-            <if test="before != null">AND a.created_at &lt; #{before}</if>
         </where>
         ORDER BY a.created_at DESC, a.id DESC
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM platform_audit_logs a
+        <where>
+            <if test="action != null">a.action = #{action}</if>
+        </where>
     </select>
 </mapper>

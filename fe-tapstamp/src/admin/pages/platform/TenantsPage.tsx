@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -7,6 +7,8 @@ import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -18,7 +20,13 @@ import { TenantStatusBadge } from './TenantStatusBadge';
 export function TenantsPage() {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
-  const tenants = useQuery({ queryKey: TENANTS_KEY, queryFn: platformApi.tenants });
+  const paging = usePagination();
+  const tenants = useQuery({
+    queryKey: [...TENANTS_KEY, paging.page, paging.size],
+    queryFn: () => platformApi.tenants({ page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
+  const items = tenants.data?.items ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,8 +46,8 @@ export function TenantsPage() {
         <CardContent className="pt-5 sm:pt-6 sm:pt-6">
           <ApiErrorAlert error={tenants.error} />
           {tenants.isPending ? <InlineLoading /> : null}
-          {tenants.data?.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}
-          {tenants.data && tenants.data.length > 0 ? (
+          {tenants.data && items.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}
+          {items.length > 0 ? (
             <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[36rem] text-left text-sm">
                 <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
@@ -51,7 +59,7 @@ export function TenantsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {tenants.data.map((tenant) => (
+                  {items.map((tenant) => (
                     <tr key={tenant.id}>
                       <td className="px-5 py-3 sm:px-6">
                         <Link
@@ -73,6 +81,7 @@ export function TenantsPage() {
               </table>
             </div>
           ) : null}
+          <Pagination state={paging} total={tenants.data?.total ?? 0} />
         </CardContent>
       </Card>
     </div>

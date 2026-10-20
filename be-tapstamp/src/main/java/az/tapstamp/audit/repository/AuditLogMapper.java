@@ -14,7 +14,9 @@ public interface AuditLogMapper {
     void insert(AuditRecord record);
 
     /** Yenidən köhnəyə; bütün filtrlər istəyə bağlıdır, {@code before} — keyset səhifələmə. */
-    List<Entry> list(String action, UUID actorId, Instant from, Instant to, Instant before, int limit);
+    List<Entry> list(String action, UUID actorId, Instant from, Instant to, int limit, long offset);
+
+    long count(String action, UUID actorId, Instant from, Instant to);
 
     List<String> actions();
 }

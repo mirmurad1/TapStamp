@@ -28,6 +28,8 @@ import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -203,9 +205,9 @@ public class CustomerAdminService {
 
     // ------------------------------------------------------------------ Fırıldaq işarələri
 
-    public List<FraudFlag> fraudFlags(AdminPrincipal principal, UUID customerId) {
+    public PageResult<FraudFlag> fraudFlags(AdminPrincipal principal, UUID customerId, PageQuery page) {
         directory.get(principal, customerId);
-        return customers.fraudFlags(customerId);
+        return page.result(customers.fraudFlags(customerId, page.limit(), page.offset()), customers.countFraudFlags(customerId));
     }
 
     /** İşarəni qeyd ilə bağlayır; artıq bağlanmış işarə dəyişmir (idempotent). */

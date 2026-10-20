@@ -21,6 +21,8 @@ import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.crypto.PhoneHasher;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,8 +35,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerDirectory {
 
-    public static final int MAX_PAGE_SIZE = 100;
-    public static final int TIMELINE_PAGE = 50;
 
     /** Sıralama sahələri (ağ siyahı — SQL-ə yalnız bu ifadələr düşür). */
     public enum Sort {
@@ -89,9 +89,7 @@ public class CustomerDirectory {
     }
 
     public Page list(AdminPrincipal principal, Filter filter, int page, int size) {
-        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE) {
-            throw new ApiException(ErrorCode.VALIDATION_FAILED);
-        }
+        PageQuery.of(page, size); // ölçü yalnız 5, 10, 20, 50
         Query query = query(principal, filter, size, (long) page * size);
         if (query == null) {
             return new Page(List.of(), 0, page, size);
@@ -113,10 +111,10 @@ public class CustomerDirectory {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
-    /** Möhürlər və hədiyyə kartları, yenidən köhnəyə; {@code before} — əvvəlki səhifənin son elementinin vaxtı. */
-    public List<TimelineItem> timeline(AdminPrincipal principal, UUID customerId, Instant before) {
+    /** Möhürlər və hədiyyə kartları, yenidən köhnəyə, səhifə ilə. */
+    public PageResult<TimelineItem> timeline(AdminPrincipal principal, UUID customerId, PageQuery page) {
         get(principal, customerId);
-        return customers.timeline(customerId, before, TIMELINE_PAGE);
+        return page.result(customers.timeline(customerId, page.limit(), page.offset()), customers.countTimeline(customerId));
     }
 
     private Row toRow(CustomerDirectoryMapper.Entry entry) {

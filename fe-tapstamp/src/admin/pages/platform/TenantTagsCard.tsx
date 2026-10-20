@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, History, KeyRound, Nfc, Power, PowerOff } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,8 @@ import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformTagsApi, type NfcTag, type ProvisioningPackage } from '../../api/adminApi';
 import { useStepUp } from '../../auth/StepUpProvider';
@@ -25,7 +27,13 @@ export function TenantTagsCard({ tenantId }: { tenantId: string }) {
   const withStepUp = useStepUp();
   const confirm = useConfirm();
   const key = ['platform-tags', tenantId];
-  const overview = useQuery({ queryKey: key, queryFn: () => platformTagsApi.overview(tenantId) });
+  const paging = usePagination();
+  const overview = useQuery({
+    queryKey: [...key, paging.page, paging.size],
+    queryFn: () => platformTagsApi.overview(tenantId, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
+  const tags = overview.data?.tags?.items ?? [];
   const [pkg, setPkg] = useState<ProvisioningPackage>();
   const [eventsOf, setEventsOf] = useState<NfcTag>();
   const refresh = () => void queryClient.invalidateQueries({ queryKey: key });
@@ -95,9 +103,9 @@ export function TenantTagsCard({ tenantId }: { tenantId: string }) {
             </div>
           ))}
         </dl>
-        {overview.data && overview.data.tags?.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:tags.empty')}</p> : null}
+        {overview.data && tags.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:tags.empty')}</p> : null}
         <div className="grid gap-4 lg:grid-cols-2">
-          {overview.data?.tags?.map((tag) => {
+          {tags.map((tag) => {
             const active = tag.status === 'ACTIVE';
             return (
               <TagCard key={tag.id} tag={tag} branchName={nameOf(tag.branchId)}>
@@ -131,10 +139,15 @@ export function TenantTagsCard({ tenantId }: { tenantId: string }) {
             );
           })}
         </div>
+        <Pagination state={paging} total={overview.data?.tags?.total ?? 0} />
       </CardContent>
       {pkg ? <PackageDialog pkg={pkg} onClose={() => setPkg(undefined)} /> : null}
       {eventsOf ? (
-        <EventsDialog tag={eventsOf} load={() => platformTagsApi.events(tenantId, eventsOf.id ?? '')} onClose={() => setEventsOf(undefined)} />
+        <EventsDialog
+          tag={eventsOf}
+          load={(query) => platformTagsApi.events(tenantId, eventsOf.id ?? '', query)}
+          onClose={() => setEventsOf(undefined)}
+        />
       ) : null}
     </Card>
   );

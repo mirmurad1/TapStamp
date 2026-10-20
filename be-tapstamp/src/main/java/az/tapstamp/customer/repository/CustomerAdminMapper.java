@@ -58,7 +58,9 @@ public interface CustomerAdminMapper {
 
     void updateStatus(UUID customerId, String status, Instant now);
 
-    List<FraudFlag> fraudFlags(UUID customerId);
+    List<FraudFlag> fraudFlags(UUID customerId, int limit, long offset);
+
+    long countFraudFlags(UUID customerId);
 
     Optional<UUID> findFraudFlagCustomer(UUID flagId);
 

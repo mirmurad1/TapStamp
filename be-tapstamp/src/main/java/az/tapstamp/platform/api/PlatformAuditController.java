@@ -5,6 +5,8 @@ import java.util.List;
 
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.PlatformAuditEntry;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
@@ -28,9 +30,10 @@ public class PlatformAuditController {
     }
 
     @GetMapping
-    @Operation(summary = "Platforma audit jurnalı", description = "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.")
-    List<PlatformAuditEntry> list(@RequestParam(required = false) @Pattern(regexp = "^[A-Z_]{1,64}$") String action,
-                                  @RequestParam(required = false) Instant before) {
-        return audit.platform(action, before);
+    @Operation(summary = "Platforma audit jurnalı", description = "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<PlatformAuditEntry> list(@RequestParam(required = false) @Pattern(regexp = "^[A-Z_]{1,64}$") String action,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return audit.platform(action, PageQuery.of(page, size));
     }
 }

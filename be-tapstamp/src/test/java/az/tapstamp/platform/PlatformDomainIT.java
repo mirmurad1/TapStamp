@@ -64,8 +64,8 @@ class PlatformDomainIT extends AdminIntegrationTest {
         publicCompany(extra).andExpect(status().is4xxClientError());
         publicCompany(TestTenants.ALPHA_HOST).andExpect(status().isOk());
 
-        admin.get("/audit-logs?action=TENANT_DOMAIN_ADDED")
-                .andExpect(jsonPath("$[?(@.targetId == '" + tenantId + "')].details").isNotEmpty());
+        admin.get("/audit-logs?size=50&action=TENANT_DOMAIN_ADDED")
+                .andExpect(jsonPath("$.items[?(@.targetId == '" + tenantId + "')].details").isNotEmpty());
         admin.get("/audit-logs?action=bad").andExpect(status().isBadRequest());
     }
 

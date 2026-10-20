@@ -29,6 +29,8 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -116,9 +118,10 @@ public class TagAdminService {
     }
 
     /** Sahib və platforma admini bütün çipləri, menecer öz filiallarının çiplərini görür. */
-    public List<TagView> list(AdminPrincipal principal, UUID branchId) {
+    public PageResult<TagView> list(AdminPrincipal principal, UUID branchId, PageQuery page) {
         BranchScope scope = BranchScope.of(principal, branchId);
-        return tags.list(scope.all(), scope.branchIds(), weekAgo(), freeTags);
+        return page.result(tags.list(scope.all(), scope.branchIds(), weekAgo(), freeTags, page.limit(), page.offset()),
+                tags.count(scope.all(), scope.branchIds()));
     }
 
     public TagView get(AdminPrincipal principal, UUID tagId) {
@@ -229,9 +232,9 @@ public class TagAdminService {
     }
 
     /** Çipin son toxunuşları (qəbul və rədd edilənlər, səbəbləri ilə). */
-    public List<TapEvent> events(AdminPrincipal principal, UUID tagId) {
+    public PageResult<TapEvent> events(AdminPrincipal principal, UUID tagId, PageQuery page) {
         get(principal, tagId);
-        return tags.events(tagId);
+        return page.result(tags.events(tagId, page.limit(), page.offset()), tags.countEvents(tagId));
     }
 
     // ------------------------------------------------------------------

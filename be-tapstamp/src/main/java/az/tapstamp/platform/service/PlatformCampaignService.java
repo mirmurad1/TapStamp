@@ -13,6 +13,8 @@ import az.tapstamp.security.admin.AdminRealm;
 import az.tapstamp.security.admin.AdminRealms;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
@@ -43,22 +45,29 @@ public class PlatformCampaignService {
         this.realms = realms;
     }
 
-    /** Verilmiş statuslarda olan kampaniyalar (bütün aktiv şirkətlər), yenidən köhnəyə. */
-    public List<TenantCampaign> list(List<String> statuses) {
+    /**
+     * Verilmiş statuslarda olan kampaniyalar (bütün aktiv şirkətlər), yenidən köhnəyə, səhifə ilə. Hər şirkətdən
+     * ən yeni "offset + size" kampaniya götürülür, birləşdirilib sıralanır və lazım olan hissə kəsilir.
+     */
+    public PageResult<TenantCampaign> list(List<String> statuses, PageQuery page) {
+        int needed = (int) Math.min(page.offset() + page.size(), Integer.MAX_VALUE);
+        long total = 0;
         List<TenantCampaign> result = new ArrayList<>();
         for (TenantRecord tenant : directory.findAll()) {
             if (tenant.status().outOfService()) {
                 continue;
             }
             try {
-                TenantContext.callAs(tenant.toInfo(), () -> campaigns.byStatus(statuses))
+                total += TenantContext.callAs(tenant.toInfo(), () -> campaigns.countByStatus(statuses));
+                TenantContext.callAs(tenant.toInfo(), () -> campaigns.byStatus(statuses, needed))
                         .forEach(campaign -> result.add(new TenantCampaign(tenant, campaign)));
             } catch (RuntimeException e) {
                 log.warn("Campaigns could not be read for tenant {}: {}", tenant.slug(), e.getClass().getSimpleName());
             }
         }
         result.sort(Comparator.comparing((TenantCampaign c) -> c.campaign().createdAt()).reversed());
-        return result;
+        int from = (int) Math.min(page.offset(), result.size());
+        return page.result(List.copyOf(result.subList(from, Math.min(from + page.size(), result.size()))), total);
     }
 
     /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək. */

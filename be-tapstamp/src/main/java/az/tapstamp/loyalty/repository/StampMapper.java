@@ -74,7 +74,9 @@ public interface StampMapper {
     }
 
     /** Filialın gözləyən möhürləri, ən köhnəsi birinci (ən çox 100). */
-    List<PendingRow> findPending(UUID branchId);
+    List<PendingRow> findPending(UUID branchId, int limit, long offset);
+
+    long countPending(UUID branchId);
 
     void confirmStamp(UUID stampId, UUID staffId, Instant now);
 

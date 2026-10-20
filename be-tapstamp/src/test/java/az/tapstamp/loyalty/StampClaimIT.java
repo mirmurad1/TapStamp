@@ -239,8 +239,8 @@ class StampClaimIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.card.currentStamps").value(0));
 
         barista.get("/staff-console/pending-stamps?branchId=" + branchId).andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(stampId))
-                .andExpect(jsonPath("$[0].phoneMasked").exists());
+                .andExpect(jsonPath("$.items[0].id").value(stampId))
+                .andExpect(jsonPath("$.items[0].phoneMasked").exists());
         // Başqa filialın işçisi bu möhürü görmür və təsdiqləyə bilmir
         otherBarista.get("/staff-console/pending-stamps?branchId=" + branchId).andExpect(status().isNotFound());
         otherBarista.post("/staff-console/pending-stamps/" + stampId + "/confirm").andExpect(status().isNotFound());

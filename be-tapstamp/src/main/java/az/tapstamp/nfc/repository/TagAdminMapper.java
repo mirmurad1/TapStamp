@@ -22,7 +22,9 @@ public interface TagAdminMapper {
      * Çiplər: {@code all} — bütün filiallar, əks halda yalnız {@code branchIds}. {@code since} — toxunuş sayı üçün dövrün
      * başlanğıcı, {@code freeTags} — pulsuz çip limiti (ən köhnə çiplər pulsuzdur).
      */
-    List<TagView> list(boolean all, List<UUID> branchIds, Instant since, int freeTags);
+    List<TagView> list(boolean all, List<UUID> branchIds, Instant since, int freeTags, int limit, long offset);
+
+    long count(boolean all, List<UUID> branchIds);
 
     Optional<TagView> find(UUID id, Instant since, int freeTags);
 
@@ -57,5 +59,7 @@ public interface TagAdminMapper {
     Optional<ExportedKeys> exportPendingKeys(UUID tagId, Instant now);
 
     /** Son 100 toxunuş cəhdi. */
-    List<TapEvent> events(UUID tagId);
+    List<TapEvent> events(UUID tagId, int limit, long offset);
+
+    long countEvents(UUID tagId);
 }

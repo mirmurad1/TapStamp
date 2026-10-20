@@ -86,8 +86,8 @@ class StampCampaignIT extends TapIntegrationTest {
         assertThat(sms.to(first.phone())).anySatisfy(m -> assertThat(m.text()).contains("hediyye mohur"));
         owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"))
                 .andExpect(jsonPath("$.stampsGranted").value(jsonInt(owner, id, "$.sentCount")));
-        owner.get("/campaigns?type=STAMPS").andExpect(jsonPath("$[?(@.id == '" + id + "')]").isNotEmpty());
-        owner.get("/campaigns?type=SMS").andExpect(jsonPath("$[?(@.id == '" + id + "')]").isEmpty());
+        owner.get("/campaigns?size=50&type=STAMPS").andExpect(jsonPath("$.items[?(@.id == '" + id + "')]").isNotEmpty());
+        owner.get("/campaigns?size=50&type=SMS").andExpect(jsonPath("$.items[?(@.id == '" + id + "')]").isEmpty());
     }
 
     @Test
@@ -115,7 +115,7 @@ class StampCampaignIT extends TapIntegrationTest {
         assertThat(flaky.stamps()).isEqualTo(1);
         owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"));
         owner.get("/campaigns/" + id + "/failures").andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.phone == '" + rejected.phone() + "')].error")
+                .andExpect(jsonPath("$.items[?(@.phone == '" + rejected.phone() + "')].error")
                         .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.containsString("RECIPIENT"))));
     }
 
@@ -134,7 +134,7 @@ class StampCampaignIT extends TapIntegrationTest {
         // Platforma 48 saatdan gec davam etdirsə də, gözləyən alıcılar itmir (son müddət yenidən başlayır)
         clock.advance(Duration.ofHours(49));
         AdminClient platform = signedInPlatformAdmin();
-        platform.get("/campaigns").andExpect(jsonPath("$[?(@.id == '" + id + "')].status")
+        platform.get("/campaigns?size=50").andExpect(jsonPath("$.items[?(@.id == '" + id + "')].status")
                 .value(org.hamcrest.Matchers.contains("PAUSED")));
         platform.post("/campaigns/" + alpha().id() + "/" + id + "/resume").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SENDING"));

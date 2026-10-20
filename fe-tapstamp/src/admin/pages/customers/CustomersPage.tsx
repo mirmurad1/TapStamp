@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Download, Search, ShieldAlert } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { ArrowDown, ArrowUp, Download, Search, ShieldAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -12,6 +12,8 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { customersApi, type CustomerFilter, type CustomerSort } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
@@ -22,7 +24,6 @@ import { hasAnyRole } from '../../layout/navigation';
 import { useBranchNames } from '../../lib/branches';
 import { downloadBlob } from '../../lib/download';
 
-const PAGE_SIZE = 25;
 /** Cədvəlin sütunları; field — sıralana bilən sahə. */
 const HEADERS: readonly { field?: CustomerSort; label: 'admin:customers.columns.customer' | 'admin:customers.columns.language' | 'admin:customers.columns.stamps' | 'admin:customers.columns.rewards' | 'admin:customers.columns.lastVisit' | 'admin:customers.columns.registered'; className: string }[] = [
   { field: 'NAME', label: 'admin:customers.columns.customer', className: 'px-5 py-2 sm:px-6' },
@@ -48,10 +49,10 @@ export function CustomersPage() {
   const [filter, setFilter] = useState<CustomerFilter>({});
   const [sort, setSort] = useState<CustomerSort>('REGISTERED_AT');
   const [direction, setDirection] = useState<'asc' | 'desc'>('desc');
-  const [page, setPage] = useState(0);
+  const paging = usePagination({ filter, sort, direction });
 
-  const query = { ...filter, sort, direction, page, size: PAGE_SIZE };
-  const customers = useQuery({ queryKey: ['customers', query], queryFn: () => customersApi.list(query), placeholderData: (prev) => prev });
+  const query = { ...filter, sort, direction, page: paging.page, size: paging.size };
+  const customers = useQuery({ queryKey: ['customers', query], queryFn: () => customersApi.list(query), placeholderData: keepPreviousData });
   const exportCsv = useMutation({
     mutationFn: () => withStepUp(() => customersApi.exportCsv(filter)),
     onSuccess: (blob) => downloadBlob(blob, `customers-${new Date().toISOString().slice(0, 10)}.csv`),
@@ -59,7 +60,6 @@ export function CustomersPage() {
 
   const update = (patch: CustomerFilter) => {
     setFilter((current) => ({ ...current, ...patch }));
-    setPage(0);
   };
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -72,13 +72,10 @@ export function CustomersPage() {
       setSort(field);
       setDirection(field === 'NAME' ? 'asc' : 'desc');
     }
-    setPage(0);
   };
 
   const data = customers.data;
   const total = data?.total ?? 0;
-  const from = total === 0 ? 0 : page * PAGE_SIZE + 1;
-  const to = Math.min((page + 1) * PAGE_SIZE, total);
 
   const sortHeader = (field: CustomerSort, label: string, className: string) => (
     <th key={field} scope="col" className={className} aria-sort={sort === field ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
@@ -233,21 +230,7 @@ export function CustomersPage() {
             </div>
           ) : null}
 
-          {total > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-              <span>{t('admin:customers.range', { from, to, total: formatNumber(total, lang) })}</span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                  <ChevronLeft className="size-4" aria-hidden="true" />
-                  {t('admin:customers.previous')}
-                </Button>
-                <Button variant="outline" size="sm" disabled={to >= total} onClick={() => setPage(page + 1)}>
-                  {t('admin:customers.next')}
-                  <ChevronRight className="size-4" aria-hidden="true" />
-                </Button>
-              </div>
-            </div>
-          ) : null}
+          <Pagination state={paging} total={total} />
         </CardContent>
       </Card>
     </div>

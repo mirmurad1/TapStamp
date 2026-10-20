@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Ban, Gift, MinusCircle, PlusCircle, ShieldAlert, Stamp, Unlock } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,8 @@ import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { customersApi, type CustomerRow, type FraudFlag, type TimelineItem } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
@@ -279,13 +281,13 @@ function Timeline({ customerId, className }: { customerId: string; className?: s
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const { nameOf } = useBranchNames();
-  const timeline = useInfiniteQuery({
-    queryKey: ['customer-timeline', customerId],
-    queryFn: ({ pageParam }) => customersApi.timeline(customerId, pageParam),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last) => (last.length === 50 ? last[last.length - 1]?.at : undefined),
+  const paging = usePagination();
+  const timeline = useQuery({
+    queryKey: ['customer-timeline', customerId, paging.page, paging.size],
+    queryFn: () => customersApi.timeline(customerId, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
   });
-  const items = timeline.data?.pages.flat() ?? [];
+  const items = timeline.data?.items ?? [];
 
   return (
     <Card className={className}>
@@ -301,11 +303,7 @@ function Timeline({ customerId, className }: { customerId: string; className?: s
             <TimelineRow key={`${item.kind}-${item.id}`} item={item} branchName={nameOf(item.branchId)} lang={lang} />
           ))}
         </ol>
-        {timeline.hasNextPage ? (
-          <Button variant="outline" className="self-center" onClick={() => void timeline.fetchNextPage()} disabled={timeline.isFetchingNextPage}>
-            {t('customers.timeline.more')}
-          </Button>
-        ) : null}
+        <Pagination state={paging} total={timeline.data?.total ?? 0} />
       </CardContent>
     </Card>
   );
@@ -349,7 +347,12 @@ function FraudFlags({ customerId }: { customerId: string }) {
   const { t } = useTranslation(['admin', 'common']);
   const lang = currentLanguage();
   const queryClient = useQueryClient();
-  const flags = useQuery({ queryKey: ['customer-flags', customerId], queryFn: () => customersApi.fraudFlags(customerId) });
+  const paging = usePagination();
+  const flags = useQuery({
+    queryKey: ['customer-flags', customerId, paging.page, paging.size],
+    queryFn: () => customersApi.fraudFlags(customerId, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
 
   return (
     <Card>
@@ -362,9 +365,9 @@ function FraudFlags({ customerId }: { customerId: string }) {
       <CardContent className="flex flex-col gap-3">
         <ApiErrorAlert error={flags.error} />
         {flags.isPending ? <InlineLoading /> : null}
-        {flags.data && flags.data.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:customers.noFlags')}</p> : null}
+        {flags.data && flags.data.items?.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:customers.noFlags')}</p> : null}
         <ul className="flex flex-col gap-3">
-          {flags.data?.map((flag) => (
+          {flags.data?.items?.map((flag) => (
             <FlagItem
               key={flag.id}
               flag={flag}
@@ -376,6 +379,7 @@ function FraudFlags({ customerId }: { customerId: string }) {
             />
           ))}
         </ul>
+        <Pagination state={paging} total={flags.data?.total ?? 0} />
       </CardContent>
     </Card>
   );

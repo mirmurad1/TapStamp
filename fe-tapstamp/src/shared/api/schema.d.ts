@@ -110,7 +110,7 @@ export interface paths {
         };
         /**
          * Audit jurnalı
-         * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
+         * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_9"];
         put?: never;
@@ -367,7 +367,7 @@ export interface paths {
         };
         /**
          * Kampaniyalar
-         * @description Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.
+         * @description Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_2"];
         put?: never;
@@ -472,7 +472,7 @@ export interface paths {
         };
         /**
          * Müştərilərin siyahısı
-         * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).
+         * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).
          */
         get: operations["list_8"];
         put?: never;
@@ -606,7 +606,7 @@ export interface paths {
         };
         /**
          * Möhür və hədiyyə tarixçəsi
-         * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.
+         * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["timeline"];
         put?: never;
@@ -1020,7 +1020,7 @@ export interface paths {
         };
         /**
          * Gözləyən möhürlər
-         * @description Yalnız işçinin öz filialı; başqa filial üçün 404.
+         * @description Yalnız işçinin öz filialı; başqa filial üçün 404. Ən köhnəsi birinci; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["pending"];
         put?: never;
@@ -1080,7 +1080,7 @@ export interface paths {
         };
         /**
          * Çiplərin siyahısı
-         * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.
+         * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_7"];
         put?: never;
@@ -1100,7 +1100,7 @@ export interface paths {
         };
         /**
          * Çipin toxunuş jurnalı
-         * @description Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.
+         * @description Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.
          */
         get: operations["events_1"];
         put?: never;
@@ -1120,7 +1120,7 @@ export interface paths {
         };
         /**
          * Komanda üzvləri
-         * @description Sahib hamını, menecer yalnız öz filiallarının işçilərini görür.
+         * @description Sahib hamını, menecer yalnız öz filiallarının işçilərini görür; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["members"];
         put?: never;
@@ -1138,7 +1138,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Gözləyən dəvətlər */
+        /**
+         * Gözləyən dəvətlər
+         * @description səhifə `page` (0-dan), `size` (5, 10, 20, 50).
+         */
         get: operations["invitations"];
         put?: never;
         /**
@@ -1554,7 +1557,7 @@ export interface paths {
         };
         /**
          * Platforma audit jurnalı
-         * @description Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.
+         * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_5"];
         put?: never;
@@ -1754,7 +1757,7 @@ export interface paths {
         };
         /**
          * Kampaniyalar
-         * @description `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).
+         * @description `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_4"];
         put?: never;
@@ -2012,7 +2015,7 @@ export interface paths {
         };
         /**
          * SMS axtarışı
-         * @description Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).
+         * @description Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["messages"];
         put?: never;
@@ -2030,7 +2033,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bütün şirkətlər */
+        /**
+         * Bütün şirkətlər
+         * @description səhifə `page` (0-dan), `size` (5, 10, 20, 50).
+         */
         get: operations["list"];
         put?: never;
         /**
@@ -2309,7 +2315,7 @@ export interface paths {
         };
         /**
          * Çipin toxunuş jurnalı
-         * @description Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.
+         * @description Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.
          */
         get: operations["events"];
         put?: never;
@@ -3106,6 +3112,123 @@ export interface components {
             /** Format: int64 */
             total?: number;
         };
+        PageResultCampaignFailureView: {
+            items?: components["schemas"]["CampaignFailureView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultCampaignView: {
+            items?: components["schemas"]["CampaignView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultEntry: {
+            items?: components["schemas"]["Entry"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultFraudFlag: {
+            items?: components["schemas"]["FraudFlag"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultInvitationResponse: {
+            items?: components["schemas"]["InvitationResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultMemberResponse: {
+            items?: components["schemas"]["MemberResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultPendingStampResponse: {
+            items?: components["schemas"]["PendingStampResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultPlatformAuditEntry: {
+            items?: components["schemas"]["PlatformAuditEntry"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultPlatformCampaignView: {
+            items?: components["schemas"]["PlatformCampaignView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultTagView: {
+            items?: components["schemas"]["TagView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultTapEvent: {
+            items?: components["schemas"]["TapEvent"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultTenantResponse: {
+            items?: components["schemas"]["TenantResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultTimelineItem: {
+            items?: components["schemas"]["TimelineItem"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
         PasswordConfirmRequest: {
             password: string;
         };
@@ -3549,7 +3672,7 @@ export interface components {
         };
         TagOverview: {
             branches?: components["schemas"]["BranchOption"][];
-            tags?: components["schemas"]["TagView"][];
+            tags?: components["schemas"]["PageResultTagView"];
             usage?: components["schemas"]["TagUsage"];
         };
         TagUsage: {
@@ -3791,7 +3914,8 @@ export interface operations {
                 actorId?: string;
                 from?: string;
                 to?: string;
-                before?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -3805,7 +3929,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["Entry"][];
+                    "*/*": components["schemas"]["PageResultEntry"];
                 };
             };
         };
@@ -4078,6 +4202,8 @@ export interface operations {
         parameters: {
             query?: {
                 type?: "SMS" | "STAMPS";
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -4091,7 +4217,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["CampaignView"][];
+                    "*/*": components["schemas"]["PageResultCampaignView"];
                 };
             };
         };
@@ -4216,7 +4342,10 @@ export interface operations {
     };
     failures: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path: {
                 campaignId: string;
@@ -4231,7 +4360,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["CampaignFailureView"][];
+                    "*/*": components["schemas"]["PageResultCampaignFailureView"];
                 };
             };
         };
@@ -4342,7 +4471,10 @@ export interface operations {
     };
     fraudFlags: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path: {
                 customerId: string;
@@ -4357,7 +4489,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["FraudFlag"][];
+                    "*/*": components["schemas"]["PageResultFraudFlag"];
                 };
             };
         };
@@ -4418,7 +4550,8 @@ export interface operations {
     timeline: {
         parameters: {
             query?: {
-                before?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path: {
@@ -4434,7 +4567,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TimelineItem"][];
+                    "*/*": components["schemas"]["PageResultTimelineItem"];
                 };
             };
         };
@@ -5042,6 +5175,8 @@ export interface operations {
         parameters: {
             query: {
                 branchId: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -5055,7 +5190,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PendingStampResponse"][];
+                    "*/*": components["schemas"]["PageResultPendingStampResponse"];
                 };
             };
         };
@@ -5112,6 +5247,8 @@ export interface operations {
         parameters: {
             query?: {
                 branchId?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -5125,14 +5262,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TagView"][];
+                    "*/*": components["schemas"]["PageResultTagView"];
                 };
             };
         };
     };
     events_1: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path: {
                 tagId: string;
@@ -5147,14 +5287,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TapEvent"][];
+                    "*/*": components["schemas"]["PageResultTapEvent"];
                 };
             };
         };
     };
     members: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -5167,14 +5310,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["MemberResponse"][];
+                    "*/*": components["schemas"]["PageResultMemberResponse"];
                 };
             };
         };
     };
     invitations: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -5187,7 +5333,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["InvitationResponse"][];
+                    "*/*": components["schemas"]["PageResultInvitationResponse"];
                 };
             };
         };
@@ -5678,7 +5824,8 @@ export interface operations {
         parameters: {
             query?: {
                 action?: string;
-                before?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -5692,7 +5839,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PlatformAuditEntry"][];
+                    "*/*": components["schemas"]["PageResultPlatformAuditEntry"];
                 };
             };
         };
@@ -5897,6 +6044,8 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -5910,7 +6059,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PlatformCampaignView"][];
+                    "*/*": components["schemas"]["PageResultPlatformCampaignView"];
                 };
             };
         };
@@ -6211,6 +6360,7 @@ export interface operations {
                 status?: string;
                 phone?: string;
                 page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -6231,7 +6381,10 @@ export interface operations {
     };
     list: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -6244,7 +6397,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TenantResponse"][];
+                    "*/*": components["schemas"]["PageResultTenantResponse"];
                 };
             };
         };
@@ -6506,7 +6659,10 @@ export interface operations {
     };
     overview: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path: {
                 tenantId: string;
@@ -6627,7 +6783,10 @@ export interface operations {
     };
     events: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path: {
                 tenantId: string;
@@ -6643,7 +6802,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TapEvent"][];
+                    "*/*": components["schemas"]["PageResultTapEvent"];
                 };
             };
         };

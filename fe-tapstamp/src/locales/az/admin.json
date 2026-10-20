@@ -323,10 +323,7 @@
         "time": "Vaxt",
         "phone": "Nömrə",
         "text": "Mətn",
-        "error": "Xəta",
-        "previous": "Əvvəlki",
-        "next": "Növbəti",
-        "page": "Səhifə {{page}} / {{pages}}"
+        "error": "Xəta"
       },
       "export": {
         "button": "Excel-ə ixrac",
@@ -591,9 +588,6 @@
     "flags_other": "{{count}} işarə",
     "noName": "Adsız müştəri",
     "empty": "Heç bir müştəri tapılmadı.",
-    "range": "{{from}}–{{to}} / {{total}}",
-    "previous": "Əvvəlki",
-    "next": "Növbəti",
     "detail": {
       "currentStamps": "Kartdakı möhürlər",
       "totalStamps": "Cəmi möhürlər",
@@ -621,7 +615,6 @@
     "timeline": {
       "title": "Tarixçə",
       "empty": "Hələ möhür yoxdur.",
-      "more": "Daha çox göstər",
       "reward": "Hədiyyə kartı: {{name}}",
       "stamp": {
         "NFC_TAP": "Möhür (NFC)",

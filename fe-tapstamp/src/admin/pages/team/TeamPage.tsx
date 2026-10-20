@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -25,6 +25,8 @@ import {
 import { Field } from '@/shared/ui/field';
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { teamApi, type Member } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
@@ -66,7 +68,13 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
   const queryClient = useQueryClient();
   const withStepUp = useStepUp();
   const { nameOf } = useBranchNames();
-  const members = useQuery({ queryKey: TEAM_KEY, queryFn: teamApi.members });
+  const paging = usePagination();
+  const members = useQuery({
+    queryKey: [...TEAM_KEY, paging.page, paging.size],
+    queryFn: () => teamApi.members({ page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
+  const memberItems = members.data?.items ?? [];
   const isOwner = hasAnyRole(me, ['COMPANY_OWNER']);
 
   const status = useMutation({
@@ -105,8 +113,8 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
       <CardContent className="flex flex-col gap-3">
         <ApiErrorAlert error={members.error ?? status.error ?? resetMfa.error ?? remove.error} />
         {members.isPending ? <InlineLoading /> : null}
-        {members.data && members.data.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:team.empty')}</p> : null}
-        {members.data && members.data.length > 0 ? (
+        {members.data && memberItems.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:team.empty')}</p> : null}
+        {memberItems.length > 0 ? (
           <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
             <table className="w-full min-w-[44rem] text-left text-sm">
               <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
@@ -120,7 +128,7 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {members.data.map((member) => {
+                {memberItems.map((member) => {
                   const self = member.id === me.id;
                   const name = member.displayName || member.email || '';
                   return (
@@ -214,6 +222,7 @@ function MembersCard({ onNotice }: { onNotice: (message: string) => void }) {
             </table>
           </div>
         ) : null}
+        <Pagination state={paging} total={members.data?.total ?? 0} />
       </CardContent>
     </Card>
   );
@@ -224,7 +233,12 @@ function InvitationsCard({ onNotice }: { onNotice: (message: string) => void }) 
   const lang = currentLanguage();
   const queryClient = useQueryClient();
   const { nameOf } = useBranchNames();
-  const invitations = useQuery({ queryKey: INVITATIONS_KEY, queryFn: teamApi.invitations });
+  const paging = usePagination();
+  const invitations = useQuery({
+    queryKey: [...INVITATIONS_KEY, paging.page, paging.size],
+    queryFn: () => teamApi.invitations({ page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
   const revoke = useMutation({
     mutationFn: (id: string) => teamApi.revokeInvitation(id),
     onSuccess: () => {
@@ -241,9 +255,9 @@ function InvitationsCard({ onNotice }: { onNotice: (message: string) => void }) 
       <CardContent className="flex flex-col gap-3">
         <ApiErrorAlert error={invitations.error ?? revoke.error} />
         {invitations.isPending ? <InlineLoading /> : null}
-        {invitations.data?.length === 0 ? <p className="text-sm text-muted-foreground">{t('team.noInvitations')}</p> : null}
+        {invitations.data?.items?.length === 0 ? <p className="text-sm text-muted-foreground">{t('team.noInvitations')}</p> : null}
         <ul className="flex flex-col divide-y divide-border">
-          {(invitations.data ?? []).map((invitation) => (
+          {(invitations.data?.items ?? []).map((invitation) => (
             <li key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
               <div className="min-w-0">
                 <p className="break-all font-medium">{invitation.email}</p>
@@ -260,6 +274,7 @@ function InvitationsCard({ onNotice }: { onNotice: (message: string) => void }) 
             </li>
           ))}
         </ul>
+        <Pagination state={paging} total={invitations.data?.total ?? 0} />
       </CardContent>
     </Card>
   );

@@ -13,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Field } from '@/shared/ui/field';
 import { Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { campaignsApi, companyApi, type CampaignRequest, type CampaignView } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -319,12 +321,17 @@ function CampaignList({ type, onEdit }: { type: CampaignType; onEdit: (campaign:
   const lang = currentLanguage();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const campaigns = useQuery({ queryKey: listKey(type), queryFn: () => campaignsApi.list(type) });
+  const paging = usePagination();
+  const campaigns = useQuery({
+    queryKey: [...listKey(type), paging.page, paging.size],
+    queryFn: () => campaignsApi.list(type, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
   const cancel = useMutation({
     mutationFn: (id: string) => campaignsApi.cancel(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: listKey(type) }),
   });
-  const items: CampaignView[] = campaigns.data ?? [];
+  const items: CampaignView[] = campaigns.data?.items ?? [];
 
   return (
     <Card>
@@ -401,6 +408,7 @@ function CampaignList({ type, onEdit }: { type: CampaignType; onEdit: (campaign:
             </li>
           ))}
         </ul>
+        <Pagination state={paging} total={campaigns.data?.total ?? 0} />
       </CardContent>
     </Card>
   );
@@ -429,10 +437,12 @@ function FailedRecipients({ campaignId }: { campaignId: string }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const [open, setOpen] = useState(false);
+  const paging = usePagination();
   const failures = useQuery({
-    queryKey: ['campaign-failures', campaignId],
-    queryFn: () => campaignsApi.failures(campaignId),
+    queryKey: ['campaign-failures', campaignId, paging.page, paging.size],
+    queryFn: () => campaignsApi.failures(campaignId, { page: paging.page, size: paging.size }),
     enabled: open,
+    placeholderData: keepPreviousData,
   });
   return (
     <div className="flex flex-col gap-2">
@@ -445,7 +455,7 @@ function FailedRecipients({ campaignId }: { campaignId: string }) {
           <ApiErrorAlert error={failures.error} />
           {failures.isPending ? <InlineLoading /> : null}
           <ul className="flex flex-col gap-2">
-            {(failures.data ?? []).map((item) => (
+            {(failures.data?.items ?? []).map((item) => (
               <li key={item.customerId} className="flex flex-col">
                 <span className="font-medium">
                   {item.name || t('campaigns.failures.noName')} · <span className="tabular-nums">{item.phone}</span>
@@ -457,6 +467,7 @@ function FailedRecipients({ campaignId }: { campaignId: string }) {
               </li>
             ))}
           </ul>
+          <Pagination className="mt-3" state={paging} total={failures.data?.total ?? 0} />
         </div>
       ) : null}
     </div>

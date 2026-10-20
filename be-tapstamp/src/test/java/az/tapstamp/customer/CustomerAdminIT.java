@@ -54,6 +54,12 @@ class CustomerAdminIT extends TapIntegrationTest {
         owner.get("/customers?q=" + localDigits(f.phone()).substring(1)).andExpect(jsonPath("$.total").value(1));
         owner.get("/customers?q=0001234567").andExpect(jsonPath("$.total").value(0));
         owner.get("/customers?branchId=" + f.branchId()).andExpect(jsonPath("$.total").value(1));
+        // Səhifə ölçüsü yalnız 5, 10, 20 və ya 50 ola bilər; susmaya görə 10
+        owner.get("/customers?size=25").andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+        owner.get("/customers?branchId=" + f.branchId() + "&page=1&size=5")
+                .andExpect(jsonPath("$.total").value(1)).andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(5)).andExpect(jsonPath("$.items").isEmpty());
         owner.get("/customers?q=test&branchId=" + f.branchId() + "&sort=NAME&direction=asc")
                 .andExpect(jsonPath("$.total").value(1));
         owner.get("/customers?size=101").andExpect(status().isBadRequest());
@@ -62,9 +68,9 @@ class CustomerAdminIT extends TapIntegrationTest {
         owner.get("/customers/" + f.customerId())
                 .andExpect(jsonPath("$.name").value("Test Müştəri"))
                 .andExpect(jsonPath("$.totalStamps").value(1));
-        owner.get("/customers/" + f.customerId() + "/timeline")
-                .andExpect(jsonPath("$[0].kind").value("STAMP"))
-                .andExpect(jsonPath("$[0].source").value("NFC_TAP"));
+        owner.get("/customers/" + f.customerId() + "/timeline?size=50")
+                .andExpect(jsonPath("$.items[0].kind").value("STAMP"))
+                .andExpect(jsonPath("$.items[0].source").value("NFC_TAP"));
 
         // Menecer: öz filialının müştərisini görür, başqa filialın müştərisi onun üçün yoxdur
         AdminClient ownManager = signedInStaff(HOST, AdminRole.BRANCH_MANAGER, f.branchId());
@@ -114,10 +120,10 @@ class CustomerAdminIT extends TapIntegrationTest {
         manager.post(path, Map.of("delta", 1, "reason", "abc", "branchId", f.branchId()), "Idempotency-Key", "adjust-0005")
                 .andExpect(status().isBadRequest());
 
-        manager.get("/customers/" + f.customerId() + "/timeline")
-                .andExpect(jsonPath("$[?(@.kind == 'STAMP' && @.status == 'REVOKED')].reason").value(
+        manager.get("/customers/" + f.customerId() + "/timeline?size=50")
+                .andExpect(jsonPath("$.items[?(@.kind == 'STAMP' && @.status == 'REVOKED')].reason").value(
                         org.hamcrest.Matchers.hasItem("Səhv vurulmuş möhürlər")))
-                .andExpect(jsonPath("$[?(@.kind == 'REWARD')].status").value(org.hamcrest.Matchers.hasItem("REVOKED")));
+                .andExpect(jsonPath("$.items[?(@.kind == 'REWARD')].status").value(org.hamcrest.Matchers.hasItem("REVOKED")));
         assertThat(count("SELECT count(*) FROM audit_logs WHERE action = 'STAMPS_ADJUSTED' AND target_id = :id",
                 Map.of("id", f.customerId().toString()))).isEqualTo(3);
     }
@@ -158,16 +164,16 @@ class CustomerAdminIT extends TapIntegrationTest {
 
         manager.get("/customers/" + f.customerId()).andExpect(jsonPath("$.openFraudFlags").value(1));
         manager.get("/customers/" + f.customerId() + "/fraud-flags")
-                .andExpect(jsonPath("$[0].type").value("RAPID_MULTI_ACCOUNT"))
-                .andExpect(jsonPath("$[0].resolvedAt").doesNotExist());
+                .andExpect(jsonPath("$.items[0].type").value("RAPID_MULTI_ACCOUNT"))
+                .andExpect(jsonPath("$.items[0].resolvedAt").doesNotExist());
         signedInStaff(HOST, AdminRole.BRANCH_MANAGER, newBranch(Policy.relaxed()))
                 .post("/customers/fraud-flags/" + flagId + "/resolve", Map.of("note", "Ailə üzvləri"))
                 .andExpect(status().isNotFound());
         manager.post("/customers/fraud-flags/" + flagId + "/resolve", Map.of("note", "Ailə üzvləri, eyni telefon"))
                 .andExpect(status().isNoContent());
         manager.get("/customers/" + f.customerId() + "/fraud-flags")
-                .andExpect(jsonPath("$[0].resolvedAt").exists())
-                .andExpect(jsonPath("$[0].resolutionNote").value("Ailə üzvləri, eyni telefon"));
+                .andExpect(jsonPath("$.items[0].resolvedAt").exists())
+                .andExpect(jsonPath("$.items[0].resolutionNote").value("Ailə üzvləri, eyni telefon"));
         manager.get("/customers/" + f.customerId()).andExpect(jsonPath("$.openFraudFlags").value(0));
     }
 

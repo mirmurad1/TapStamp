@@ -11,6 +11,12 @@ import type { components } from '@/shared/api/schema';
 export type Realm = 'STAFF' | 'PLATFORM';
 
 type Schemas = components['schemas'];
+
+/** Səhifə parametrləri: `page` 0-dan, `size` — 5, 10, 20 və ya 50. */
+export interface PageParams {
+  page: number;
+  size: number;
+}
 export type LoginStatus = NonNullable<Schemas['LoginResponse']['status']>;
 export type SessionState = 'NONE' | 'PENDING_MFA' | 'MFA_ENROLLMENT' | 'ACTIVE';
 export type Me = Schemas['MeResponse'];
@@ -138,8 +144,8 @@ export const accountApi = {
 };
 
 export const teamApi = {
-  members: () => unwrap(api.GET('/api/v1/admin/team')),
-  invitations: () => unwrap(api.GET('/api/v1/admin/team/invitations')),
+  members: (query: PageParams) => unwrap(api.GET('/api/v1/admin/team', { params: { query } })),
+  invitations: (query: PageParams) => unwrap(api.GET('/api/v1/admin/team/invitations', { params: { query } })),
   invite: (body: InviteRequest) => unwrap(api.POST('/api/v1/admin/team/invitations', { body })),
   revokeInvitation: (invitationId: string) =>
     unwrap(api.DELETE('/api/v1/admin/team/invitations/{invitationId}', { params: { path: { invitationId } } })),
@@ -155,7 +161,7 @@ export const teamApi = {
 };
 
 export const platformApi = {
-  tenants: () => unwrap(api.GET('/api/v1/platform/tenants')),
+  tenants: (query: PageParams) => unwrap(api.GET('/api/v1/platform/tenants', { params: { query } })),
   tenant: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}', { params: { path: { tenantId } } })),
   provision: (body: ProvisionRequest) => unwrap(api.POST('/api/v1/platform/tenants', { body })),
   updateStatus: (tenantId: string, status: 'ACTIVE' | 'SUSPENDED') =>
@@ -176,8 +182,8 @@ export type PendingStamp = Schemas['PendingStampResponse'];
 
 /** İşçi konsolu: təsdiq gözləyən möhürlər (filial üzrə). */
 export const staffConsoleApi = {
-  pendingStamps: (branchId: string) =>
-    unwrap(api.GET('/api/v1/admin/staff-console/pending-stamps', { params: { query: { branchId } } })),
+  pendingStamps: (branchId: string, paging: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/staff-console/pending-stamps', { params: { query: { branchId, ...paging } } })),
   confirmStamp: (stampId: string) =>
     unwrap(
       api.POST('/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm', { params: { path: { stampId } } }),
@@ -304,8 +310,8 @@ export const customersApi = {
   list: (query: CustomerFilter & { sort: CustomerSort; direction: 'asc' | 'desc'; page: number; size: number }) =>
     unwrap(api.GET('/api/v1/admin/customers', { params: { query } })),
   get: (customerId: string) => unwrap(api.GET('/api/v1/admin/customers/{customerId}', { params: { path: { customerId } } })),
-  timeline: (customerId: string, before?: string) =>
-    unwrap(api.GET('/api/v1/admin/customers/{customerId}/timeline', { params: { path: { customerId }, query: { before } } })),
+  timeline: (customerId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/timeline', { params: { path: { customerId }, query } })),
   adjust: (customerId: string, body: { delta: number; reason: string; branchId?: string }, idempotencyKey: string) =>
     unwrap(
       api.POST('/api/v1/admin/customers/{customerId}/stamp-adjustments', {
@@ -315,8 +321,8 @@ export const customersApi = {
     ),
   updateStatus: (customerId: string, status: 'ACTIVE' | 'BLOCKED') =>
     unwrap(api.PATCH('/api/v1/admin/customers/{customerId}/status', { params: { path: { customerId } }, body: { status } })),
-  fraudFlags: (customerId: string) =>
-    unwrap(api.GET('/api/v1/admin/customers/{customerId}/fraud-flags', { params: { path: { customerId } } })),
+  fraudFlags: (customerId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/fraud-flags', { params: { path: { customerId }, query } })),
   resolveFlag: (flagId: string, note: string) =>
     unwrap(api.POST('/api/v1/admin/customers/fraud-flags/{flagId}/resolve', { params: { path: { flagId } }, body: { note } })),
   /** CSV faylı (Blob); step-up tələb edir. */
@@ -331,13 +337,15 @@ export type AuditEntry = Schemas['Entry'];
 
 /** NFC çipləri şirkət panelində yalnız baxış üçündür (sahib — hamısı, menecer — öz filialları). */
 export const tagsApi = {
-  list: () => unwrap(api.GET('/api/v1/admin/tags')),
-  events: (tagId: string) => unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId } } })),
+  list: (query: PageParams) => unwrap(api.GET('/api/v1/admin/tags', { params: { query } })),
+  events: (tagId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId }, query } })),
 };
 
 /** Şirkətin çipləri platforma panelindən: qeydiyyat, idarə, say. Rotasiya və provisioning paketi step-up tələb edir. */
 export const platformTagsApi = {
-  overview: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId } } })),
+  overview: (tenantId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId }, query } })),
   register: (tenantId: string, body: { uid: string; branchId: string; label: string }) =>
     unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId } }, body })),
   disable: (tenantId: string, tagId: string) =>
@@ -350,12 +358,12 @@ export const platformTagsApi = {
     unwrap(
       api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package', { params: { path: { tenantId, tagId } } }),
     ),
-  events: (tenantId: string, tagId: string) =>
-    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events', { params: { path: { tenantId, tagId } } })),
+  events: (tenantId: string, tagId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events', { params: { path: { tenantId, tagId }, query } })),
 };
 
 export const auditApi = {
-  list: (query: { action?: string; from?: string; to?: string; before?: string }) =>
+  list: (query: { action?: string; from?: string; to?: string } & PageParams) =>
     unwrap(api.GET('/api/v1/admin/audit-logs', { params: { query } })),
   actions: () => unwrap(api.GET('/api/v1/admin/audit-logs/actions')),
 };
@@ -410,7 +418,7 @@ export const platformDomainsApi = {
 };
 
 export const platformAuditApi = {
-  list: (query: { action?: string; before?: string }) => unwrap(api.GET('/api/v1/platform/audit-logs', { params: { query } })),
+  list: (query: { action?: string } & PageParams) => unwrap(api.GET('/api/v1/platform/audit-logs', { params: { query } })),
 };
 
 export type SmsUsageReport = Schemas['SmsUsageReport'];
@@ -424,10 +432,11 @@ export type PlatformCampaign = Schemas['PlatformCampaignView'];
 export const campaignsApi = {
   preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
   create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
-  list: (type: 'SMS' | 'STAMPS') => unwrap(api.GET('/api/v1/admin/campaigns', { params: { query: { type } } })),
+  list: (type: 'SMS' | 'STAMPS', paging: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/campaigns', { params: { query: { type, ...paging } } })),
   /** SMS-i göndərilməyən alıcılar (ad, nömrə, səbəb). */
-  failures: (campaignId: string) =>
-    unwrap(api.GET('/api/v1/admin/campaigns/{campaignId}/failures', { params: { path: { campaignId } } })),
+  failures: (campaignId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/campaigns/{campaignId}/failures', { params: { path: { campaignId }, query } })),
   /** Yalnız təsdiq gözləyən kampaniya. */
   update: (campaignId: string, body: CampaignRequest) =>
     unwrap(api.PUT('/api/v1/admin/campaigns/{campaignId}', { params: { path: { campaignId } }, body })),
@@ -437,7 +446,8 @@ export const campaignsApi = {
 
 /** Kampaniyalar (platforma): təsdiq gözləyənlər və qərar. */
 export const platformCampaignsApi = {
-  list: (status: 'PENDING' | 'ALL') => unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status } } })),
+  list: (status: 'PENDING' | 'ALL', paging: PageParams) =>
+    unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status, ...paging } } })),
   approve: (tenantId: string, campaignId: string) =>
     unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve', { params: { path: { tenantId, campaignId } } })),
   /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək. */
@@ -456,6 +466,6 @@ export const platformSmsApi = {
   /** Günlər daxil (YYYY-MM-DD, Bakı vaxtı). */
   usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
   /** SMS axtarışı: status (SENT/FAILED) və nömrə (və ya hissəsi) istəyə bağlı; 20-lik səhifələr (page 0-dan). */
-  messages: (query: { from: string; to: string; status?: 'SENT' | 'FAILED'; phone?: string; page: number }) =>
+  messages: (query: { from: string; to: string; status?: 'SENT' | 'FAILED'; phone?: string } & PageParams) =>
     unwrap(api.GET('/api/v1/platform/sms-usage/messages', { params: { query } })),
 };

@@ -78,8 +78,12 @@
         SELECT id, type, severity, details::text AS details, created_at, resolved_at, resolution_note
         FROM fraud_flags
         WHERE customer_id = #{customerId}
-        ORDER BY created_at DESC
-        LIMIT 100
+        ORDER BY created_at DESC, id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countFraudFlags" resultType="long">
+        SELECT count(*) FROM fraud_flags WHERE customer_id = #{customerId}
     </select>
 
     <select id="findFraudFlagCustomer" resultType="java.util.UUID">

@@ -47,7 +47,7 @@ class InvitationIT extends AdminIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.role").value("BRANCH_MANAGER"));
-        owner.get("/team/invitations").andExpect(jsonPath("$[?(@.email == '" + email + "')]").exists());
+        owner.get("/team/invitations?size=50").andExpect(jsonPath("$.items[?(@.email == '" + email + "')]").exists());
 
         MailMessage mail = mailbox.awaitMessage(email, 1);
         assertThat(mail.subject()).isEqualTo("Alpha Kafe EN — invitation to join the team");
@@ -78,7 +78,10 @@ class InvitationIT extends AdminIntegrationTest {
         AdminClient.staff(mvc, HOST)
                 .post("/auth/invitations/accept", Map.of("token", token, "displayName", "X", "password", NEW_PASSWORD))
                 .andExpect(jsonPath("$.code").value("TOKEN_INVALID"));
-        owner.get("/team").andExpect(jsonPath("$[?(@.email == '" + email + "')].status").value("ACTIVE"));
+        // Üzvlər köhnədən yeniyə sıralanır: yeni üzv son səhifədədir
+        int total = com.jayway.jsonpath.JsonPath.read(owner.get("/team?size=50").andReturn().getResponse().getContentAsString(), "$.total");
+        owner.get("/team?size=50&page=" + (total - 1) / 50)
+                .andExpect(jsonPath("$.items[?(@.email == '" + email + "')].status").value("ACTIVE"));
     }
 
     @Test

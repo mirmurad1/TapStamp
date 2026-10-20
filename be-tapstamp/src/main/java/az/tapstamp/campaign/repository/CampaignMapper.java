@@ -69,13 +69,19 @@ public interface CampaignMapper {
     /** Alıcılar yenidən müəyyənləşəndən əvvəl köhnələri silinir (yalnız təsdiq gözləyən kampaniya). */
     void deleteRecipients(UUID campaignId);
 
-    List<Campaign> list(String type, int limit);
+    List<Campaign> list(String type, int limit, long offset);
+
+    long countByType(String type);
 
     List<Campaign> listByStatus(List<String> statuses, int limit);
 
+    long countByStatus(List<String> statuses);
+
     Optional<Campaign> find(UUID id);
 
-    List<FailedRecipient> failedRecipients(UUID campaignId);
+    List<FailedRecipient> failedRecipients(UUID campaignId, int limit, long offset);
+
+    long countFailed(UUID campaignId);
 
     /** Status yalnız {@code from} vəziyyətindədirsə dəyişir; dəyişən sətir sayı (0 — artıq dəyişib). */
     int changeStatus(UUID id, String from, String to, @Nullable Instant decidedAt, @Nullable UUID decidedBy,

@@ -1,19 +1,18 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatDateTime } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { auditApi, type AuditEntry } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
-
-const PAGE = 50;
 
 /** Audit jurnalı (yalnız sahib): kim, nə vaxt, nə etdi. Jurnal dəyişdirilə bilməz. */
 export function AuditPage() {
@@ -25,13 +24,13 @@ export function AuditPage() {
   const filter = { action: action || undefined, from: from || undefined, to: to || undefined };
 
   const actions = useQuery({ queryKey: ['audit-actions'], queryFn: auditApi.actions });
-  const entries = useInfiniteQuery({
-    queryKey: ['audit', filter],
-    queryFn: ({ pageParam }) => auditApi.list({ ...filter, before: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last) => (last.length === PAGE ? last[last.length - 1]?.createdAt : undefined),
+  const paging = usePagination(filter);
+  const entries = useQuery({
+    queryKey: ['audit', filter, paging.page, paging.size],
+    queryFn: () => auditApi.list({ ...filter, page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
   });
-  const items = entries.data?.pages.flat() ?? [];
+  const items = entries.data?.items ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,11 +83,7 @@ export function AuditPage() {
               </table>
             </div>
           ) : null}
-          {entries.hasNextPage ? (
-            <Button variant="outline" className="self-center" onClick={() => void entries.fetchNextPage()} disabled={entries.isFetchingNextPage}>
-              {t('admin:customers.timeline.more')}
-            </Button>
-          ) : null}
+          <Pagination state={paging} total={entries.data?.total ?? 0} />
         </CardContent>
       </Card>
     </div>

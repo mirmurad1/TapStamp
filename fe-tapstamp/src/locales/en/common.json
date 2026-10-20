@@ -52,5 +52,13 @@
   },
   "footer": {
     "copyright": "© 2026 Trend Solutions. All rights reserved."
+  },
+  "pagination": {
+    "label": "Pages",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}}"
   }
 }

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { Download, Nfc, Plus } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,10 @@ import { Card, CardContent } from '@/shared/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
-import type { NfcTag, ProvisioningPackage, TapEvent } from '../../api/adminApi';
+import type { NfcTag, PageParams, ProvisioningPackage, TapEvent } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { downloadBlob } from '../../lib/download';
@@ -211,10 +213,24 @@ export function PackageDialog({ pkg, onClose }: { pkg: ProvisioningPackage; onCl
   );
 }
 
-export function EventsDialog({ tag, load, onClose }: { tag: NfcTag; load: () => Promise<TapEvent[]>; onClose: () => void }) {
+export function EventsDialog({
+  tag,
+  load,
+  onClose,
+}: {
+  tag: NfcTag;
+  load: (paging: PageParams) => Promise<{ items?: TapEvent[]; total?: number }>;
+  onClose: () => void;
+}) {
   const { t } = useTranslation(['admin', 'common']);
   const lang = currentLanguage();
-  const events = useQuery({ queryKey: ['tag-events', tag.id], queryFn: load });
+  const paging = usePagination();
+  const events = useQuery({
+    queryKey: ['tag-events', tag.id, paging.page, paging.size],
+    queryFn: () => load({ page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
+  });
+  const items = events.data?.items ?? [];
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
       <DialogContent className="max-w-2xl">
@@ -224,9 +240,9 @@ export function EventsDialog({ tag, load, onClose }: { tag: NfcTag; load: () => 
         </DialogHeader>
         <ApiErrorAlert error={events.error} />
         {events.isPending ? <InlineLoading /> : null}
-        {events.data && events.data.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:tags.events.empty')}</p> : null}
+        {events.data && items.length === 0 ? <p className="text-sm text-muted-foreground">{t('admin:tags.events.empty')}</p> : null}
         <ul className="flex max-h-[60vh] flex-col divide-y divide-border overflow-y-auto text-sm">
-          {events.data?.map((event) => (
+          {items.map((event) => (
             <li key={event.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span className="flex items-center gap-2">
                 <Badge tone={event.outcome === 'ACCEPTED' ? 'success' : 'danger'}>
@@ -242,6 +258,7 @@ export function EventsDialog({ tag, load, onClose }: { tag: NfcTag; load: () => 
             </li>
           ))}
         </ul>
+        <Pagination state={paging} total={events.data?.total ?? 0} />
       </DialogContent>
     </Dialog>
   );

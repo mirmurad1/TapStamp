@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogQuery.Entry;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
@@ -31,15 +33,14 @@ public class AdminAuditController {
     }
 
     @GetMapping
-    @Operation(summary = "Audit jurnalı", description = """
-            Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün \
-            `before` — son elementin vaxtı.""")
-    List<Entry> list(@RequestParam(required = false) @Pattern(regexp = "^[A-Z_]{1,64}$") String action,
-                     @RequestParam(required = false) UUID actorId,
-                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-                     @RequestParam(required = false) Instant before) {
-        return audit.list(action, actorId, from, to, before);
+    @Operation(summary = "Audit jurnalı", description = "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<Entry> list(@RequestParam(required = false) @Pattern(regexp = "^[A-Z_]{1,64}$") String action,
+                           @RequestParam(required = false) UUID actorId,
+                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return audit.list(action, actorId, from, to, PageQuery.of(page, size));
     }
 
     @GetMapping("/actions")

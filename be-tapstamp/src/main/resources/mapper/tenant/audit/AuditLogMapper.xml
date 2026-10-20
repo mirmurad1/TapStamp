@@ -10,20 +10,28 @@
                 #{userAgent}, CAST(#{details} AS jsonb), #{createdAt})
     </insert>
 
-    <select id="list" resultType="az.tapstamp.audit.AuditLogQuery$Entry">
-        SELECT a.id, a.actor_type, a.actor_id, coalesce(u.display_name, u.email) AS actor_name, a.action,
-               a.target_type, a.target_id, a.details::text AS details, host(a.ip) AS ip, a.created_at
-        FROM audit_logs a
-        LEFT JOIN staff_users u ON a.actor_type = 'STAFF' AND u.id = a.actor_id
+    <sql id="filters">
         <where>
             <if test="action != null">a.action = #{action}</if>
             <if test="actorId != null">AND a.actor_id = #{actorId}</if>
             <if test="from != null">AND a.created_at &gt;= #{from}</if>
             <if test="to != null">AND a.created_at &lt; #{to}</if>
-            <if test="before != null">AND a.created_at &lt; #{before}</if>
         </where>
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.audit.AuditLogQuery$Entry">
+        SELECT a.id, a.actor_type, a.actor_id, coalesce(u.display_name, u.email) AS actor_name, a.action,
+               a.target_type, a.target_id, a.details::text AS details, host(a.ip) AS ip, a.created_at
+        FROM audit_logs a
+        LEFT JOIN staff_users u ON a.actor_type = 'STAFF' AND u.id = a.actor_id
+        <include refid="filters"/>
         ORDER BY a.created_at DESC, a.id DESC
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM audit_logs a
+        <include refid="filters"/>
     </select>
 
     <select id="actions" resultType="string">

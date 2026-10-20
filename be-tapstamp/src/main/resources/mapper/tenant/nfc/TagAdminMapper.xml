@@ -21,15 +21,25 @@
         FROM nfc_tags t
     </sql>
 
-    <select id="list" resultType="az.tapstamp.nfc.admin.TagAdminService$TagView">
-        <include refid="tagView"/>
+    <sql id="tagScope">
         <where>
             <if test="!all">
                 t.branch_id IN
                 <foreach item="branchId" collection="branchIds" open="(" separator="," close=")">#{branchId}</foreach>
             </if>
         </where>
-        ORDER BY t.created_at DESC
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.nfc.admin.TagAdminService$TagView">
+        <include refid="tagView"/>
+        <include refid="tagScope"/>
+        ORDER BY t.created_at DESC, t.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM nfc_tags t
+        <include refid="tagScope"/>
     </select>
 
     <select id="find" resultType="az.tapstamp.nfc.admin.TagAdminService$TagView">
@@ -98,7 +108,11 @@
         SELECT id, stage, outcome, reason, counter, counter_gap, customer_id, created_at
         FROM tap_events
         WHERE tag_id = #{tagId}
-        ORDER BY created_at DESC
-        LIMIT 100
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countEvents" resultType="long">
+        SELECT count(*) FROM tap_events WHERE tag_id = #{tagId}
     </select>
 </mapper>

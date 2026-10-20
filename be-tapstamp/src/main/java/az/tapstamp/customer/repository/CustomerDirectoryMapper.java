@@ -42,5 +42,7 @@ public interface CustomerDirectoryMapper {
     Optional<Entry> find(UUID id, boolean all, List<UUID> branchIds);
 
     /** Möhürlər və hədiyyə kartları, yenidən köhnəyə; {@code before} — keyset səhifələmə. */
-    List<TimelineItem> timeline(UUID customerId, Instant before, int limit);
+    List<TimelineItem> timeline(UUID customerId, int limit, long offset);
+
+    long countTimeline(UUID customerId);
 }

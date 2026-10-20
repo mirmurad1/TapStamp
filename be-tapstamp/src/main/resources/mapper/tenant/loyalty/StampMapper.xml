@@ -103,8 +103,12 @@
         FROM stamps s
         JOIN customers c ON c.id = s.customer_id
         WHERE s.branch_id = #{branchId} AND s.status = 'PENDING'
-        ORDER BY s.created_at
-        LIMIT 100
+        ORDER BY s.created_at, s.id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countPending" resultType="long">
+        SELECT count(*) FROM stamps WHERE branch_id = #{branchId} AND status = 'PENDING'
     </select>
 
     <update id="confirmStamp">

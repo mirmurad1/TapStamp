@@ -16,6 +16,8 @@ import az.tapstamp.security.admin.AdminRealm;
 import az.tapstamp.security.admin.AdminRealms;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
@@ -28,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PlatformTagService {
 
-    public record TagOverview(TagUsage usage, List<BranchOption> branches, List<TagView> tags) {
+    public record TagOverview(TagUsage usage, List<BranchOption> branches, PageResult<TagView> tags) {
     }
 
     private final TagAdminService tags;
@@ -41,8 +43,8 @@ public class PlatformTagService {
         this.realms = realms;
     }
 
-    public TagOverview overview(AdminPrincipal principal, UUID tenantId) {
-        return inTenant(tenantId, () -> new TagOverview(tags.usage(), tags.branches(), tags.list(principal, null)));
+    public TagOverview overview(AdminPrincipal principal, UUID tenantId, PageQuery page) {
+        return inTenant(tenantId, () -> new TagOverview(tags.usage(), tags.branches(), tags.list(principal, null, page)));
     }
 
     public TagView register(AdminPrincipal principal, UUID tenantId, String uid, UUID branchId, String label) {
@@ -71,8 +73,8 @@ public class PlatformTagService {
         return pkg;
     }
 
-    public List<TapEvent> events(AdminPrincipal principal, UUID tenantId, UUID tagId) {
-        return inTenant(tenantId, () -> tags.events(principal, tagId));
+    public PageResult<TapEvent> events(AdminPrincipal principal, UUID tenantId, UUID tagId, PageQuery page) {
+        return inTenant(tenantId, () -> tags.events(principal, tagId, page));
     }
 
     private <T> T inTenant(UUID tenantId, Supplier<T> action) {

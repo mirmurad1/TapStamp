@@ -9,6 +9,8 @@ import java.util.UUID;
 import az.tapstamp.audit.repository.AuditLogMapper;
 import az.tapstamp.audit.repository.PlatformAuditLogMapper;
 import az.tapstamp.company.service.CompanySettings;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,8 +19,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AuditLogQuery {
-
-    public static final int PAGE = 50;
 
     public record Entry(UUID id, String actorType, UUID actorId, String actorName, String action, String targetType,
                         String targetId, String details, String ip, Instant createdAt) {
@@ -35,15 +35,14 @@ public class AuditLogQuery {
     }
 
     /**
-     * Şirkətin jurnalı, yenidən köhnəyə. Tarixlər şirkətin saat qurşağı ilə günlərdir; {@code before} — əvvəlki
-     * səhifənin son elementinin vaxtı (keyset səhifələmə).
+     * Şirkətin jurnalı, yenidən köhnəyə, səhifə ilə. Tarixlər şirkətin saat qurşağı ilə günlərdir.
      */
-    public List<Entry> list(String action, UUID actorId, LocalDate from, LocalDate to, Instant before) {
+    public PageResult<Entry> list(String action, UUID actorId, LocalDate from, LocalDate to, PageQuery page) {
         ZoneId zone = company.current().timezone();
-        return tenantLog.list(action, actorId,
-                from == null ? null : from.atStartOfDay(zone).toInstant(),
-                to == null ? null : to.plusDays(1).atStartOfDay(zone).toInstant(),
-                before, PAGE);
+        Instant start = from == null ? null : from.atStartOfDay(zone).toInstant();
+        Instant end = to == null ? null : to.plusDays(1).atStartOfDay(zone).toInstant();
+        return page.result(tenantLog.list(action, actorId, start, end, page.limit(), page.offset()),
+                tenantLog.count(action, actorId, start, end));
     }
 
     /** Filtr üçün jurnalda rast gəlinən əməliyyat adları. */
@@ -51,8 +50,8 @@ public class AuditLogQuery {
         return tenantLog.actions();
     }
 
-    /** Platformanın jurnalı, yenidən köhnəyə (50-lik səhifələr). */
-    public List<PlatformAuditEntry> platform(String action, Instant before) {
-        return platformLog.list(action, before, PAGE);
+    /** Platformanın jurnalı, yenidən köhnəyə, səhifə ilə. */
+    public PageResult<PlatformAuditEntry> platform(String action, PageQuery page) {
+        return page.result(platformLog.list(action, page.limit(), page.offset()), platformLog.count(action));
     }
 }

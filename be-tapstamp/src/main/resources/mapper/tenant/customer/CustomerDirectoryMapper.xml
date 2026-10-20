@@ -75,10 +75,12 @@
             FROM rewards r
             WHERE r.customer_id = #{customerId}
         ) t
-        <where>
-            <if test="before != null">t.at &lt; #{before}</if>
-        </where>
         ORDER BY t.at DESC, t.id DESC
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countTimeline" resultType="long">
+        SELECT (SELECT count(*) FROM stamps WHERE customer_id = #{customerId})
+             + (SELECT count(*) FROM rewards WHERE customer_id = #{customerId})
     </select>
 </mapper>

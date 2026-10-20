@@ -323,10 +323,7 @@
         "time": "Time",
         "phone": "Number",
         "text": "Text",
-        "error": "Error",
-        "previous": "Previous",
-        "next": "Next",
-        "page": "Page {{page}} of {{pages}}"
+        "error": "Error"
       },
       "export": {
         "button": "Export to Excel",
@@ -591,9 +588,6 @@
     "flags_other": "{{count}} flags",
     "noName": "Unnamed customer",
     "empty": "No customers found.",
-    "range": "{{from}}–{{to}} of {{total}}",
-    "previous": "Previous",
-    "next": "Next",
     "detail": {
       "currentStamps": "Stamps on card",
       "totalStamps": "Total stamps",
@@ -621,7 +615,6 @@
     "timeline": {
       "title": "History",
       "empty": "No stamps yet.",
-      "more": "Show more",
       "reward": "Gift card: {{name}}",
       "stamp": {
         "NFC_TAP": "Stamp (NFC)",

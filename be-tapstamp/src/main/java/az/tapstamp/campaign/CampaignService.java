@@ -21,6 +21,8 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,7 +71,6 @@ public class CampaignService {
                           @Nullable Integer stampCount, long totalStamps, @Nullable Integer maxStamps) {
     }
 
-    private static final int LIST_LIMIT = 100;
 
     /** Önizləmə şablonunda müştəri adının yeri. */
     public static final String NAME_TOKEN = "{name}";
@@ -125,22 +126,22 @@ public class CampaignService {
         return created;
     }
 
-    public List<Campaign> list(AdminPrincipal principal, Type type) {
+    public PageResult<Campaign> list(AdminPrincipal principal, Type type, PageQuery page) {
         AccessPolicy.requireCompanyWide(principal);
-        return campaigns.list(type.name(), LIST_LIMIT);
+        return page.result(campaigns.list(type.name(), page.limit(), page.offset()), campaigns.countByType(type.name()));
     }
 
     /** SMS-i göndərilməyən alıcılar və səbəbləri (sahib tam nömrəni görür). */
-    public List<FailedRecipient> failures(AdminPrincipal principal, UUID id) {
+    public PageResult<FailedRecipient> failures(AdminPrincipal principal, UUID id, PageQuery page) {
         AccessPolicy.requireCompanyWide(principal);
         campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         UUID tenantId = TenantContext.require().id();
-        return campaigns.failedRecipients(id).stream()
+        // Yalnız göstərilən səhifənin nömrələri deşifrə olunur
+        return page.result(campaigns.failedRecipients(id, page.limit(), page.offset()), campaigns.countFailed(id))
                 .map(f -> new FailedRecipient(f.customerId(), f.name(), f.phoneEnc() == null ? null
                         : cipher.decryptString(f.phoneEnc(),
                                 Aad.tenantField(tenantId, "customers", "phone_enc", f.customerId())),
-                        f.error(), f.at()))
-                .toList();
+                        f.error(), f.at()));
     }
 
     public Campaign get(AdminPrincipal principal, UUID id) {
@@ -192,8 +193,13 @@ public class CampaignService {
 
     // ---------------------------------------------------------------- platforma (çağıran tenant kontekstini qurur)
 
-    public List<Campaign> byStatus(List<String> statuses) {
-        return campaigns.listByStatus(statuses, LIST_LIMIT);
+    /** Platforma üçün: ən yeni {@code limit} kampaniya (şirkətlər arası birləşdirmə üçün). */
+    public List<Campaign> byStatus(List<String> statuses, int limit) {
+        return campaigns.listByStatus(statuses, limit);
+    }
+
+    public long countByStatus(List<String> statuses) {
+        return campaigns.countByStatus(statuses);
     }
 
     public Campaign find(UUID id) {

@@ -11,6 +11,8 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformSmsApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -123,6 +125,9 @@ function UsageSection({ today }: { today: string }) {
     enabled: valid,
   });
   const rows = report.data?.tenants ?? [];
+  // Hesabat bütöv gəlir (ixrac üçün); cədvəldə hissə-hissə göstərilir
+  const rowPaging = usePagination(report.data);
+  const visibleRows = rows.slice(rowPaging.page * rowPaging.size, (rowPaging.page + 1) * rowPaging.size);
 
   /** Excel üçün CSV: şirkət, kod, uğurlu SMS sayı və cəm sətri. */
   const exportCsv = () => {
@@ -169,7 +174,7 @@ function UsageSection({ today }: { today: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((row) => (
+                {visibleRows.map((row) => (
                   <tr key={row.tenantId}>
                     <td className="py-2 pr-4">
                       <span className="font-medium">{resolveText(row.displayName, lang)}</span>
@@ -184,6 +189,7 @@ function UsageSection({ today }: { today: string }) {
             </table>
           </div>
         ) : null}
+        <Pagination state={rowPaging} total={rows.length} />
         <p className="text-xs text-muted-foreground">{t('platform.sms.note')}</p>
       </CardContent>
     </Card>
@@ -207,24 +213,17 @@ function MessagesSection({ today, mode }: { today: string; mode: MessagesMode })
   const [phone, setPhone] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const status = mode === 'failures' ? 'FAILED' : statusFilter || undefined;
-  const [page, setPage] = useState(0);
   // Filtr dəyişəndə birinci səhifəyə qayıdırıq
-  const filterKey = `${range.from}|${range.to}|${phone}|${status ?? ''}`;
-  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
-  if (lastFilterKey !== filterKey) {
-    setLastFilterKey(filterKey);
-    setPage(0);
-  }
+  const paging = usePagination([range.from, range.to, phone, status]);
+  const { page, size } = paging;
   const messages = useQuery({
-    queryKey: ['platform-sms-messages', range.from, range.to, status, phone, page],
-    queryFn: () => platformSmsApi.messages({ from: range.from, to: range.to, status, phone: phone || undefined, page }),
+    queryKey: ['platform-sms-messages', range.from, range.to, status, phone, page, size],
+    queryFn: () => platformSmsApi.messages({ from: range.from, to: range.to, status, phone: phone || undefined, page, size }),
     enabled: valid,
     placeholderData: keepPreviousData,
   });
   const items = messages.data?.items ?? [];
   const total = messages.data?.total ?? 0;
-  const size = messages.data?.size ?? 20;
-  const pages = Math.max(1, Math.ceil(total / size));
   const prefix = mode === 'failures' ? 'sms-failures' : 'sms-search';
 
   return (
@@ -311,19 +310,7 @@ function MessagesSection({ today, mode }: { today: string; mode: MessagesMode })
             </table>
           </div>
         ) : null}
-        {total > size ? (
-          <div className="flex items-center justify-between gap-3">
-            <Button variant="outline" disabled={page === 0 || messages.isFetching} onClick={() => setPage(page - 1)}>
-              {t('platform.sms.failures.previous')}
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              {t('platform.sms.failures.page', { page: page + 1, pages })}
-            </span>
-            <Button variant="outline" disabled={page + 1 >= pages || messages.isFetching} onClick={() => setPage(page + 1)}>
-              {t('platform.sms.failures.next')}
-            </Button>
-          </div>
-        ) : null}
+        <Pagination state={paging} total={total} />
       </CardContent>
     </Card>
   );

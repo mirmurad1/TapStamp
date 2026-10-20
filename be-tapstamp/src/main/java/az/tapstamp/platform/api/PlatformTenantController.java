@@ -8,6 +8,8 @@ import az.tapstamp.platform.service.PlatformTenantService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantStatus;
 import az.tapstamp.tenancy.provisioning.ProvisionTenantCommand;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -82,9 +85,10 @@ public class PlatformTenantController {
     }
 
     @GetMapping
-    @Operation(summary = "Bütün şirkətlər")
-    List<TenantResponse> list() {
-        return tenants.list().stream().map(TenantResponse::from).toList();
+    @Operation(summary = "Bütün şirkətlər", description = "səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<TenantResponse> list(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return PageQuery.of(page, size).slice(tenants.list()).map(TenantResponse::from);
     }
 
     @GetMapping("/{tenantId}")

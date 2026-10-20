@@ -9,6 +9,7 @@ import az.tapstamp.notification.sms.SmsLog;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.paging.PageQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +33,6 @@ public class PlatformSmsController {
 
     /** Ən uzun dövr: iki il. */
     private static final int MAX_DAYS = 731;
-    private static final int PAGE_SIZE = 20;
 
     private final SmsLog smsLog;
 
@@ -79,14 +79,16 @@ public class PlatformSmsController {
     @Operation(summary = "SMS axtarışı", description = """
             Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — \
             SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). \
-            Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).""")
+            Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).""")
     SmsMessagePage messages(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                             @RequestParam(required = false) @Pattern(regexp = "SENT|FAILED") String status,
                             @RequestParam(required = false) @Size(max = 32) String phone,
-                            @RequestParam(defaultValue = "0") @Min(0) @Max(100_000) int page) {
+                            @RequestParam(defaultValue = "0") @Min(0) @Max(100_000) int page,
+                            @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
         requireRange(from, to);
-        SmsLog.MessagePage result = smsLog.messages(from, to, status, phone, page, PAGE_SIZE);
+        PageQuery.of(page, size); // ölçü yalnız 5, 10, 20, 50
+        SmsLog.MessagePage result = smsLog.messages(from, to, status, phone, page, size);
         return new SmsMessagePage(result.items().stream()
                 .map(m -> new SmsMessageRow(m.id(), m.createdAt(), m.tenantId(), m.slug(), m.displayName(), m.phone(),
                         m.text(), m.purpose(), m.status(), m.error()))

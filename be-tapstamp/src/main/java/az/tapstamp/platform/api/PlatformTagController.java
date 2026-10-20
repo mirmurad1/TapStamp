@@ -9,6 +9,8 @@ import az.tapstamp.nfc.admin.TagAdminService.TapEvent;
 import az.tapstamp.platform.service.PlatformTagService;
 import az.tapstamp.platform.service.PlatformTagService.TagOverview;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,8 +58,10 @@ public class PlatformTagController {
     @Operation(summary = "Şirkətin çipləri", description = """
             Çiplər, şirkətin aktiv filialları və say: ilk N çip pulsuzdur (app.nfc.free-tags-per-tenant), qalanları \
             pulludur.""")
-    TagOverview overview(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId) {
-        return tags.overview(principal, tenantId);
+    TagOverview overview(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                         @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return tags.overview(principal, tenantId, PageQuery.of(page, size));
     }
 
     @PostMapping
@@ -108,9 +113,10 @@ public class PlatformTagController {
     }
 
     @GetMapping("/{tagId}/events")
-    @Operation(summary = "Çipin toxunuş jurnalı", description = "Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.")
-    List<TapEvent> events(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
-                          @PathVariable UUID tagId) {
-        return tags.events(principal, tenantId, tagId);
+    @Operation(summary = "Çipin toxunuş jurnalı", description = "Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.")
+    PageResult<TapEvent> events(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                          @PathVariable UUID tagId, @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return tags.events(principal, tenantId, tagId, PageQuery.of(page, size));
     }
 }

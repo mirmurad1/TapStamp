@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Play, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/shared/ui/card';
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformCampaignsApi, type PlatformCampaign } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -25,11 +27,13 @@ type Filter = (typeof FILTERS)[number];
 export function PlatformCampaignsPage() {
   const { t } = useTranslation('admin');
   const [filter, setFilter] = useState<Filter>('PENDING');
+  const paging = usePagination(filter);
   const campaigns = useQuery({
-    queryKey: ['platform-campaigns', filter],
-    queryFn: () => platformCampaignsApi.list(filter),
+    queryKey: ['platform-campaigns', filter, paging.page, paging.size],
+    queryFn: () => platformCampaignsApi.list(filter, { page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
   });
-  const items = campaigns.data ?? [];
+  const items = campaigns.data?.items ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,6 +60,7 @@ export function PlatformCampaignsPage() {
       {items.map((campaign) => (
         <CampaignCard key={`${campaign.tenantId}-${campaign.id}`} campaign={campaign} />
       ))}
+      <Pagination state={paging} total={campaigns.data?.total ?? 0} />
     </div>
   );
 }

@@ -329,10 +329,7 @@
         "time": "Время",
         "phone": "Номер",
         "text": "Текст",
-        "error": "Ошибка",
-        "previous": "Назад",
-        "next": "Далее",
-        "page": "Страница {{page}} из {{pages}}"
+        "error": "Ошибка"
       },
       "export": {
         "button": "Экспорт в Excel",
@@ -613,9 +610,6 @@
     "flags_other": "{{count}} отметки",
     "noName": "Клиент без имени",
     "empty": "Клиенты не найдены.",
-    "range": "{{from}}–{{to}} из {{total}}",
-    "previous": "Назад",
-    "next": "Далее",
     "detail": {
       "currentStamps": "Штампы на карте",
       "totalStamps": "Всего штампов",
@@ -643,7 +637,6 @@
     "timeline": {
       "title": "История",
       "empty": "Штампов пока нет.",
-      "more": "Показать ещё",
       "reward": "Подарочная карта: {{name}}",
       "stamp": {
         "NFC_TAP": "Штамп (NFC)",

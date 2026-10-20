@@ -56,5 +56,13 @@
   },
   "footer": {
     "copyright": "© 2026 Trend Solutions. Все права защищены."
+  },
+  "pagination": {
+    "label": "Страницы",
+    "range": "{{from}}–{{to}} из {{total}}",
+    "perPage": "На странице",
+    "previous": "Назад",
+    "next": "Далее",
+    "page": "Страница {{page}}"
   }
 }

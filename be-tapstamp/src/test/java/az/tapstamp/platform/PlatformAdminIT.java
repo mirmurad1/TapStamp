@@ -82,10 +82,10 @@ class PlatformAdminIT extends AdminIntegrationTest {
     @Test
     void listsCompaniesWithoutCustomerData() throws Exception {
         AdminClient admin = superAdmin();
-        admin.get("/tenants")
+        admin.get("/tenants?size=50")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.slug == 'alpha')].primaryDomain").value(TestTenants.ALPHA_HOST))
-                .andExpect(jsonPath("$[?(@.slug == 'beta')].status").value("ACTIVE"));
+                .andExpect(jsonPath("$.items[?(@.slug == 'alpha')].primaryDomain").value(TestTenants.ALPHA_HOST))
+                .andExpect(jsonPath("$.items[?(@.slug == 'beta')].status").value("ACTIVE"));
         String alphaId = tenant(TestTenants.ALPHA_HOST).id().toString();
         String body = admin.get("/tenants/" + alphaId + "/stats").andExpect(status().isOk())
                 .andExpect(jsonPath("$.branches").isNumber())

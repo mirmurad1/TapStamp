@@ -11,6 +11,8 @@ import az.tapstamp.platform.service.PlatformCampaignService;
 import az.tapstamp.platform.service.PlatformCampaignService.TenantCampaign;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -67,12 +69,14 @@ public class PlatformCampaignController {
 
     @GetMapping
     @Operation(summary = "Kampaniyalar", description = """
-            `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son \
-            kampaniyalar: hər şirkətdən ən çox 100).""")
-    List<PlatformCampaignView> list(@RequestParam(defaultValue = "PENDING") @Pattern(regexp = "PENDING|ALL") String status) {
+            `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün \
+            şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).""")
+    PageResult<PlatformCampaignView> list(@RequestParam(defaultValue = "PENDING") @Pattern(regexp = "PENDING|ALL") String status,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
         List<String> statuses = "PENDING".equals(status) ? List.of("PENDING_APPROVAL", "PAUSED")
                 : List.of("PENDING_APPROVAL", "APPROVED", "SENDING", "PAUSED", "SENT", "REJECTED", "CANCELLED");
-        return campaigns.list(statuses).stream().map(PlatformCampaignView::from).toList();
+        return campaigns.list(statuses, PageQuery.of(page, size)).map(PlatformCampaignView::from);
     }
 
     @PostMapping("/{tenantId}/{campaignId}/approve")

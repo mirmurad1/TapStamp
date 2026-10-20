@@ -81,7 +81,7 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
         }
         LocalDate today = LocalDate.ofInstant(clock.instant(), SmsLog.REPORT_ZONE);
         AdminClient admin = signedInPlatformAdmin();
-        String path = "/sms-usage/messages?status=FAILED&from=" + today + "&to=" + today;
+        String path = "/sms-usage/messages?size=20&status=FAILED&from=" + today + "&to=" + today;
 
         admin.get(path).andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(20))

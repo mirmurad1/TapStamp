@@ -72,8 +72,8 @@ class CampaignIT extends TapIntegrationTest {
                 Map.of("id", id))).isZero();
 
         AdminClient platform = signedInPlatformAdmin();
-        platform.get("/campaigns").andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.id == '" + id + "')].totalSms").value(org.hamcrest.Matchers.contains(recipients)));
+        platform.get("/campaigns?size=50").andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[?(@.id == '" + id + "')].totalSms").value(org.hamcrest.Matchers.contains(recipients)));
         platform.post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("APPROVED"));
         platform.post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isConflict())
@@ -173,7 +173,7 @@ class CampaignIT extends TapIntegrationTest {
                 .andExpect(status().isCreated()), "$.id");
         owner.post("/campaigns/" + cancelled + "/cancel").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
-        owner.get("/campaigns").andExpect(jsonPath("$[?(@.id == '" + cancelled + "')].status")
+        owner.get("/campaigns?size=50").andExpect(jsonPath("$.items[?(@.id == '" + cancelled + "')].status")
                 .value(org.hamcrest.Matchers.contains("CANCELLED")));
     }
 

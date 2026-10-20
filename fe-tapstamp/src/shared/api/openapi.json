@@ -245,7 +245,7 @@
     },
     "/api/v1/admin/audit-logs" : {
       "get" : {
-        "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
+        "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_9",
         "parameters" : [ {
           "in" : "query",
@@ -281,11 +281,21 @@
           }
         }, {
           "in" : "query",
-          "name" : "before",
+          "name" : "page",
           "required" : false,
           "schema" : {
-            "type" : "string",
-            "format" : "date-time"
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
           }
         } ],
         "responses" : {
@@ -293,10 +303,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/Entry"
-                  }
+                  "$ref" : "#/components/schemas/PageResultEntry"
                 }
               }
             },
@@ -603,7 +610,7 @@
     },
     "/api/v1/admin/campaigns" : {
       "get" : {
-        "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.",
+        "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_2",
         "parameters" : [ {
           "in" : "query",
@@ -614,16 +621,31 @@
             "default" : "SMS",
             "enum" : [ "SMS", "STAMPS" ]
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/CampaignView"
-                  }
+                  "$ref" : "#/components/schemas/PageResultCampaignView"
                 }
               }
             },
@@ -798,16 +820,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/CampaignFailureView"
-                  }
+                  "$ref" : "#/components/schemas/PageResultCampaignFailureView"
                 }
               }
             },
@@ -820,7 +857,7 @@
     },
     "/api/v1/admin/customers" : {
       "get" : {
-        "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (ən çox 100).",
+        "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
         "operationId" : "list_8",
         "parameters" : [ {
           "in" : "query",
@@ -911,7 +948,7 @@
           "schema" : {
             "type" : "integer",
             "format" : "int32",
-            "default" : 25
+            "default" : 10
           }
         } ],
         "responses" : {
@@ -1070,16 +1107,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/FraudFlag"
-                  }
+                  "$ref" : "#/components/schemas/PageResultFraudFlag"
                 }
               }
             },
@@ -1171,7 +1223,7 @@
     },
     "/api/v1/admin/customers/{customerId}/timeline" : {
       "get" : {
-        "description" : "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before` — son elementin vaxtı.",
+        "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "timeline",
         "parameters" : [ {
           "in" : "path",
@@ -1183,11 +1235,21 @@
           }
         }, {
           "in" : "query",
-          "name" : "before",
+          "name" : "page",
           "required" : false,
           "schema" : {
-            "type" : "string",
-            "format" : "date-time"
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
           }
         } ],
         "responses" : {
@@ -1195,10 +1257,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/TimelineItem"
-                  }
+                  "$ref" : "#/components/schemas/PageResultTimelineItem"
                 }
               }
             },
@@ -1900,7 +1959,7 @@
     },
     "/api/v1/admin/staff-console/pending-stamps" : {
       "get" : {
-        "description" : "Yalnız işçinin öz filialı; başqa filial üçün 404.",
+        "description" : "Yalnız işçinin öz filialı; başqa filial üçün 404. Ən köhnəsi birinci; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "pending",
         "parameters" : [ {
           "in" : "query",
@@ -1910,16 +1969,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/PendingStampResponse"
-                  }
+                  "$ref" : "#/components/schemas/PageResultPendingStampResponse"
                 }
               }
             },
@@ -2000,7 +2074,7 @@
     },
     "/api/v1/admin/tags" : {
       "get" : {
-        "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə.",
+        "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_7",
         "parameters" : [ {
           "in" : "query",
@@ -2010,16 +2084,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/TagView"
-                  }
+                  "$ref" : "#/components/schemas/PageResultTagView"
                 }
               }
             },
@@ -2032,7 +2121,7 @@
     },
     "/api/v1/admin/tags/{tagId}/events" : {
       "get" : {
-        "description" : "Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.",
+        "description" : "Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.",
         "operationId" : "events_1",
         "parameters" : [ {
           "in" : "path",
@@ -2042,16 +2131,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/TapEvent"
-                  }
+                  "$ref" : "#/components/schemas/PageResultTapEvent"
                 }
               }
             },
@@ -2064,17 +2168,33 @@
     },
     "/api/v1/admin/team" : {
       "get" : {
-        "description" : "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür.",
+        "description" : "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "members",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/MemberResponse"
-                  }
+                  "$ref" : "#/components/schemas/PageResultMemberResponse"
                 }
               }
             },
@@ -2087,16 +2207,33 @@
     },
     "/api/v1/admin/team/invitations" : {
       "get" : {
+        "description" : "səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "invitations",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/InvitationResponse"
-                  }
+                  "$ref" : "#/components/schemas/PageResultInvitationResponse"
                 }
               }
             },
@@ -2619,7 +2756,7 @@
     },
     "/api/v1/platform/audit-logs" : {
       "get" : {
-        "description" : "Yenidən köhnəyə, 50-lik səhifələr; növbəti səhifə üçün `before`.",
+        "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_5",
         "parameters" : [ {
           "in" : "query",
@@ -2631,11 +2768,21 @@
           }
         }, {
           "in" : "query",
-          "name" : "before",
+          "name" : "page",
           "required" : false,
           "schema" : {
-            "type" : "string",
-            "format" : "date-time"
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
           }
         } ],
         "responses" : {
@@ -2643,10 +2790,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/PlatformAuditEntry"
-                  }
+                  "$ref" : "#/components/schemas/PageResultPlatformAuditEntry"
                 }
               }
             },
@@ -2871,7 +3015,7 @@
     },
     "/api/v1/platform/campaigns" : {
       "get" : {
-        "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).",
+        "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_4",
         "parameters" : [ {
           "in" : "query",
@@ -2882,16 +3026,31 @@
             "default" : "PENDING",
             "pattern" : "PENDING|ALL"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/PlatformCampaignView"
-                  }
+                  "$ref" : "#/components/schemas/PageResultPlatformCampaignView"
                 }
               }
             },
@@ -3265,7 +3424,7 @@
     },
     "/api/v1/platform/sms-usage/messages" : {
       "get" : {
-        "description" : "Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə, 20-lik səhifələr (`page` 0-dan).",
+        "description" : "Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "messages",
         "parameters" : [ {
           "in" : "query",
@@ -3311,6 +3470,15 @@
             "maximum" : 100000,
             "minimum" : 0
           }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
@@ -3330,16 +3498,33 @@
     },
     "/api/v1/platform/tenants" : {
       "get" : {
+        "description" : "səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/TenantResponse"
-                  }
+                  "$ref" : "#/components/schemas/PageResultTenantResponse"
                 }
               }
             },
@@ -3722,6 +3907,24 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
@@ -3897,7 +4100,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events" : {
       "get" : {
-        "description" : "Son 100 cəhd — qəbul və rədd edilənlər, səbəbləri ilə.",
+        "description" : "Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.",
         "operationId" : "events",
         "parameters" : [ {
           "in" : "path",
@@ -3915,16 +4118,31 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
         } ],
         "responses" : {
           "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/TapEvent"
-                  }
+                  "$ref" : "#/components/schemas/PageResultTapEvent"
                 }
               }
             },
@@ -5613,6 +5831,305 @@
           }
         }
       },
+      "PageResultCampaignFailureView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CampaignFailureView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultCampaignView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CampaignView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultEntry" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Entry"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultFraudFlag" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FraudFlag"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultInvitationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InvitationResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultMemberResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MemberResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultPendingStampResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PendingStampResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultPlatformAuditEntry" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PlatformAuditEntry"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultPlatformCampaignView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PlatformCampaignView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultTagView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TagView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultTapEvent" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TapEvent"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultTenantResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TenantResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultTimelineItem" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TimelineItem"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "PasswordConfirmRequest" : {
         "type" : "object",
         "properties" : {
@@ -6634,10 +7151,7 @@
             }
           },
           "tags" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/TagView"
-            }
+            "$ref" : "#/components/schemas/PageResultTagView"
           },
           "usage" : {
             "$ref" : "#/components/schemas/TagUsage"

@@ -1,29 +1,28 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatDateTime } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformAuditApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 
-const PAGE = 50;
-
 /** Platforma audit jurnalı: şirkətlərin yaradılması, dayandırılması, domenlər, sahiblərin 2FA-sı. */
 export function PlatformAuditPage() {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
-  const entries = useInfiniteQuery({
-    queryKey: ['platform-audit'],
-    queryFn: ({ pageParam }) => platformAuditApi.list({ before: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last) => (last.length === PAGE ? last[last.length - 1]?.createdAt : undefined),
+  const paging = usePagination();
+  const entries = useQuery({
+    queryKey: ['platform-audit', paging.page, paging.size],
+    queryFn: () => platformAuditApi.list({ page: paging.page, size: paging.size }),
+    placeholderData: keepPreviousData,
   });
-  const items = entries.data?.pages.flat() ?? [];
+  const items = entries.data?.items ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -55,11 +54,7 @@ export function PlatformAuditPage() {
               </li>
             ))}
           </ul>
-          {entries.hasNextPage ? (
-            <Button variant="outline" className="self-center" onClick={() => void entries.fetchNextPage()} disabled={entries.isFetchingNextPage}>
-              {t('customers.timeline.more')}
-            </Button>
-          ) : null}
+          <Pagination state={paging} total={entries.data?.total ?? 0} />
         </CardContent>
       </Card>
     </div>

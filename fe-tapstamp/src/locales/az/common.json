@@ -52,5 +52,13 @@
   },
   "footer": {
     "copyright": "© 2026 Trend Solutions. Bütün hüquqlar qorunur."
+  },
+  "pagination": {
+    "label": "Səhifələr",
+    "range": "{{from}}–{{to}} / {{total}}",
+    "perPage": "Səhifədə",
+    "previous": "Əvvəlki",
+    "next": "Növbəti",
+    "page": "Səhifə {{page}}"
   }
 }

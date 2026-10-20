@@ -9,6 +9,8 @@ import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.security.admin.api.AdminAuthDtos.RoleResponse;
 import az.tapstamp.shared.i18n.Language;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.staff.service.InvitationService;
 import az.tapstamp.staff.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -71,20 +74,23 @@ public class TeamController {
     }
 
     @GetMapping
-    @Operation(summary = "Komanda üzvləri", description = "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür.")
-    List<MemberResponse> members(@AuthenticationPrincipal AdminPrincipal principal) {
-        return team.members(principal).stream()
+    @Operation(summary = "Komanda üzvləri", description = "Sahib hamını, menecer yalnız öz filiallarının işçilərini görür; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<MemberResponse> members(@AuthenticationPrincipal AdminPrincipal principal,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return PageQuery.of(page, size).slice(team.members(principal))
                 .map(member -> new MemberResponse(member.id(), member.email(), member.displayName(),
                         member.status().name(),
                         member.roles().stream().map(grant -> new RoleResponse(grant.role().name(), grant.branchId())).toList(),
-                        member.totpEnabled(), member.lastLoginAt()))
-                .toList();
+                        member.totpEnabled(), member.lastLoginAt()));
     }
 
     @GetMapping("/invitations")
-    @Operation(summary = "Gözləyən dəvətlər")
-    List<InvitationResponse> invitations(@AuthenticationPrincipal AdminPrincipal principal) {
-        return invitations.pending(principal).stream().map(InvitationResponse::from).toList();
+    @Operation(summary = "Gözləyən dəvətlər", description = "səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<InvitationResponse> invitations(@AuthenticationPrincipal AdminPrincipal principal,
+                                               @RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return PageQuery.of(page, size).slice(invitations.pending(principal)).map(InvitationResponse::from);
     }
 
     @PostMapping("/invitations")

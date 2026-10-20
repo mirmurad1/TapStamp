@@ -14,6 +14,8 @@ import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -48,14 +50,13 @@ public class StampApprovalService {
         this.clock = clock;
     }
 
-    /** Filialın gözləyən möhürləri, ən köhnəsi birinci. */
-    public List<PendingStamp> pending(AdminPrincipal principal, UUID branchId) {
+    /** Filialın gözləyən möhürləri, ən köhnəsi birinci, səhifə ilə. */
+    public PageResult<PendingStamp> pending(AdminPrincipal principal, UUID branchId, PageQuery page) {
         AccessPolicy.requireBranch(principal, branchId);
         StampPolicy policy = ledger.policy(branchId);
-        return stamps.findPending(branchId).stream()
+        return page.result(stamps.findPending(branchId, page.limit(), page.offset()), stamps.countPending(branchId))
                 .map(row -> new PendingStamp(row.id(), row.branchId(), row.customerId(), row.customerName(),
-                        row.phoneMasked(), row.createdAt(), row.createdAt().plus(policy.pendingTimeout())))
-                .toList();
+                        row.phoneMasked(), row.createdAt(), row.createdAt().plus(policy.pendingTimeout())));
     }
 
     public Decision confirm(AdminPrincipal principal, UUID stampId) {
