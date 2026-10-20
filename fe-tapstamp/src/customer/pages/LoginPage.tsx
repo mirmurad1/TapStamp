@@ -71,7 +71,12 @@ export function LoginPage() {
           resendAt={step.resendAt}
           onResent={(challengeId, resendAt) => setStep({ ...step, challengeId, resendAt })}
           onChangePhone={() => setStep({ name: 'phone' })}
-          onAuthenticated={() => void finish()}
+          onAuthenticated={() => {
+            // Mövcud müştəri daxil oldu — saxlanmış dəvət kodu ona aid deyil; bu cihazda sonra qeydiyyatdan keçən
+            // başqa müştəri səhvən "dəvət olunmuş" sayılmasın
+            clearReferralCode();
+            void finish();
+          }}
           onRegistrationRequired={(registrationToken) => setStep({ name: 'register', registrationToken })}
         />
       ) : null}
