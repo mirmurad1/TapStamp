@@ -30,7 +30,12 @@ class ReferralIT extends TapIntegrationTest {
 
     private void settings(boolean enabled, int referrerStamps, int friendStamps, int monthlyCap, int validDays)
             throws Exception {
-        owner().put("/referrals/settings", Map.of("enabled", enabled, "referrerStamps", referrerStamps,
+        settings(enabled, "FIRST_VISIT", referrerStamps, friendStamps, monthlyCap, validDays);
+    }
+
+    private void settings(boolean enabled, String rewardOn, int referrerStamps, int friendStamps, int monthlyCap,
+                          int validDays) throws Exception {
+        owner().put("/referrals/settings", Map.of("enabled", enabled, "rewardOn", rewardOn, "referrerStamps", referrerStamps,
                         "friendStamps", friendStamps, "monthlyCap", monthlyCap, "validDays", validDays))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabled").value(enabled));
@@ -184,9 +189,31 @@ class ReferralIT extends TapIntegrationTest {
     }
 
     @Test
+    void companyCanGrantTheBonusRightAtRegistration() throws Exception {
+        settings(true, "REGISTRATION", 2, 1, 5, 30);
+        TestTag tag = newTag(newBranch(Policy.relaxed()));
+        CustomerClient referrer = signedIn(uniquePhone());
+        referrer.get("/api/v1/me/referral").andExpect(jsonPath("$.rewardOn").value("REGISTRATION"));
+        int referrerBefore = totalStamps(referrer);
+
+        // Qeydiyyat anında: dosta 1, dəvət edənə 2 bonus
+        CustomerClient friend = signedIn(uniquePhone(), referralCode(referrer));
+        assertThat(totalStamps(friend)).isEqualTo(1);
+        assertThat(totalStamps(referrer)).isEqualTo(referrerBefore + 2);
+        referrer.get("/api/v1/me/referral").andExpect(jsonPath("$.rewarded").value(1));
+
+        // İlk gəlişdə bonus təkrarlanmır
+        claim(friend, tag, 1);
+        assertThat(totalStamps(friend)).isEqualTo(2);
+        assertThat(totalStamps(referrer)).isEqualTo(referrerBefore + 2);
+    }
+
+    @Test
     void settingsAreValidatedAndOnlyForOwner() throws Exception {
-        owner().put("/referrals/settings", Map.of("enabled", true, "referrerStamps", 4, "friendStamps", 1,
-                "monthlyCap", 5, "validDays", 30)).andExpect(status().isBadRequest());
+        owner().put("/referrals/settings", Map.of("enabled", true, "rewardOn", "FIRST_VISIT", "referrerStamps", 4,
+                "friendStamps", 1, "monthlyCap", 5, "validDays", 30)).andExpect(status().isBadRequest());
+        owner().put("/referrals/settings", Map.of("enabled", true, "rewardOn", "ANYTIME", "referrerStamps", 1,
+                "friendStamps", 1, "monthlyCap", 5, "validDays", 30)).andExpect(status().isBadRequest());
         signedInStaff(HOST, AdminRole.BRANCH_MANAGER, newBranch(Policy.relaxed()))
                 .get("/referrals/settings").andExpect(status().isForbidden());
     }

@@ -18,7 +18,11 @@ export function InviteFriendCard() {
     return null;
   }
   const link = `${window.location.origin}/r/${data.code}`;
-  const message = t('referral.shareText', { count: data.friendStamps ?? 1, link });
+  const atRegistration = data.rewardOn === 'REGISTRATION';
+  const message = t(atRegistration ? 'referral.shareTextRegistration' : 'referral.shareText', {
+    count: data.friendStamps ?? 1,
+    link,
+  });
 
   const copy = async () => {
     try {
@@ -50,7 +54,10 @@ export function InviteFriendCard() {
           {t('referral.title')}
         </CardTitle>
         <CardDescription>
-          {t('referral.description', { mine: data.referrerStamps ?? 1, friend: data.friendStamps ?? 1 })}
+          {t(atRegistration ? 'referral.descriptionRegistration' : 'referral.description', {
+            mine: data.referrerStamps ?? 1,
+            friend: data.friendStamps ?? 1,
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -73,7 +80,9 @@ export function InviteFriendCard() {
           </p>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          {t('referral.rules', { cap: data.monthlyCap ?? 5, days: data.validDays ?? 30 })}
+          {atRegistration
+            ? t('referral.rulesRegistration', { cap: data.monthlyCap ?? 5 })
+            : t('referral.rules', { cap: data.monthlyCap ?? 5, days: data.validDays ?? 30 })}
         </p>
       </CardContent>
     </Card>

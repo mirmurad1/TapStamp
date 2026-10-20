@@ -12,7 +12,9 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface ReferralMapper {
 
-    record ReferralSettings(boolean enabled, int referrerStamps, int friendStamps, int monthlyCap, int validDays) {
+    /** {@code rewardOn}: FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — dost qeydiyyatdan keçən kimi. */
+    record ReferralSettings(boolean enabled, String rewardOn, int referrerStamps, int friendStamps, int monthlyCap,
+                            int validDays) {
     }
 
     /** Bonus verilən dəvət: dəvət edən və dost. */
@@ -34,8 +36,8 @@ public interface ReferralMapper {
 
     ReferralSettings settings();
 
-    void updateSettings(boolean enabled, int referrerStamps, int friendStamps, int monthlyCap, int validDays,
-                        UUID staffId, Instant now);
+    void updateSettings(boolean enabled, String rewardOn, int referrerStamps, int friendStamps, int monthlyCap,
+                        int validDays, UUID staffId, Instant now);
 
     Optional<String> referralCode(UUID customerId);
 
@@ -52,6 +54,8 @@ public interface ReferralMapper {
 
     /** Dostun gözləyən (müddəti bitməmiş) dəvətini atomik olaraq REWARDED edir — bonus yalnız bir dəfə verilir. */
     Optional<Claimed> claimPending(UUID friendId, Instant now);
+
+    Optional<UUID> registrationBranch(UUID referrerId);
 
     boolean isActive(UUID customerId);
 

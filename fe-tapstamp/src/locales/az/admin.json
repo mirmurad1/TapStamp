@@ -835,10 +835,10 @@
   },
   "referrals": {
     "title": "Dost dəvəti",
-    "subtitle": "Müştərilər dostlarını dəvət edir; dost ilk dəfə gəlib NFC ilə möhür alanda hər ikisi bonus möhür qazanır.",
+    "subtitle": "Müştərilər dostlarını dəvət edir və hər ikisi bonus möhür qazanır — dostun ilk gəlişində və ya qeydiyyat anında (seçiminizə görə).",
     "settings": {
       "title": "Parametrlər",
-      "description": "Bonus yalnız real gəlişdən sonra verilir — saxta qeydiyyat bonus qazandırmır.",
+      "description": "Yalnız yeni müştəri dəvət oluna bilər; bonus hər dəvətə bir dəfə verilir.",
       "enabled": "Dəvət proqramı aktivdir",
       "enabledHint": "Müştəri tətbiqində \"Dostunu dəvət et\" bölməsi görünür.",
       "referrerStamps": "Dəvət edənə bonus möhür",
@@ -846,7 +846,19 @@
       "monthlyCap": "Aylıq limit (bir müştəri üçün)",
       "monthlyCapHint": "Bir müştərinin ayda neçə dostu bonus qazandıra bilər.",
       "validDays": "Dəvətin müddəti (gün)",
-      "validDaysHint": "Dost bu müddətdə gəlməsə, dəvət bonussuz bağlanır."
+      "validDaysHint": "Dost bu müddətdə gəlməsə, dəvət bonussuz bağlanır.",
+      "rewardOn": "Bonus nə vaxt verilsin",
+      "rewardOnOptions": {
+        "FIRST_VISIT": {
+          "title": "Dostun ilk gəlişində (tövsiyə olunur)",
+          "hint": "Dost kafeyə gəlib NFC ilə ilk möhürünü alanda — həmin möhürlə yanaşı hər ikisinə bonus."
+        },
+        "REGISTRATION": {
+          "title": "Qeydiyyat anında",
+          "hint": "Dost linklə qeydiyyatdan keçən kimi hər ikisinə dərhal bonus."
+        }
+      },
+      "registrationWarning": "Diqqət: bonus gəlişsiz verilir — kimsə başqa nömrələrlə qeydiyyatdan keçib özünə bonus yığa bilər. Aylıq limiti aşağı saxlayın."
     },
     "summary": {
       "total": "Dəvətlər",

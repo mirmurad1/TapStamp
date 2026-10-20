@@ -806,7 +806,7 @@ export interface paths {
         get: operations["settings"];
         /**
          * Parametrləri dəyişmək
-         * @description Aktiv/söndürülmüş, dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.
+         * @description Aktiv/söndürülmüş, bonusun vaxtı (FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — qeydiyyat anında), dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.
          */
         put: operations["updateSettings"];
         post?: never;
@@ -2917,6 +2917,7 @@ export interface components {
             pending?: number;
             /** Format: int32 */
             referrerStamps?: number;
+            rewardOn?: string;
             /** Format: int32 */
             rewarded?: number;
             /** Format: int32 */
@@ -3497,6 +3498,7 @@ export interface components {
             friendStamps?: number;
             /** Format: int32 */
             referrerStamps?: number;
+            rewardOn?: string;
         };
         ProvisionRequest: {
             defaultLanguage: string;
@@ -3572,6 +3574,7 @@ export interface components {
             monthlyCap?: number;
             /** Format: int32 */
             referrerStamps?: number;
+            rewardOn?: string;
             /** Format: int32 */
             validDays?: number;
         };
@@ -3583,6 +3586,7 @@ export interface components {
             monthlyCap: number;
             /** Format: int32 */
             referrerStamps: number;
+            rewardOn: string;
             /** Format: int32 */
             validDays: number;
         };

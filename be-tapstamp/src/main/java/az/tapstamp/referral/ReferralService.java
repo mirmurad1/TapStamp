@@ -37,8 +37,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Dost dəvəti (referral). Müştəri şəxsi kodu ilə link paylaşır; dost həmin linklə <b>yeni</b> müştəri kimi qeydiyyatdan
- * keçəndə dəvət yaranır (PENDING). Dost <b>ilk təsdiqlənmiş NFC möhürünü</b> alanda (yəni real gəlişdə) hər ikisinə
- * bonus möhür verilir — eyni tranzaksiyada və yalnız bir dəfə. Qorunma: yalnız yeni müştəri, özünü dəvət etmək olmaz,
+ * keçəndə dəvət yaranır (PENDING). Bonusun vaxtı şirkətin seçimidir: dostun <b>ilk təsdiqlənmiş NFC möhüründə</b>
+ * (default, real gəliş) və ya <b>qeydiyyat anında</b>; hər iki halda hər ikisinə, eyni tranzaksiyada və yalnız bir dəfə. Qorunma: yalnız yeni müştəri, özünü dəvət etmək olmaz,
  * dəvət edənin aylıq limiti, dəvətin etibarlılıq müddəti; bonus saxta qeydiyyata yox, gəlişə verilir.
  */
 @Service
@@ -50,10 +50,14 @@ public class ReferralService {
     private static final Pattern CODE = Pattern.compile("^[A-Z2-9]{8}$");
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    public record ProgramInfo(boolean enabled, int referrerStamps, int friendStamps) {
+    public static final String FIRST_VISIT = "FIRST_VISIT";
+    public static final String REGISTRATION = "REGISTRATION";
+
+    public record ProgramInfo(boolean enabled, String rewardOn, int referrerStamps, int friendStamps) {
     }
 
-    public record CustomerReferral(boolean enabled, @Nullable String code, int referrerStamps, int friendStamps,
+    public record CustomerReferral(boolean enabled, String rewardOn, @Nullable String code, int referrerStamps,
+                                   int friendStamps,
                                    int monthlyCap, int validDays, int invited, int rewarded, int pending) {
     }
 
@@ -77,19 +81,19 @@ public class ReferralService {
     /** Dəvət səhifəsi üçün (giriş tələb etmir): proqram aktivdirmi və neçə bonus möhür. */
     public ProgramInfo program() {
         ReferralSettings settings = referrals.settings();
-        return new ProgramInfo(settings.enabled(), settings.referrerStamps(), settings.friendStamps());
+        return new ProgramInfo(settings.enabled(), settings.rewardOn(), settings.referrerStamps(), settings.friendStamps());
     }
 
     /** Müştərinin dəvət kodu (lazım olanda yaranır) və dəvətləri üzrə saylar. */
     public CustomerReferral forCustomer(CustomerPrincipal principal) {
         ReferralSettings settings = referrals.settings();
         if (!settings.enabled()) {
-            return new CustomerReferral(false, null, settings.referrerStamps(), settings.friendStamps(),
+            return new CustomerReferral(false, settings.rewardOn(), null, settings.referrerStamps(), settings.friendStamps(),
                     settings.monthlyCap(), settings.validDays(), 0, 0, 0);
         }
         String code = codeFor(principal.customerId());
         Stats stats = referrals.stats(principal.customerId(), clock.instant());
-        return new CustomerReferral(true, code, settings.referrerStamps(), settings.friendStamps(),
+        return new CustomerReferral(true, settings.rewardOn(), code, settings.referrerStamps(), settings.friendStamps(),
                 settings.monthlyCap(), settings.validDays(), stats.invited(), stats.rewarded(), stats.pending());
     }
 
@@ -143,6 +147,11 @@ public class ReferralService {
                 now.plus(Duration.ofDays(settings.validDays())));
         audit.tenant(limitReached ? "REFERRAL_LIMIT_REACHED" : "REFERRAL_CREATED", AuditLogger.ActorType.CUSTOMER,
                 friendId, "referral", id, Map.of("referrerId", referrer.get().toString()));
+        if (!limitReached && REGISTRATION.equals(settings.rewardOn())) {
+            // Şirkət bonusu qeydiyyatda verməyi seçib — filial yoxdursa, dəvət ilk gəlişə qədər gözləyir
+            referrals.registrationBranch(referrer.get()).ifPresent(branchId -> referrals.claimPending(friendId, now)
+                    .ifPresent(claimed -> reward(claimed, friendId, branchId, settings, now)));
+        }
     }
 
     /**
@@ -156,14 +165,16 @@ public class ReferralService {
         if (!settings.enabled()) {
             return null;
         }
-        Optional<Claimed> claimed = referrals.claimPending(friendId, at);
-        if (claimed.isEmpty()) {
-            return null;
-        }
+        // Gözləyən hər dəvət burada bitir (rejim sonradan "qeydiyyatda"ya dəyişibsə, əvvəlki dəvətlər də)
+        return referrals.claimPending(friendId, at).map(claimed -> reward(claimed, friendId, branchId, settings, at))
+                .orElse(null);
+    }
+
+    private CardState reward(Claimed claimed, UUID friendId, UUID branchId, ReferralSettings settings, Instant at) {
         LocalDate day = LocalDate.ofInstant(at, company.current().timezone());
-        UUID referralId = claimed.get().id();
+        UUID referralId = claimed.id();
         CardState friendCard = grant(friendId, branchId, referralId, settings.friendStamps(), day, at);
-        UUID referrerId = claimed.get().referrerId();
+        UUID referrerId = claimed.referrerId();
         boolean referrerRewarded = referrals.isActive(referrerId);
         if (referrerRewarded) {
             // Dəvət edən həmişə dostdan əvvəl qeydiyyatdan keçib — kilid sırası tsikl yaratmır
@@ -201,12 +212,13 @@ public class ReferralService {
 
     public ReferralSettings updateSettings(AdminPrincipal principal, ReferralSettings next) {
         AccessPolicy.requireCompanyWide(principal);
-        if (next.referrerStamps() < 1 || next.referrerStamps() > 3 || next.friendStamps() < 1 || next.friendStamps() > 3
-                || next.monthlyCap() < 1 || next.monthlyCap() > 50 || next.validDays() < 7 || next.validDays() > 90) {
+        boolean validTrigger = FIRST_VISIT.equals(next.rewardOn()) || REGISTRATION.equals(next.rewardOn());
+        if (!validTrigger || next.referrerStamps() < 1 || next.referrerStamps() > 3 || next.friendStamps() < 1
+                || next.friendStamps() > 3 || next.monthlyCap() < 1 || next.monthlyCap() > 50 || next.validDays() < 7 || next.validDays() > 90) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         ReferralSettings before = referrals.settings();
-        referrals.updateSettings(next.enabled(), next.referrerStamps(), next.friendStamps(), next.monthlyCap(),
+        referrals.updateSettings(next.enabled(), next.rewardOn(), next.referrerStamps(), next.friendStamps(), next.monthlyCap(),
                 next.validDays(), principal.userId(), clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("before", before);

@@ -1529,7 +1529,7 @@
         "tags" : [ "Admin: dost dəvəti" ]
       },
       "put" : {
-        "description" : "Aktiv/söndürülmüş, dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.",
+        "description" : "Aktiv/söndürülmüş, bonusun vaxtı (FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — qeydiyyat anında), dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.",
         "operationId" : "updateSettings",
         "requestBody" : {
           "content" : {
@@ -5245,6 +5245,9 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "rewardOn" : {
+            "type" : "string"
+          },
           "rewarded" : {
             "type" : "integer",
             "format" : "int32"
@@ -6673,6 +6676,9 @@
           "referrerStamps" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "rewardOn" : {
+            "type" : "string"
           }
         }
       },
@@ -6863,6 +6869,9 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "rewardOn" : {
+            "type" : "string"
+          },
           "validDays" : {
             "type" : "integer",
             "format" : "int32"
@@ -6893,6 +6902,10 @@
             "maximum" : 3,
             "minimum" : 1
           },
+          "rewardOn" : {
+            "type" : "string",
+            "pattern" : "FIRST_VISIT|REGISTRATION"
+          },
           "validDays" : {
             "type" : "integer",
             "format" : "int32",
@@ -6900,7 +6913,7 @@
             "minimum" : 7
           }
         },
-        "required" : [ "enabled", "friendStamps", "monthlyCap", "referrerStamps", "validDays" ]
+        "required" : [ "enabled", "friendStamps", "monthlyCap", "referrerStamps", "rewardOn", "validDays" ]
       },
       "ReferralSummary" : {
         "type" : "object",

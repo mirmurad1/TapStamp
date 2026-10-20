@@ -51,7 +51,9 @@ export function ReferralPage() {
         <Gift className="size-10 text-primary" aria-hidden="true" />
         <CardTitle className="text-2xl">{t('referral.landing.title', { company: companyName })}</CardTitle>
         <CardDescription>
-          {t('referral.landing.description', { count: program.data.friendStamps ?? 1 })}
+          {t(program.data.rewardOn === 'REGISTRATION' ? 'referral.landing.descriptionRegistration' : 'referral.landing.description', {
+            count: program.data.friendStamps ?? 1,
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

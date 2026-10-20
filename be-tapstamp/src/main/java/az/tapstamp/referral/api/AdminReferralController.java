@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ public class AdminReferralController {
     }
 
     public record ReferralSettingsRequest(@NotNull Boolean enabled,
+                                          @NotNull @Pattern(regexp = "FIRST_VISIT|REGISTRATION") String rewardOn,
                                           @NotNull @Min(1) @Max(3) Integer referrerStamps,
                                           @NotNull @Min(1) @Max(3) Integer friendStamps,
                                           @NotNull @Min(1) @Max(50) Integer monthlyCap,
@@ -50,11 +52,12 @@ public class AdminReferralController {
 
     @PutMapping("/settings")
     @Operation(summary = "Parametrləri dəyişmək", description = """
-            Aktiv/söndürülmüş, dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin \
+            Aktiv/söndürülmüş, bonusun vaxtı (FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — qeydiyyat \
+            anında), dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin \
             etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.""")
     ReferralSettings updateSettings(@AuthenticationPrincipal AdminPrincipal principal,
                             @Valid @RequestBody ReferralSettingsRequest request) {
-        return referrals.updateSettings(principal, new ReferralSettings(request.enabled(), request.referrerStamps(),
+        return referrals.updateSettings(principal, new ReferralSettings(request.enabled(), request.rewardOn(), request.referrerStamps(),
                 request.friendStamps(), request.monthlyCap(), request.validDays()));
     }
 

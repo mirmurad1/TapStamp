@@ -156,7 +156,13 @@
       "home": "Go to my card",
       "join": "Sign up",
       "description_one": "Sign up and get {{count}} bonus stamp together with your stamp on your first visit.",
-      "description_other": "Sign up and get {{count}} bonus stamps together with your stamp on your first visit."
-    }
+      "description_other": "Sign up and get {{count}} bonus stamps together with your stamp on your first visit.",
+      "descriptionRegistration_one": "Sign up and get {{count}} bonus stamp right away.",
+      "descriptionRegistration_other": "Sign up and get {{count}} bonus stamps right away."
+    },
+    "descriptionRegistration": "As soon as your friend signs up with your link, you get {{mine}} and your friend gets {{friend}} bonus stamps.",
+    "rulesRegistration": "Up to {{cap}} friends count per month.",
+    "shareTextRegistration_one": "Join me! Sign up with this link and get {{count}} bonus stamp right away: {{link}}",
+    "shareTextRegistration_other": "Join me! Sign up with this link and get {{count}} bonus stamps right away: {{link}}"
   }
 }

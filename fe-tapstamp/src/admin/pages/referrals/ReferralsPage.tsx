@@ -20,6 +20,8 @@ import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 
 const SETTINGS_KEY = ['referral-settings'] as const;
+const REWARD_ON = ['FIRST_VISIT', 'REGISTRATION'] as const;
+type RewardOn = (typeof REWARD_ON)[number];
 const STATUSES = ['PENDING', 'REWARDED', 'EXPIRED', 'LIMIT_REACHED'] as const;
 type ReferralStatus = (typeof STATUSES)[number];
 
@@ -78,12 +80,13 @@ function SettingsForm({ initial }: { initial: ReferralSettings }) {
   const { t } = useTranslation(['admin', 'common']);
   const queryClient = useQueryClient();
   const [enabled, setEnabled] = useState(Boolean(initial.enabled));
+  const [rewardOn, setRewardOn] = useState<RewardOn>(initial.rewardOn === 'REGISTRATION' ? 'REGISTRATION' : 'FIRST_VISIT');
   const [referrerStamps, setReferrerStamps] = useState(initial.referrerStamps ?? 1);
   const [friendStamps, setFriendStamps] = useState(initial.friendStamps ?? 1);
   const [monthlyCap, setMonthlyCap] = useState(initial.monthlyCap ?? 5);
   const [validDays, setValidDays] = useState(initial.validDays ?? 30);
   const save = useMutation({
-    mutationFn: () => referralsApi.updateSettings({ enabled, referrerStamps, friendStamps, monthlyCap, validDays }),
+    mutationFn: () => referralsApi.updateSettings({ enabled, rewardOn, referrerStamps, friendStamps, monthlyCap, validDays }),
     onSuccess: (updated) => queryClient.setQueryData(SETTINGS_KEY, updated),
   });
   const submit = (event: FormEvent) => {
@@ -115,6 +118,28 @@ function SettingsForm({ initial }: { initial: ReferralSettings }) {
               <span className="block text-muted-foreground">{t('admin:referrals.settings.enabledHint')}</span>
             </span>
           </label>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-sm font-medium">{t('admin:referrals.settings.rewardOn')}</legend>
+            {REWARD_ON.map((value) => (
+              <label key={value} className="flex items-start gap-3 rounded-xl border border-border p-3 text-sm">
+                <input
+                  type="radio"
+                  name="reward-on"
+                  value={value}
+                  checked={rewardOn === value}
+                  onChange={() => setRewardOn(value)}
+                  className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+                />
+                <span>
+                  <span className="block font-medium">{t(`admin:referrals.settings.rewardOnOptions.${value}.title`)}</span>
+                  <span className="block text-muted-foreground">{t(`admin:referrals.settings.rewardOnOptions.${value}.hint`)}</span>
+                </span>
+              </label>
+            ))}
+            {rewardOn === 'REGISTRATION' ? (
+              <Alert tone="error">{t('admin:referrals.settings.registrationWarning')}</Alert>
+            ) : null}
+          </fieldset>
           <div className="grid gap-4 sm:grid-cols-2">
             <NumberSelect id="referrer-stamps" label={t('admin:referrals.settings.referrerStamps')} value={referrerStamps}
               options={[1, 2, 3]} onChange={setReferrerStamps} />
@@ -123,9 +148,11 @@ function SettingsForm({ initial }: { initial: ReferralSettings }) {
             <NumberSelect id="monthly-cap" label={t('admin:referrals.settings.monthlyCap')}
               hint={t('admin:referrals.settings.monthlyCapHint')} value={monthlyCap}
               options={[1, 3, 5, 10, 20, 50]} onChange={setMonthlyCap} />
-            <NumberSelect id="valid-days" label={t('admin:referrals.settings.validDays')}
-              hint={t('admin:referrals.settings.validDaysHint')} value={validDays}
-              options={[7, 14, 30, 60, 90]} onChange={setValidDays} />
+            {rewardOn === 'FIRST_VISIT' ? (
+              <NumberSelect id="valid-days" label={t('admin:referrals.settings.validDays')}
+                hint={t('admin:referrals.settings.validDaysHint')} value={validDays}
+                options={[7, 14, 30, 60, 90]} onChange={setValidDays} />
+            ) : null}
           </div>
           <Button type="submit" disabled={save.isPending} className="self-start">
             {t('common:actions.save')}

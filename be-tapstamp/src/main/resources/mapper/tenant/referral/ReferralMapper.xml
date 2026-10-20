@@ -4,12 +4,12 @@
 <mapper namespace="az.tapstamp.referral.repository.ReferralMapper">
 
     <select id="settings" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralSettings">
-        SELECT enabled, referrer_stamps, friend_stamps, monthly_cap, valid_days FROM referral_settings WHERE id = 1
+        SELECT enabled, reward_on, referrer_stamps, friend_stamps, monthly_cap, valid_days FROM referral_settings WHERE id = 1
     </select>
 
     <update id="updateSettings">
         UPDATE referral_settings
-        SET enabled = #{enabled}, referrer_stamps = #{referrerStamps}, friend_stamps = #{friendStamps},
+        SET enabled = #{enabled}, reward_on = #{rewardOn}, referrer_stamps = #{referrerStamps}, friend_stamps = #{friendStamps},
             monthly_cap = #{monthlyCap}, valid_days = #{validDays}, updated_at = #{now}, updated_by = #{staffId}
         WHERE id = 1
     </update>
@@ -40,6 +40,14 @@
         UPDATE referrals SET status = 'REWARDED', rewarded_at = #{now}
         WHERE friend_id = #{friendId} AND status = 'PENDING' AND expires_at &gt; #{now}
         RETURNING id, referrer_id
+    </select>
+
+    <!-- Qeydiyyatda verilən bonusun filialı: dəvət edənin son (aktiv) filialı, yoxdursa ilk aktiv filial -->
+    <select id="registrationBranch" resultType="java.util.UUID">
+        SELECT coalesce(
+            (SELECT b.id FROM customers c JOIN branches b ON b.id = c.last_branch_id AND b.status = 'ACTIVE'
+             WHERE c.id = #{referrerId}),
+            (SELECT id FROM branches WHERE status = 'ACTIVE' ORDER BY created_at, id LIMIT 1))
     </select>
 
     <select id="isActive" resultType="boolean">

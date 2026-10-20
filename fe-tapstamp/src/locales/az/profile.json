@@ -156,7 +156,13 @@
       "home": "Kartıma keç",
       "join": "Qeydiyyatdan keç",
       "description_one": "Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə {{count}} bonus möhür qazan.",
-      "description_other": "Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə {{count}} bonus möhür qazan."
-    }
+      "description_other": "Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə {{count}} bonus möhür qazan.",
+      "descriptionRegistration_one": "Qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan.",
+      "descriptionRegistration_other": "Qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan."
+    },
+    "descriptionRegistration": "Dostun linkinlə qeydiyyatdan keçən kimi sən {{mine}}, dostun isə {{friend}} bonus möhür qazanır.",
+    "rulesRegistration": "Ayda ən çox {{cap}} dost sayılır.",
+    "shareTextRegistration_one": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}",
+    "shareTextRegistration_other": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}"
   }
 }

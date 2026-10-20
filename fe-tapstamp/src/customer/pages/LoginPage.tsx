@@ -263,7 +263,9 @@ function RegisterStep({ registrationToken, onRegistered }: { registrationToken: 
           <ErrorMessage error={register.error} />
           {referralCode && program.data?.enabled ? (
             <p className="rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
-              {t('auth:register.referral', { count: program.data.friendStamps ?? 1 })}
+              {t(program.data.rewardOn === 'REGISTRATION' ? 'auth:register.referralRegistration' : 'auth:register.referral', {
+                count: program.data.friendStamps ?? 1,
+              })}
             </p>
           ) : null}
           {tokenExpired ? (

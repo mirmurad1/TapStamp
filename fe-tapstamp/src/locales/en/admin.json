@@ -835,10 +835,10 @@
   },
   "referrals": {
     "title": "Invite a friend",
-    "subtitle": "Customers invite friends; when a friend visits for the first time and gets an NFC stamp, both earn bonus stamps.",
+    "subtitle": "Customers invite friends and both earn bonus stamps — on the friend’s first visit or at registration (your choice).",
     "settings": {
       "title": "Settings",
-      "description": "The bonus is granted only after a real visit — fake sign-ups earn nothing.",
+      "description": "Only new customers can be invited; the bonus is granted once per invitation.",
       "enabled": "Referral program is active",
       "enabledHint": "The “Invite a friend” section is shown in the customer app.",
       "referrerStamps": "Bonus stamps for the referrer",
@@ -846,7 +846,19 @@
       "monthlyCap": "Monthly limit (per customer)",
       "monthlyCapHint": "How many friends per month can earn a customer a bonus.",
       "validDays": "Invitation validity (days)",
-      "validDaysHint": "If the friend does not visit within this period, the invitation closes without a bonus."
+      "validDaysHint": "If the friend does not visit within this period, the invitation closes without a bonus.",
+      "rewardOn": "When to grant the bonus",
+      "rewardOnOptions": {
+        "FIRST_VISIT": {
+          "title": "On the friend’s first visit (recommended)",
+          "hint": "When the friend visits and gets their first NFC stamp — both get the bonus together with that stamp."
+        },
+        "REGISTRATION": {
+          "title": "At registration",
+          "hint": "Both get the bonus as soon as the friend signs up with the link."
+        }
+      },
+      "registrationWarning": "Note: the bonus is granted without a visit — someone could sign up with other numbers to collect bonuses. Keep the monthly limit low."
     },
     "summary": {
       "total": "Invitations",
