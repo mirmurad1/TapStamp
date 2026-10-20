@@ -236,26 +236,30 @@ function MessagesSection({ today, mode }: { today: string; mode: MessagesMode })
         <PeriodPicker id={prefix} today={today} state={period} />
         {mode === 'search' ? (
           <form
-            className="flex flex-wrap items-end gap-4"
+            className="flex flex-col gap-2"
             onSubmit={(event) => {
               event.preventDefault();
               setPhone(phoneInput.trim());
             }}
           >
-            <Field id={`${prefix}-phone`} label={t('platform.sms.search.phone')} hint={t('platform.sms.search.phoneHint')}>
-              <Input type="search" inputMode="tel" value={phoneInput} maxLength={32}
-                     onChange={(event) => setPhoneInput(event.target.value)} />
-            </Field>
-            <Field id={`${prefix}-status`} label={t('platform.sms.search.status')}>
-              <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
-                {STATUSES.map((value) => (
-                  <option key={value || 'all'} value={value}>
-                    {t(`platform.sms.statuses.${value || 'ALL'}`)}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Button type="submit">{t('platform.sms.search.submit')}</Button>
+            {/* Sahələr və düymə bir sırada; nömrənin izahı altda (sahənin içində olsaydı, sıranı pozurdu) */}
+            <div className="flex flex-wrap items-end gap-4">
+              <Field id={`${prefix}-phone`} label={t('platform.sms.search.phone')}>
+                <Input type="search" inputMode="tel" value={phoneInput} maxLength={32}
+                       onChange={(event) => setPhoneInput(event.target.value)} />
+              </Field>
+              <Field id={`${prefix}-status`} label={t('platform.sms.search.status')}>
+                <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
+                  {STATUSES.map((value) => (
+                    <option key={value || 'all'} value={value}>
+                      {t(`platform.sms.statuses.${value || 'ALL'}`)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Button type="submit">{t('platform.sms.search.submit')}</Button>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('platform.sms.search.phoneHint')}</p>
           </form>
         ) : null}
         <ApiErrorAlert error={messages.error} />

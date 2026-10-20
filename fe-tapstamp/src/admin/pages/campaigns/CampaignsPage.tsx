@@ -17,7 +17,16 @@ import { Select } from '@/shared/ui/input';
 import { campaignsApi, companyApi, type CampaignRequest, type CampaignView } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
-import { campaignStatus, campaignStatusTone, CAMPAIGN_AUDIENCES, INACTIVE_DAYS, type CampaignAudience } from './campaignLabels';
+import {
+  campaignStatus,
+  campaignStatusTone,
+  CAMPAIGN_AUDIENCES,
+  INACTIVE_DAYS,
+  isAscii,
+  NAME_TOKEN,
+  toLatin,
+  type CampaignAudience,
+} from './campaignLabels';
 
 const LIST_KEY = ['campaigns'] as const;
 const MAX_TEXT = 1000;
@@ -106,6 +115,11 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
   };
 
   const data = text.trim() ? preview.data : undefined;
+  // Bildiriş yalnız istifadəçinin öz mətnindən asılıdır ("Hörmətli" müraciəti nəzərə alınmır)
+  const nonLatin = !isAscii(text);
+  // Latın variantı yalnız mətn həqiqətən latına çevrilə bilirsə təklif olunur (məs. kiril hərfləri çevrilmir)
+  const latinizable = nonLatin && isAscii(toLatin(text));
+  const withNamePlaceholder = (value: string) => value.replaceAll(NAME_TOKEN, t('campaigns.preview.namePlaceholder'));
 
   return (
     <Card>
@@ -178,16 +192,9 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
           {data ? (
             <div className="flex flex-col gap-3 rounded-xl bg-muted p-4 text-sm">
               <p className="font-medium">{t('campaigns.preview.title')}</p>
-              {data.sampleWithoutName ? (
-                <>
-                  <p className="text-muted-foreground">{t('campaigns.preview.withName')}</p>
-                  <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.fullText}</p>
-                  <p className="text-muted-foreground">{t('campaigns.preview.withoutName')}</p>
-                  <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.sampleWithoutName}</p>
-                </>
-              ) : (
-                <p className="whitespace-pre-wrap rounded-lg bg-card p-3">{data.fullText}</p>
-              )}
+              <p className="whitespace-pre-wrap rounded-lg bg-card p-3">
+                {withNamePlaceholder(data.template ?? data.fullText ?? '')}
+              </p>
               <p>
                 {t('campaigns.preview.summary', {
                   recipients: formatNumber(data.recipients ?? 0, lang),
@@ -195,7 +202,6 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
                   segments: segmentRange(data.minSegments, data.segments),
                 })}
               </p>
-              {data.personalized ? <p className="text-muted-foreground">{t('campaigns.preview.personalizedNote')}</p> : null}
               <p className="font-display text-xl font-semibold">
                 {t('campaigns.preview.total', { total: formatNumber(data.totalSms ?? 0, lang) })}
               </p>
@@ -204,29 +210,35 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
                   <div className="flex flex-col gap-2">
                     <p>{t('campaigns.preview.latinOn')}</p>
                     <Button type="button" variant="outline" className="self-start" onClick={() => setLatin(false)}>
-                      {t('campaigns.preview.useAzerbaijani')}
+                      {t('campaigns.preview.useOriginal')}
                     </Button>
                   </div>
                 </Alert>
-              ) : data.encoding === 'UCS_2' ? (
+              ) : nonLatin ? (
                 <Alert tone="info" className="bg-card">
                   <div className="flex flex-col gap-2">
-                    <p>
-                      {t(data.latinCheaper ? 'campaigns.preview.latinAdvice' : 'campaigns.preview.latinSame', {
-                        segments: segmentRange(undefined, data.latinSegments),
-                        total: formatNumber(data.latinTotalSms ?? 0, lang),
-                      })}
-                    </p>
-                    <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">{data.latinText}</p>
-                    <Button type="button" variant="outline" className="self-start" onClick={() => setLatin(true)}>
-                      {t('campaigns.preview.useLatin')}
-                    </Button>
+                    <p>{t('campaigns.preview.nonLatin')}</p>
+                    {latinizable ? (
+                      <>
+                        <p>
+                          {t('campaigns.preview.latinAdvice', {
+                            segments: segmentRange(undefined, data.latinSegments),
+                            total: formatNumber(data.latinTotalSms ?? 0, lang),
+                          })}
+                        </p>
+                        <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">
+                          {withNamePlaceholder(toLatin(data.template ?? data.fullText ?? ''))}
+                        </p>
+                        <Button type="button" variant="outline" className="self-start" onClick={() => setLatin(true)}>
+                          {t('campaigns.preview.useLatin')}
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
                 </Alert>
               ) : null}
             </div>
-          ) : null}
-          <ApiErrorAlert error={text.trim() ? preview.error : null} />
+          ) : null}          <ApiErrorAlert error={text.trim() ? preview.error : null} />
 
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={!text.trim() || create.isPending || !data?.recipients}>

@@ -118,7 +118,7 @@ class CampaignIT extends TapIntegrationTest {
         owner.post("/campaigns/preview", request).andExpect(status().isOk())
                 .andExpect(jsonPath("$.personalized").value(true))
                 .andExpect(jsonPath("$.fullText").value(org.hamcrest.Matchers.matchesPattern("Alpha Kafe: Hörmətli .+, " + text)))
-                .andExpect(jsonPath("$.sampleWithoutName").value("Alpha Kafe: Hörmətli istifadəçi, " + text))
+                .andExpect(jsonPath("$.template").value("Alpha Kafe: Hörmətli {name}, " + text))
                 .andExpect(jsonPath("$.encoding").value("UCS_2"))
                 .andExpect(jsonPath("$.latinText").value(org.hamcrest.Matchers.startsWith("Alpha Kafe: Hormetli ")));
 
@@ -142,7 +142,7 @@ class CampaignIT extends TapIntegrationTest {
         owner.post("/campaigns/preview", request).andExpect(status().isOk())
                 .andExpect(jsonPath("$.latin").value(true))
                 .andExpect(jsonPath("$.encoding").value("GSM_7"))
-                .andExpect(jsonPath("$.sampleWithoutName").value("Alpha Kafe: Hormetli istifadeci, Senbe gunu endirim var!"));
+                .andExpect(jsonPath("$.template").value("Alpha Kafe: Hormetli {name}, Senbe gunu endirim var!"));
         String id = json(owner.post("/campaigns", request).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.latin").value(true)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());

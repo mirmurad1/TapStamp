@@ -11,11 +11,13 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
    - **"Müraciətlə başla"** (istəyə bağlı): hər SMS `Kafe: Hörmətli <ad>, <mətn>` olur, adı olmayan müştəriyə
      `Kafe: Hörmətli istifadəçi, <mətn>`. "Hörmətli" sözündə `ö` olduğu üçün mesaj UCS-2-yə keçir (70 simvol/SMS);
      SMS sayı hər müştərinin öz adı ilə hesablanır (önizləmədə "hər müştəriyə 1–2 SMS" kimi aralıq görünə bilər),
-     cəmi kampaniya yaradılanda alıcıların adları ilə dəqiqləşir. Önizləmədə adı olan (auditoriyadan) və adı
-     olmayan müştəri üçün nümunə göstərilir;
-   - **"Latın hərfləri ilə göndər"** — mətndə Azərbaycan hərfləri olanda önizləmədə həmişə görünür (latın variantı
-     və onun SMS sayı ilə). Seçiləndə bütün mesaj — müraciət (`Hormetli`), müştərinin adı və mətn — göndəriləndə
-     latına çevrilir (160 simvol/SMS); önizləmə və SMS sayı da buna görədir; geri qaytarmaq olar;
+     cəmi kampaniya yaradılanda alıcıların adları ilə dəqiqləşir. Önizləmədə bir mətn göstərilir:
+     `Kafe: Hörmətli <müştərinin adı>, <mətn>`;
+   - **Latın olmayan simvollar** — bildiriş yalnız sahibin öz mətnində ASCII olmayan simvol olanda çıxır ("Hörmətli"
+     müraciəti nəzərə alınmır): "bir SMS-ə 160 yox, 70 simvol sığır". Mətn latına çevrilə bilirsə (Azərbaycan
+     hərfləri), latın variantı, onun SMS sayı və **"Latın hərfləri ilə göndər"** düyməsi də göstərilir; çevrilə
+     bilmirsə (məs. kiril), yalnız bildiriş. Seçiləndə bütün mesaj — müraciət (`Hormetli`), müştərinin adı və mətn —
+     göndəriləndə latına çevrilir (160 simvol/SMS); "Yazıldığı kimi göndər" ilə geri qaytarılır;
    - auditoriya: bütün müştərilər / uzun müddət gəlməyənlər (30, 60, 90 gün) / hədiyyəyə 1–2 möhür qalanlar /
      istifadə olunmamış hədiyyə kartı olanlar; istəyə bağlı filial (həmin filialda möhürü olanlar);
    - **önizləmə**: alıcı sayı, tam mətn, simvol sayı, hər müştəriyə neçə SMS, **cəmi SMS**.

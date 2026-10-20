@@ -43,16 +43,21 @@ public class CampaignService {
     }
 
     /**
-     * Önizləmə ({@code latin} — mesaj latın hərfləri ilə gedəcək, nümunələr və saylar da buna görə): nümunə mətn (fərdi müraciətdə auditoriyadan adı olan müştəri ilə; {@code sampleWithoutName} — adı
-     * olmayan üçün), hər müştəriyə ən az/ən çox SMS və cəmi (hər müştərinin adı ilə hesablanır); həmçinin latın
-     * hərfləri ilə variant (Azərbaycan hərfləri bir SMS-i 160 yox, 70 simvol edir).
+     * Önizləmə ({@code latin} — mesaj latın hərfləri ilə gedəcək, saylar da buna görə): {@code fullText} — nümunə
+     * (fərdi müraciətdə auditoriyadan adı olan müştəri ilə), {@code template} — ad yerinə {@link #NAME_TOKEN} olan
+     * şablon (müştəri panelində "Hörmətli &lt;müştərinin adı&gt;" kimi göstərilir), hər müştəriyə ən az/ən çox SMS və
+     * cəmi (hər müştərinin adı ilə hesablanır); həmçinin latın hərfləri ilə variant (ASCII olmayan simvol bir SMS-i
+     * 160 yox, 70 simvol edir).
      */
-    public record Preview(long recipients, boolean personalized, boolean latin, String fullText, @Nullable String sampleWithoutName,
+    public record Preview(long recipients, boolean personalized, boolean latin, String fullText, String template,
                           String encoding, int characters, int segments, int minSegments, long totalSms,
                           String latinText, int latinSegments, long latinTotalSms, boolean latinCheaper) {
     }
 
     private static final int LIST_LIMIT = 100;
+
+    /** Önizləmə şablonunda müştəri adının yeri. */
+    public static final String NAME_TOKEN = "{name}";
 
     private final CampaignMapper campaigns;
     private final CompanySettings company;
@@ -190,8 +195,8 @@ public class CampaignService {
         String sampleName = names == null ? null
                 : names.stream().filter(n -> n != null && !n.isBlank()).findFirst().orElse(null);
         String full = CampaignTexts.message(company, draft.text(), draft.personalized(), sampleName, draft.latin());
-        String withoutName = draft.personalized() && sampleName != null
-                ? CampaignTexts.message(company, draft.text(), true, null, draft.latin()) : null;
+        String template = draft.personalized()
+                ? CampaignTexts.message(company, draft.text(), true, NAME_TOKEN, draft.latin()) : full;
         String latin = CampaignTexts.latin(full);
         SmsSegments.Info info = CampaignTexts.analyze(full);
         List<@Nullable String> forTotals = names != null ? names : java.util.Collections.nCopies((int) recipients, null);
@@ -199,7 +204,7 @@ public class CampaignService {
                 draft.latin());
         CampaignTexts.Totals latinTotals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals,
                 true);
-        return new Preview(recipients, draft.personalized(), draft.latin(), full, withoutName, info.encoding().name(),
+        return new Preview(recipients, draft.personalized(), draft.latin(), full, template, info.encoding().name(),
                 info.units(), totals.maxSegments(), totals.minSegments(), totals.total(), latin,
                 latinTotals.maxSegments(), latinTotals.total(), latinTotals.total() < totals.total());
     }

@@ -27,3 +27,19 @@ export function campaignStatusTone(status: string | undefined): 'neutral' | 'suc
       return 'neutral';
   }
 }
+
+/** Önizləmə şablonunda müştəri adının yeri (backend-dəki CampaignService.NAME_TOKEN). */
+export const NAME_TOKEN = '{name}';
+
+/** Yalnız ASCII: SMS 160 simvollu (LATIN) formatda gedir; əks halda 70 simvol (UNICODE). */
+export function isAscii(text: string): boolean {
+  return [...text].every((ch) => ch.charCodeAt(0) < 128);
+}
+
+const LATIN_FROM = 'əƏşŞğĞıİçÇöÖüÜ';
+const LATIN_TO = 'eEsSgGiIcCoOuU';
+
+/** Azərbaycan hərflərinin latın qarşılığı (backend-dəki CampaignTexts.latin ilə eyni). */
+export function toLatin(text: string): string {
+  return [...text].map((ch) => (LATIN_FROM.includes(ch) ? LATIN_TO.charAt(LATIN_FROM.indexOf(ch)) : ch)).join('');
+}

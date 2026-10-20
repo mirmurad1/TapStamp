@@ -5742,12 +5742,12 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "sampleWithoutName" : {
-            "type" : "string"
-          },
           "segments" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "template" : {
+            "type" : "string"
           },
           "totalSms" : {
             "type" : "integer",

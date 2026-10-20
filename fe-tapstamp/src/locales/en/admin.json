@@ -754,14 +754,12 @@
       "title": "Preview",
       "summary": "{{recipients}} recipients · {{characters}} characters · {{segments}} SMS per customer",
       "total": "Total {{total}} SMS",
-      "latinAdvice": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü) — one SMS holds 70 characters instead of 160. With Latin letters it would be {{segments}} SMS per customer, {{total}} SMS in total:",
+      "latinAdvice": "In Latin letters, {{segments}} SMS per customer, {{total}} SMS in total will be sent:",
       "useLatin": "Send in Latin letters",
-      "withName": "To a customer with a name:",
-      "withoutName": "To a customer without a name:",
-      "personalizedNote": "The word \"Hörmətli\" contains \"ö\": one SMS holds 70 characters. The SMS count is calculated with each customer's own name.",
-      "latinSame": "The text contains Azerbaijani letters (ə, ş, ğ, ı, ç, ö, ü), so one SMS holds 70 characters instead of 160. In Latin letters it would also be {{segments}} SMS per customer, {{total}} SMS in total:",
-      "latinOn": "The SMS will be sent in Latin letters, including the greeting, the customer name and the text (ə→e, ş→s, ğ→g, ı→i, ç→c, ö→o, ü→u). One SMS holds 160 characters.",
-      "useAzerbaijani": "Send with Azerbaijani letters"
+      "latinOn": "The SMS will be sent in Latin letters (including the greeting, the customer name and the text). One SMS holds 160 characters.",
+      "namePlaceholder": "<customer name>",
+      "nonLatin": "The text contains non-Latin characters — one SMS holds 70 characters instead of 160.",
+      "useOriginal": "Send as written"
     },
     "list": {
       "title": "My campaigns",

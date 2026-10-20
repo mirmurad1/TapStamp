@@ -3142,9 +3142,9 @@ export interface components {
             personalized?: boolean;
             /** Format: int64 */
             recipients?: number;
-            sampleWithoutName?: string;
             /** Format: int32 */
             segments?: number;
+            template?: string;
             /** Format: int64 */
             totalSms?: number;
         };
