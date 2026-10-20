@@ -25,6 +25,7 @@ import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { emailField, useValidationMessage } from '../../lib/forms';
 import { DomainsCard } from './DomainsCard';
+import { TenantSmsLimitCard } from './SmsLimitCards';
 import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
 import { TenantStatusBadge } from './TenantStatusBadge';
@@ -56,6 +57,7 @@ export function TenantDetailPage() {
               <StatsCard tenantId={tenantId} />
               <OwnersCard tenantId={tenantId} onNotice={setNotice} />
               <TenantTagsCard tenantId={tenantId} />
+              <TenantSmsLimitCard tenantId={tenantId} />
             </>
           ) : (
             <Alert tone="info">{t('platform.detail.unavailable')}</Alert>

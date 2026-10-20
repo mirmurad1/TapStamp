@@ -3601,6 +3601,26 @@
         "tags" : [ "Platforma: SMS hesabatı" ]
       }
     },
+    "/api/v1/platform/sms-usage/budget" : {
+      "get" : {
+        "description" : "Bu gün (Bakı vaxtı ilə) bütün şirkətlər üzrə göndərilən giriş kodları və gündəlik büdcə (`APP_SMS_PLATFORM_DAILY`). Büdcə dolanda yeni kodlar göndərilmir.",
+        "operationId" : "budget",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlatformSmsBudget"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Platformanın gündəlik SMS büdcəsi",
+        "tags" : [ "Platforma: SMS limitləri" ]
+      }
+    },
     "/api/v1/platform/sms-usage/messages" : {
       "get" : {
         "description" : "Hansı nömrəyə hansı mesaj getdiyi. `from` və `to` daxil olmaqla (Bakı vaxtı), ən çox 2 il; `status` — SENT və ya FAILED (boşdursa hamısı); `phone` — nömrə və ya onun hissəsi (+994…, 050…, 50 123). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
@@ -4004,6 +4024,72 @@
         },
         "summary" : "Sahibin TOTP-sinin sıfırlanması",
         "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/sms-limit" : {
+      "get" : {
+        "description" : "Limit yalnız sistemdə olmayan (yeni) nömrələrə göndərilən giriş kodlarını sayır; qeydiyyatlı müştərilərin kodları limitə düşmür. `usedToday` — bu gün (şirkətin saatı ilə) yeni nömrələrə göndərilən kodlar.",
+        "operationId" : "tenantLimit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantSmsLimit"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin gündəlik SMS limiti",
+        "tags" : [ "Platforma: SMS limitləri" ]
+      },
+      "put" : {
+        "description" : "Məsələn, açılış günü üçün artırmaq. Auditə yazılır.",
+        "operationId" : "updateTenantLimit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SmsLimitRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantSmsLimit"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin gündəlik SMS limitini dəyişmək",
+        "tags" : [ "Platforma: SMS limitləri" ]
       }
     },
     "/api/v1/platform/tenants/{tenantId}/stats" : {
@@ -6643,6 +6729,19 @@
           }
         }
       },
+      "PlatformSmsBudget" : {
+        "type" : "object",
+        "properties" : {
+          "dailyBudget" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "usedToday" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "PlatformTagRegisterRequest" : {
         "type" : "object",
         "description" : "Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər)",
@@ -7387,6 +7486,18 @@
           }
         }
       },
+      "SmsLimitRequest" : {
+        "type" : "object",
+        "properties" : {
+          "limit" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Gündə yeni nömrələrə ən çox neçə giriş kodu (10–100000); null — standart dəyər",
+            "maximum" : 100000,
+            "minimum" : 10
+          }
+        }
+      },
       "SmsMessagePage" : {
         "type" : "object",
         "description" : "SMS-lərin bir səhifəsi; total — filtrə uyğun ümumi say",
@@ -7827,6 +7938,26 @@
           },
           "timezone" : {
             "type" : "string"
+          }
+        }
+      },
+      "TenantSmsLimit" : {
+        "type" : "object",
+        "properties" : {
+          "custom" : {
+            "type" : "boolean"
+          },
+          "defaultLimit" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "limit" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "usedToday" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

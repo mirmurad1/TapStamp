@@ -23,6 +23,8 @@ public enum ErrorCode {
     /** Loqo faylı tələblərə uyğun deyil (növ, həcm, ölçü). */
     LOGO_INVALID(HttpStatus.BAD_REQUEST),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
+    /** Şirkətin (yeni nömrələrə) və ya platformanın gündəlik SMS kod limiti dolub. */
+    SMS_DAILY_LIMIT_REACHED(HttpStatus.TOO_MANY_REQUESTS),
     /** Sessiyanın vaxtı bitib (fəaliyyətsizlik və ya mütləq limit) — yenidən daxil olmaq lazımdır. */
     SESSION_EXPIRED(HttpStatus.UNAUTHORIZED),
     /** Email və ya şifrə yanlışdır (hansının səhv olduğu açıqlanmır). */

@@ -376,6 +376,18 @@
       "pauseReason": "Pause reason: {{reason}}",
       "resume": "Resume",
       "resumeConfirm": "Is the SMS account problem fixed? Sending will resume."
+    },
+    "smsLimit": {
+      "title": "SMS limit",
+      "description": "How many sign-in codes per day can be sent to new (unregistered) numbers. Codes for registered customers do not count.",
+      "usedToday": "Today: {{used}} / {{limit}}",
+      "custom": "Custom limit (default: {{default}})",
+      "default": "Default limit",
+      "limit": "Daily limit",
+      "limitHint": "10–100000. For example, raise it temporarily for an opening day.",
+      "reset": "Reset to default",
+      "budgetTitle": "Daily SMS budget",
+      "budgetDescription": "Sign-in codes sent today across all companies (Baku time). When the budget is used up, no new codes are sent; an alert is sent at 80%."
     }
   },
   "staffConsole": {

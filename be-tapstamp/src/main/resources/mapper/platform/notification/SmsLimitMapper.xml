@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- SMS limitləri: şirkətin fərdi limiti, platformanın günlük OTP sayı, xəbərdarlıqların bir dəfə göndərilməsi -->
+<mapper namespace="az.tapstamp.notification.sms.repository.SmsLimitMapper">
+
+    <select id="tenantLimit" resultType="int">
+        SELECT daily_new_otp_limit FROM tenant_sms_limits WHERE tenant_id = #{tenantId}
+    </select>
+
+    <insert id="upsertTenantLimit">
+        INSERT INTO tenant_sms_limits (tenant_id, daily_new_otp_limit, updated_at, updated_by)
+        VALUES (#{tenantId}, #{limit}, #{now}, #{updatedBy})
+        ON CONFLICT (tenant_id) DO UPDATE
+            SET daily_new_otp_limit = EXCLUDED.daily_new_otp_limit, updated_at = EXCLUDED.updated_at,
+                updated_by = EXCLUDED.updated_by
+    </insert>
+
+    <delete id="deleteTenantLimit">
+        DELETE FROM tenant_sms_limits WHERE tenant_id = #{tenantId}
+    </delete>
+
+    <select id="countOtpSince" resultType="long">
+        SELECT count(*) FROM sms_messages WHERE purpose = 'OTP' AND created_at &gt;= #{since}
+    </select>
+
+    <insert id="recordAlert">
+        INSERT INTO sms_limit_alerts (day, scope, level, created_at) VALUES (#{day}, #{scope}, #{level}, #{now})
+        ON CONFLICT DO NOTHING
+    </insert>
+</mapper>

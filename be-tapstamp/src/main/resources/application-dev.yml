@@ -26,6 +26,7 @@ app:
   rate-limits:
     admin-login-per-ip: 300
     otp-request-per-ip: 300
+    otp-request-per-ip-daily: 3000
     otp-verify-per-ip: 600
     token-redeem-per-ip: 200
 

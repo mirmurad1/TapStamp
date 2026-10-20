@@ -2107,6 +2107,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/sms-usage/budget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platformanın gündəlik SMS büdcəsi
+         * @description Bu gün (Bakı vaxtı ilə) bütün şirkətlər üzrə göndərilən giriş kodları və gündəlik büdcə (`APP_SMS_PLATFORM_DAILY`). Büdcə dolanda yeni kodlar göndərilmir.
+         */
+        get: operations["budget"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/sms-usage/messages": {
         parameters: {
             query?: never;
@@ -2283,6 +2303,30 @@ export interface paths {
          * @description Sahib həm telefonunu, həm bərpa kodlarını itirəndə. Step-up tələb edir; audit jurnalına yazılır.
          */
         post: operations["resetOwnerMfa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/sms-limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin gündəlik SMS limiti
+         * @description Limit yalnız sistemdə olmayan (yeni) nömrələrə göndərilən giriş kodlarını sayır; qeydiyyatlı müştərilərin kodları limitə düşmür. `usedToday` — bu gün (şirkətin saatı ilə) yeni nömrələrə göndərilən kodlar.
+         */
+        get: operations["tenantLimit"];
+        /**
+         * Şirkətin gündəlik SMS limitini dəyişmək
+         * @description Məsələn, açılış günü üçün artırmaq. Auditə yazılır.
+         */
+        put: operations["updateTenantLimit"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3481,6 +3525,12 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        PlatformSmsBudget: {
+            /** Format: int64 */
+            dailyBudget?: number;
+            /** Format: int64 */
+            usedToday?: number;
+        };
         /** @description Yeni çip: UID 7 bayt (14 hex simvol, iki nöqtə və boşluq ola bilər) */
         PlatformTagRegisterRequest: {
             /** Format: uuid */
@@ -3803,6 +3853,13 @@ export interface components {
         SessionStateResponse: {
             state?: string;
         };
+        SmsLimitRequest: {
+            /**
+             * Format: int32
+             * @description Gündə yeni nömrələrə ən çox neçə giriş kodu (10–100000); null — standart dəyər
+             */
+            limit?: number;
+        };
         /** @description SMS-lərin bir səhifəsi; total — filtrə uyğun ümumi say */
         SmsMessagePage: {
             items?: components["schemas"]["SmsMessageRow"][];
@@ -3994,6 +4051,15 @@ export interface components {
             slug?: string;
             status?: string;
             timezone?: string;
+        };
+        TenantSmsLimit: {
+            custom?: boolean;
+            /** Format: int32 */
+            defaultLimit?: number;
+            /** Format: int32 */
+            limit?: number;
+            /** Format: int64 */
+            usedToday?: number;
         };
         TenantStatusRequest: {
             status: string;
@@ -6740,6 +6806,26 @@ export interface operations {
             };
         };
     };
+    budget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformSmsBudget"];
+                };
+            };
+        };
+    };
     messages: {
         parameters: {
             query: {
@@ -6994,6 +7080,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    tenantLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantSmsLimit"];
+                };
+            };
+        };
+    };
+    updateTenantLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SmsLimitRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantSmsLimit"];
+                };
             };
         };
     };

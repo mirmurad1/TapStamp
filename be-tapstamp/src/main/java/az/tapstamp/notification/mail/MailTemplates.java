@@ -29,6 +29,13 @@ public class MailTemplates {
         return render("invitation", to, language, tenantId, companyName, link, validHours);
     }
 
+    /** Platformaya: SMS limitinin 80% / 100%-i doldu. */
+    public MailMessage smsLimitAlert(String to, Language language, String scope, int level, long used, long limit,
+                                     java.time.LocalDate day) {
+        return render(level >= 100 ? "smsLimitReached" : "smsLimitWarning", to, language, null, scope, used, limit,
+                day.toString());
+    }
+
     private MailMessage render(String template, String to, Language language, String tenantId, Object... args) {
         String subject = messages.getMessage("mail." + template + ".subject", args, language.locale());
         String body = messages.getMessage("mail." + template + ".body", args, language.locale());

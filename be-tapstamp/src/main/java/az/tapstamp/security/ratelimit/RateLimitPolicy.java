@@ -14,11 +14,16 @@ public enum RateLimitPolicy {
     PASSWORD_RESET_PER_EMAIL(3, Duration.ofHours(1)),
     PASSWORD_RESET_PER_IP(10, Duration.ofHours(1)),
     TOKEN_REDEEM_PER_IP(20, Duration.ofMinutes(15)),
-    /** Müştəri OTP göndərişi — telefon üzrə (15 dəqiqədə 3 və gündə 10). */
+    /**
+     * Müştəri OTP göndərişi — telefon üzrə: 15 dəqiqədə 3; giriş kodu gündə 3 (bir "yenidən göndər" və bir səhv cəhd
+     * üçün yer), təkrar təsdiq kodları (hesabın silinməsi, hədiyyə kartı) ayrıca — gündə 10.
+     */
     OTP_REQUEST_PER_PHONE(3, Duration.ofMinutes(15)),
-    OTP_REQUEST_PER_PHONE_DAILY(10, Duration.ofDays(1)),
-    /** Kafenin Wi-Fi-ında çox müştəri eyni IP-dən gəlir — limit yumşaqdır. */
+    OTP_REQUEST_PER_PHONE_DAILY(3, Duration.ofDays(1)),
+    OTP_STEP_UP_PER_PHONE_DAILY(10, Duration.ofDays(1)),
+    /** Kafenin Wi-Fi-ında və mobil operatorlarda (CGNAT) çox müştəri eyni IP-dən gəlir — limit yumşaqdır. */
     OTP_REQUEST_PER_IP(20, Duration.ofHours(1)),
+    OTP_REQUEST_PER_IP_DAILY(100, Duration.ofDays(1)),
     /** Bir şirkətə hücum digərlərinin SMS limitini tükətmir. */
     OTP_REQUEST_PER_TENANT(100, Duration.ofMinutes(1)),
     /** Bütün platforma üzrə — SMS xərcinin qorunması. */

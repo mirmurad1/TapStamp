@@ -376,6 +376,18 @@
       "pauseReason": "Dayandırılma səbəbi: {{reason}}",
       "resume": "Davam et",
       "resumeConfirm": "SMS hesabındakı problem həll olunub? Göndəriş davam edəcək."
+    },
+    "smsLimit": {
+      "title": "SMS limiti",
+      "description": "Gündə yeni (qeydiyyatsız) nömrələrə ən çox neçə giriş kodu göndərilə bilər. Qeydiyyatlı müştərilərin kodları limitə düşmür.",
+      "usedToday": "Bu gün: {{used}} / {{limit}}",
+      "custom": "Fərdi limit (standart: {{default}})",
+      "default": "Standart limit",
+      "limit": "Gündəlik limit",
+      "limitHint": "10–100000. Məsələn, açılış günü üçün müvəqqəti artırın.",
+      "reset": "Standarta qaytar",
+      "budgetTitle": "Gündəlik SMS büdcəsi",
+      "budgetDescription": "Bütün şirkətlər üzrə bu gün (Bakı vaxtı) göndərilən giriş kodları. Büdcə dolanda yeni kodlar göndərilmir; 80%-də xəbərdarlıq gəlir."
     }
   },
   "staffConsole": {

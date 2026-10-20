@@ -476,7 +476,22 @@ export const platformCampaignsApi = {
     ),
 };
 
+export type TenantSmsLimit = Schemas['TenantSmsLimit'];
+
 export const platformSmsApi = {
+  /** Şirkətin gündəlik SMS limiti (yeni nömrələrə giriş kodları) və bu günkü istifadə. */
+  tenantLimit: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/sms-limit', { params: { path: { tenantId } } })),
+  /** {@code null} — standart dəyərə qaytarmaq. */
+  updateTenantLimit: (tenantId: string, limit: number | null) =>
+    unwrap(
+      api.PUT('/api/v1/platform/tenants/{tenantId}/sms-limit', {
+        params: { path: { tenantId } },
+        body: { limit: limit ?? undefined },
+      }),
+    ),
+  /** Platformanın gündəlik büdcəsi və bu günkü istifadə. */
+  budget: () => unwrap(api.GET('/api/v1/platform/sms-usage/budget')),
   /** GÃ¼nlÉ™r daxil (YYYY-MM-DD, BakÄ± vaxtÄ±). */
   usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
   /** SMS axtarÄ±ÅŸÄ±: status (SENT/FAILED) vÉ™ nÃ¶mrÉ™ (vÉ™ ya hissÉ™si) istÉ™yÉ™ baÄŸlÄ±; 20-lik sÉ™hifÉ™lÉ™r (page 0-dan). */

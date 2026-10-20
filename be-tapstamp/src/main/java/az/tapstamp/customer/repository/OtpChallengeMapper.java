@@ -18,7 +18,7 @@ public interface OtpChallengeMapper {
 
     record NewChallenge(UUID id, byte[] phoneHash, byte[] phoneEnc, byte[] codeHash, Language language,
                         int maxAttempts, Purpose purpose, UUID customerId, String ip, Instant createdAt,
-                        Instant expiresAt) {
+                        Instant expiresAt, boolean newNumber) {
     }
 
     /** Cəhd sayı artırılandan sonrakı vəziyyət (kod hələ yoxlanılmayıb). */
@@ -38,6 +38,9 @@ public interface OtpChallengeMapper {
     void supersedeActive(byte[] phoneHash, Purpose purpose);
 
     void insert(NewChallenge challenge);
+
+    /** {@code since}-dən bəri yeni (qeydiyyatsız) nömrələrə göndərilən giriş kodları — şirkətin gündəlik SMS limiti. */
+    long countNewNumbersSince(Instant since);
 
     /**
      * Cəhd sayını atomik artırır. Yalnız aktiv, vaxtı keçməmiş və limiti dolmamış kod üçün işləyir — paralel sorğularla

@@ -86,6 +86,7 @@ public class OtpService {
     private final PhoneHasher phoneHasher;
     private final EnvelopeCipher cipher;
     private final RateLimiter rateLimiter;
+    private final OtpBudget budget;
     private final CompanySettings companySettings;
     private final SmsProvider sms;
     private final SmsTemplates templates;
@@ -98,7 +99,7 @@ public class OtpService {
 
     public OtpService(OtpChallengeMapper challenges, TapTokenMapper tapTokens, OtpCodes codes, CustomerMapper customers,
                       PhoneNumberService phoneNumbers, PhoneHasher phoneHasher,
-                      @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter,
+                      @Qualifier("tenantCipher") EnvelopeCipher cipher, RateLimiter rateLimiter, OtpBudget budget,
                       CompanySettings companySettings, SmsProvider sms,
                       SmsTemplates templates, SmsLog smsLog,
                       @Qualifier("applicationTaskExecutor") TaskExecutor executor, AuditLogger audit,
@@ -111,6 +112,7 @@ public class OtpService {
         this.phoneHasher = phoneHasher;
         this.cipher = cipher;
         this.rateLimiter = rateLimiter;
+        this.budget = budget;
         this.companySettings = companySettings;
         this.sms = sms;
         this.templates = templates;
@@ -177,14 +179,19 @@ public class OtpService {
         byte[] phoneHash = phoneHasher.hash(tenant.id(), phone);
 
         rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_PER_IP, scope, client.ip());
+        rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_PER_IP_DAILY, scope, client.ip());
         Optional<Instant> last = challenges.lastCreatedAt(phoneHash, purpose);
         if (last.isPresent() && last.get().plus(properties.otpResendCooldown()).isAfter(now)) {
             throw RateLimiter.rateLimited(Duration.between(now, last.get().plus(properties.otpResendCooldown())).toNanos());
         }
         rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_PER_PHONE, scope, phone);
-        rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_PER_PHONE_DAILY, scope, phone);
+        rateLimiter.consume(purpose == Purpose.LOGIN ? RateLimitPolicy.OTP_REQUEST_PER_PHONE_DAILY
+                : RateLimitPolicy.OTP_STEP_UP_PER_PHONE_DAILY, scope, phone);
         rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_PER_TENANT, scope, "all");
         rateLimiter.consume(RateLimitPolicy.OTP_REQUEST_GLOBAL, GLOBAL_SCOPE, "all");
+        // Gündəlik SMS büdcəsi: şirkət — yalnız yeni nömrələr, platforma — bütün kodlar
+        boolean newNumber = purpose == Purpose.LOGIN && customers.findByPhoneHash(phoneHash).isEmpty();
+        budget.check(tenant, newNumber);
 
         UUID id = Ids.newId();
         String code = codes.generate();
@@ -192,7 +199,7 @@ public class OtpService {
         OtpChallengeMapper.NewChallenge challenge = new OtpChallengeMapper.NewChallenge(id, phoneHash,
                 cipher.encryptString(KeyPurpose.PII, phone, Aad.tenantField(tenant.id(), "otp_challenges", "phone_enc", id)),
                 codes.hash(id, code), language, properties.otpMaxAttempts(), purpose, customerId, client.ip(), now,
-                expiresAt);
+                expiresAt, newNumber);
         tx.executeWithoutResult(status -> {
             challenges.supersedeActive(phoneHash, purpose);
             challenges.insert(challenge);

@@ -18,6 +18,7 @@ import { platformSmsApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { toCsv } from '../../lib/csv';
+import { PlatformSmsBudgetCard } from './SmsLimitCards';
 import { downloadBlob } from '../../lib/download';
 
 const PERIODS = ['thisMonth', 'lastMonth', 'last7', 'last30', 'thisYear', 'custom'] as const;
@@ -107,6 +108,7 @@ export function SmsUsagePage() {
         <h1 className="font-display text-2xl font-semibold">{t('platform.sms.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('platform.sms.subtitle')}</p>
       </div>
+      <PlatformSmsBudgetCard />
       <UsageSection today={today} />
       <MessagesSection today={today} mode="failures" />
       <MessagesSection today={today} mode="search" />

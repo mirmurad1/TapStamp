@@ -95,6 +95,12 @@ app:
   security:
     cookie-secure: true
     hsts-enabled: true
+  # Giriş kodlarının gündəlik SMS büdcəsi (qərar #53): şirkət — yalnız yeni nömrələrə (platforma şirkət üzrə dəyişə
+  # bilir), platforma — bütün kodlar (sabit büdcə). 80% və 100%-də xəbərdarlıq — alert-email boşdursa yalnız audit/log.
+  sms-limits:
+    tenant-daily-new: ${APP_SMS_TENANT_DAILY_NEW:100}
+    platform-daily: ${APP_SMS_PLATFORM_DAILY:1500}
+    alert-email: ${APP_SMS_ALERT_EMAIL:}
   notifications:
     sms-provider: ${APP_SMS_PROVIDER:console}
     mail-provider: ${APP_MAIL_PROVIDER:console}

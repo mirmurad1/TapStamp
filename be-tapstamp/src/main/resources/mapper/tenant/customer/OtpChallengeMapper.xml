@@ -17,10 +17,14 @@
 
     <insert id="insert">
         INSERT INTO otp_challenges (id, phone_hash, phone_enc, code_hash, language, attempts, max_attempts, status,
-                                    purpose, customer_id, ip, created_at, expires_at)
+                                    purpose, customer_id, ip, created_at, expires_at, new_number)
         VALUES (#{id}, #{phoneHash}, #{phoneEnc}, #{codeHash}, #{language}, 0, #{maxAttempts}, 'ACTIVE', #{purpose},
-                #{customerId}, CAST(#{ip} AS inet), #{createdAt}, #{expiresAt})
+                #{customerId}, CAST(#{ip} AS inet), #{createdAt}, #{expiresAt}, #{newNumber})
     </insert>
+
+    <select id="countNewNumbersSince" resultType="long">
+        SELECT count(*) FROM otp_challenges WHERE new_number AND created_at &gt;= #{since}
+    </select>
 
     <select id="attempt" resultType="az.tapstamp.customer.repository.OtpChallengeMapper$Attempt" flushCache="true">
         UPDATE otp_challenges SET attempts = attempts + 1
