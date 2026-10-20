@@ -874,13 +874,40 @@
       "friend": "Friend",
       "status": "Status",
       "date": "Date",
-      "rewardedAt": "bonus: {{date}}"
+      "rewardedAt": "bonus: {{date}}",
+      "activity": "Visits",
+      "visits": "Visits",
+      "lastVisit": "Last visit"
     },
     "status": {
       "PENDING": "Pending",
       "REWARDED": "Rewarded",
       "EXPIRED": "Expired",
       "LIMIT_REACHED": "Monthly limit"
+    },
+    "activity": {
+      "ALL": "All",
+      "NONE": "Not visited",
+      "ONCE": "Visited once",
+      "RETURNED": "Returned (2+ days)"
+    },
+    "dashboard": {
+      "title": "Invite a friend",
+      "description": "Friends invited in the selected period and their visits.",
+      "details": "Details",
+      "invited": "Invited",
+      "invitedHint": "friends who signed up with a link",
+      "came": "Visited",
+      "ofInvited": "{{rate}} of invited",
+      "returned": "Returned",
+      "ofCame": "{{rate}} of those who visited (2+ different days)",
+      "visits": "Visits",
+      "visitsHint": "friends’ NFC stamps (bonuses excluded)",
+      "giftCards": "Earned a gift",
+      "giftCardsHint": "friends who earned a gift card",
+      "bonusStamps": "Bonus stamps",
+      "bonusStampsHint": "the program’s “cost” — bonus stamps granted",
+      "topTitle": "Top referrers"
     }
   }
 }

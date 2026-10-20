@@ -61,20 +61,80 @@
         FROM referrals WHERE referrer_id = #{referrerId}
     </select>
 
+    <!-- Dostun gəlişləri: yalnız təsdiqlənmiş NFC möhürləri (bonus və əl ilə möhürlər gəliş deyil) -->
+    <sql id="friendVisits">
+        LEFT JOIN LATERAL (
+            SELECT count(*) AS visits, count(DISTINCT s.local_date) AS days, max(s.created_at) AS last_visit_at
+            FROM stamps s
+            WHERE s.customer_id = r.friend_id AND s.source = 'NFC_TAP' AND s.status = 'CONFIRMED'
+        ) v ON true
+    </sql>
+
+    <!-- Siyahı süzgəci: NONE — gəlməyib, ONCE — bir gün gəlib, RETURNED — 2+ fərqli gündə -->
+    <sql id="activityFilter">
+        <where>
+            <if test="activity == 'NONE'">v.visits = 0</if>
+            <if test="activity == 'ONCE'">v.days = 1</if>
+            <if test="activity == 'RETURNED'">v.days &gt;= 2</if>
+        </where>
+    </sql>
+
     <select id="list" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralRow">
         SELECT r.id, r.referrer_id, ref.name AS referrer_name, ref.phone_masked AS referrer_phone,
                r.friend_id, fr.name AS friend_name, fr.phone_masked AS friend_phone,
                CASE WHEN r.status = 'PENDING' AND r.expires_at &lt;= #{now} THEN 'EXPIRED' ELSE r.status END AS status,
-               r.created_at, r.expires_at, r.rewarded_at
+               r.created_at, r.expires_at, r.rewarded_at, v.visits, v.last_visit_at
         FROM referrals r
         JOIN customers ref ON ref.id = r.referrer_id
         JOIN customers fr ON fr.id = r.friend_id
+        <include refid="friendVisits"/>
+        <include refid="activityFilter"/>
         ORDER BY r.created_at DESC, r.id DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="count" resultType="long">
-        SELECT count(*) FROM referrals
+        SELECT count(*) FROM referrals r
+        <include refid="friendVisits"/>
+        <include refid="activityFilter"/>
+    </select>
+
+    <!-- Dövrdə yaranan dəvətlər və dostların gəlişləri (filial verilibsə — yalnız o filialdakı gəlişlər) -->
+    <sql id="periodVisits">
+        WITH r AS (
+            SELECT id, referrer_id, friend_id FROM referrals
+            WHERE created_at &gt;= #{from} AND created_at &lt; #{to}
+        ),
+        v AS (
+            SELECT s.customer_id, count(*) AS visits, count(DISTINCT s.local_date) AS days
+            FROM stamps s JOIN r ON r.friend_id = s.customer_id
+            WHERE s.source = 'NFC_TAP' AND s.status = 'CONFIRMED'
+            <if test="branchId != null">AND s.branch_id = #{branchId}</if>
+            GROUP BY s.customer_id
+        )
+    </sql>
+
+    <select id="periodStats" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralStats">
+        <include refid="periodVisits"/>
+        SELECT (SELECT count(*) FROM r) AS invited,
+               (SELECT count(*) FROM v) AS came,
+               (SELECT count(*) FROM v WHERE days &gt;= 2) AS returned,
+               (SELECT coalesce(sum(visits), 0) FROM v) AS visits,
+               (SELECT count(DISTINCT g.customer_id) FROM rewards g JOIN r ON r.friend_id = g.customer_id) AS gift_cards,
+               (SELECT count(*) FROM stamps s JOIN r ON s.referral_id = r.id
+                WHERE s.source = 'REFERRAL' AND s.status = 'CONFIRMED') AS bonus_stamps
+    </select>
+
+    <select id="topReferrers" resultType="az.tapstamp.referral.repository.ReferralMapper$TopReferrer">
+        <include refid="periodVisits"/>
+        SELECT r.referrer_id AS customer_id, c.name, c.phone_masked AS phone, count(*) AS invited,
+               count(v.customer_id) AS came, count(v.customer_id) FILTER (WHERE v.days &gt;= 2) AS returned
+        FROM r
+        JOIN customers c ON c.id = r.referrer_id
+        LEFT JOIN v ON v.customer_id = r.friend_id
+        GROUP BY r.referrer_id, c.name, c.phone_masked
+        ORDER BY came DESC, invited DESC, r.referrer_id
+        LIMIT #{limit}
     </select>
 
     <select id="summary" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralSummary">

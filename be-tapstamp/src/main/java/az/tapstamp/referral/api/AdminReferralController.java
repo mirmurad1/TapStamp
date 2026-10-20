@@ -1,5 +1,8 @@
 package az.tapstamp.referral.api;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import az.tapstamp.referral.ReferralService;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralRow;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralSettings;
@@ -14,6 +17,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,10 +72,26 @@ public class AdminReferralController {
     }
 
     @GetMapping
-    @Operation(summary = "Dəvətlər", description = "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50). Telefonlar maskalı.")
+    @Operation(summary = "Dəvətlər", description = """
+            Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. \
+            `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), \
+            `size` (5, 10, 20, 50).""")
     PageResult<ReferralRow> list(@AuthenticationPrincipal AdminPrincipal principal,
-                         @RequestParam(defaultValue = "0") int page,
-                         @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
-        return referrals.list(principal, PageQuery.of(page, size));
+                                 @RequestParam(defaultValue = "ALL") String activity,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return referrals.list(principal, activity, PageQuery.of(page, size));
+    }
+
+    @GetMapping("/dashboard")
+    @Operation(summary = "İdarəetmə paneli üçün statistika", description = """
+            Dövrdə yaranan dəvətlər: dəvət olunanlar, gələnlər (1+ NFC möhürü), qayıdanlar (2+ fərqli gün), gəlişlər, \
+            hədiyyə kartı qazananlar, bonus möhürlər və ən çox dost gətirən 5 müştəri. `from`/`to` — şirkətin yerli \
+            tarixləri (default son 30 gün); `branchId` verilibsə, gəlişlər yalnız o filialda sayılır.""")
+    ReferralService.Dashboard dashboard(@AuthenticationPrincipal AdminPrincipal principal,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                                        @RequestParam(required = false) UUID branchId) {
+        return referrals.dashboard(principal, from, to, branchId);
     }
 }

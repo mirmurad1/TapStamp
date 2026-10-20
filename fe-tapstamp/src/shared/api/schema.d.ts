@@ -784,9 +784,29 @@ export interface paths {
         };
         /**
          * Dəvətlər
-         * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50). Telefonlar maskalı.
+         * @description Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list_8"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referrals/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * İdarəetmə paneli üçün statistika
+         * @description Dövrdə yaranan dəvətlər: dəvət olunanlar, gələnlər (1+ NFC möhürü), qayıdanlar (2+ fərqli gün), gəlişlər, hədiyyə kartı qazananlar, bonus möhürlər və ən çox dost gətirən 5 müştəri. `from`/`to` — şirkətin yerli tarixləri (default son 30 gün); `branchId` verilibsə, gəlişlər yalnız o filialda sayılır.
+         */
+        get: operations["dashboard"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2928,6 +2948,14 @@ export interface components {
             /** @enum {string} */
             state?: "ACTIVE" | "REFRESH_REQUIRED" | "NONE";
         };
+        Dashboard: {
+            /** Format: date */
+            from?: string;
+            stats?: components["schemas"]["ReferralStats"];
+            /** Format: date */
+            to?: string;
+            topReferrers?: components["schemas"]["TopReferrer"][];
+        };
         DeviceResponse: {
             /** Format: date-time */
             createdAt?: string;
@@ -3558,6 +3586,8 @@ export interface components {
             friendPhone?: string;
             /** Format: uuid */
             id?: string;
+            /** Format: date-time */
+            lastVisitAt?: string;
             /** Format: uuid */
             referrerId?: string;
             referrerName?: string;
@@ -3565,6 +3595,8 @@ export interface components {
             /** Format: date-time */
             rewardedAt?: string;
             status?: string;
+            /** Format: int32 */
+            visits?: number;
         };
         ReferralSettings: {
             enabled?: boolean;
@@ -3589,6 +3621,20 @@ export interface components {
             rewardOn: string;
             /** Format: int32 */
             validDays: number;
+        };
+        ReferralStats: {
+            /** Format: int64 */
+            bonusStamps?: number;
+            /** Format: int64 */
+            came?: number;
+            /** Format: int64 */
+            giftCards?: number;
+            /** Format: int64 */
+            invited?: number;
+            /** Format: int64 */
+            returned?: number;
+            /** Format: int64 */
+            visits?: number;
         };
         ReferralSummary: {
             /** Format: int64 */
@@ -3964,6 +4010,18 @@ export interface components {
             rewardName?: string;
             source?: string;
             status?: string;
+        };
+        TopReferrer: {
+            /** Format: int64 */
+            came?: number;
+            /** Format: uuid */
+            customerId?: string;
+            /** Format: int64 */
+            invited?: number;
+            name?: string;
+            phone?: string;
+            /** Format: int64 */
+            returned?: number;
         };
         UpdateProfileRequest: {
             displayName?: string;
@@ -4963,6 +5021,7 @@ export interface operations {
     list_8: {
         parameters: {
             query?: {
+                activity?: string;
                 page?: number;
                 size?: number;
             };
@@ -4979,6 +5038,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResultReferralRow"];
+                };
+            };
+        };
+    };
+    dashboard: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Dashboard"];
                 };
             };
         };

@@ -874,13 +874,40 @@
       "friend": "Dost",
       "status": "Vəziyyət",
       "date": "Tarix",
-      "rewardedAt": "bonus: {{date}}"
+      "rewardedAt": "bonus: {{date}}",
+      "activity": "Gəliş",
+      "visits": "Gəlişlər",
+      "lastVisit": "Son gəliş"
     },
     "status": {
       "PENDING": "Gözləyir",
       "REWARDED": "Bonus verilib",
       "EXPIRED": "Müddəti bitib",
       "LIMIT_REACHED": "Aylıq limit"
+    },
+    "activity": {
+      "ALL": "Hamısı",
+      "NONE": "Gəlməyib",
+      "ONCE": "Bir dəfə gəlib",
+      "RETURNED": "Qayıdıb (2+ gün)"
+    },
+    "dashboard": {
+      "title": "Dost dəvəti",
+      "description": "Seçilmiş dövrdə dəvət olunan dostlar və onların gəlişləri.",
+      "details": "Ətraflı",
+      "invited": "Dəvət olunub",
+      "invitedHint": "linklə qeydiyyatdan keçən dostlar",
+      "came": "Gəlib",
+      "ofInvited": "dəvət olunanların {{rate}}-i",
+      "returned": "Qayıdıb",
+      "ofCame": "gələnlərin {{rate}}-i (2+ fərqli gün)",
+      "visits": "Gəlişlər",
+      "visitsHint": "dostların NFC möhürləri (bonuslar daxil deyil)",
+      "giftCards": "Hədiyyə alıb",
+      "giftCardsHint": "hədiyyə kartı qazanan dostlar",
+      "bonusStamps": "Bonus möhür",
+      "bonusStampsHint": "proqramın \"xərci\" — verilən bonus möhürlər",
+      "topTitle": "Ən çox dost gətirənlər"
     }
   }
 }

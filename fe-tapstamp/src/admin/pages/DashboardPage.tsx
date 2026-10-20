@@ -23,6 +23,7 @@ import { ApiErrorAlert } from '../components/ApiErrorAlert';
 import { InlineLoading } from '../components/FullPageState';
 import { hasAnyRole } from '../layout/navigation';
 import { useBranchNames } from '../lib/branches';
+import { ReferralDashboard } from './referrals/ReferralDashboard';
 
 const PERIODS = [7, 30, 90, 365] as const;
 
@@ -190,6 +191,8 @@ function Analytics() {
           <CardContent>{languages.data ? <Languages shares={languages.data} /> : <InlineLoading />}</CardContent>
         </Card>
       </div>
+
+      {isOwner ? <ReferralDashboard filter={filter} /> : null}
     </>
   );
 }

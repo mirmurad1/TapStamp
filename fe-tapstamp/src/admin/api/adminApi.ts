@@ -424,13 +424,17 @@ export const platformAuditApi = {
 export type SmsUsageReport = Schemas['SmsUsageReport'];
 
 export type ReferralSettings = Schemas['ReferralSettings'];
+export type ReferralActivity = 'ALL' | 'NONE' | 'ONCE' | 'RETURNED';
 
 /** Dost dÉ™vÉ™ti (ÅŸirkÉ™t sahibi): parametrlÉ™r, xÃ¼lasÉ™ vÉ™ dÉ™vÉ™tlÉ™r. */
 export const referralsApi = {
   settings: () => unwrap(api.GET('/api/v1/admin/referrals/settings')),
   updateSettings: (body: Schemas['ReferralSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/referrals/settings', { body })),
   summary: () => unwrap(api.GET('/api/v1/admin/referrals/summary')),
-  list: (query: PageParams) => unwrap(api.GET('/api/v1/admin/referrals', { params: { query } })),
+  /** {@code activity}: ALL, NONE (gəlməyib), ONCE (bir gün), RETURNED (2+ gün). */
+  list: (query: PageParams & { activity: ReferralActivity }) => unwrap(api.GET('/api/v1/admin/referrals', { params: { query } })),
+  /** İdarəetmə paneli: dövrün statistikası və ən çox dost gətirənlər. */
+  dashboard: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/referrals/dashboard', { params: { query } })),
 };
 
 export type CampaignRequest = Schemas['CampaignRequest'];

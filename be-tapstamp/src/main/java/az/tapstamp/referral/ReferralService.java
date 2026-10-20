@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +23,9 @@ import az.tapstamp.referral.repository.ReferralMapper;
 import az.tapstamp.referral.repository.ReferralMapper.Claimed;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralRow;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralSettings;
+import az.tapstamp.referral.repository.ReferralMapper.ReferralStats;
 import az.tapstamp.referral.repository.ReferralMapper.Stats;
+import az.tapstamp.referral.repository.ReferralMapper.TopReferrer;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralSummary;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -55,6 +58,13 @@ public class ReferralService {
 
     public record ProgramInfo(boolean enabled, String rewardOn, int referrerStamps, int friendStamps) {
     }
+
+    /** İdarəetmə paneli üçün: dövrün statistikası və ən çox dost gətirənlər. */
+    public record Dashboard(LocalDate from, LocalDate to, ReferralStats stats, List<TopReferrer> topReferrers) {
+    }
+
+    public static final List<String> ACTIVITIES = List.of("ALL", "NONE", "ONCE", "RETURNED");
+    private static final int TOP_REFERRERS = 5;
 
     public record CustomerReferral(boolean enabled, String rewardOn, @Nullable String code, int referrerStamps,
                                    int friendStamps,
@@ -228,9 +238,32 @@ public class ReferralService {
         return referrals.settings();
     }
 
-    public PageResult<ReferralRow> list(AdminPrincipal principal, PageQuery page) {
+    public PageResult<ReferralRow> list(AdminPrincipal principal, String activity, PageQuery page) {
         AccessPolicy.requireCompanyWide(principal);
-        return page.result(referrals.list(clock.instant(), page.limit(), page.offset()), referrals.count());
+        if (!ACTIVITIES.contains(activity)) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        return page.result(referrals.list(clock.instant(), activity, page.limit(), page.offset()),
+                referrals.count(activity));
+    }
+
+    /**
+     * Dövrdə ({@code from}–{@code to}, şirkətin yerli tarixləri, hər ikisi daxil; default — son 30 gün) yaranan
+     * dəvətlər üzrə. Filial verilibsə, gəlişlər yalnız o filialda sayılır.
+     */
+    public Dashboard dashboard(AdminPrincipal principal, @Nullable LocalDate from, @Nullable LocalDate to,
+                               @Nullable UUID branchId) {
+        AccessPolicy.requireCompanyWide(principal);
+        ZoneId zone = company.current().timezone();
+        LocalDate end = to != null ? to : LocalDate.ofInstant(clock.instant(), zone);
+        LocalDate start = from != null ? from : end.minusDays(29);
+        if (start.isAfter(end) || start.isBefore(end.minusYears(2))) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        Instant fromAt = start.atStartOfDay(zone).toInstant();
+        Instant toAt = end.plusDays(1).atStartOfDay(zone).toInstant();
+        return new Dashboard(start, end, referrals.periodStats(fromAt, toAt, branchId),
+                referrals.topReferrers(fromAt, toAt, branchId, TOP_REFERRERS));
     }
 
     public ReferralSummary summary(AdminPrincipal principal) {

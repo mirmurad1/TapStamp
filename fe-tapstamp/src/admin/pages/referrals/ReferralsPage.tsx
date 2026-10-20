@@ -15,7 +15,7 @@ import { Select } from '@/shared/ui/input';
 import { Pagination } from '@/shared/ui/pagination';
 import { usePagination } from '@/shared/ui/usePagination';
 
-import { referralsApi, type ReferralSettings } from '../../api/adminApi';
+import { referralsApi, type ReferralActivity, type ReferralSettings } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 
@@ -23,6 +23,7 @@ const SETTINGS_KEY = ['referral-settings'] as const;
 const REWARD_ON = ['FIRST_VISIT', 'REGISTRATION'] as const;
 type RewardOn = (typeof REWARD_ON)[number];
 const STATUSES = ['PENDING', 'REWARDED', 'EXPIRED', 'LIMIT_REACHED'] as const;
+const ACTIVITIES: readonly ReferralActivity[] = ['ALL', 'NONE', 'ONCE', 'RETURNED'];
 type ReferralStatus = (typeof STATUSES)[number];
 
 function referralStatus(value: string | undefined): ReferralStatus {
@@ -201,10 +202,11 @@ function SummaryCard() {
 function ReferralList() {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
-  const paging = usePagination();
+  const [activity, setActivity] = useState<ReferralActivity>('ALL');
+  const paging = usePagination(activity);
   const referrals = useQuery({
-    queryKey: ['referrals', paging.page, paging.size],
-    queryFn: () => referralsApi.list({ page: paging.page, size: paging.size }),
+    queryKey: ['referrals', activity, paging.page, paging.size],
+    queryFn: () => referralsApi.list({ activity, page: paging.page, size: paging.size }),
     placeholderData: keepPreviousData,
   });
   const items = referrals.data?.items ?? [];
@@ -218,8 +220,18 @@ function ReferralList() {
   );
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row flex-wrap items-end justify-between gap-3">
         <CardTitle>{t('referrals.list.title')}</CardTitle>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          {t('referrals.list.activity')}
+          <Select value={activity} onChange={(event) => setActivity(event.target.value as ReferralActivity)}>
+            {ACTIVITIES.map((value) => (
+              <option key={value} value={value}>
+                {t(`referrals.activity.${value}`)}
+              </option>
+            ))}
+          </Select>
+        </label>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <ApiErrorAlert error={referrals.error} />
@@ -229,12 +241,14 @@ function ReferralList() {
         ) : null}
         {items.length > 0 ? (
           <div className="-mx-5 overflow-x-auto sm:-mx-6">
-            <table className="w-full min-w-[40rem] text-left text-sm">
+            <table className="w-full min-w-[48rem] text-left text-sm">
               <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('referrals.list.referrer')}</th>
                   <th scope="col" className="px-3 py-2 font-medium">{t('referrals.list.friend')}</th>
                   <th scope="col" className="px-3 py-2 font-medium">{t('referrals.list.status')}</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">{t('referrals.list.visits')}</th>
+                  <th scope="col" className="px-3 py-2 font-medium">{t('referrals.list.lastVisit')}</th>
                   <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('referrals.list.date')}</th>
                 </tr>
               </thead>
@@ -247,6 +261,10 @@ function ReferralList() {
                       <td className="px-3 py-3">{person(item.friendId, item.friendName, item.friendPhone)}</td>
                       <td className="px-3 py-3">
                         <Badge tone={TONES[status]}>{t(`referrals.status.${status}`)}</Badge>
+                      </td>
+                      <td className="px-3 py-3 text-right tabular-nums">{formatNumber(item.visits ?? 0, lang)}</td>
+                      <td className="px-3 py-3 text-muted-foreground">
+                        {item.lastVisitAt ? formatDate(item.lastVisitAt, lang) : '—'}
                       </td>
                       <td className="px-5 py-3 text-muted-foreground sm:px-6">
                         {item.createdAt ? formatDate(item.createdAt, lang) : null}

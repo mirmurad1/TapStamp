@@ -44,11 +44,27 @@ Dəyişikliklər audit jurnalına yazılır (`REFERRAL_SETTINGS_UPDATED`).
 - Bonus yalnız bir dəfə: `UPDATE … WHERE status = 'PENDING' RETURNING` — paralel toxunuşlarda da təkrarlanmır.
 - Sahibin proqramı söndürməsi gözləyən dəvətlərə bonus verilməsini dayandırır.
 
-## Hesabat
+## Hesabat və statistika
 
-**Dost dəvəti** səhifəsində: dəvətlərin sayı, gəlib bonus qazananlar, gözləyənlər, verilən bonus möhürlər, müddəti
-bitənlər və limitə düşənlər; dəvətlərin siyahısı (dəvət edən, dost — maskalı nömrə ilə, vəziyyət, tarix). Müştərinin
-tarixçəsində bonus möhürlər "Möhür (dost dəvəti)" kimi görünür.
+**İdarəetmə paneli** (yalnız sahib; panelin dövr və filial filtrləri ilə) — "Dost dəvəti" bloku. Proqram söndürülüb
+və dövrdə dəvət yoxdursa, görünmür. Göstəricilər seçilmiş dövrdə **yaranan dəvətlər** üzrədir:
+
+| Göstərici | Mənası |
+|---|---|
+| Dəvət olunub | linklə qeydiyyatdan keçən dostlar |
+| Gəlib | ən azı 1 təsdiqlənmiş NFC möhürü alan dostlar (+ % dəvət olunanlardan) |
+| Qayıdıb | 2+ **fərqli gündə** NFC möhürü alan dostlar (+ % gələnlərdən) |
+| Gəlişlər | dostların təsdiqlənmiş NFC möhürləri (bonus və əl ilə möhürlər daxil deyil) |
+| Hədiyyə alıb | hədiyyə kartı qazanan dostlar |
+| Bonus möhür | bu dəvətlər üzrə verilən bonus möhürlər |
+
+Filial seçiləndə gəlişlər yalnız həmin filialda sayılır. Altında — ən çox dost gətirən 5 müştəri (dəvət etdiyi, gələn
+və qayıdan dostları ilə).
+
+**Dost dəvəti** səhifəsində: ümumi xülasə (dəvətlər, bonus qazananlar, gözləyənlər, bonus möhürlər, müddəti bitən və
+limitə düşənlər) və dəvətlərin siyahısı — dəvət edən, dost (maskalı nömrə), vəziyyət, dostun gəlişləri, son gəlişi,
+tarix; "Gəliş" süzgəci: hamısı / gəlməyib / bir dəfə gəlib / qayıdıb (2+ gün). Müştərinin tarixçəsində bonus möhürlər
+"Möhür (dost dəvəti)" kimi görünür.
 
 ## Texniki
 
@@ -57,5 +73,6 @@ tarixçəsində bonus möhürlər "Möhür (dost dəvəti)" kimi görünür.
 - Backend: `az.tapstamp.referral` (`ReferralService`, `ReferralMapper`); bağlanma nöqtələri —
   `RegistrationService.register`, `StampClaimService` (təsdiqlənmiş möhür) və `StampApprovalService.confirm`.
 - API: `GET /api/v1/me/referral`, `GET /api/v1/public/referral-program`, `GET|PUT /api/v1/admin/referrals/settings`,
-  `GET /api/v1/admin/referrals/summary`, `GET /api/v1/admin/referrals` (səhifələmə ilə).
+  `GET /api/v1/admin/referrals/summary`, `GET /api/v1/admin/referrals/dashboard` (dövr statistikası),
+  `GET /api/v1/admin/referrals?activity=…` (səhifələmə ilə).
 - Testlər: `ReferralIT` (tam axın, qorunma halları, müddət, işçi təsdiqi rejimi, parametrlərin yoxlanması).

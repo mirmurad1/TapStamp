@@ -25,10 +25,25 @@ public interface ReferralMapper {
     record Stats(int invited, int rewarded, int pending) {
     }
 
-    /** Admin siyahısı üçün; {@code status}-da müddəti keçmiş PENDING — EXPIRED kimi qaytarılır. */
-    record ReferralRow(UUID id, UUID referrerId, @Nullable String referrerName, @Nullable String referrerPhone, UUID friendId,
-               @Nullable String friendName, @Nullable String friendPhone, String status, Instant createdAt,
-               Instant expiresAt, @Nullable Instant rewardedAt) {
+    /**
+     * Admin siyahısı üçün; {@code status}-da müddəti keçmiş PENDING — EXPIRED kimi qaytarılır. {@code visits} —
+     * dostun təsdiqlənmiş NFC möhürləri (gəlişləri), {@code lastVisitAt} — sonuncusu.
+     */
+    record ReferralRow(UUID id, UUID referrerId, @Nullable String referrerName, @Nullable String referrerPhone,
+                       UUID friendId, @Nullable String friendName, @Nullable String friendPhone, String status,
+                       Instant createdAt, Instant expiresAt, @Nullable Instant rewardedAt, int visits,
+                       @Nullable Instant lastVisitAt) {
+    }
+
+    /**
+     * Dövr üzrə statistika: dəvət olunanlar, gələnlər (1+ NFC möhürü), qayıdanlar (2+ fərqli gün), gəlişlər,
+     * hədiyyə kartı qazananlar və verilən bonus möhürlər.
+     */
+    record ReferralStats(long invited, long came, long returned, long visits, long giftCards, long bonusStamps) {
+    }
+
+    record TopReferrer(UUID customerId, @Nullable String name, @Nullable String phone, long invited, long came,
+                       long returned) {
     }
 
     record ReferralSummary(long total, long rewarded, long pending, long expired, long limitReached, long bonusStamps) {
@@ -61,9 +76,14 @@ public interface ReferralMapper {
 
     Stats stats(UUID referrerId, Instant now);
 
-    List<ReferralRow> list(Instant now, int limit, long offset);
+    /** {@code activity}: ALL, NONE (gəlməyib), ONCE (bir gün), RETURNED (2+ gün). */
+    List<ReferralRow> list(Instant now, String activity, int limit, long offset);
 
-    long count();
+    long count(String activity);
+
+    ReferralStats periodStats(Instant from, Instant to, @Nullable UUID branchId);
+
+    List<TopReferrer> topReferrers(Instant from, Instant to, @Nullable UUID branchId, int limit);
 
     ReferralSummary summary(Instant now);
 }

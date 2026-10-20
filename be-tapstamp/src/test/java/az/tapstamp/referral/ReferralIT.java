@@ -189,6 +189,50 @@ class ReferralIT extends TapIntegrationTest {
     }
 
     @Test
+    void dashboardCountsInvitedCameAndReturnedFriends() throws Exception {
+        settings(true, 1, 1, 50, 30);
+        UUID branchId = newBranch(Policy.relaxed());
+        TestTag tag = newTag(branchId);
+        CustomerClient referrer = signedIn(uniquePhone());
+        String code = referralCode(referrer);
+        CustomerClient once = signedIn(uniquePhone(), code);
+        String returningPhone = uniquePhone();
+        CustomerClient returning = signedIn(returningPhone, code);
+        CustomerClient absent = signedIn(uniquePhone(), code);
+        String returningId = read(returning, "/api/v1/me", "$.id");
+        String absentId = read(absent, "/api/v1/me", "$.id");
+
+        claim(once, tag, 1);
+        claim(returning, tag, 2);
+        // Eyni gün ikinci möhür "qayıtmaq" sayılmır; növbəti gün sayılır
+        claim(returning, tag, 3);
+        clock.advance(Duration.ofDays(1));
+        // Bir gündən sonra müştəri yenidən daxil olur (access token-in ömrü bitib)
+        claim(signedIn(returningPhone), tag, 4);
+
+        // Yalnız bu filialın gəlişləri: bu testin dostları
+        AdminClient owner = owner();
+        owner.get("/referrals/dashboard?branchId=" + branchId).andExpect(status().isOk())
+                .andExpect(jsonPath("$.stats.came").value(2))
+                .andExpect(jsonPath("$.stats.returned").value(1))
+                .andExpect(jsonPath("$.stats.visits").value(4))
+                .andExpect(jsonPath("$.stats.invited").value(org.hamcrest.Matchers.greaterThanOrEqualTo(3)))
+                .andExpect(jsonPath("$.topReferrers[0].came").value(2))
+                .andExpect(jsonPath("$.topReferrers[0].returned").value(1));
+
+        owner.get("/referrals?activity=RETURNED&size=50")
+                .andExpect(jsonPath("$.items[?(@.friendId == '" + returningId + "')].visits")
+                        .value(org.hamcrest.Matchers.contains(3)))
+                .andExpect(jsonPath("$.items[?(@.friendId == '" + absentId + "')]").isEmpty());
+        owner.get("/referrals?activity=NONE&size=50")
+                .andExpect(jsonPath("$.items[?(@.friendId == '" + absentId + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.items[?(@.friendId == '" + returningId + "')]").isEmpty());
+        owner.get("/referrals?activity=SOMETIMES").andExpect(status().isBadRequest());
+        signedInStaff(HOST, AdminRole.BRANCH_MANAGER, branchId).get("/referrals/dashboard")
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void companyCanGrantTheBonusRightAtRegistration() throws Exception {
         settings(true, "REGISTRATION", 2, 1, 5, 30);
         TestTag tag = newTag(newBranch(Policy.relaxed()));

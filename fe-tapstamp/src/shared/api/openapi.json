@@ -1473,9 +1473,17 @@
     },
     "/api/v1/admin/referrals" : {
       "get" : {
-        "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50). Telefonlar maskalı.",
+        "description" : "Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list_8",
         "parameters" : [ {
+          "in" : "query",
+          "name" : "activity",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "ALL"
+          }
+        }, {
           "in" : "query",
           "name" : "page",
           "required" : false,
@@ -1507,6 +1515,51 @@
           }
         },
         "summary" : "Dəvətlər",
+        "tags" : [ "Admin: dost dəvəti" ]
+      }
+    },
+    "/api/v1/admin/referrals/dashboard" : {
+      "get" : {
+        "description" : "Dövrdə yaranan dəvətlər: dəvət olunanlar, gələnlər (1+ NFC möhürü), qayıdanlar (2+ fərqli gün), gəlişlər, hədiyyə kartı qazananlar, bonus möhürlər və ən çox dost gətirən 5 müştəri. `from`/`to` — şirkətin yerli tarixləri (default son 30 gün); `branchId` verilibsə, gəlişlər yalnız o filialda sayılır.",
+        "operationId" : "dashboard",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Dashboard"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "İdarəetmə paneli üçün statistika",
         "tags" : [ "Admin: dost dəvəti" ]
       }
     },
@@ -5268,6 +5321,28 @@
           }
         }
       },
+      "Dashboard" : {
+        "type" : "object",
+        "properties" : {
+          "from" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "stats" : {
+            "$ref" : "#/components/schemas/ReferralStats"
+          },
+          "to" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "topReferrers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TopReferrer"
+            }
+          }
+        }
+      },
       "DeviceResponse" : {
         "type" : "object",
         "properties" : {
@@ -6832,6 +6907,10 @@
             "type" : "string",
             "format" : "uuid"
           },
+          "lastVisitAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "referrerId" : {
             "type" : "string",
             "format" : "uuid"
@@ -6848,6 +6927,10 @@
           },
           "status" : {
             "type" : "string"
+          },
+          "visits" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -6914,6 +6997,35 @@
           }
         },
         "required" : [ "enabled", "friendStamps", "monthlyCap", "referrerStamps", "rewardOn", "validDays" ]
+      },
+      "ReferralStats" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "came" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "giftCards" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "invited" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "returned" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "visits" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
       },
       "ReferralSummary" : {
         "type" : "object",
@@ -7755,6 +7867,33 @@
           },
           "status" : {
             "type" : "string"
+          }
+        }
+      },
+      "TopReferrer" : {
+        "type" : "object",
+        "properties" : {
+          "came" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "invited" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "returned" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
