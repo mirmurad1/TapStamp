@@ -57,5 +57,6 @@
   "DOMAIN_IS_PRIMARY": "Əsas domen silinə bilməz: əvvəlcə başqa domeni əsas edin.",
   "CAMPAIGN_NO_RECIPIENTS": "Seçilmiş auditoriyada kampaniya SMS-i ala bilən müştəri yoxdur.",
   "CAMPAIGN_STATE_CHANGED": "Kampaniyanın vəziyyəti artıq dəyişib. Səhifəni yeniləyin.",
-  "SMS_DAILY_LIMIT_REACHED": "Bu gün üçün SMS kod limiti dolub. Sabah yenidən cəhd edin."
+  "SMS_DAILY_LIMIT_REACHED": "Bu gün üçün SMS kod limiti dolub. Sabah yenidən cəhd edin.",
+  "PUSH_UNAVAILABLE": "Bildirişlər hazırda qurulmayıb. Sonra yenidən cəhd et."
 }

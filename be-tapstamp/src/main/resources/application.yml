@@ -97,6 +97,12 @@ app:
     hsts-enabled: true
   # Giriş kodlarının gündəlik SMS büdcəsi (qərar #53): şirkət — yalnız yeni nömrələrə (platforma şirkət üzrə dəyişə
   # bilir), platforma — bütün kodlar (sabit büdcə). 80% və 100%-də xəbərdarlıq — alert-email boşdursa yalnız audit/log.
+  # Web push (qərar #54): VAPID açarları — scripts/gen-vapid-keys ilə yaradılır; boşdursa push söndürülür.
+  # subject — push xidməti üçün əlaqə (mailto:), boşdursa APP_MAIL_FROM
+  push:
+    vapid-public-key: ${APP_PUSH_VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${APP_PUSH_VAPID_PRIVATE_KEY:}
+    subject: ${APP_PUSH_SUBJECT:}
   sms-limits:
     tenant-daily-new: ${APP_SMS_TENANT_DAILY_NEW:100}
     platform-daily: ${APP_SMS_PLATFORM_DAILY:1500}

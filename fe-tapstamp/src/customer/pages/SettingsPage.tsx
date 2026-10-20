@@ -28,6 +28,7 @@ import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { SwitchNumber } from '../components/SwitchNumber';
+import { NotificationsSettings } from '../pwa/NotificationsCard';
 
 /** Parametrlər: dil, cihazlar, hüquqi sənədlər və hesabın silinməsi (çıxış — möhür kartının altında). */
 export function SettingsPage() {
@@ -84,6 +85,7 @@ export function SettingsPage() {
 
       <DevicesCard />
 
+      <NotificationsSettings />
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.legal.title')}</CardTitle>

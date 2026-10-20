@@ -2851,6 +2851,51 @@
         "tags" : [ "Müştəri: hədiyyə kartları" ]
       }
     },
+    "/api/v1/me/push-subscriptions" : {
+      "post" : {
+        "description" : "Ünvan yalnız tanınmış push xidmətinə (Google, Apple, Mozilla, Microsoft) ola bilər. Eyni ünvan təkrar göndəriləndə yenilənir; müştərinin ən çox 10 cihazı saxlanılır. Push qurulmayıbsa `PUSH_UNAVAILABLE`.",
+        "operationId" : "subscribe",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubscriptionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Bu cihazda bildirişləri açmaq",
+        "tags" : [ "Müştəri: bildirişlər" ]
+      }
+    },
+    "/api/v1/me/push-subscriptions/remove" : {
+      "post" : {
+        "operationId" : "unsubscribe",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EndpointRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Bu cihazda bildirişləri söndürmək",
+        "tags" : [ "Müştəri: bildirişlər" ]
+      }
+    },
     "/api/v1/me/referral" : {
       "get" : {
         "description" : "Proqram aktivdirsə: şəxsi kod (ilk dəfə istəniləndə yaranır), bonus möhürlər və dəvətlər üzrə saylar (dəvət olunanlar, bonus qazandıranlar, hələ gəlməyənlər). Söndürülübsə `enabled = false`.",
@@ -4613,6 +4658,26 @@
         "tags" : [ "İctimai" ]
       }
     },
+    "/api/v1/public/push" : {
+      "get" : {
+        "description" : "`enabled` — serverdə push qurulubmu; `publicKey` — brauzerin abunəsi üçün VAPID açıq açarı (base64url).",
+        "operationId" : "config",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Config"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Web push parametrləri",
+        "tags" : [ "Müştəri: bildirişlər" ]
+      }
+    },
     "/api/v1/public/referral-program" : {
       "get" : {
         "description" : "Dəvət linki açılanda göstərmək üçün: proqram aktivdirmi və dosta neçə bonus möhür verilir.",
@@ -5296,6 +5361,17 @@
         },
         "required" : [ "brandColor", "defaultLanguage", "name", "smsSenderName", "timezone" ]
       },
+      "Config" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "publicKey" : {
+            "type" : "string"
+          }
+        }
+      },
       "ConsentRequest" : {
         "type" : "object",
         "properties" : {
@@ -5504,6 +5580,17 @@
           }
         },
         "required" : [ "hostname" ]
+      },
+      "EndpointRequest" : {
+        "type" : "object",
+        "properties" : {
+          "endpoint" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "endpoint" ]
       },
       "EnrollmentStartResponse" : {
         "type" : "object",
@@ -5797,6 +5884,22 @@
           }
         },
         "required" : [ "email", "language", "role" ]
+      },
+      "Keys" : {
+        "type" : "object",
+        "properties" : {
+          "auth" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "p256dh" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "auth", "p256dh" ]
       },
       "LanguageShare" : {
         "type" : "object",
@@ -7742,6 +7845,21 @@
             "minLength" : 0
           }
         }
+      },
+      "SubscriptionRequest" : {
+        "type" : "object",
+        "description" : "Brauzerin PushSubscription obyekti (toJSON): ünvan və açarlar",
+        "properties" : {
+          "endpoint" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "keys" : {
+            "$ref" : "#/components/schemas/Keys"
+          }
+        },
+        "required" : [ "endpoint", "keys" ]
       },
       "TagOverview" : {
         "type" : "object",

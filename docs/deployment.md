@@ -56,6 +56,7 @@ nano .env
 | `ACME_EMAIL` | sertifikat bildirişləri üçün email |
 | `APP_SMS_PROVIDER`, `APP_SMS_PG_URL`, `APP_SMS_PG_PUBLIC_KEY`, `APP_SMS_PG_PRIVATE_KEY` | `postaguvercini` və Poçt Göyərçininin API ünvanı (yolsuz), PublicKey, PrivateKey. Başlıq (`APP_SMS_SENDER`, standart `TrendStamp`) provayderdə qeydiyyatdan keçmiş olmalıdır. Ümumi JSON adapteri üçün: `http`, `APP_SMS_HTTP_URL`, `APP_SMS_HTTP_API_KEY` |
 | `APP_SMS_TENANT_DAILY_NEW`, `APP_SMS_PLATFORM_DAILY`, `APP_SMS_ALERT_EMAIL` | Giriş kodlarının gündəlik SMS büdcəsi: şirkət üzrə **yeni nömrələrə** (standart 100; platforma panelində şirkət üçün dəyişdirilə bilər) və platforma üzrə **bütün kodlar** (standart 1500). 80% və 100%-də `APP_SMS_ALERT_EMAIL`-ə xəbərdarlıq (boşdursa yalnız platforma auditi). Bax: qərar #53 |
+| `APP_PUSH_VAPID_PUBLIC_KEY`, `APP_PUSH_VAPID_PRIVATE_KEY`, `APP_PUSH_SUBJECT` | Web push bildirişləri. Açarlar **bir dəfə** yaradılır: `scripts/gen-vapid-keys.sh` (və ya `.ps1`) iki sətri çap edir — `.env`-ə əlavə edin. Dəyişdirilsə, bütün müştərilərin abunələri etibarsız olur. Boşdursa push söndürülür. `APP_PUSH_SUBJECT` — `mailto:` ünvanı (boşdursa `APP_MAIL_FROM`). Bax: qərar #54 |
 | `APP_MAIL_PROVIDER`, `APP_MAIL_FROM`, `SMTP_*` | `smtp` və poçt serverinin məlumatları |
 | `APP_DEV_SIMULATOR_KEY`, `DEV_SEED_*` | boş saxlayın (prod-da istifadə olunmur) |
 

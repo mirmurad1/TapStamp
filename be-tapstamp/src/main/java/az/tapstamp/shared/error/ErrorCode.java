@@ -25,6 +25,8 @@ public enum ErrorCode {
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
     /** Şirkətin (yeni nömrələrə) və ya platformanın gündəlik SMS kod limiti dolub. */
     SMS_DAILY_LIMIT_REACHED(HttpStatus.TOO_MANY_REQUESTS),
+    /** Serverdə web push qurulmayıb (VAPID açarları yoxdur). */
+    PUSH_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     /** Sessiyanın vaxtı bitib (fəaliyyətsizlik və ya mütləq limit) — yenidən daxil olmaq lazımdır. */
     SESSION_EXPIRED(HttpStatus.UNAUTHORIZED),
     /** Email və ya şifrə yanlışdır (hansının səhv olduğu açıqlanmır). */

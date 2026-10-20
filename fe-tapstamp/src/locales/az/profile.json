@@ -164,5 +164,22 @@
     "rulesRegistration": "Ayda ən çox {{cap}} dost sayılır.",
     "shareTextRegistration_one": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}",
     "shareTextRegistration_other": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}"
+  },
+  "push": {
+    "title": "Bildirişlər",
+    "description": "Möhür təsdiqlənəndə, hədiyyən hazır olanda və dostun gələndə xəbər alırsan. Pulsuzdur, istədiyin vaxt söndürə bilərsən.",
+    "enable": "Bildirişləri aç",
+    "disable": "Bu cihazda söndür",
+    "enabledOnDevice": "Bu cihazda bildirişlər açıqdır.",
+    "needsInstall": "iPhone-da bildirişlər üçün əvvəlcə tətbiqi ana ekrana əlavə et, sonra oradan aç.",
+    "unsupported": "Bu brauzer bildirişləri dəstəkləmir.",
+    "blocked": "Bildirişlər brauzerin parametrlərində bloklanıb. Açmaq üçün saytın icazələrini dəyiş.",
+    "offerTitle": "Hədiyyəni qaçırma",
+    "offerDescription": "Bildirişləri aç — möhür təsdiqlənəndə və hədiyyən hazır olanda dərhal xəbər alacaqsan.",
+    "dismiss": "Bağla",
+    "errors": {
+      "denied": "İcazə verilmədi.",
+      "failed": "Bildirişləri açmaq alınmadı. Bir azdan yenidən cəhd et."
+    }
   }
 }

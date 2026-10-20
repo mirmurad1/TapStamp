@@ -1,0 +1,170 @@
+package az.tapstamp.notification.push;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import az.tapstamp.notification.push.repository.PushSubscriptionMapper;
+import az.tapstamp.notification.push.repository.PushSubscriptionMapper.Subscription;
+import az.tapstamp.shared.error.ApiException;
+import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.i18n.Language;
+import az.tapstamp.shared.id.Ids;
+import az.tapstamp.shared.web.DeviceLabels;
+import az.tapstamp.tenancy.TenantContext;
+import az.tapstamp.tenancy.TenantInfo;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.databind.json.JsonMapper;
+
+/**
+ * Müştərilərə web push bildirişləri (qərar #54): abunələrin idarəsi və göndəriş. Bildiriş tranzaksiya
+ * <b>commit olandan sonra</b> arxa planda göndərilir (möhür ləğv olunarsa bildiriş getmir, cavab gecikmir). Mətn
+ * müştərinin dilində ({@code push.*} açarları). Push xidməti abunənin etibarsız olduğunu bildirsə, abunə silinir.
+ */
+@Service
+public class PushService {
+
+    /** Bildiriş növləri; mətn {@code push.<növ>.title/body}, klikdə açılan səhifə — {@code url}. */
+    public enum Kind {
+        STAMP_CONFIRMED("/"),
+        GIFT_READY("/gift-cards"),
+        REFERRAL_BONUS("/");
+
+        private final String url;
+
+        Kind(String url) {
+            this.url = url;
+        }
+    }
+
+    public record Config(boolean enabled, @Nullable String publicKey) {
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(PushService.class);
+    private static final int MAX_DEVICES = 10;
+    /** Cihaz oflayndırsa push serveri mesajı 1 gün saxlayır. */
+    private static final int TTL_SECONDS = 24 * 60 * 60;
+    private static final Base64.Decoder B64 = Base64.getUrlDecoder();
+
+    private final PushSubscriptionMapper subscriptions;
+    private final WebPushSender sender;
+    private final MessageSource messages;
+    private final TaskExecutor executor;
+    private final JsonMapper json;
+    private final Clock clock;
+
+    public PushService(PushSubscriptionMapper subscriptions, WebPushSender sender,
+                       @Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messages,
+                       @Qualifier("applicationTaskExecutor") TaskExecutor executor, JsonMapper json, Clock clock) {
+        this.subscriptions = subscriptions;
+        this.sender = sender;
+        this.messages = messages;
+        this.executor = executor;
+        this.json = json;
+        this.clock = clock;
+    }
+
+    public Config config() {
+        return new Config(sender.enabled(), sender.publicKey());
+    }
+
+    /** Brauzerin abunəsi: ünvan icazəli push serverində olmalı, açarlar düzgün ölçüdə. */
+    public void subscribe(UUID customerId, String endpoint, String p256dh, String auth, @Nullable String userAgent) {
+        if (!sender.enabled()) {
+            throw new ApiException(ErrorCode.PUSH_UNAVAILABLE);
+        }
+        if (!WebPushSender.allowedEndpoint(endpoint) || decodedLength(p256dh) != 65 || decodedLength(auth) != 16) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        subscriptions.upsert(Ids.newId(), customerId, endpoint, p256dh, auth,
+                userAgent == null ? null : DeviceLabels.describe(userAgent), clock.instant());
+        subscriptions.trim(customerId, MAX_DEVICES);
+    }
+
+    public void unsubscribe(UUID customerId, String endpoint) {
+        subscriptions.delete(customerId, endpoint);
+    }
+
+    /** Hesab silinəndə və ya bloklananda — bütün cihazlardakı abunələr. */
+    public void removeAll(UUID customerId) {
+        subscriptions.deleteAll(customerId);
+    }
+
+    public long customersWithPush() {
+        return subscriptions.countCustomers();
+    }
+
+    /**
+     * Bildirişi növbəyə qoyur: cari tranzaksiya varsa commit-dən sonra, yoxdursa dərhal (arxa planda). Push
+     * söndürülübsə heç nə etmir.
+     */
+    public void notify(UUID customerId, Kind kind, Object... args) {
+        if (!sender.enabled()) {
+            return;
+        }
+        TenantInfo tenant = TenantContext.require();
+        Runnable task = () -> executor.execute(() -> TenantContext.runAs(tenant, () -> deliver(customerId, kind, args)));
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
+    }
+
+    private void deliver(UUID customerId, Kind kind, Object[] args) {
+        try {
+            List<Subscription> devices = subscriptions.forCustomer(customerId);
+            if (devices.isEmpty()) {
+                return;
+            }
+            Language language = subscriptions.activeCustomerLanguage(customerId).flatMap(Language::fromTag).orElse(null);
+            if (language == null) {
+                return;
+            }
+            String key = "push." + kind.name().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("title", messages.getMessage(key + ".title", args, language.locale()));
+            payload.put("body", messages.getMessage(key + ".body", args, language.locale()));
+            payload.put("url", kind.url);
+            payload.put("tag", kind.name());
+            byte[] body = json.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8);
+            for (Subscription device : devices) {
+                WebPushSender.Result result = sender.send(device.endpoint(), B64.decode(device.p256dh()),
+                        B64.decode(device.auth()), body, TTL_SECONDS);
+                switch (result) {
+                    case SENT -> subscriptions.markSent(device.id(), clock.instant());
+                    case GONE -> subscriptions.deleteById(device.id());
+                    case FAILED -> { }
+                }
+            }
+        } catch (RuntimeException e) {
+            log.warn("Push notification {} failed: {}", kind, e.getClass().getSimpleName());
+        }
+    }
+
+    private static int decodedLength(String value) {
+        try {
+            return value == null ? -1 : B64.decode(value).length;
+        } catch (IllegalArgumentException e) {
+            return -1;
+        }
+    }
+}

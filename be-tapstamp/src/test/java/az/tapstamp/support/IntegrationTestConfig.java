@@ -48,6 +48,13 @@ public class IntegrationTestConfig {
         return new TestSmsFailures(console);
     }
 
+    /** Push serveri: göndərişlər yazılır, real push xidmətinə sorğu getmir. */
+    @Bean
+    @Primary
+    TestPushInbox testPushInbox() {
+        return new TestPushInbox();
+    }
+
     @Bean
     ApplicationRunner testTenants(TenantProvisioner provisioner, @Qualifier("tenantJdbc") JdbcClient tenantJdbc) {
         return args -> TestTenants.provisionAll(provisioner, tenantJdbc);

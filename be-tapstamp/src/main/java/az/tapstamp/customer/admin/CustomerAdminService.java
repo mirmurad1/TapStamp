@@ -21,6 +21,7 @@ import az.tapstamp.customer.repository.CustomerAdminMapper.CardTotals;
 import az.tapstamp.customer.repository.CustomerAdminMapper.RevocableReward;
 import az.tapstamp.customer.repository.CustomerAdminMapper;
 import az.tapstamp.loyalty.stamp.StampLedger;
+import az.tapstamp.notification.push.PushService;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -56,6 +57,7 @@ public class CustomerAdminService {
     }
 
     private final CustomerAdminMapper customers;
+    private final PushService push;
     private final CustomerDirectory directory;
     private final StampLedger ledger;
     private final CustomerSessionService customerSessions;
@@ -70,7 +72,8 @@ public class CustomerAdminService {
                                 StampLedger ledger, CustomerSessionService customerSessions,
                                 AdminAuthService adminAuth, @Qualifier("tenantCipher") EnvelopeCipher cipher,
                                 CompanySettings company, AuditLogger audit,
-                                PlatformTransactionManager transactionManager, Clock clock) {
+                                PlatformTransactionManager transactionManager, Clock clock, PushService push) {
+        this.push = push;
         this.customers = customers;
         this.directory = directory;
         this.ledger = ledger;
@@ -198,6 +201,7 @@ public class CustomerAdminService {
         customers.updateStatus(customerId, status, now);
         if (status.equals("BLOCKED")) {
             customerSessions.revokeAll(customerId, "CUSTOMER_BLOCKED");
+            push.removeAll(customerId);
         }
         audit.tenant(status.equals("BLOCKED") ? "CUSTOMER_BLOCKED" : "CUSTOMER_UNBLOCKED", AuditLogger.ActorType.STAFF,
                 principal.userId(), "customer", customerId, Map.of());

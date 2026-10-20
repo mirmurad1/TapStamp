@@ -16,6 +16,7 @@ key() { openssl rand -base64 32; }
 password() { openssl rand -base64 24 | tr '+/' '-_' | tr -d '='; }
 
 KEK_ID="kek-$(date +%Y-%m)"
+VAPID="$("$ROOT/scripts/gen-vapid-keys.sh")"
 declare -A GENERATED=(
   [POSTGRES_PASSWORD]="$(password)"
   [DB_PLATFORM_OWNER_PASSWORD]="$(password)"
@@ -28,6 +29,8 @@ declare -A GENERATED=(
   [APP_REDEMPTION_CODE_KEY]="$(key)"
   [APP_INTERNAL_TOKEN]="$(password)"
   [APP_DEV_SIMULATOR_KEY]="$(key)"
+  [APP_PUSH_VAPID_PUBLIC_KEY]="$(sed -n 's/^APP_PUSH_VAPID_PUBLIC_KEY=//p' <<<"$VAPID")"
+  [APP_PUSH_VAPID_PRIVATE_KEY]="$(sed -n 's/^APP_PUSH_VAPID_PRIVATE_KEY=//p' <<<"$VAPID")"
 )
 
 umask 077

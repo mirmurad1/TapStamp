@@ -23,6 +23,9 @@ app:
     simulator-key: ${APP_DEV_SIMULATOR_KEY:}
   # Lokalda bütün sorğular (E2E testləri, ekran görüntüsü skriptləri) bir IP-dən gəlir — yalnız IP üzrə limitlər
   # dev-də artırılır. Nömrə və email üzrə limitlər (kobud güc qorunması) dəyişmir; prod standart dəyərlərlə işləyir.
+  # VAPID açarları .env-də yoxdursa, hər başlanğıcda müvəqqəti açar (köhnə abunələr işləmir — yalnız dev)
+  push:
+    temporary-keys: true
   rate-limits:
     admin-login-per-ip: 300
     otp-request-per-ip: 300

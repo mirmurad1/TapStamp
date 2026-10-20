@@ -1578,6 +1578,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/push-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bu cihazda bildirişləri açmaq
+         * @description Ünvan yalnız tanınmış push xidmətinə (Google, Apple, Mozilla, Microsoft) ola bilər. Eyni ünvan təkrar göndəriləndə yenilənir; müştərinin ən çox 10 cihazı saxlanılır. Push qurulmayıbsa `PUSH_UNAVAILABLE`.
+         */
+        post: operations["subscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/push-subscriptions/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bu cihazda bildirişləri söndürmək */
+        post: operations["unsubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/referral": {
         parameters: {
             query?: never;
@@ -2611,6 +2648,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Web push parametrləri
+         * @description `enabled` — serverdə push qurulubmu; `publicKey` — brauzerin abunəsi üçün VAPID açıq açarı (base64url).
+         */
+        get: operations["config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/referral-program": {
         parameters: {
             query?: never;
@@ -2948,6 +3005,10 @@ export interface components {
             smsSenderName: string;
             timezone: string;
         };
+        Config: {
+            enabled?: boolean;
+            publicKey?: string;
+        };
         ConsentRequest: {
             acceptedDocuments: components["schemas"]["DocumentAcceptance"][];
         };
@@ -3029,6 +3090,9 @@ export interface components {
         };
         DomainRequest: {
             hostname: string;
+        };
+        EndpointRequest: {
+            endpoint: string;
         };
         /** @description TOTP qeydiyyatı: sirr autentifikator tətbiqinə əl ilə və ya QR kod ilə əlavə olunur */
         EnrollmentStartResponse: {
@@ -3151,6 +3215,10 @@ export interface components {
             language: string;
             /** @enum {string} */
             role: "SUPER_ADMIN" | "COMPANY_OWNER" | "BRANCH_MANAGER" | "STAFF";
+        };
+        Keys: {
+            auth: string;
+            p256dh: string;
         };
         LanguageShare: {
             /** Format: int64 */
@@ -3970,6 +4038,11 @@ export interface components {
         StepUpRequest: {
             code?: string;
             password?: string;
+        };
+        /** @description Brauzerin PushSubscription obyekti (toJSON): ünvan və açarlar */
+        SubscriptionRequest: {
+            endpoint: string;
+            keys: components["schemas"]["Keys"];
         };
         TagOverview: {
             branches?: components["schemas"]["BranchOption"][];
@@ -6194,6 +6267,50 @@ export interface operations {
             };
         };
     };
+    subscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    unsubscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     mine: {
         parameters: {
             query?: never;
@@ -7475,6 +7592,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LegalDocumentResponse"];
+                };
+            };
+        };
+    };
+    config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Config"];
                 };
             };
         };

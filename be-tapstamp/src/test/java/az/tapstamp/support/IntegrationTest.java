@@ -25,6 +25,7 @@ public abstract class IntegrationTest {
         registry.add("app.rate-limits.otp-request-global", () -> 100_000);
         registry.add("app.sms-limits.tenant-daily-new", () -> 100_000);
         registry.add("app.sms-limits.platform-daily", () -> 10_000_000);
+        registry.add("app.push.temporary-keys", () -> true);
         registry.add("app.rate-limits.otp-request-per-ip-daily", () -> 100_000);
         // Fon işləri (token və möhür müddətləri) testlərdə birbaşa çağırılır — paralel işləyib nəticəni pozmasın
         registry.add("app.jobs.enabled", () -> false);

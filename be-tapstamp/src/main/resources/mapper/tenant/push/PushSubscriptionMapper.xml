@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Web push abunələri: əlavə/yeniləmə, silmə və göndəriş üçün oxunma -->
+<mapper namespace="az.tapstamp.notification.push.repository.PushSubscriptionMapper">
+
+    <insert id="upsert">
+        INSERT INTO push_subscriptions (id, customer_id, endpoint, p256dh, auth, device_label, created_at)
+        VALUES (#{id}, #{customerId}, #{endpoint}, #{p256dh}, #{auth}, #{deviceLabel}, #{now})
+        ON CONFLICT (endpoint) DO UPDATE
+            SET customer_id = EXCLUDED.customer_id, p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth,
+                device_label = EXCLUDED.device_label, created_at = EXCLUDED.created_at
+    </insert>
+
+    <delete id="trim">
+        DELETE FROM push_subscriptions
+        WHERE customer_id = #{customerId}
+          AND id NOT IN (SELECT id FROM push_subscriptions WHERE customer_id = #{customerId}
+                         ORDER BY created_at DESC, id DESC LIMIT #{keep})
+    </delete>
+
+    <delete id="delete">
+        DELETE FROM push_subscriptions WHERE customer_id = #{customerId} AND endpoint = #{endpoint}
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM push_subscriptions WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteAll">
+        DELETE FROM push_subscriptions WHERE customer_id = #{customerId}
+    </delete>
+
+    <select id="forCustomer" resultType="az.tapstamp.notification.push.repository.PushSubscriptionMapper$Subscription">
+        SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE customer_id = #{customerId}
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="markSent">
+        UPDATE push_subscriptions SET last_sent_at = #{now} WHERE id = #{id}
+    </update>
+
+    <select id="activeCustomerLanguage" resultType="string">
+        SELECT preferred_language FROM customers WHERE id = #{customerId} AND status = 'ACTIVE'
+    </select>
+
+    <select id="countCustomers" resultType="long">
+        SELECT count(DISTINCT customer_id) FROM push_subscriptions
+    </select>
+</mapper>

@@ -46,6 +46,13 @@ export const customerAuthApi = {
     unwrap(api.POST('/api/v1/auth/step-up/otp/verify', { body: { challengeId, code } })),
 };
 
+/** Web push: serverin açıq açarı (giriş tələb etmir) və bu cihazın abunəsi. */
+export const pushApi = {
+  config: () => unwrap(api.GET('/api/v1/public/push')),
+  subscribe: (body: Schemas['SubscriptionRequest']) => unwrap(api.POST('/api/v1/me/push-subscriptions', { body })),
+  unsubscribe: (endpoint: string) => unwrap(api.POST('/api/v1/me/push-subscriptions/remove', { body: { endpoint } })),
+};
+
 /** Dost dəvəti: proqram (giriş tələb etmir) və müştərinin öz kodu ilə nəticələri. */
 export const referralApi = {
   program: () => unwrap(api.GET('/api/v1/public/referral-program')),

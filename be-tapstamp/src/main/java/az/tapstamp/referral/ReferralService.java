@@ -19,6 +19,7 @@ import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.auth.CustomerPrincipal;
 import az.tapstamp.loyalty.stamp.StampLedger;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
+import az.tapstamp.notification.push.PushService;
 import az.tapstamp.referral.repository.ReferralMapper;
 import az.tapstamp.referral.repository.ReferralMapper.Claimed;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralRow;
@@ -75,14 +76,16 @@ public class ReferralService {
     private final StampLedger ledger;
     private final CompanySettings company;
     private final AuditLogger audit;
+    private final PushService push;
     private final Clock clock;
 
     public ReferralService(ReferralMapper referrals, StampLedger ledger, CompanySettings company, AuditLogger audit,
-                           Clock clock) {
+                           Clock clock, PushService push) {
         this.referrals = referrals;
         this.ledger = ledger;
         this.company = company;
         this.audit = audit;
+        this.push = push;
         this.clock = clock;
     }
 
@@ -188,7 +191,9 @@ public class ReferralService {
         boolean referrerRewarded = referrals.isActive(referrerId);
         if (referrerRewarded) {
             // Dəvət edən həmişə dostdan əvvəl qeydiyyatdan keçib — kilid sırası tsikl yaratmır
-            grant(referrerId, branchId, referralId, settings.referrerStamps(), day, at);
+            CardState referrerCard = grant(referrerId, branchId, referralId, settings.referrerStamps(), day, at);
+            push.notify(referrerId, referrerCard.giftCardId() != null ? PushService.Kind.GIFT_READY
+                    : PushService.Kind.REFERRAL_BONUS, settings.referrerStamps());
         }
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("referrerId", referrerId.toString());

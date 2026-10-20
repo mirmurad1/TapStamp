@@ -14,6 +14,7 @@ import az.tapstamp.customer.consent.LegalDocumentService;
 import az.tapstamp.customer.repository.CustomerAccountMapper;
 import az.tapstamp.customer.repository.CustomerMapper;
 import az.tapstamp.customer.repository.OtpChallengeMapper;
+import az.tapstamp.notification.push.PushService;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.error.ApiException;
@@ -46,6 +47,7 @@ public class CustomerAccountService {
     }
 
     private final CustomerAccountMapper accounts;
+    private final PushService push;
     private final CustomerMapper customers;
     private final CustomerSessionService sessions;
     private final OtpChallengeMapper challenges;
@@ -59,7 +61,8 @@ public class CustomerAccountService {
                                   CustomerSessionService sessions, OtpChallengeMapper challenges,
                                   LegalDocumentService legal, AuditLogger audit,
                                   @Qualifier("tenantCipher") EnvelopeCipher cipher,
-                                  PlatformTransactionManager transactionManager, Clock clock) {
+                                  PlatformTransactionManager transactionManager, Clock clock, PushService push) {
+        this.push = push;
         this.accounts = accounts;
         this.customers = customers;
         this.sessions = sessions;
@@ -112,6 +115,7 @@ public class CustomerAccountService {
             challenges.deleteForCustomer(customer.id(), customer.phoneHash());
             accounts.anonymizeTapEvents(customer.id());
             legal.withdrawAll(customer.id());
+            push.removeAll(customer.id());
             customers.anonymize(customer.id(), now);
             audit.tenant("CUSTOMER_DELETED", AuditLogger.ActorType.CUSTOMER, customer.id(), "customer", customer.id(),
                     Map.of("deletedAt", now.atOffset(ZoneOffset.UTC).toString()));

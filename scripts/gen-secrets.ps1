@@ -27,6 +27,8 @@ function New-Key { [Convert]::ToBase64String((New-RandomBytes 32)) }
 function New-Password { ([Convert]::ToBase64String((New-RandomBytes 24))).Replace('+', '-').Replace('/', '_').TrimEnd('=') }
 
 $kekId = 'kek-' + (Get-Date -Format 'yyyy-MM')
+$vapid = @{}
+& (Join-Path $PSScriptRoot 'gen-vapid-keys.ps1') | ForEach-Object { $name, $value = $_ -split '=', 2; $vapid[$name] = $value }
 $generated = @{
     'POSTGRES_PASSWORD'          = New-Password
     'DB_PLATFORM_OWNER_PASSWORD' = New-Password
@@ -39,6 +41,8 @@ $generated = @{
     'APP_REDEMPTION_CODE_KEY'    = New-Key
     'APP_DEV_SIMULATOR_KEY'      = New-Key
     'APP_INTERNAL_TOKEN'         = New-Password
+    'APP_PUSH_VAPID_PUBLIC_KEY'  = $vapid['APP_PUSH_VAPID_PUBLIC_KEY']
+    'APP_PUSH_VAPID_PRIVATE_KEY' = $vapid['APP_PUSH_VAPID_PRIVATE_KEY']
 }
 
 $lines = Get-Content -Path $example -Encoding UTF8 | ForEach-Object {

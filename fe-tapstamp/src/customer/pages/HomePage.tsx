@@ -16,6 +16,7 @@ import { InviteFriendCard } from '../components/InviteFriendCard';
 import { StampCard } from '../components/StampCard';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 import { InstallCard } from '../pwa/InstallCard';
+import { NotificationsOffer } from '../pwa/NotificationsCard';
 
 /** Ana səhifə: daxil olmuş müştəri üçün möhür kartı, qonaq üçün kafe haqqında qısa məlumat və giriş düyməsi. */
 export function HomePage() {
@@ -83,6 +84,7 @@ function Profile({ me }: { me: Me }) {
           <ChevronRight className="size-6 shrink-0" aria-label={t('rewards.open')} />
         </Link>
       ) : null}
+      <NotificationsOffer />
       <InviteFriendCard />
       <InstallCard />
     </>

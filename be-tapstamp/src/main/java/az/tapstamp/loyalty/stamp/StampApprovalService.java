@@ -10,6 +10,7 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
+import az.tapstamp.notification.push.PushService;
 import az.tapstamp.referral.ReferralService;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -41,11 +42,13 @@ public class StampApprovalService {
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final ReferralService referrals;
+    private final PushService push;
     private final Clock clock;
 
     public StampApprovalService(StampMapper stamps, StampLedger ledger, AuditLogger audit,
-                                PlatformTransactionManager transactionManager, ReferralService referrals, Clock clock) {
+                                PlatformTransactionManager transactionManager, ReferralService referrals, Clock clock, PushService push) {
         this.referrals = referrals;
+        this.push = push;
         this.stamps = stamps;
         this.ledger = ledger;
         this.audit = audit;
@@ -72,6 +75,12 @@ public class StampApprovalService {
                     referrals.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), now));
             audit.tenant("STAMP_CONFIRMED", AuditLogger.ActorType.STAFF, principal.userId(), "stamp", stampId,
                     Map.of("branchId", stamp.branchId().toString()));
+            // Müştəri kassadan uzaqlaşmış ola bilər — təsdiq bildirişi (hədiyyə yaranıbsa, hədiyyə bildirişi)
+            if (card.giftCardId() != null) {
+                push.notify(stamp.customerId(), PushService.Kind.GIFT_READY);
+            } else {
+                push.notify(stamp.customerId(), PushService.Kind.STAMP_CONFIRMED, card.currentStamps(), card.stampsRequired());
+            }
             return new Decision(stampId, StampStatus.CONFIRMED, card);
         });
     }

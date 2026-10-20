@@ -57,5 +57,6 @@
   "DOMAIN_IS_PRIMARY": "The primary domain cannot be removed: make another domain primary first.",
   "CAMPAIGN_NO_RECIPIENTS": "No customer in the selected audience can receive campaign SMS.",
   "CAMPAIGN_STATE_CHANGED": "The campaign status has already changed. Refresh the page.",
-  "SMS_DAILY_LIMIT_REACHED": "The SMS code limit for today has been reached. Please try again tomorrow."
+  "SMS_DAILY_LIMIT_REACHED": "The SMS code limit for today has been reached. Please try again tomorrow.",
+  "PUSH_UNAVAILABLE": "Notifications are not set up right now. Please try again later."
 }
