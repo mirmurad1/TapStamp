@@ -1565,7 +1565,7 @@
     },
     "/api/v1/admin/referrals/settings" : {
       "get" : {
-        "operationId" : "settings",
+        "operationId" : "settings_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -1583,7 +1583,7 @@
       },
       "put" : {
         "description" : "Aktiv/söndürülmüş, bonusun vaxtı (FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — qeydiyyat anında), dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.",
-        "operationId" : "updateSettings",
+        "operationId" : "updateSettings_1",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1628,6 +1628,73 @@
         },
         "summary" : "Xülasə",
         "tags" : [ "Admin: dost dəvəti" ]
+      }
+    },
+    "/api/v1/admin/reminders/settings" : {
+      "get" : {
+        "operationId" : "settings",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReminderSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Xatırlatmaların parametrləri",
+        "tags" : [ "Admin: xatırlatmalar" ]
+      },
+      "put" : {
+        "description" : "Hər xatırlatma ayrıca açılır: hədiyyəyə 1 möhür qalıb, uzun müddətdir gəlməyib (`winbackDays`: 30, 60, 90), istifadə olunmamış hədiyyə. Yalnız web push ilə, 10:00–20:00, müştəriyə həftədə ən çox bir. Auditə yazılır.",
+        "operationId" : "updateSettings",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReminderSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReminderSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Parametrləri dəyişmək",
+        "tags" : [ "Admin: xatırlatmalar" ]
+      }
+    },
+    "/api/v1/admin/reminders/stats" : {
+      "get" : {
+        "description" : "Son 30 gün: növ üzrə göndərilən xatırlatmalar və onlardan sonra 7 gün ərzində gələn (NFC möhürü alan) müştərilər; bildirişləri açıq olan müştərilərin sayı (xatırlatmalar yalnız onlara gedir).",
+        "operationId" : "stats_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReminderStats"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Statistika",
+        "tags" : [ "Admin: xatırlatmalar" ]
       }
     },
     "/api/v1/admin/settings/branches" : {
@@ -5901,6 +5968,22 @@
         },
         "required" : [ "auth", "p256dh" ]
       },
+      "KindStats" : {
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "returned" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sent" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "LanguageShare" : {
         "type" : "object",
         "properties" : {
@@ -7321,6 +7404,58 @@
           }
         },
         "required" : [ "reason" ]
+      },
+      "ReminderSettings" : {
+        "type" : "object",
+        "properties" : {
+          "nearRewardEnabled" : {
+            "type" : "boolean"
+          },
+          "unusedGiftEnabled" : {
+            "type" : "boolean"
+          },
+          "winbackDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "winbackEnabled" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "ReminderSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "nearRewardEnabled" : {
+            "type" : "boolean"
+          },
+          "unusedGiftEnabled" : {
+            "type" : "boolean"
+          },
+          "winbackDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "winbackEnabled" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "nearRewardEnabled", "unusedGiftEnabled", "winbackDays", "winbackEnabled" ]
+      },
+      "ReminderStats" : {
+        "type" : "object",
+        "properties" : {
+          "customersWithPush" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "kinds" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/KindStats"
+            }
+          }
+        }
       },
       "ResolveRequest" : {
         "type" : "object",

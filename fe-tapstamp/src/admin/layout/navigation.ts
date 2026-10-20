@@ -1,4 +1,5 @@
 import {
+  BellRing,
   Building2,
   ClipboardList,
   LayoutDashboard,
@@ -25,6 +26,7 @@ export type AdminSection =
   | 'tags'
   | 'stampCampaigns'
   | 'referrals'
+  | 'reminders'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -52,6 +54,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'] },
   { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'] },
   { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'] },
+  { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'] },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },

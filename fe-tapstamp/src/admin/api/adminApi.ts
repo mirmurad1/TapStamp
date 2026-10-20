@@ -423,6 +423,15 @@ export const platformAuditApi = {
 
 export type SmsUsageReport = Schemas['SmsUsageReport'];
 
+export type ReminderSettings = Schemas['ReminderSettings'];
+
+/** Avtomatik xatırlatmalar (şirkət sahibi): parametrlər və statistika. */
+export const remindersApi = {
+  settings: () => unwrap(api.GET('/api/v1/admin/reminders/settings')),
+  updateSettings: (body: Schemas['ReminderSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/reminders/settings', { body })),
+  stats: () => unwrap(api.GET('/api/v1/admin/reminders/stats')),
+};
+
 export type ReferralSettings = Schemas['ReferralSettings'];
 export type ReferralActivity = 'ALL' | 'NONE' | 'ONCE' | 'RETURNED';
 

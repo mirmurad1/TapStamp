@@ -62,8 +62,8 @@ class PushIT extends TapIntegrationTest {
         assertThat(delivery.headers()).containsEntry("Content-Encoding", "aes128gcm");
         assertThat(delivery.headers().get("Authorization")).startsWith("vapid t=").contains(", k=");
         String payload = TestPushInbox.decrypt(browser, delivery.body());
-        assertThat((String) JsonPath.read(payload, "$.title")).contains("Möhürün təsdiqləndi");
-        assertThat((String) JsonPath.read(payload, "$.body")).contains("1 /");
+        assertThat((String) JsonPath.read(payload, "$.title")).isEqualTo("Möhür təsdiqləndi ✅");
+        assertThat((String) JsonPath.read(payload, "$.body")).startsWith("Kartınızda 1/");
         assertThat((String) JsonPath.read(payload, "$.url")).isEqualTo("/");
     }
 

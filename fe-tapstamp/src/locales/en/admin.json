@@ -19,7 +19,8 @@
     "smsUsage": "SMS report",
     "campaigns": "Campaigns",
     "stampCampaigns": "Stamp campaign",
-    "referrals": "Invite a friend"
+    "referrals": "Invite a friend",
+    "reminders": "Reminders"
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -924,6 +925,39 @@
       "bonusStamps": "Bonus stamps",
       "bonusStampsHint": "the program’s “cost” — bonus stamps granted",
       "topTitle": "Top referrers"
+    }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "subtitle": "Automatic notifications that invite customers back. Sent for free only to customers who turned on notifications (no SMS).",
+    "settings": {
+      "title": "Settings",
+      "description": "Turn each reminder on separately. The texts are standard and sent in the customer’s language.",
+      "winbackDays": "Not visited for",
+      "rules": "Notifications are sent only between 10:00 and 20:00. A customer gets at most one reminder per week; each reminder is sent once until the next visit."
+    },
+    "kinds": {
+      "NEAR_REWARD": {
+        "title": "1 stamp left to the gift",
+        "hint": "To customers 1 stamp away from a gift who have not visited for 7 days: “Almost there 🎁”."
+      },
+      "UNUSED_GIFT": {
+        "title": "Unused gift",
+        "hint": "To customers who have not claimed their gift and have not visited for 7 days: “Your gift is waiting for you 🎁”."
+      },
+      "WINBACK": {
+        "title": "Customers who have not visited for a while",
+        "hint": "To customers who have not visited for {{days}} days: “We’d love to see you again 👋”."
+      }
+    },
+    "stats": {
+      "title": "Last 30 days",
+      "reach_one": "Customers with notifications on: {{customers}}. Reminders go only to them.",
+      "reach_other": "Customers with notifications on: {{customers}}. Reminders go only to them.",
+      "kind": "Reminder",
+      "sent": "Sent",
+      "returned": "Visited after",
+      "note": "“Visited after” — customers who got an NFC stamp within 7 days after the reminder."
     }
   }
 }

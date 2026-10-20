@@ -22,9 +22,12 @@ SMS-də qalır (push-un çatdırılması zəmanətli deyil).
 
 | Hadisə | Kimə | Mətn (az) |
 |---|---|---|
-| İşçi möhürü təsdiqlədi | müştəriyə | "Möhürün təsdiqləndi ✅ — Kartında X / Y möhür var." |
-| Kart doldu (təsdiq və ya bonusla) | müştəriyə | "Hədiyyən hazırdır 🎁" (klikdə hədiyyələr səhifəsi) |
-| Dostu ilk dəfə gəldi | dəvət edənə | "Dostun gəldi 🎉 — kartına N bonus möhür əlavə olundu." |
+| İşçi möhürü təsdiqlədi | müştəriyə | "Möhür təsdiqləndi ✅ — Kartınızda X/Y möhür var." |
+| Kart doldu (təsdiq və ya bonusla) | müştəriyə | "Hədiyyəniz hazırdır 🎁" (klikdə hədiyyələr səhifəsi) |
+| Dostu ilk dəfə gəldi | dəvət edənə | "Dostunuz gəldi 🎉 — Dəvətiniz üçün kartınıza N bonus möhür əlavə olundu." |
+
+NFC toxunuşunda bildiriş göndərilmir — nəticə o anda tətbiqin ekranında görünür. Mətnlər "Siz" formasında, ümumi
+(istənilən biznesə uyğun) və ümumi smayliklərlə (✅ 🎁 🎉 👋).
 
 Mətnlər müştərinin dilində (`push.*` açarları, `messages_{az,en,ru}.properties`). Bildiriş tranzaksiya commit
 olandan sonra arxa planda gedir; möhür ləğv olunarsa bildiriş getmir.
@@ -60,7 +63,18 @@ yaranır.
 - API: `GET /api/v1/public/push`, `POST /api/v1/me/push-subscriptions`, `POST /api/v1/me/push-subscriptions/remove`.
 - Testlər: `PushIT` (abunə, şifrəli və imzalı bildiriş — test "brauzeri" deşifrə edir, 410 ilə silinmə, söndürmə).
 
-## Növbəti mərhələ
+## Avtomatik xatırlatmalar
 
-Kampaniyalarda "push varsa push, yoxdursa SMS" və avtomatik xatırlatmalar ("hədiyyəyə 1 möhür qaldı", "30 gündür
-gəlməmisən").
+Sahib **Xatırlatmalar** bölməsində hər növü ayrıca açır (default söndürülü). Yalnız push ilə — pulsuz; kampaniyalar
+SMS ilə qalır (istifadəçi qərarı).
+
+| Xatırlatma | Nə vaxt | Başlıq (az) |
+|---|---|---|
+| Hədiyyəyə 1 möhür qalıb | kartında "hədd − 1" möhür, 7 gündür gəlməyib | Hədiyyəyə az qalıb 🎁 |
+| İstifadə olunmamış hədiyyə | hədiyyəsi var (müddəti keçməyib), 7 gündür gəlməyib | Hədiyyəniz sizi gözləyir 🎁 |
+| Uzun müddətdir gəlməyib | 30 / 60 / 90 gündür gəlməyib | Sizi yenidən görmək istərdik 👋 |
+
+Qaydalar: yalnız 10:00–20:00 (şirkətin saatı); müştəriyə həftədə ən çox bir xatırlatma (prioritet: hədiyyə, hədiyyəyə
+az qalıb, uzun fasilə); hər növ bir dövrdə bir dəfə (`reminder_log`) — dövr müştərinin növbəti gəlişi ilə yenilənir.
+Taymer hər 15 dəqiqədən bir işləyir. Statistika (son 30 gün): növ üzrə göndərilən və 7 gün ərzində NFC möhürü alan
+müştərilər; bildirişləri açıq olan müştərilərin sayı.

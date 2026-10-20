@@ -823,12 +823,12 @@ export interface paths {
             cookie?: never;
         };
         /** Dəvət proqramının parametrləri */
-        get: operations["settings"];
+        get: operations["settings_1"];
         /**
          * Parametrləri dəyişmək
          * @description Aktiv/söndürülmüş, bonusun vaxtı (FIRST_VISIT — dostun ilk NFC möhüründə, REGISTRATION — qeydiyyat anında), dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.
          */
-        put: operations["updateSettings"];
+        put: operations["updateSettings_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -848,6 +848,47 @@ export interface paths {
          * @description Bütün dəvətlər, bonus qazandıranlar, gözləyənlər, müddəti bitənlər, limitə düşənlər və verilən bonus möhürlər.
          */
         get: operations["summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reminders/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Xatırlatmaların parametrləri */
+        get: operations["settings"];
+        /**
+         * Parametrləri dəyişmək
+         * @description Hər xatırlatma ayrıca açılır: hədiyyəyə 1 möhür qalıb, uzun müddətdir gəlməyib (`winbackDays`: 30, 60, 90), istifadə olunmamış hədiyyə. Yalnız web push ilə, 10:00–20:00, müştəriyə həftədə ən çox bir. Auditə yazılır.
+         */
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reminders/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Statistika
+         * @description Son 30 gün: növ üzrə göndərilən xatırlatmalar və onlardan sonra 7 gün ərzində gələn (NFC möhürü alan) müştərilər; bildirişləri açıq olan müştərilərin sayı (xatırlatmalar yalnız onlara gedir).
+         */
+        get: operations["stats_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3220,6 +3261,13 @@ export interface components {
             auth: string;
             p256dh: string;
         };
+        KindStats: {
+            kind?: string;
+            /** Format: int64 */
+            returned?: number;
+            /** Format: int64 */
+            sent?: number;
+        };
         LanguageShare: {
             /** Format: int64 */
             customers?: number;
@@ -3784,6 +3832,25 @@ export interface components {
         };
         RejectStampRequest: {
             reason: string;
+        };
+        ReminderSettings: {
+            nearRewardEnabled?: boolean;
+            unusedGiftEnabled?: boolean;
+            /** Format: int32 */
+            winbackDays?: number;
+            winbackEnabled?: boolean;
+        };
+        ReminderSettingsRequest: {
+            nearRewardEnabled: boolean;
+            unusedGiftEnabled: boolean;
+            /** Format: int32 */
+            winbackDays: number;
+            winbackEnabled: boolean;
+        };
+        ReminderStats: {
+            /** Format: int64 */
+            customersWithPush?: number;
+            kinds?: components["schemas"]["KindStats"][];
         };
         ResolveRequest: {
             note: string;
@@ -5207,7 +5274,7 @@ export interface operations {
             };
         };
     };
-    settings: {
+    settings_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5227,7 +5294,7 @@ export interface operations {
             };
         };
     };
-    updateSettings: {
+    updateSettings_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5267,6 +5334,70 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ReferralSummary"];
+                };
+            };
+        };
+    };
+    settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReminderSettings"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReminderSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReminderSettings"];
+                };
+            };
+        };
+    };
+    stats_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReminderStats"];
                 };
             };
         };

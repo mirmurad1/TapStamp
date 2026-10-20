@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Avtomatik xatırlatmalar: yalnız push abunəsi olan aktiv müştərilər; həftədə bir, hər dövrdə bir dəfə -->
+<mapper namespace="az.tapstamp.reminder.repository.ReminderMapper">
+
+    <select id="settings" resultType="az.tapstamp.reminder.repository.ReminderMapper$ReminderSettings">
+        SELECT near_reward_enabled, winback_enabled, winback_days, unused_gift_enabled
+        FROM reminder_settings WHERE id = 1
+    </select>
+
+    <update id="updateSettings">
+        UPDATE reminder_settings
+        SET near_reward_enabled = #{nearRewardEnabled}, winback_enabled = #{winbackEnabled},
+            winback_days = #{winbackDays}, unused_gift_enabled = #{unusedGiftEnabled},
+            updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = 1
+    </update>
+
+    <!-- Son gəliş (heç gəlməyibsə — qeydiyyat) -->
+    <sql id="lastVisit">coalesce(c.last_visit_at, c.registered_at)</sql>
+    <sql id="cycle">(extract(epoch FROM <include refid="lastVisit"/>) * 1000)::bigint::text</sql>
+
+    <!-- Aktiv, push-u açıq, son 7 gündə heç bir xatırlatma almamış müştəri -->
+    <sql id="eligible">
+        c.status = 'ACTIVE'
+        AND EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.customer_id = c.id)
+        AND NOT EXISTS (SELECT 1 FROM reminder_log w WHERE w.customer_id = c.id AND w.sent_at &gt; #{weekAgo})
+    </sql>
+
+    <!-- Kartın qaydası: yarımçıq kart öz qaydası ilə, yoxdursa aktiv qayda -->
+    <sql id="cardRule">
+        LEFT JOIN loyalty_accounts a ON a.customer_id = c.id
+        LEFT JOIN reward_rules r ON r.id = coalesce(a.reward_rule_id, (SELECT id FROM reward_rules WHERE active))
+    </sql>
+
+    <select id="nearReward" resultType="az.tapstamp.reminder.repository.ReminderMapper$Candidate">
+        SELECT c.id AS customer_id, <include refid="cycle"/> AS cycle_key, a.current_stamps AS current,
+               r.stamps_required AS required
+        FROM customers c
+        <include refid="cardRule"/>
+        WHERE <include refid="eligible"/>
+          AND r.stamps_required &gt; 1 AND a.current_stamps = r.stamps_required - 1
+          AND <include refid="lastVisit"/> &lt;= #{visitedBefore}
+          AND NOT EXISTS (SELECT 1 FROM reminder_log l WHERE l.customer_id = c.id AND l.kind = 'NEAR_REWARD'
+                          AND l.cycle_key = <include refid="cycle"/>)
+        ORDER BY c.id
+        LIMIT #{limit}
+    </select>
+
+    <select id="unusedGift" resultType="az.tapstamp.reminder.repository.ReminderMapper$Candidate">
+        SELECT DISTINCT ON (c.id) c.id AS customer_id, g.id::text || ':' || <include refid="cycle"/> AS cycle_key,
+               0 AS current, 0 AS required
+        FROM customers c
+        JOIN rewards g ON g.customer_id = c.id AND g.status = 'AVAILABLE'
+                      AND (g.expires_at IS NULL OR g.expires_at &gt; #{now})
+        WHERE <include refid="eligible"/>
+          AND <include refid="lastVisit"/> &lt;= #{visitedBefore}
+          AND NOT EXISTS (SELECT 1 FROM reminder_log l WHERE l.customer_id = c.id AND l.kind = 'UNUSED_GIFT'
+                          AND l.cycle_key = g.id::text || ':' || <include refid="cycle"/>)
+        ORDER BY c.id, g.earned_at
+        LIMIT #{limit}
+    </select>
+
+    <select id="winback" resultType="az.tapstamp.reminder.repository.ReminderMapper$Candidate">
+        SELECT c.id AS customer_id, <include refid="cycle"/> AS cycle_key, coalesce(a.current_stamps, 0) AS current,
+               coalesce(r.stamps_required, 0) AS required
+        FROM customers c
+        <include refid="cardRule"/>
+        WHERE <include refid="eligible"/>
+          AND <include refid="lastVisit"/> &lt;= #{visitedBefore}
+          AND NOT EXISTS (SELECT 1 FROM reminder_log l WHERE l.customer_id = c.id AND l.kind = 'WINBACK'
+                          AND l.cycle_key = <include refid="cycle"/>)
+        ORDER BY c.id
+        LIMIT #{limit}
+    </select>
+
+    <insert id="record">
+        INSERT INTO reminder_log (id, customer_id, kind, cycle_key, sent_at)
+        VALUES (#{id}, #{customerId}, #{kind}, #{cycleKey}, #{now})
+        ON CONFLICT (customer_id, kind, cycle_key) DO NOTHING
+    </insert>
+
+    <!-- Gəliş — xatırlatmadan sonrakı 7 gün ərzində təsdiqlənmiş NFC möhürü -->
+    <select id="stats" resultType="az.tapstamp.reminder.repository.ReminderMapper$KindStats">
+        SELECT l.kind, count(*) AS sent,
+               count(*) FILTER (WHERE EXISTS (
+                   SELECT 1 FROM stamps s
+                   WHERE s.customer_id = l.customer_id AND s.source = 'NFC_TAP' AND s.status = 'CONFIRMED'
+                     AND s.created_at &gt; l.sent_at AND s.created_at &lt;= l.sent_at + interval '7 days')) AS returned
+        FROM reminder_log l
+        WHERE l.sent_at &gt;= #{since}
+        GROUP BY l.kind
+    </select>
+</mapper>

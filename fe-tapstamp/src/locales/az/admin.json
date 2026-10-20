@@ -19,7 +19,8 @@
     "smsUsage": "SMS hesabatı",
     "campaigns": "Kampaniyalar",
     "stampCampaigns": "Möhür kampaniyası",
-    "referrals": "Dost dəvəti"
+    "referrals": "Dost dəvəti",
+    "reminders": "Xatırlatmalar"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -924,6 +925,39 @@
       "bonusStamps": "Bonus möhür",
       "bonusStampsHint": "proqramın \"xərci\" — verilən bonus möhürlər",
       "topTitle": "Ən çox dost gətirənlər"
+    }
+  },
+  "reminders": {
+    "title": "Xatırlatmalar",
+    "subtitle": "Müştərilərə avtomatik bildirişlər — onları yenidən gəlməyə dəvət edir. Yalnız bildirişləri açıq olan müştərilərə pulsuz gedir (SMS göndərilmir).",
+    "settings": {
+      "title": "Parametrlər",
+      "description": "Hər xatırlatmanı ayrıca aça bilərsiniz. Mətnlər standartdır və müştərinin dilində göndərilir.",
+      "winbackDays": "Neçə gündür gəlməyənlər",
+      "rules": "Bildirişlər yalnız 10:00–20:00 arası göndərilir. Bir müştəriyə həftədə ən çox bir xatırlatma gedir; hər xatırlatma növbəti ziyarətə qədər bir dəfə göndərilir."
+    },
+    "kinds": {
+      "NEAR_REWARD": {
+        "title": "Hədiyyəyə 1 möhür qalıb",
+        "hint": "Kartında hədiyyəyə 1 möhür qalan və 7 gündür gəlməyən müştərilərə: \"Hədiyyəyə az qalıb 🎁\"."
+      },
+      "UNUSED_GIFT": {
+        "title": "İstifadə olunmamış hədiyyə",
+        "hint": "Hədiyyəsini hələ almamış və 7 gündür gəlməyən müştərilərə: \"Hədiyyəniz sizi gözləyir 🎁\"."
+      },
+      "WINBACK": {
+        "title": "Uzun müddətdir gəlməyənlər",
+        "hint": "{{days}} gündür gəlməyən müştərilərə: \"Sizi yenidən görmək istərdik 👋\"."
+      }
+    },
+    "stats": {
+      "title": "Son 30 gün",
+      "reach_one": "Bildirişləri açıq olan müştərilər: {{customers}}. Xatırlatmalar yalnız onlara gedir.",
+      "reach_other": "Bildirişləri açıq olan müştərilər: {{customers}}. Xatırlatmalar yalnız onlara gedir.",
+      "kind": "Xatırlatma",
+      "sent": "Göndərilib",
+      "returned": "Sonra gəlib",
+      "note": "\"Sonra gəlib\" — xatırlatmadan sonra 7 gün ərzində NFC ilə möhür alan müştərilər."
     }
   }
 }

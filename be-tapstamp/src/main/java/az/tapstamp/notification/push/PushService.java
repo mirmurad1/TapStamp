@@ -41,7 +41,12 @@ public class PushService {
     public enum Kind {
         STAMP_CONFIRMED("/"),
         GIFT_READY("/gift-cards"),
-        REFERRAL_BONUS("/");
+        REFERRAL_BONUS("/"),
+        /** Avtomatik xatırlatmalar (qərar #55); arqumentlər: kartdakı möhür, hədd. */
+        REMINDER_NEAR_REWARD("/"),
+        REMINDER_WINBACK("/"),
+        REMINDER_WINBACK_EMPTY("/"),
+        REMINDER_UNUSED_GIFT("/gift-cards");
 
         private final String url;
 
