@@ -42,6 +42,10 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
 
 ## Təhlükəsizlik və etibarlılıq
 
+- Təsdiqə göndərmək (yeni kampaniya və təsdiq gözləyənin dəyişdirilməsi, həm SMS, həm möhür kampaniyası) hər dəfə
+  **cari şifrə** tələb edir; şifrə serverdə yoxlanır, yanlış cəhdlər girişdəki kimi sayılır (hesab müvəqqəti bloklana
+  bilər). Önizləmə şifrə tələb etmir.
+
 - Alıcı göndərişdən əvvəl `SENDING` kimi götürülür (`FOR UPDATE SKIP LOCKED`): deploy zamanı iki backend eyni anda
   işləsə də, bir müştəriyə SMS iki dəfə getmir.
 - Provayder xətaları növə görə (`SmsDeliveryException.Kind`) işlənir:

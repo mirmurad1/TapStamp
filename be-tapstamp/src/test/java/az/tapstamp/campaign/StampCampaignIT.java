@@ -26,6 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 class StampCampaignIT extends TapIntegrationTest {
 
+    /** Təsdiqə göndərmək (yaratma və dəyişmə) cari şifrə tələb edir. */
+    private static Map<String, Object> confirmed(Map<String, ?> body) {
+        Map<String, Object> withPassword = new java.util.HashMap<>(body);
+        withPassword.put("currentPassword", STAFF_PASSWORD);
+        return withPassword;
+    }
+
     @Autowired
     private CampaignSender sender;
 
@@ -55,7 +62,7 @@ class StampCampaignIT extends TapIntegrationTest {
     }
 
     private String approvedCampaign(AdminClient owner, int stamps) throws Exception {
-        String id = json(owner.post("/campaigns", request(stamps)).andExpect(status().isCreated())
+        String id = json(owner.post("/campaigns", confirmed(request(stamps))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.type").value("STAMPS"))
                 .andExpect(jsonPath("$.stampCount").value(stamps)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());

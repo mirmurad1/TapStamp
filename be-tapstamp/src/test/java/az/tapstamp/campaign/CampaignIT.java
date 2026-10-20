@@ -23,6 +23,13 @@ import org.springframework.jdbc.core.simple.JdbcClient;
  */
 class CampaignIT extends TapIntegrationTest {
 
+    /** Təsdiqə göndərmək (yaratma və dəyişmə) cari şifrə tələb edir. */
+    private static Map<String, Object> confirmed(Map<String, ?> body) {
+        Map<String, Object> withPassword = new java.util.HashMap<>(body);
+        withPassword.put("currentPassword", STAFF_PASSWORD);
+        return withPassword;
+    }
+
     @Autowired
     private CampaignSender sender;
 
@@ -54,7 +61,7 @@ class CampaignIT extends TapIntegrationTest {
         owner.post("/campaigns/preview", Map.of("text", "x", "audience", "INACTIVE")).andExpect(status().isBadRequest());
 
         String latin = "Bu hefte ikinci qehve hediyyedir!";
-        String id = json(owner.post("/campaigns", Map.of("text", latin, "audience", "ALL"))
+        String id = json(owner.post("/campaigns", confirmed(Map.of("text", latin, "audience", "ALL")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("PENDING_APPROVAL"))
                 .andExpect(jsonPath("$.segmentsPerMessage").value(1)), "$.id");
@@ -93,7 +100,7 @@ class CampaignIT extends TapIntegrationTest {
     void rejectedCampaignIsNeverSent() throws Exception {
         signedIn(uniquePhone());
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
-        String id = json(owner.post("/campaigns", Map.of("text", "Rədd testi", "audience", "ALL"))
+        String id = json(owner.post("/campaigns", confirmed(Map.of("text", "Rədd testi", "audience", "ALL")))
                 .andExpect(status().isCreated()), "$.id");
         AdminClient platform = signedInPlatformAdmin();
         platform.post("/campaigns/" + alpha().id() + "/" + id + "/reject", Map.of("reason", "Ödəniş alınmayıb"))
@@ -122,7 +129,7 @@ class CampaignIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.encoding").value("UCS_2"))
                 .andExpect(jsonPath("$.latinText").value(org.hamcrest.Matchers.startsWith("Alpha Kafe: Hormetli ")));
 
-        String id = json(owner.post("/campaigns", request).andExpect(status().isCreated())
+        String id = json(owner.post("/campaigns", confirmed(request)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.personalized").value(true)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
         sendAll();
@@ -143,7 +150,7 @@ class CampaignIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.latin").value(true))
                 .andExpect(jsonPath("$.encoding").value("GSM_7"))
                 .andExpect(jsonPath("$.template").value("Alpha Kafe: Hormetli {name}, Senbe gunu endirim var!"));
-        String id = json(owner.post("/campaigns", request).andExpect(status().isCreated())
+        String id = json(owner.post("/campaigns", confirmed(request)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.latin").value(true)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
         sendAll();
@@ -155,9 +162,17 @@ class CampaignIT extends TapIntegrationTest {
     void pendingCampaignCanBeEditedOrCancelledOnlyBeforeApproval() throws Exception {
         signedIn(uniquePhone());
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
-        String id = json(owner.post("/campaigns", Map.of("text", "Ilk metn", "audience", "ALL"))
+        // Təsdiqə göndərmək cari şifrə tələb edir (önizləmə tələb etmir)
+        owner.post("/campaigns", Map.of("text", "Sifresiz", "audience", "ALL"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("CURRENT_PASSWORD_INVALID"));
+        owner.post("/campaigns", Map.of("text", "Sehv sifre", "audience", "ALL", "currentPassword", "yanlis-sifre"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("CURRENT_PASSWORD_INVALID"));
+        owner.post("/campaigns/preview", Map.of("text", "Onizleme", "audience", "ALL")).andExpect(status().isOk());
+        String id = json(owner.post("/campaigns", confirmed(Map.of("text", "Ilk metn", "audience", "ALL")))
                 .andExpect(status().isCreated()), "$.id");
-        owner.put("/campaigns/" + id, Map.of("text", "Yeni mətn", "audience", "ALL", "latin", true))
+        owner.put("/campaigns/" + id, Map.of("text", "Sifresiz deyisiklik", "audience", "ALL"))
+                .andExpect(jsonPath("$.code").value("CURRENT_PASSWORD_INVALID"));
+        owner.put("/campaigns/" + id, confirmed(Map.of("text", "Yeni mətn", "audience", "ALL", "latin", true)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text").value("Yeni mətn"))
                 .andExpect(jsonPath("$.latin").value(true))
@@ -165,11 +180,11 @@ class CampaignIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty());
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
         // Təsdiqdən sonra nə dəyişmək, nə ləğv etmək olmur; tarixçədə qalır
-        owner.put("/campaigns/" + id, Map.of("text", "Gec", "audience", "ALL")).andExpect(status().isConflict())
+        owner.put("/campaigns/" + id, confirmed(Map.of("text", "Gec", "audience", "ALL"))).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CAMPAIGN_STATE_CHANGED"));
         owner.post("/campaigns/" + id + "/cancel").andExpect(status().isConflict());
 
-        String cancelled = json(owner.post("/campaigns", Map.of("text", "Legv olunacaq", "audience", "ALL"))
+        String cancelled = json(owner.post("/campaigns", confirmed(Map.of("text", "Legv olunacaq", "audience", "ALL")))
                 .andExpect(status().isCreated()), "$.id");
         owner.post("/campaigns/" + cancelled + "/cancel").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));

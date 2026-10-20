@@ -1,6 +1,6 @@
 # Göstəricilərin tərifləri
 
-İdarəetmə panelinin analitikası (`/api/v1/admin/analytics/*`) bu təriflərlə hesablanır. Kod: `AnalyticsService`.
+Göstəricilər panelinin analitikası (`/api/v1/admin/analytics/*`) bu təriflərlə hesablanır. Kod: `AnalyticsService`.
 
 ## Ümumi qaydalar
 

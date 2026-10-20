@@ -2772,6 +2772,8 @@ export interface components {
              * @description Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı
              */
             branchId?: string;
+            /** @description Cari şifrə — təsdiqə göndərəndə (yaratma və dəyişmə) məcburidir; önizləmədə lazım deyil */
+            currentPassword?: string;
             /**
              * Format: int32
              * @description Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)

@@ -4922,6 +4922,12 @@
             "format" : "uuid",
             "description" : "Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı"
           },
+          "currentPassword" : {
+            "type" : "string",
+            "description" : "Cari şifrə — təsdiqə göndərəndə (yaratma və dəyişmə) məcburidir; önizləmədə lazım deyil",
+            "maxLength" : 256,
+            "minLength" : 0
+          },
           "inactiveDays" : {
             "type" : "integer",
             "format" : "int32",

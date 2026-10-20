@@ -6,7 +6,7 @@
     "platformTitle": "Platforma"
   },
   "nav": {
-    "dashboard": "İdarəetmə paneli",
+    "dashboard": "Göstəricilər paneli",
     "customers": "Müştərilər",
     "staffConsole": "İşçi konsolu",
     "settings": "Parametrlər",
@@ -22,7 +22,7 @@
     "referrals": "Dost dəvəti"
   },
   "dashboard": {
-    "title": "İdarəetmə paneli",
+    "title": "Göstəricilər paneli",
     "subtitle": "Müştərilər, möhürlər və hədiyyələr üzrə əsas göstəricilər.",
     "staff": {
       "title": "Xoş gəldiniz!",
@@ -816,6 +816,10 @@
     "failures": {
       "toggle": "Göndərilməyənlər",
       "noName": "Adsız"
+    },
+    "confirm": {
+      "title": "Cari şifrəni daxil edin",
+      "description": "Kampaniya platformanın təsdiqinə göndəriləcək. Davam etmək üçün hesabınızın cari şifrəsini yazın."
     }
   },
   "stampCampaigns": {

@@ -46,7 +46,7 @@ Dəyişikliklər audit jurnalına yazılır (`REFERRAL_SETTINGS_UPDATED`).
 
 ## Hesabat və statistika
 
-**İdarəetmə paneli** (yalnız sahib; panelin dövr və filial filtrləri ilə) — "Dost dəvəti" bloku. Proqram söndürülüb
+**Göstəricilər paneli** (yalnız sahib; panelin dövr və filial filtrləri ilə) — "Dost dəvəti" bloku. Proqram söndürülüb
 və dövrdə dəvət yoxdursa, görünmür. Göstəricilər seçilmiş dövrdə **yaranan dəvətlər** üzrədir:
 
 | Göstərici | Mənası |

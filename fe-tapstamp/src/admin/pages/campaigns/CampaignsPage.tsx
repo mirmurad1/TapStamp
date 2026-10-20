@@ -18,6 +18,7 @@ import { usePagination } from '@/shared/ui/usePagination';
 
 import { campaignsApi, companyApi, type CampaignRequest, type CampaignView } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
+import { ConfirmPasswordDialog } from '../../components/ConfirmPasswordDialog';
 import { InlineLoading } from '../../components/FullPageState';
 import {
   campaignStatus,
@@ -120,9 +121,15 @@ function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editin
     enabled: debounced.text.length > 0,
     placeholderData: keepPreviousData,
   });
+  // Təsdiqə göndərmək (yaratma və dəyişmə) cari şifrə tələb edir
+  const [confirming, setConfirming] = useState(false);
   const create = useMutation({
-    mutationFn: () => (editing?.id ? campaignsApi.update(editing.id, request) : campaignsApi.create(request)),
+    mutationFn: (currentPassword: string) => {
+      const body = { ...request, currentPassword };
+      return editing?.id ? campaignsApi.update(editing.id, body) : campaignsApi.create(body);
+    },
     onSuccess: () => {
+      setConfirming(false);
       setText('');
       setLatin(false);
       setPersonalized(false);
@@ -134,7 +141,8 @@ function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editin
   });
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    create.mutate();
+    create.reset();
+    setConfirming(true);
   };
 
   const data = text.trim() ? preview.data : undefined;
@@ -159,7 +167,7 @@ function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editin
       <CardContent>
         <form className="flex flex-col gap-4" onSubmit={submit}>
           {create.isSuccess ? <Alert tone="success">{t('campaigns.new.sent')}</Alert> : null}
-          <ApiErrorAlert error={create.error} />
+          <ApiErrorAlert error={confirming ? null : create.error} />
           <Field id={`${type}-text`} label={t('campaigns.new.text')} hint={t('campaigns.new.textHint')}>
             <textarea
               value={text}
@@ -311,6 +319,16 @@ function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editin
             ) : null}
           </div>
         </form>
+        <ConfirmPasswordDialog
+          open={confirming}
+          title={t('campaigns.confirm.title')}
+          description={t('campaigns.confirm.description')}
+          confirmLabel={editing ? t('campaigns.edit.save') : t('campaigns.new.submit')}
+          pending={create.isPending}
+          error={create.error}
+          onConfirm={(password) => create.mutate(password)}
+          onCancel={() => setConfirming(false)}
+        />
       </CardContent>
     </Card>
   );

@@ -50,7 +50,7 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase6-12-team-delete.png` | Komanda: "Sil" düyməsi |
 | `phase6-13-team-delete-confirm.png` | İşçinin silinməsinin təsdiqi (soft delete) |
 | `phase7-01-dashboard.png` | Admin: idarəetmə paneli — göstəricilər, qrafik, istilik xəritəsi, dillər |
-| `phase7-02-dashboard-mobile.png` | İdarəetmə paneli telefonda |
+| `phase7-02-dashboard-mobile.png` | Göstəricilər paneli telefonda |
 | `phase7-03-customers.png` | Admin: müştərilər — axtarış, filtrlər, sıralama |
 | `phase7-04-customer-detail.png` | Müştərinin detalları: göstəricilər, tarixçə, fırıldaq işarələri |
 | `phase7-05-customer-adjust.png` | Möhürlərin əl ilə düzəlişi (səbəb məcburi) |

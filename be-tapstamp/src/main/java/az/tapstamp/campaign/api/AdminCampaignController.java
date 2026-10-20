@@ -10,6 +10,7 @@ import az.tapstamp.campaign.CampaignService.Draft;
 import az.tapstamp.campaign.CampaignService.Preview;
 import az.tapstamp.campaign.CampaignService.Type;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
+import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
@@ -22,6 +23,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,9 +45,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCampaignController {
 
     private final CampaignService campaigns;
+    private final AdminAuthService adminAuth;
 
-    public AdminCampaignController(CampaignService campaigns) {
+    public AdminCampaignController(CampaignService campaigns, AdminAuthService adminAuth) {
         this.campaigns = campaigns;
+        this.adminAuth = adminAuth;
     }
 
     @Schema(description = "Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial")
@@ -60,7 +64,14 @@ public class AdminCampaignController {
             @Schema(description = "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")")
             Boolean personalized,
             @Schema(description = "Bütün mesaj latın hərfləri ilə göndərilsin (ə→e, ş→s, ...): 160 simvol/SMS")
-            Boolean latin) {
+            Boolean latin,
+            @Schema(description = "Cari şifrə — təsdiqə göndərəndə (yaratma və dəyişmə) məcburidir; önizləmədə lazım deyil")
+            @Size(max = 256) String currentPassword) {
+
+        @Override
+        public @NonNull String toString() {
+            return "CampaignRequest[type=" + type + ", audience=" + audience + ", currentPassword=***]";
+        }
 
         Draft draft() {
             return new Draft(type == null ? Type.SMS : type, stampCount, text, audience, inactiveDays, branchId,
@@ -108,6 +119,7 @@ public class AdminCampaignController {
             Alıcılar və SMS sayı bu an müəyyənləşir; kampaniya platformanın təsdiqini gözləyir (PENDING_APPROVAL). \
             Alıcı yoxdursa `CAMPAIGN_NO_RECIPIENTS`.""")
     CampaignView create(@AuthenticationPrincipal AdminPrincipal principal, @Valid @RequestBody CampaignRequest request) {
+        adminAuth.confirmCurrentPassword(principal, request.currentPassword());
         return CampaignView.from(campaigns.create(principal, request.draft()));
     }
 
@@ -140,6 +152,7 @@ public class AdminCampaignController {
             Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.""")
     CampaignView update(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId,
                         @Valid @RequestBody CampaignRequest request) {
+        adminAuth.confirmCurrentPassword(principal, request.currentPassword());
         return CampaignView.from(campaigns.update(principal, campaignId, request.draft()));
     }
 

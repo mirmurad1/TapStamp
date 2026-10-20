@@ -286,7 +286,7 @@ Sahib (`owner@mockcoffee.az`) və filial meneceri (`manager@mockcoffee.az`, yaln
 
 | Bölmə | Nə var |
 |---|---|
-| **İdarəetmə paneli** | Ümumi/aktiv müştərilər, yeni müştərilər, möhürlər, hədiyyələr, geri qayıtma; günlük/həftəlik qrafik, istilik xəritəsi (gün × saat), dil bölgüsü; dövr və filial filtri. Təriflər: `docs/metrics.md` |
+| **Göstəricilər paneli** | Ümumi/aktiv müştərilər, yeni müştərilər, möhürlər, hədiyyələr, geri qayıtma; günlük/həftəlik qrafik, istilik xəritəsi (gün × saat), dil bölgüsü; dövr və filial filtri. Təriflər: `docs/metrics.md` |
 | **Müştərilər** | Ad və ya telefonla axtarış, filtrlər (dil, status, gəlməyənlər, filial), sıralama; detallar, tarixçə, fırıldaq işarələri; möhürün əl ilə düzəlişi (səbəb məcburi, təkrar göndərişdən qorunur). Sahib üçün: tam nömrə və CSV ixracı (kimliyin təsdiqi ilə, auditə yazılır), bloklama |
 | **NFC çipləri** | Yalnız baxış: çiplər, vəziyyəti (pulsuz/pullu), toxunuş jurnalı. Çipləri platforma admini əlavə edir: **Platforma → şirkət → NFC çipləri** (qeydiyyat, birdəfəlik provisioning paketi, açar rotasiyası, deaktivasiya; hər şirkətdə ilk çip pulsuzdur, `APP_NFC_FREE_TAGS`). Təlimat: `docs/nfc-ntag424-programming.md` |
 | **Parametrlər** | Möhür qaydası, hədiyyə, şirkətin adı/təsviri (3 dildə), brend rəngi, saat qurşağı; filiallar (ad, ünvan, iş saatları) və filial üzrə ayrıca qayda |

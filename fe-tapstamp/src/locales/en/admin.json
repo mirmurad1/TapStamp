@@ -6,7 +6,7 @@
     "platformTitle": "Platform"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Insights dashboard",
     "customers": "Customers",
     "staffConsole": "Staff console",
     "settings": "Settings",
@@ -22,7 +22,7 @@
     "referrals": "Invite a friend"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Insights dashboard",
     "subtitle": "Key numbers for customers, stamps and rewards.",
     "staff": {
       "title": "Welcome!",
@@ -816,6 +816,10 @@
     "failures": {
       "toggle": "Not sent",
       "noName": "No name"
+    },
+    "confirm": {
+      "title": "Enter your current password",
+      "description": "The campaign will be sent for platform approval. Enter your account’s current password to continue."
     }
   },
   "stampCampaigns": {

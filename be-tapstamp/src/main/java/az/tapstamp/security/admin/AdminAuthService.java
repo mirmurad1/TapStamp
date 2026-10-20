@@ -387,6 +387,14 @@ public class AdminAuthService {
         }
     }
 
+    /**
+     * Həssas əməliyyatdan (məs. kampaniyanı təsdiqə göndərmək) əvvəl cari şifrənin təkrar yoxlanması — hər dəfə.
+     * Yanlış cəhdlər girişdəki kimi sayılır; səhvdə {@code CURRENT_PASSWORD_INVALID}.
+     */
+    public void confirmCurrentPassword(AdminPrincipal principal, String password) {
+        confirmPassword(principal, password, clock.instant());
+    }
+
     // ------------------------------------------------------------------ Daxili köməkçilər
 
     /** Cari şifrənin təkrar yoxlanması; yanlış cəhdlər girişdəki kimi sayılır və hesabı müvəqqəti bloklayır. */

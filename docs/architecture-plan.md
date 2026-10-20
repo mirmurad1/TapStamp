@@ -140,7 +140,7 @@ Proses idempotentdir: yarımçıq qalarsa, təkrar işə salındıqda qaldığı
 | `staff` | Şirkət işçiləri: giriş, TOTP, bloklanma, şifrə bərpası, dəvətlər, rollar |
 | `nfc` | Çiplər, çip açarları, `TagVerifier`, toxunuş endpoint-i, `tap_token`-lər |
 | `loyalty` | Möhürlər, mükafat qaydaları, sui-istifadə siyasəti, mükafatlar, mükafatın istifadəsi (redemption) |
-| `analytics` | İdarəetmə paneli sorğuları |
+| `analytics` | Göstəricilər paneli sorğuları |
 | `audit` | Audit jurnalı, toxunuş hadisələri, fırıldaq işarələri |
 | `notification` | `SmsProvider`, `MailSender`, 3 dildə şablonlar |
 | `platform` | Platforma adminləri (SUPER_ADMIN), tenant-ların və domenlərin idarəsi |
@@ -1346,7 +1346,7 @@ Eyni frontend build-i bütün şirkətlərin domenlərində işləyir. Şirkəti
 |---|---|
 | `/admin/login`, `/admin/login/mfa`, `/admin/mfa/setup` | Giriş və 2FA |
 | `/admin/forgot-password`, `/admin/reset-password`, `/admin/invitation` | Şifrə bərpası və dəvət |
-| `/admin` | İdarəetmə paneli: KPI kartları, xətti qrafik, istilik xəritəsi, geri qayıtma, dil bölgüsü, filial və tarix filtrləri |
+| `/admin` | Göstəricilər paneli: KPI kartları, xətti qrafik, istilik xəritəsi, geri qayıtma, dil bölgüsü, filial və tarix filtrləri |
 | `/admin/customers`, `/admin/customers/:id` | Müştərilər cədvəli; zaman xətti, fırıldaq işarələri, əl ilə düzəliş |
 | `/admin/staff-console` | İşçi konsolu: gözləyən möhürlər, mükafatın təsdiqi (kod daxil etmək və ya QR skan etmək) |
 | `/admin/settings/*` | Mükafat qaydası, limitlər, NFC çipləri, komanda, filiallar, kafe məzmunu (3 dil tab-ı), hüquqi sənədlər |
