@@ -19,6 +19,7 @@ import { SettingsPage } from './pages/settings/SettingsPage';
 import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
 import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
+import { ReferralsPage } from './pages/referrals/ReferralsPage';
 import { SmsUsagePage } from './pages/platform/SmsUsagePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
 import { TenantDetailPage } from './pages/platform/TenantDetailPage';
@@ -78,6 +79,7 @@ export const adminRouter = createBrowserRouter(
                         { path: 'audit', element: <AuditPage /> },
                         { path: 'campaigns', element: <CampaignsPage /> },
                         { path: 'stamp-campaigns', element: <StampCampaignsPage /> },
+                        { path: 'referrals', element: <ReferralsPage /> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

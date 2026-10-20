@@ -246,7 +246,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -858,7 +858,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
-        "operationId" : "list_8",
+        "operationId" : "list_9",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1469,6 +1469,112 @@
         },
         "summary" : "Sessiyanın ləğvi (cihazdan çıxış)",
         "tags" : [ "Admin: hesab" ]
+      }
+    },
+    "/api/v1/admin/referrals" : {
+      "get" : {
+        "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50). Telefonlar maskalı.",
+        "operationId" : "list_8",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultReferralRow"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dəvətlər",
+        "tags" : [ "Admin: dost dəvəti" ]
+      }
+    },
+    "/api/v1/admin/referrals/settings" : {
+      "get" : {
+        "operationId" : "settings",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReferralSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dəvət proqramının parametrləri",
+        "tags" : [ "Admin: dost dəvəti" ]
+      },
+      "put" : {
+        "description" : "Aktiv/söndürülmüş, dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.",
+        "operationId" : "updateSettings",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReferralSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReferralSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Parametrləri dəyişmək",
+        "tags" : [ "Admin: dost dəvəti" ]
+      }
+    },
+    "/api/v1/admin/referrals/summary" : {
+      "get" : {
+        "description" : "Bütün dəvətlər, bonus qazandıranlar, gözləyənlər, müddəti bitənlər, limitə düşənlər və verilən bonus möhürlər.",
+        "operationId" : "summary",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReferralSummary"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Xülasə",
+        "tags" : [ "Admin: dost dəvəti" ]
       }
     },
     "/api/v1/admin/settings/branches" : {
@@ -2690,6 +2796,26 @@
         },
         "summary" : "Hədiyyə kartları",
         "tags" : [ "Müştəri: hədiyyə kartları" ]
+      }
+    },
+    "/api/v1/me/referral" : {
+      "get" : {
+        "description" : "Proqram aktivdirsə: şəxsi kod (ilk dəfə istəniləndə yaranır), bonus möhürlər və dəvətlər üzrə saylar (dəvət olunanlar, bonus qazandıranlar, hələ gəlməyənlər). Söndürülübsə `enabled = false`.",
+        "operationId" : "mine",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerReferral"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Mənim dəvət kodum",
+        "tags" : [ "Müştəri: dost dəvəti" ]
       }
     },
     "/api/v1/me/sessions" : {
@@ -4348,6 +4474,26 @@
         "tags" : [ "İctimai" ]
       }
     },
+    "/api/v1/public/referral-program" : {
+      "get" : {
+        "description" : "Dəvət linki açılanda göstərmək üçün: proqram aktivdirmi və dosta neçə bonus möhür verilir.",
+        "operationId" : "program",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProgramInfo"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dəvət proqramı (giriş tələb etmir)",
+        "tags" : [ "Müştəri: dost dəvəti" ]
+      }
+    },
     "/api/v1/taps/{token}" : {
       "get" : {
         "description" : "Yan təsiri yoxdur. Token tanınmırsa `TAP_TOKEN_EXPIRED`.",
@@ -5067,6 +5213,45 @@
           "registeredAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "CustomerReferral" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "friendStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "invited" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "monthlyCap" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pending" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "referrerStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "rewarded" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "validDays" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -6038,6 +6223,29 @@
           }
         }
       },
+      "PageResultReferralRow" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReferralRow"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "PageResultTagView" : {
         "type" : "object",
         "properties" : {
@@ -6452,6 +6660,22 @@
           }
         }
       },
+      "ProgramInfo" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "friendStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "referrerStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "ProvisionRequest" : {
         "type" : "object",
         "properties" : {
@@ -6577,6 +6801,136 @@
           }
         }
       },
+      "ReferralRow" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "friendId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "friendName" : {
+            "type" : "string"
+          },
+          "friendPhone" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "referrerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "referrerName" : {
+            "type" : "string"
+          },
+          "referrerPhone" : {
+            "type" : "string"
+          },
+          "rewardedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ReferralSettings" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "friendStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "monthlyCap" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "referrerStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "validDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "ReferralSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "friendStamps" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 3,
+            "minimum" : 1
+          },
+          "monthlyCap" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 50,
+            "minimum" : 1
+          },
+          "referrerStamps" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 3,
+            "minimum" : 1
+          },
+          "validDays" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 90,
+            "minimum" : 7
+          }
+        },
+        "required" : [ "enabled", "friendStamps", "monthlyCap", "referrerStamps", "validDays" ]
+      },
+      "ReferralSummary" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "expired" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "limitReached" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "pending" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rewarded" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "RegisterRequest" : {
         "type" : "object",
         "properties" : {
@@ -6596,6 +6950,12 @@
           "name" : {
             "type" : "string",
             "maxLength" : 80,
+            "minLength" : 0
+          },
+          "referralCode" : {
+            "type" : "string",
+            "description" : "Dost dəvətinin kodu (dəvət linkindən, istəyə bağlı)",
+            "maxLength" : 16,
             "minLength" : 0
           },
           "registrationToken" : {

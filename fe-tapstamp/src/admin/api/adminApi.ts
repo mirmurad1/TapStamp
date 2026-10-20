@@ -4,15 +4,15 @@ import { api, unwrap } from '@/shared/api/client';
 import type { components } from '@/shared/api/schema';
 
 /**
- * Admin API. İki "realm" eyni endpoint-lərə malikdir: şirkət domenində işçilər ({@code /api/v1/admin}),
- * platforma domenində platforma adminləri ({@code /api/v1/platform}). Yollar tipli qalsın deyə hər realm üçün
- * ayrıca literal yol yazılır.
+ * Admin API. Ä°ki "realm" eyni endpoint-lÉ™rÉ™ malikdir: ÅŸirkÉ™t domenindÉ™ iÅŸÃ§ilÉ™r ({@code /api/v1/admin}),
+ * platforma domenindÉ™ platforma adminlÉ™ri ({@code /api/v1/platform}). Yollar tipli qalsÄ±n deyÉ™ hÉ™r realm Ã¼Ã§Ã¼n
+ * ayrÄ±ca literal yol yazÄ±lÄ±r.
  */
 export type Realm = 'STAFF' | 'PLATFORM';
 
 type Schemas = components['schemas'];
 
-/** Səhifə parametrləri: `page` 0-dan, `size` — 5, 10, 20 və ya 50. */
+/** SÉ™hifÉ™ parametrlÉ™ri: `page` 0-dan, `size` â€” 5, 10, 20 vÉ™ ya 50. */
 export interface PageParams {
   page: number;
   size: number;
@@ -68,7 +68,7 @@ export const authApi = {
         ? api.POST('/api/v1/platform/auth/mfa/enrollment/confirm', { body: { code } })
         : api.POST('/api/v1/admin/auth/mfa/enrollment/confirm', { body: { code } }),
     ),
-  /** 2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə). */
+  /** 2FA aktivdirsÉ™ code (TOTP), deyilsÉ™ password (cari ÅŸifrÉ™). */
   stepUp: (realm: Realm, body: { code?: string; password?: string }) =>
     unwrap(
       isPlatform(realm)
@@ -121,7 +121,7 @@ export const accountApi = {
         ? api.POST('/api/v1/platform/me/mfa/recovery-codes')
         : api.POST('/api/v1/admin/me/mfa/recovery-codes'),
     ),
-  /** 2FA-nın müvəqqəti söndürülməsi (cari şifrə ilə; sirr saxlanılır). */
+  /** 2FA-nÄ±n mÃ¼vÉ™qqÉ™ti sÃ¶ndÃ¼rÃ¼lmÉ™si (cari ÅŸifrÉ™ ilÉ™; sirr saxlanÄ±lÄ±r). */
   pauseMfa: (realm: Realm, password: string) =>
     unwrap(
       isPlatform(realm)
@@ -134,7 +134,7 @@ export const accountApi = {
         ? api.POST('/api/v1/platform/me/mfa/resume', { body: { code } })
         : api.POST('/api/v1/admin/me/mfa/resume', { body: { code } }),
     ),
-  /** 2FA-nın tam silinməsi (sirr və bərpa kodları). */
+  /** 2FA-nÄ±n tam silinmÉ™si (sirr vÉ™ bÉ™rpa kodlarÄ±). */
   removeMfa: (realm: Realm, password: string) =>
     unwrap(
       isPlatform(realm)
@@ -155,7 +155,7 @@ export const teamApi = {
     ),
   resetMfa: (userId: string) =>
     unwrap(api.POST('/api/v1/admin/team/members/{userId}/mfa-reset', { params: { path: { userId } } })),
-  /** Yumşaq silinmə: hesab bazada qalır, giriş və siyahıdan çıxır. */
+  /** YumÅŸaq silinmÉ™: hesab bazada qalÄ±r, giriÅŸ vÉ™ siyahÄ±dan Ã§Ä±xÄ±r. */
   deleteMember: (userId: string) =>
     unwrap(api.DELETE('/api/v1/admin/team/members/{userId}', { params: { path: { userId } } })),
 };
@@ -180,7 +180,7 @@ export const platformApi = {
 
 export type PendingStamp = Schemas['PendingStampResponse'];
 
-/** İşçi konsolu: təsdiq gözləyən möhürlər (filial üzrə). */
+/** Ä°ÅŸÃ§i konsolu: tÉ™sdiq gÃ¶zlÉ™yÉ™n mÃ¶hÃ¼rlÉ™r (filial Ã¼zrÉ™). */
 export const staffConsoleApi = {
   pendingStamps: (branchId: string, paging: PageParams) =>
     unwrap(api.GET('/api/v1/admin/staff-console/pending-stamps', { params: { query: { branchId, ...paging } } })),
@@ -197,7 +197,7 @@ export const staffConsoleApi = {
     ),
 };
 
-/** Simulyatorun çipi (dev endpoint-i OpenAPI sənədində yoxdur — sənəd prod konfiqurasiyası ilə yaradılır). */
+/** Simulyatorun Ã§ipi (dev endpoint-i OpenAPI sÉ™nÉ™dindÉ™ yoxdur â€” sÉ™nÉ™d prod konfiqurasiyasÄ± ilÉ™ yaradÄ±lÄ±r). */
 export interface SimulatedTag {
   id: string;
   uid: string;
@@ -226,10 +226,10 @@ interface DevPaths {
   };
 }
 
-// Eyni klient (CSRF, sessiya yeniləməsi) — yalnız yol tipləri əl ilə verilib
+// Eyni klient (CSRF, sessiya yenilÉ™mÉ™si) â€” yalnÄ±z yol tiplÉ™ri É™l ilÉ™ verilib
 const devApi = api as unknown as Client<DevPaths>;
 
-/** NFC simulyatoru — yalnız dev mühitində mövcuddur (prod-da 403). */
+/** NFC simulyatoru â€” yalnÄ±z dev mÃ¼hitindÉ™ mÃ¶vcuddur (prod-da 403). */
 export const simulatorApi = {
   tags: () => unwrap(devApi.GET('/api/v1/dev/simulator/tags')),
   tap: (tagId: string) => unwrap(devApi.POST('/api/v1/dev/simulator/taps', { body: { tagId } })),
@@ -242,11 +242,11 @@ export type RewardSettingsRequest = Schemas['RewardSettingsRequest'];
 export type RewardImpact = Schemas['RewardImpactResponse'];
 export type ExistingCards = NonNullable<RewardSettingsRequest['existingCards']>;
 
-/** Loyallıq parametrləri (yalnız sahib): möhür qaydası və hədiyyə. */
+/** LoyallÄ±q parametrlÉ™ri (yalnÄ±z sahib): mÃ¶hÃ¼r qaydasÄ± vÉ™ hÉ™diyyÉ™. */
 export const settingsApi = {
   stampPolicy: () => unwrap(api.GET('/api/v1/admin/settings/stamp-policy')),
   updateStampPolicy: (body: StampPolicyRequest) => unwrap(api.PUT('/api/v1/admin/settings/stamp-policy', { body })),
-  /** Yeni şirkətdə hədiyyə qaydası hələ yoxdur: boş cavab null olur (react-query undefined-i xəta sayır). */
+  /** Yeni ÅŸirkÉ™tdÉ™ hÉ™diyyÉ™ qaydasÄ± hÉ™lÉ™ yoxdur: boÅŸ cavab null olur (react-query undefined-i xÉ™ta sayÄ±r). */
   rewardRule: async () => (await unwrap(api.GET('/api/v1/admin/settings/reward-rule'))) ?? null,
   updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
   rewardImpact: (stampsRequired: number) =>
@@ -255,7 +255,7 @@ export const settingsApi = {
 
 export type GiftCardCheck = Schemas['GiftCardCheckResponse'];
 
-/** İşçi konsolu: hədiyyə kartının yoxlanması və təhvili. */
+/** Ä°ÅŸÃ§i konsolu: hÉ™diyyÉ™ kartÄ±nÄ±n yoxlanmasÄ± vÉ™ tÉ™hvili. */
 export const giftCardConsoleApi = {
   check: (code: string) => unwrap(api.POST('/api/v1/admin/staff-console/gift-cards/check', { body: { code } })),
   redeem: (code: string, branchId: string) =>
@@ -276,7 +276,7 @@ export type HeatCell = Schemas['HeatCell'];
 export type Retention = Schemas['Retention'];
 export type LanguageShare = Schemas['LanguageShare'];
 
-/** Analitika (sahib və menecer); boş filtr — son 30 gün, bütün icazəli filiallar. */
+/** Analitika (sahib vÉ™ menecer); boÅŸ filtr â€” son 30 gÃ¼n, bÃ¼tÃ¼n icazÉ™li filiallar. */
 export const analyticsApi = {
   overview: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/overview', { params: { query } })),
   series: (query: AnalyticsFilter & { granularity: 'DAY' | 'WEEK' }) =>
@@ -305,7 +305,7 @@ export interface CustomerFilter {
 
 export type CustomerSort = 'REGISTERED_AT' | 'LAST_VISIT_AT' | 'NAME' | 'TOTAL_STAMPS';
 
-/** Müştərilər (sahib və menecer). Tam nömrə, bloklama və CSV yalnız sahibə açıqdır. */
+/** MÃ¼ÅŸtÉ™rilÉ™r (sahib vÉ™ menecer). Tam nÃ¶mrÉ™, bloklama vÉ™ CSV yalnÄ±z sahibÉ™ aÃ§Ä±qdÄ±r. */
 export const customersApi = {
   list: (query: CustomerFilter & { sort: CustomerSort; direction: 'asc' | 'desc'; page: number; size: number }) =>
     unwrap(api.GET('/api/v1/admin/customers', { params: { query } })),
@@ -325,7 +325,7 @@ export const customersApi = {
     unwrap(api.GET('/api/v1/admin/customers/{customerId}/fraud-flags', { params: { path: { customerId }, query } })),
   resolveFlag: (flagId: string, note: string) =>
     unwrap(api.POST('/api/v1/admin/customers/fraud-flags/{flagId}/resolve', { params: { path: { flagId } }, body: { note } })),
-  /** CSV faylı (Blob); step-up tələb edir. */
+  /** CSV faylÄ± (Blob); step-up tÉ™lÉ™b edir. */
   exportCsv: (query: CustomerFilter) =>
     unwrap(api.POST('/api/v1/admin/customers/export', { params: { query }, parseAs: 'blob' })) as Promise<Blob>,
 };
@@ -335,14 +335,14 @@ export type TapEvent = Schemas['TapEvent'];
 export type ProvisioningPackage = Schemas['ProvisioningPackage'];
 export type AuditEntry = Schemas['Entry'];
 
-/** NFC çipləri şirkət panelində yalnız baxış üçündür (sahib — hamısı, menecer — öz filialları). */
+/** NFC Ã§iplÉ™ri ÅŸirkÉ™t panelindÉ™ yalnÄ±z baxÄ±ÅŸ Ã¼Ã§Ã¼ndÃ¼r (sahib â€” hamÄ±sÄ±, menecer â€” Ã¶z filiallarÄ±). */
 export const tagsApi = {
   list: (query: PageParams) => unwrap(api.GET('/api/v1/admin/tags', { params: { query } })),
   events: (tagId: string, query: PageParams) =>
     unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId }, query } })),
 };
 
-/** Şirkətin çipləri platforma panelindən: qeydiyyat, idarə, say. Rotasiya və provisioning paketi step-up tələb edir. */
+/** ÅžirkÉ™tin Ã§iplÉ™ri platforma panelindÉ™n: qeydiyyat, idarÉ™, say. Rotasiya vÉ™ provisioning paketi step-up tÉ™lÉ™b edir. */
 export const platformTagsApi = {
   overview: (tenantId: string, query: PageParams) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId }, query } })),
@@ -378,11 +378,11 @@ export interface Localized {
   ru?: string;
 }
 
-/** Şirkətin məzmunu, filiallar və filial üzrə qayda (yalnız sahib). */
+/** ÅžirkÉ™tin mÉ™zmunu, filiallar vÉ™ filial Ã¼zrÉ™ qayda (yalnÄ±z sahib). */
 export const companyApi = {
   get: () => unwrap(api.GET('/api/v1/admin/settings/company')),
   update: (body: Schemas['CompanyRequest']) => unwrap(api.PUT('/api/v1/admin/settings/company', { body })),
-  /** Loqo multipart ilə göndərilir (fayl brauzerdə ölçü və növ üzrə əvvəlcədən yoxlanılır). */
+  /** Loqo multipart ilÉ™ gÃ¶ndÉ™rilir (fayl brauzerdÉ™ Ã¶lÃ§Ã¼ vÉ™ nÃ¶v Ã¼zrÉ™ É™vvÉ™lcÉ™dÉ™n yoxlanÄ±lÄ±r). */
   uploadLogo: (file: File) => {
     const form = new FormData();
     form.append('file', file);
@@ -404,7 +404,7 @@ export const companyApi = {
 export type TenantDomain = Schemas['Domain'];
 export type PlatformAuditEntry = Schemas['PlatformAuditEntry'];
 
-/** Platforma: şirkətin domenləri (əsas domen və silmə step-up tələb edir) və platforma audit jurnalı. */
+/** Platforma: ÅŸirkÉ™tin domenlÉ™ri (É™sas domen vÉ™ silmÉ™ step-up tÉ™lÉ™b edir) vÉ™ platforma audit jurnalÄ±. */
 export const platformDomainsApi = {
   list: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/domains', { params: { path: { tenantId } } })),
   add: (tenantId: string, hostname: string) =>
@@ -423,34 +423,44 @@ export const platformAuditApi = {
 
 export type SmsUsageReport = Schemas['SmsUsageReport'];
 
+export type ReferralSettings = Schemas['ReferralSettings'];
+
+/** Dost dÉ™vÉ™ti (ÅŸirkÉ™t sahibi): parametrlÉ™r, xÃ¼lasÉ™ vÉ™ dÉ™vÉ™tlÉ™r. */
+export const referralsApi = {
+  settings: () => unwrap(api.GET('/api/v1/admin/referrals/settings')),
+  updateSettings: (body: Schemas['ReferralSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/referrals/settings', { body })),
+  summary: () => unwrap(api.GET('/api/v1/admin/referrals/summary')),
+  list: (query: PageParams) => unwrap(api.GET('/api/v1/admin/referrals', { params: { query } })),
+};
+
 export type CampaignRequest = Schemas['CampaignRequest'];
 export type CampaignView = Schemas['CampaignView'];
 export type CampaignPreview = Schemas['Preview'];
 export type PlatformCampaign = Schemas['PlatformCampaignView'];
 
-/** Kampaniya SMS-ləri (şirkət sahibi). */
+/** Kampaniya SMS-lÉ™ri (ÅŸirkÉ™t sahibi). */
 export const campaignsApi = {
   preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
   create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
   list: (type: 'SMS' | 'STAMPS', paging: PageParams) =>
     unwrap(api.GET('/api/v1/admin/campaigns', { params: { query: { type, ...paging } } })),
-  /** SMS-i göndərilməyən alıcılar (ad, nömrə, səbəb). */
+  /** SMS-i gÃ¶ndÉ™rilmÉ™yÉ™n alÄ±cÄ±lar (ad, nÃ¶mrÉ™, sÉ™bÉ™b). */
   failures: (campaignId: string, query: PageParams) =>
     unwrap(api.GET('/api/v1/admin/campaigns/{campaignId}/failures', { params: { path: { campaignId }, query } })),
-  /** Yalnız təsdiq gözləyən kampaniya. */
+  /** YalnÄ±z tÉ™sdiq gÃ¶zlÉ™yÉ™n kampaniya. */
   update: (campaignId: string, body: CampaignRequest) =>
     unwrap(api.PUT('/api/v1/admin/campaigns/{campaignId}', { params: { path: { campaignId } }, body })),
   cancel: (campaignId: string) =>
     unwrap(api.POST('/api/v1/admin/campaigns/{campaignId}/cancel', { params: { path: { campaignId } } })),
 };
 
-/** Kampaniyalar (platforma): təsdiq gözləyənlər və qərar. */
+/** Kampaniyalar (platforma): tÉ™sdiq gÃ¶zlÉ™yÉ™nlÉ™r vÉ™ qÉ™rar. */
 export const platformCampaignsApi = {
   list: (status: 'PENDING' | 'ALL', paging: PageParams) =>
     unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status, ...paging } } })),
   approve: (tenantId: string, campaignId: string) =>
     unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve', { params: { path: { tenantId, campaignId } } })),
-  /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək. */
+  /** Hesab xÉ™tasÄ±na gÃ¶rÉ™ dayandÄ±rÄ±lmÄ±ÅŸ kampaniyanÄ± davam etdirmÉ™k. */
   resume: (tenantId: string, campaignId: string) =>
     unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume', { params: { path: { tenantId, campaignId } } })),
   reject: (tenantId: string, campaignId: string, reason: string) =>
@@ -463,9 +473,9 @@ export const platformCampaignsApi = {
 };
 
 export const platformSmsApi = {
-  /** Günlər daxil (YYYY-MM-DD, Bakı vaxtı). */
+  /** GÃ¼nlÉ™r daxil (YYYY-MM-DD, BakÄ± vaxtÄ±). */
   usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
-  /** SMS axtarışı: status (SENT/FAILED) və nömrə (və ya hissəsi) istəyə bağlı; 20-lik səhifələr (page 0-dan). */
+  /** SMS axtarÄ±ÅŸÄ±: status (SENT/FAILED) vÉ™ nÃ¶mrÉ™ (vÉ™ ya hissÉ™si) istÉ™yÉ™ baÄŸlÄ±; 20-lik sÉ™hifÉ™lÉ™r (page 0-dan). */
   messages: (query: { from: string; to: string; status?: 'SENT' | 'FAILED'; phone?: string } & PageParams) =>
     unwrap(api.GET('/api/v1/platform/sms-usage/messages', { params: { query } })),
 };

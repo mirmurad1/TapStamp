@@ -138,5 +138,25 @@
     "iosStep1": "In Safari, tap the",
     "share": "Share",
     "iosStep2": "button, then choose \"Add to Home Screen\"."
+  },
+  "referral": {
+    "title": "Invite a friend",
+    "description": "When your friend signs up with your link and gets their first stamp, you get {{mine}} and your friend gets {{friend}} bonus stamps.",
+    "link": "Your invite link",
+    "share": "Share",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "stats": "Invited: {{invited}} · earned a bonus: {{rewarded}} · not visited yet: {{pending}}",
+    "rules": "Up to {{cap}} friends count per month. Your friend must visit within {{days}} days.",
+    "shareText_one": "Join me! Sign up with this link and get {{count}} bonus stamp with your first stamp: {{link}}",
+    "shareText_other": "Join me! Sign up with this link and get {{count}} bonus stamps with your first stamp: {{link}}",
+    "landing": {
+      "title": "{{company}} — your friend invites you",
+      "alreadyMember": "You are already a member — invitations are for new customers only.",
+      "home": "Go to my card",
+      "join": "Sign up",
+      "description_one": "Sign up and get {{count}} bonus stamp together with your stamp on your first visit.",
+      "description_other": "Sign up and get {{count}} bonus stamps together with your stamp on your first visit."
+    }
   }
 }

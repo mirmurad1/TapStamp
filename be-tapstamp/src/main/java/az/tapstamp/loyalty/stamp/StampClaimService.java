@@ -26,11 +26,13 @@ import az.tapstamp.nfc.TapEventLog;
 import az.tapstamp.nfc.repository.TapEventMapper;
 import az.tapstamp.nfc.repository.TapTokenMapper.TapToken;
 import az.tapstamp.nfc.repository.TapTokenMapper;
+import az.tapstamp.referral.ReferralService;
 import az.tapstamp.security.token.SecureTokens;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.web.ClientInfo;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -81,13 +83,15 @@ public class StampClaimService {
     private final StampMapper stamps;
     private final TapEventMapper tapEvents;
     private final TransactionTemplate tx;
+    private final ReferralService referrals;
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerMapper customers, OtpChallengeMapper challenges, CompanySettings companySettings,
                              StampMapper stamps, TapEventMapper tapEvents,
-                             PlatformTransactionManager transactionManager,
+                             PlatformTransactionManager transactionManager, ReferralService referrals,
                              Clock clock) {
+        this.referrals = referrals;
         this.tokens = tokens;
         this.events = events;
         this.fraudFlags = fraudFlags;
@@ -213,6 +217,9 @@ public class StampClaimService {
         UUID stampId = ledger.insertTapStamp(token.branchId(), customerId, token.tagId(), token.id(), status, day, tapAt);
         CardState card = status == StampStatus.CONFIRMED ? ledger.applyConfirmed(customerId, stampId, tapAt)
                 : ledger.card(customerId);
+        if (status == StampStatus.CONFIRMED) {
+            card = withReferralBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
+        }
         tokens.markConsumed(token.id(), customerId, now);
         ledger.touchCustomerVisit(customerId, token.branchId(), tapAt);
         events.record(Event.of(Stage.CLAIM, token.branchId(), token.tagId(), null, source)
@@ -220,6 +227,15 @@ public class StampClaimService {
         detectMultiAccount(token, customerId, source, now);
         return Outcome.ok(new ClaimResult(stampId, status, card.currentStamps(), card.stampsRequired(),
                 card.giftCardId(), token.branchId()));
+    }
+
+    /** Dəvət bonusu verilibsə, kart bonusdan sonrakı vəziyyətdir; hədiyyə kartı — ilk yaranan. */
+    static CardState withReferralBonus(CardState card, @Nullable CardState bonus) {
+        if (bonus == null) {
+            return card;
+        }
+        return new CardState(bonus.currentStamps(), bonus.stampsRequired(),
+                card.giftCardId() != null ? card.giftCardId() : bonus.giftCardId());
     }
 
     private ClaimResult previousResult(TapToken token, UUID customerId) {

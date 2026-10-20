@@ -111,7 +111,8 @@ public class CustomerAuthController {
             @NotBlank @Size(max = 128) String registrationToken,
             @Size(max = 80) String name,
             @NotNull @Size(max = 10) List<@Valid @NotNull DocumentAcceptance> acceptedDocuments,
-            @NotBlank @Pattern(regexp = "az|en|ru") String language) {
+            @NotBlank @Pattern(regexp = "az|en|ru") String language,
+            @Schema(description = "Dost dəvətinin kodu (dəvət linkindən, istəyə bağlı)") @Size(max = 16) String referralCode) {
         @Override
         public @NonNull String toString() {
             return "RegisterRequest[***]";
@@ -182,7 +183,8 @@ public class CustomerAuthController {
         ClientInfo client = ClientInfo.of(http);
         Language language = Language.fromTag(request.language()).orElse(Language.DEFAULT);
         UUID customerId = registration.register(request.registrationToken(), request.name(),
-                request.acceptedDocuments().stream().map(DocumentAcceptance::toRef).toList(), language, client);
+                request.acceptedDocuments().stream().map(DocumentAcceptance::toRef).toList(), language, client,
+                request.referralCode());
         cookies.write(response, sessions.open(customerId, client));
         return new AuthStatusResponse("AUTHENTICATED");
     }

@@ -6,6 +6,7 @@ import { GiftCardsPage } from './pages/GiftCardsPage';
 import { LegalPage } from './pages/LegalPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ReferralPage } from './pages/ReferralPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TapErrorPage, TapPage } from './pages/TapPage';
 
@@ -20,6 +21,7 @@ export const customerRouter = createBrowserRouter([
       { path: 'tap/error', element: <TapErrorPage /> },
       { path: 'tap/:token', element: <TapPage /> },
       { path: 'legal/:slug', element: <LegalPage /> },
+      { path: 'r/:code', element: <ReferralPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

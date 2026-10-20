@@ -18,7 +18,8 @@
     "tags": "NFC tags",
     "smsUsage": "SMS report",
     "campaigns": "Campaigns",
-    "stampCampaigns": "Stamp campaign"
+    "stampCampaigns": "Stamp campaign",
+    "referrals": "Invite a friend"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -619,7 +620,8 @@
       "stamp": {
         "NFC_TAP": "Stamp (NFC)",
         "MANUAL": "Stamp (manual)",
-        "CAMPAIGN": "Stamp (campaign)"
+        "CAMPAIGN": "Stamp (campaign)",
+        "REFERRAL": "Stamp (friend invite)"
       },
       "status": {
         "PENDING": "Awaiting approval",
@@ -829,6 +831,44 @@
     "preview": {
       "stamps": "{{stamps}} stamps to {{recipients}} customers — {{total}} stamps in total",
       "rule": "Stamps are granted only to customers whose SMS was sent. Customers who get a stamp before approval still receive the campaign stamps."
+    }
+  },
+  "referrals": {
+    "title": "Invite a friend",
+    "subtitle": "Customers invite friends; when a friend visits for the first time and gets an NFC stamp, both earn bonus stamps.",
+    "settings": {
+      "title": "Settings",
+      "description": "The bonus is granted only after a real visit — fake sign-ups earn nothing.",
+      "enabled": "Referral program is active",
+      "enabledHint": "The “Invite a friend” section is shown in the customer app.",
+      "referrerStamps": "Bonus stamps for the referrer",
+      "friendStamps": "Bonus stamps for the friend",
+      "monthlyCap": "Monthly limit (per customer)",
+      "monthlyCapHint": "How many friends per month can earn a customer a bonus.",
+      "validDays": "Invitation validity (days)",
+      "validDaysHint": "If the friend does not visit within this period, the invitation closes without a bonus."
+    },
+    "summary": {
+      "total": "Invitations",
+      "rewarded": "Visited and rewarded",
+      "pending": "Pending",
+      "bonusStamps": "Bonus stamps granted",
+      "notCounted": "Not counted: expired {{expired}}, over the monthly limit {{limit}}."
+    },
+    "list": {
+      "title": "Invitations",
+      "empty": "No invitations yet.",
+      "referrer": "Referrer",
+      "friend": "Friend",
+      "status": "Status",
+      "date": "Date",
+      "rewardedAt": "bonus: {{date}}"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "REWARDED": "Rewarded",
+      "EXPIRED": "Expired",
+      "LIMIT_REACHED": "Monthly limit"
     }
   }
 }

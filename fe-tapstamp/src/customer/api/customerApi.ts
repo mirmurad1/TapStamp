@@ -46,6 +46,12 @@ export const customerAuthApi = {
     unwrap(api.POST('/api/v1/auth/step-up/otp/verify', { body: { challengeId, code } })),
 };
 
+/** Dost dəvəti: proqram (giriş tələb etmir) və müştərinin öz kodu ilə nəticələri. */
+export const referralApi = {
+  program: () => unwrap(api.GET('/api/v1/public/referral-program')),
+  mine: () => unwrap(api.GET('/api/v1/me/referral')),
+};
+
 export const meApi = {
   me: () => unwrap(api.GET('/api/v1/me')),
   update: (body: Schemas['UpdateRequest']) => unwrap(api.PATCH('/api/v1/me', { body })),

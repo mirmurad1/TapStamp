@@ -88,16 +88,25 @@ public abstract class CustomerIntegrationTest extends IntegrationTest {
 
     /** Tam axın: kod → (yeni nömrədirsə) qeydiyyat. Klient daxil olmuş vəziyyətdə qalır. */
     protected CustomerClient signedIn(String phone) throws Exception {
+        return signedIn(phone, null);
+    }
+
+    /** Tam axın; yeni müştəri qeydiyyatda dost dəvətinin kodunu göndərir ({@code null} — kodsuz). */
+    protected CustomerClient signedIn(String phone, String referralCode) throws Exception {
         CustomerClient client = client();
         String[] challenge = requestCode(client, phone, "az");
         ResultActions verify = client.post("/api/v1/auth/otp/verify",
                 Map.of("challengeId", challenge[0], "code", challenge[1])).andExpect(status().isOk());
         if ("REGISTRATION_REQUIRED".equals(json(verify, "$.status"))) {
-            client.post("/api/v1/auth/register", Map.of(
-                            "registrationToken", json(verify, "$.registrationToken"),
-                            "name", "Test Müştəri",
-                            "acceptedDocuments", currentDocuments(client),
-                            "language", "az"))
+            Map<String, Object> body = new java.util.HashMap<>(Map.of(
+                    "registrationToken", json(verify, "$.registrationToken"),
+                    "name", "Test Müştəri",
+                    "acceptedDocuments", currentDocuments(client),
+                    "language", "az"));
+            if (referralCode != null) {
+                body.put("referralCode", referralCode);
+            }
+            client.post("/api/v1/auth/register", body)
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value("AUTHENTICATED"));
         }

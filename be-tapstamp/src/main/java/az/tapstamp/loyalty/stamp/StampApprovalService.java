@@ -10,6 +10,7 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
+import az.tapstamp.referral.ReferralService;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.error.ApiException;
@@ -39,10 +40,12 @@ public class StampApprovalService {
     private final StampLedger ledger;
     private final AuditLogger audit;
     private final TransactionTemplate tx;
+    private final ReferralService referrals;
     private final Clock clock;
 
     public StampApprovalService(StampMapper stamps, StampLedger ledger, AuditLogger audit,
-                                PlatformTransactionManager transactionManager, Clock clock) {
+                                PlatformTransactionManager transactionManager, ReferralService referrals, Clock clock) {
+        this.referrals = referrals;
         this.stamps = stamps;
         this.ledger = ledger;
         this.audit = audit;
@@ -65,7 +68,8 @@ public class StampApprovalService {
             StampLedger.Stamp stamp = lockPending(principal, stampId);
             ledger.lockAccount(stamp.customerId(), now);
             stamps.confirmStamp(stampId, principal.userId(), now);
-            CardState card = ledger.applyConfirmed(stamp.customerId(), stampId, now);
+            CardState card = StampClaimService.withReferralBonus(ledger.applyConfirmed(stamp.customerId(), stampId, now),
+                    referrals.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), now));
             audit.tenant("STAMP_CONFIRMED", AuditLogger.ActorType.STAFF, principal.userId(), "stamp", stampId,
                     Map.of("branchId", stamp.branchId().toString()));
             return new Decision(stampId, StampStatus.CONFIRMED, card);

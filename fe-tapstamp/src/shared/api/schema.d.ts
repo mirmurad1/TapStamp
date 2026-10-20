@@ -112,7 +112,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -474,7 +474,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).
          */
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -770,6 +770,67 @@ export interface paths {
         post?: never;
         /** Sessiyanın ləğvi (cihazdan çıxış) */
         delete: operations["revokeSession_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referrals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dəvətlər
+         * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50). Telefonlar maskalı.
+         */
+        get: operations["list_8"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referrals/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dəvət proqramının parametrləri */
+        get: operations["settings"];
+        /**
+         * Parametrləri dəyişmək
+         * @description Aktiv/söndürülmüş, dəvət edənə və dosta bonus möhür (1–3), dəvət edənin aylıq limiti (1–50), dəvətin etibarlılıq müddəti (7–90 gün). Dəyişiklik auditə yazılır.
+         */
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referrals/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Xülasə
+         * @description Bütün dəvətlər, bonus qazandıranlar, gözləyənlər, müddəti bitənlər, limitə düşənlər və verilən bonus möhürlər.
+         */
+        get: operations["summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1489,6 +1550,26 @@ export interface paths {
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
         get: operations["list_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/referral": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mənim dəvət kodum
+         * @description Proqram aktivdirsə: şəxsi kod (ilk dəfə istəniləndə yaranır), bonus möhürlər və dəvətlər üzrə saylar (dəvət olunanlar, bonus qazandıranlar, hələ gəlməyənlər). Söndürülübsə `enabled = false`.
+         */
+        get: operations["mine"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2466,6 +2547,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/referral-program": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dəvət proqramı (giriş tələb etmir)
+         * @description Dəvət linki açılanda göstərmək üçün: proqram aktivdirmi və dosta neçə bonus möhür verilir.
+         */
+        get: operations["program"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/taps/{token}": {
         parameters: {
             query?: never;
@@ -2802,6 +2903,24 @@ export interface components {
             preferredLanguage?: string;
             /** Format: date-time */
             registeredAt?: string;
+        };
+        CustomerReferral: {
+            code?: string;
+            enabled?: boolean;
+            /** Format: int32 */
+            friendStamps?: number;
+            /** Format: int32 */
+            invited?: number;
+            /** Format: int32 */
+            monthlyCap?: number;
+            /** Format: int32 */
+            pending?: number;
+            /** Format: int32 */
+            referrerStamps?: number;
+            /** Format: int32 */
+            rewarded?: number;
+            /** Format: int32 */
+            validDays?: number;
         };
         /** @description ACTIVE — access token etibarlıdır; REFRESH_REQUIRED — yalnız refresh token var, əvvəlcə /refresh çağırılmalıdır; NONE — daxil olmayıb */
         CustomerSessionStateResponse: {
@@ -3193,6 +3312,15 @@ export interface components {
             /** Format: int64 */
             total?: number;
         };
+        PageResultReferralRow: {
+            items?: components["schemas"]["ReferralRow"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
         PageResultTagView: {
             items?: components["schemas"]["TagView"][];
             /** Format: int32 */
@@ -3363,6 +3491,13 @@ export interface components {
             /** Format: int64 */
             totalStamps?: number;
         };
+        ProgramInfo: {
+            enabled?: boolean;
+            /** Format: int32 */
+            friendStamps?: number;
+            /** Format: int32 */
+            referrerStamps?: number;
+        };
         ProvisionRequest: {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
@@ -3410,10 +3545,67 @@ export interface components {
         RecoveryCodesResponse: {
             recoveryCodes?: string[];
         };
+        ReferralRow: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: uuid */
+            friendId?: string;
+            friendName?: string;
+            friendPhone?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            referrerId?: string;
+            referrerName?: string;
+            referrerPhone?: string;
+            /** Format: date-time */
+            rewardedAt?: string;
+            status?: string;
+        };
+        ReferralSettings: {
+            enabled?: boolean;
+            /** Format: int32 */
+            friendStamps?: number;
+            /** Format: int32 */
+            monthlyCap?: number;
+            /** Format: int32 */
+            referrerStamps?: number;
+            /** Format: int32 */
+            validDays?: number;
+        };
+        ReferralSettingsRequest: {
+            enabled: boolean;
+            /** Format: int32 */
+            friendStamps: number;
+            /** Format: int32 */
+            monthlyCap: number;
+            /** Format: int32 */
+            referrerStamps: number;
+            /** Format: int32 */
+            validDays: number;
+        };
+        ReferralSummary: {
+            /** Format: int64 */
+            bonusStamps?: number;
+            /** Format: int64 */
+            expired?: number;
+            /** Format: int64 */
+            limitReached?: number;
+            /** Format: int64 */
+            pending?: number;
+            /** Format: int64 */
+            rewarded?: number;
+            /** Format: int64 */
+            total?: number;
+        };
         RegisterRequest: {
             acceptedDocuments: components["schemas"]["DocumentAcceptance"][];
             language: string;
             name?: string;
+            /** @description Dost dəvətinin kodu (dəvət linkindən, istəyə bağlı) */
+            referralCode?: string;
             registrationToken: string;
         };
         /** @description Rədd səbəbi (şirkət sahibinə göstərilir) */
@@ -3907,7 +4099,7 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    list_10: {
         parameters: {
             query?: {
                 action?: string;
@@ -4365,7 +4557,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: {
                 q?: string;
@@ -4761,6 +4953,93 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list_8: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResultReferralRow"];
+                };
+            };
+        };
+    };
+    settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReferralSettings"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReferralSettings"];
+                };
+            };
+        };
+    };
+    summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReferralSummary"];
+                };
             };
         };
     };
@@ -5756,6 +6035,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GiftCardResponse"][];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CustomerReferral"];
                 };
             };
         };
@@ -6953,6 +7252,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LegalDocumentResponse"];
+                };
+            };
+        };
+    };
+    program: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProgramInfo"];
                 };
             };
         };

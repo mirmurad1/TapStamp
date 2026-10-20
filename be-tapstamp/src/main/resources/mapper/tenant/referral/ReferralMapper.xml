@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Dost dəvəti: parametrlər, müştərinin dəvət kodu, dəvətlər və bonusun bir dəfə verilməsi -->
+<mapper namespace="az.tapstamp.referral.repository.ReferralMapper">
+
+    <select id="settings" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralSettings">
+        SELECT enabled, referrer_stamps, friend_stamps, monthly_cap, valid_days FROM referral_settings WHERE id = 1
+    </select>
+
+    <update id="updateSettings">
+        UPDATE referral_settings
+        SET enabled = #{enabled}, referrer_stamps = #{referrerStamps}, friend_stamps = #{friendStamps},
+            monthly_cap = #{monthlyCap}, valid_days = #{validDays}, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = 1
+    </update>
+
+    <select id="referralCode" resultType="string">
+        SELECT referral_code FROM customers WHERE id = #{customerId} AND referral_code IS NOT NULL
+    </select>
+
+    <update id="setReferralCode">
+        UPDATE customers SET referral_code = #{code} WHERE id = #{customerId} AND referral_code IS NULL
+    </update>
+
+    <select id="findActiveByCode" resultType="java.util.UUID">
+        SELECT id FROM customers WHERE referral_code = #{code} AND status = 'ACTIVE'
+    </select>
+
+    <select id="countSince" resultType="int">
+        SELECT count(*) FROM referrals
+        WHERE referrer_id = #{referrerId} AND created_at &gt;= #{since} AND status &lt;&gt; 'LIMIT_REACHED'
+    </select>
+
+    <insert id="insert">
+        INSERT INTO referrals (id, referrer_id, friend_id, status, created_at, expires_at)
+        VALUES (#{id}, #{referrerId}, #{friendId}, #{status}, #{createdAt}, #{expiresAt})
+    </insert>
+
+    <select id="claimPending" resultType="az.tapstamp.referral.repository.ReferralMapper$Claimed">
+        UPDATE referrals SET status = 'REWARDED', rewarded_at = #{now}
+        WHERE friend_id = #{friendId} AND status = 'PENDING' AND expires_at &gt; #{now}
+        RETURNING id, referrer_id
+    </select>
+
+    <select id="isActive" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM customers WHERE id = #{customerId} AND status = 'ACTIVE')
+    </select>
+
+    <select id="stats" resultType="az.tapstamp.referral.repository.ReferralMapper$Stats">
+        SELECT count(*) FILTER (WHERE status &lt;&gt; 'LIMIT_REACHED') AS invited,
+               count(*) FILTER (WHERE status = 'REWARDED') AS rewarded,
+               count(*) FILTER (WHERE status = 'PENDING' AND expires_at &gt; #{now}) AS pending
+        FROM referrals WHERE referrer_id = #{referrerId}
+    </select>
+
+    <select id="list" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralRow">
+        SELECT r.id, r.referrer_id, ref.name AS referrer_name, ref.phone_masked AS referrer_phone,
+               r.friend_id, fr.name AS friend_name, fr.phone_masked AS friend_phone,
+               CASE WHEN r.status = 'PENDING' AND r.expires_at &lt;= #{now} THEN 'EXPIRED' ELSE r.status END AS status,
+               r.created_at, r.expires_at, r.rewarded_at
+        FROM referrals r
+        JOIN customers ref ON ref.id = r.referrer_id
+        JOIN customers fr ON fr.id = r.friend_id
+        ORDER BY r.created_at DESC, r.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM referrals
+    </select>
+
+    <select id="summary" resultType="az.tapstamp.referral.repository.ReferralMapper$ReferralSummary">
+        SELECT count(*) AS total,
+               count(*) FILTER (WHERE status = 'REWARDED') AS rewarded,
+               count(*) FILTER (WHERE status = 'PENDING' AND expires_at &gt; #{now}) AS pending,
+               count(*) FILTER (WHERE status = 'PENDING' AND expires_at &lt;= #{now}) AS expired,
+               count(*) FILTER (WHERE status = 'LIMIT_REACHED') AS limit_reached,
+               (SELECT count(*) FROM stamps WHERE source = 'REFERRAL' AND status = 'CONFIRMED') AS bonus_stamps
+        FROM referrals
+    </select>
+</mapper>

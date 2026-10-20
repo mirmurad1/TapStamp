@@ -14,10 +14,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Field } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
-import { customerAuthApi, publicApi } from '../api/customerApi';
+import { customerAuthApi, publicApi, referralApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { markJustSignedIn } from '../auth/justSignedIn';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { clearReferralCode, readReferralCode } from '../lib/referral';
 
 type Step =
   | { name: 'phone' }
@@ -225,6 +226,9 @@ type RegisterValues = z.infer<typeof registerSchema>;
 function RegisterStep({ registrationToken, onRegistered }: { registrationToken: string; onRegistered: () => void }) {
   const { t } = useTranslation(['auth', 'common']);
   const documents = useQuery({ queryKey: ['legal-documents'], queryFn: publicApi.legalDocuments });
+  // Dəvət linki ilə gəlibsə — kod qeydiyyatla göndərilir
+  const [referralCode] = useState(readReferralCode);
+  const program = useQuery({ queryKey: ['referral-program'], queryFn: referralApi.program, enabled: Boolean(referralCode) });
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: '', consent: false },
@@ -239,8 +243,12 @@ function RegisterStep({ registrationToken, onRegistered }: { registrationToken: 
           version: document.version ?? 1,
         })),
         language: currentLanguage(),
+        referralCode,
       }),
-    onSuccess: onRegistered,
+    onSuccess: () => {
+      clearReferralCode();
+      onRegistered();
+    },
   });
   const tokenExpired = isApiError(register.error, 'TOKEN_INVALID');
 
@@ -253,6 +261,11 @@ function RegisterStep({ registrationToken, onRegistered }: { registrationToken: 
       <CardContent>
         <form onSubmit={form.handleSubmit((values) => register.mutate(values))} className="flex flex-col gap-4" noValidate>
           <ErrorMessage error={register.error} />
+          {referralCode && program.data?.enabled ? (
+            <p className="rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
+              {t('auth:register.referral', { count: program.data.friendStamps ?? 1 })}
+            </p>
+          ) : null}
           {tokenExpired ? (
             <Button asChild>
               <Link to="/login" reloadDocument>

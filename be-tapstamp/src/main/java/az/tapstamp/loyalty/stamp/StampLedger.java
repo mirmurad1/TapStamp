@@ -90,6 +90,13 @@ public class StampLedger {
         return id;
     }
 
+    /** Dost dəvətinin bonus möhürü (çağıran tranzaksiyada {@link #lockAccount} etməlidir). */
+    public UUID insertReferralStamp(UUID branchId, UUID customerId, UUID referralId, LocalDate localDate, Instant at) {
+        UUID id = Ids.newId();
+        stamps.insertReferralStamp(id, branchId, customerId, referralId, localDate, at);
+        return id;
+    }
+
     public Optional<Stamp> findByTapToken(UUID tapTokenId) {
         return stamps.findByTapToken(tapTokenId);
     }

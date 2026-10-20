@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
+import { InviteFriendCard } from '../components/InviteFriendCard';
 import { StampCard } from '../components/StampCard';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 import { InstallCard } from '../pwa/InstallCard';
@@ -82,6 +83,7 @@ function Profile({ me }: { me: Me }) {
           <ChevronRight className="size-6 shrink-0" aria-label={t('rewards.open')} />
         </Link>
       ) : null}
+      <InviteFriendCard />
       <InstallCard />
     </>
   );

@@ -18,7 +18,8 @@
     "tags": "NFC çipləri",
     "smsUsage": "SMS hesabatı",
     "campaigns": "Kampaniyalar",
-    "stampCampaigns": "Möhür kampaniyası"
+    "stampCampaigns": "Möhür kampaniyası",
+    "referrals": "Dost dəvəti"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -619,7 +620,8 @@
       "stamp": {
         "NFC_TAP": "Möhür (NFC)",
         "MANUAL": "Möhür (əl ilə)",
-        "CAMPAIGN": "Möhür (kampaniya)"
+        "CAMPAIGN": "Möhür (kampaniya)",
+        "REFERRAL": "Möhür (dost dəvəti)"
       },
       "status": {
         "PENDING": "Təsdiq gözləyir",
@@ -829,6 +831,44 @@
     "preview": {
       "stamps": "{{recipients}} müştəriyə {{stamps}} möhür — cəmi {{total}} möhür",
       "rule": "Möhür yalnız SMS uğurla göndərilən müştəriyə verilir. Təsdiqə qədər kartına möhür düşən müştəri də kampaniya möhürünü alır."
+    }
+  },
+  "referrals": {
+    "title": "Dost dəvəti",
+    "subtitle": "Müştərilər dostlarını dəvət edir; dost ilk dəfə gəlib NFC ilə möhür alanda hər ikisi bonus möhür qazanır.",
+    "settings": {
+      "title": "Parametrlər",
+      "description": "Bonus yalnız real gəlişdən sonra verilir — saxta qeydiyyat bonus qazandırmır.",
+      "enabled": "Dəvət proqramı aktivdir",
+      "enabledHint": "Müştəri tətbiqində \"Dostunu dəvət et\" bölməsi görünür.",
+      "referrerStamps": "Dəvət edənə bonus möhür",
+      "friendStamps": "Dosta bonus möhür",
+      "monthlyCap": "Aylıq limit (bir müştəri üçün)",
+      "monthlyCapHint": "Bir müştərinin ayda neçə dostu bonus qazandıra bilər.",
+      "validDays": "Dəvətin müddəti (gün)",
+      "validDaysHint": "Dost bu müddətdə gəlməsə, dəvət bonussuz bağlanır."
+    },
+    "summary": {
+      "total": "Dəvətlər",
+      "rewarded": "Gəlib bonus qazanan",
+      "pending": "Gözləyən",
+      "bonusStamps": "Verilən bonus möhür",
+      "notCounted": "Sayılmayan: müddəti bitən {{expired}}, aylıq limitə düşən {{limit}}."
+    },
+    "list": {
+      "title": "Dəvətlər",
+      "empty": "Hələ dəvət yoxdur.",
+      "referrer": "Dəvət edən",
+      "friend": "Dost",
+      "status": "Vəziyyət",
+      "date": "Tarix",
+      "rewardedAt": "bonus: {{date}}"
+    },
+    "status": {
+      "PENDING": "Gözləyir",
+      "REWARDED": "Bonus verilib",
+      "EXPIRED": "Müddəti bitib",
+      "LIMIT_REACHED": "Aylıq limit"
     }
   }
 }

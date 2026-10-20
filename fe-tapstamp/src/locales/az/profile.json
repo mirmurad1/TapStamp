@@ -138,5 +138,25 @@
     "iosStep1": "Safari-də aşağıdakı",
     "share": "Paylaş",
     "iosStep2": "düyməsini basın, sonra \"Ana ekrana əlavə et\" seçin."
+  },
+  "referral": {
+    "title": "Dostunu dəvət et",
+    "description": "Dostun linkinlə qeydiyyatdan keçib ilk möhürünü alanda sən {{mine}}, dostun isə {{friend}} bonus möhür qazanır.",
+    "link": "Dəvət linkin",
+    "share": "Paylaş",
+    "copy": "Linki kopyala",
+    "copied": "Kopyalandı",
+    "stats": "Dəvət etdiyin: {{invited}} · bonus qazandıran: {{rewarded}} · hələ gəlməyən: {{pending}}",
+    "rules": "Ayda ən çox {{cap}} dost sayılır. Dost {{days}} gün ərzində gəlməlidir.",
+    "shareText_one": "Səni dəvət edirəm! Linklə qeydiyyatdan keç, ilk möhürünlə {{count}} bonus möhür qazan: {{link}}",
+    "shareText_other": "Səni dəvət edirəm! Linklə qeydiyyatdan keç, ilk möhürünlə {{count}} bonus möhür qazan: {{link}}",
+    "landing": {
+      "title": "{{company}} — dostun səni dəvət edir",
+      "alreadyMember": "Sən artıq üzvsən — dəvət yalnız yeni müştərilər üçündür.",
+      "home": "Kartıma keç",
+      "join": "Qeydiyyatdan keç",
+      "description_one": "Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə {{count}} bonus möhür qazan.",
+      "description_other": "Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə {{count}} bonus möhür qazan."
+    }
   }
 }
