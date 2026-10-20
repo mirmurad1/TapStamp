@@ -1,11 +1,14 @@
 /** Kampaniyaların auditoriya seçimləri və status nişanlarının rəngi (şirkət və platforma panellərində ortaq). */
 export const CAMPAIGN_AUDIENCES = ['ALL', 'INACTIVE', 'NEAR_REWARD', 'UNUSED_GIFT_CARD'] as const;
-export type CampaignAudience = (typeof CAMPAIGN_AUDIENCES)[number];
+export type CampaignAudience = (typeof CAMPAIGN_AUDIENCES)[number] | 'EMPTY_CARD';
+
+/** Kampaniya növü: adi SMS və ya möhür kampaniyası (SMS + hədiyyə möhür). */
+export type CampaignType = 'SMS' | 'STAMPS';
 
 /** "Uzun müddət gəlməyənlər" üçün gün seçimləri. */
 export const INACTIVE_DAYS = [30, 60, 90] as const;
 
-export const CAMPAIGN_STATUSES = ['PENDING_APPROVAL', 'APPROVED', 'SENDING', 'SENT', 'REJECTED', 'CANCELLED'] as const;
+export const CAMPAIGN_STATUSES = ['PENDING_APPROVAL', 'APPROVED', 'SENDING', 'PAUSED', 'SENT', 'REJECTED', 'CANCELLED'] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
 /** API-dən gələn statusu tanınan dəyərə çevirir (tərcümə açarı üçün). */
@@ -22,6 +25,7 @@ export function campaignStatusTone(status: string | undefined): 'neutral' | 'suc
     case 'SENDING':
       return 'warning';
     case 'REJECTED':
+    case 'PAUSED':
       return 'danger';
     default:
       return 'neutral';

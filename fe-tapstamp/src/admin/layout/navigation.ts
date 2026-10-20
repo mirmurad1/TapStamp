@@ -7,6 +7,7 @@ import {
   Nfc,
   Settings,
   ShieldCheck,
+  Stamp,
   UserCog,
   Users,
   UsersRound,
@@ -21,6 +22,7 @@ export type AdminSection =
   | 'staffConsole'
   | 'team'
   | 'tags'
+  | 'stampCampaigns'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -46,6 +48,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'] },
+  { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'] },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'] },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },

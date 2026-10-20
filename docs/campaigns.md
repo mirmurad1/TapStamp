@@ -43,10 +43,31 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
 ## Təhlükəsizlik və etibarlılıq
 
 - Alıcı göndərişdən əvvəl `SENDING` kimi götürülür (`FOR UPDATE SKIP LOCKED`): deploy zamanı iki backend eyni anda
-  işləsə də, bir müştəriyə SMS iki dəfə getmir. Proses SMS-in ortasında kəsilsə, alıcı 10 dəqiqə sonra `FAILED`
-  olur — təkrar göndərmək riskinə girmirik.
+  işləsə də, bir müştəriyə SMS iki dəfə getmir.
+- Provayder xətaları növə görə (`SmsDeliveryException.Kind`) işlənir:
+  - **TRANSIENT** (qoşulmaq olmadı, müvəqqəti xəta) — alıcı 10 dəq, 30 dəq, 2 saat sonra yenidən cəhd olunur (ən çox 4
+    cəhd), sonra `FAILED`;
+  - **PROVIDER_DOWN** — partiyanın qalanı geri qaytarılır, növbəti dövrdə yenidən cəhd;
+  - **ACCOUNT** (balans, icazə, açar) — kampaniya `PAUSED` olur; platforma problemi həll edib "Davam et" basır;
+  - **RECIPIENT** (nömrə rədd edildi) — dərhal `FAILED`;
+  - **UNKNOWN** (cavab çatmadı, proses SMS-in ortasında kəsildi) — SMS **göndərilmiş sayılır** və təkrar edilmir
+    (müştəriyə iki SMS getməsin).
+- Kampaniya təsdiqdən 48 saat sonra hələ bitməyibsə, gözləyən alıcılar `FAILED` olur.
 - Kampaniyanın yaradılması, ləğvi, təsdiqi və rəddi şirkətin audit jurnalına, təsdiq və rədd həm də platformanın
   audit jurnalına yazılır.
+
+## Möhür kampaniyası
+
+Ayrıca bölmə ("Möhür kampaniyası"), eyni axın (sahib yaradır/dəyişir/silir, platforma təsdiqləyir və ya ləğv edir).
+
+- Auditoriya sabitdir: kartında hazırda möhürü olmayan aktiv müştərilər (`EMPTY_CARD`).
+- Hər müştəriyə N möhür, 1 ≤ N ≤ "hədiyyə üçün lazım olan say − 1" (müştəri hədiyyə üçün yenə gəlməlidir).
+- SMS məcburidir; mətni şirkət yazır (fərdi müraciət, latın variantı — adi kampaniyadakı kimi).
+- **Möhür yalnız SMS provayder tərəfindən qəbul edildikdə, eyni tranzaksiyada verilir** (`campaign_recipients.stamps_granted_at`
+  ikinci dəfə verilməyə imkan vermir). Nəticə məlum deyilsə (UNKNOWN) SMS getmiş sayılır və möhür verilir.
+- Təsdiqə qədər kartına möhür düşən müştəri də kampaniya möhürünü alır.
+- Möhürlər `stamps` cədvəlinə `source = CAMPAIGN` ilə yazılır (filial: kampaniyanın filialı, yoxdursa müştərinin son
+  filialı, yoxdursa əsas filial); hədd dolarsa hədiyyə kartı adi qayda ilə yaranır.
 
 ## SMS kodlaşdırması
 

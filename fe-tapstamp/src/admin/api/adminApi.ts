@@ -424,7 +424,10 @@ export type PlatformCampaign = Schemas['PlatformCampaignView'];
 export const campaignsApi = {
   preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
   create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
-  list: () => unwrap(api.GET('/api/v1/admin/campaigns')),
+  list: (type: 'SMS' | 'STAMPS') => unwrap(api.GET('/api/v1/admin/campaigns', { params: { query: { type } } })),
+  /** SMS-i göndərilməyən alıcılar (ad, nömrə, səbəb). */
+  failures: (campaignId: string) =>
+    unwrap(api.GET('/api/v1/admin/campaigns/{campaignId}/failures', { params: { path: { campaignId } } })),
   /** Yalnız təsdiq gözləyən kampaniya. */
   update: (campaignId: string, body: CampaignRequest) =>
     unwrap(api.PUT('/api/v1/admin/campaigns/{campaignId}', { params: { path: { campaignId } }, body })),
@@ -437,6 +440,9 @@ export const platformCampaignsApi = {
   list: (status: 'PENDING' | 'ALL') => unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status } } })),
   approve: (tenantId: string, campaignId: string) =>
     unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve', { params: { path: { tenantId, campaignId } } })),
+  /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək. */
+  resume: (tenantId: string, campaignId: string) =>
+    unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume', { params: { path: { tenantId, campaignId } } })),
   reject: (tenantId: string, campaignId: string, reason: string) =>
     unwrap(
       api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject', {

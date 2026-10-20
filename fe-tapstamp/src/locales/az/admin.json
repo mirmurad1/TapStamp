@@ -17,7 +17,8 @@
     "simulator": "NFC simulyatoru",
     "tags": "NFC çipləri",
     "smsUsage": "SMS hesabatı",
-    "campaigns": "Kampaniyalar"
+    "campaigns": "Kampaniyalar",
+    "stampCampaigns": "Möhür kampaniyası"
   },
   "dashboard": {
     "title": "İdarəetmə paneli",
@@ -366,11 +367,17 @@
       "recipients": "Alıcı",
       "perMessage": "Hər müştəriyə SMS",
       "totalSms": "Cəmi SMS",
-      "delivery": "Göndərilib / xəta",
+      "delivery": "Göndərilib / gözləyir / xəta",
       "approve": "Təsdiqlə",
       "reject": "Ləğv et",
       "rejectReason": "Ləğv səbəbi",
-      "approveConfirm": "Ödəniş alınıb? Təsdiqdən sonra {{total}} SMS göndəriləcək."
+      "approveConfirm": "Ödəniş alınıb? Təsdiqdən sonra {{total}} SMS göndəriləcək.",
+      "stampType_one": "Möhür kampaniyası: {{count}} möhür",
+      "stampType_other": "Möhür kampaniyası: {{count}} möhür",
+      "stampsGranted": "Verilən möhür",
+      "pauseReason": "Dayandırılma səbəbi: {{reason}}",
+      "resume": "Davam et",
+      "resumeConfirm": "SMS hesabındakı problem həll olunub? Göndəriş davam edəcək."
     }
   },
   "staffConsole": {
@@ -618,7 +625,8 @@
       "reward": "Hədiyyə kartı: {{name}}",
       "stamp": {
         "NFC_TAP": "Möhür (NFC)",
-        "MANUAL": "Möhür (əl ilə)"
+        "MANUAL": "Möhür (əl ilə)",
+        "CAMPAIGN": "Möhür (kampaniya)"
       },
       "status": {
         "PENDING": "Təsdiq gözləyir",
@@ -774,7 +782,8 @@
       "greetingPrefix": "Hörmətli <ad>,",
       "latin": "Latın hərfləri",
       "edit": "Dəyiş",
-      "updated": "Dəyişdirilib: {{time}}"
+      "updated": "Dəyişdirilib: {{time}}",
+      "pausedNote": "Göndəriş SMS hesabındakı problemə görə dayandırılıb. Platforma problemi həll edib davam etdirəcək."
     },
     "status": {
       "PENDING_APPROVAL": "Təsdiq gözləyir",
@@ -782,18 +791,51 @@
       "SENDING": "Göndərilir",
       "SENT": "Göndərilib",
       "REJECTED": "Rədd edilib",
-      "CANCELLED": "Ləğv edilib"
+      "CANCELLED": "Ləğv edilib",
+      "PAUSED": "Dayandırılıb"
     },
     "audience": {
       "ALL": "Bütün müştərilər",
       "INACTIVE": "Uzun müddət gəlməyənlər",
       "NEAR_REWARD": "Hədiyyəyə 1–2 möhür qalanlar",
-      "UNUSED_GIFT_CARD": "İstifadə olunmamış hədiyyə kartı olanlar"
+      "UNUSED_GIFT_CARD": "İstifadə olunmamış hədiyyə kartı olanlar",
+      "EMPTY_CARD": "Kartı boş olanlar"
     },
     "edit": {
       "title": "Kampaniyanı dəyiş",
       "save": "Yadda saxla",
       "cancel": "İmtina"
+    },
+    "summary": {
+      "sent_one": "göndərilib: {{count}}",
+      "sent_other": "göndərilib: {{count}}",
+      "sentWithStamps_one": "göndərilib (möhür verilib): {{count}}",
+      "sentWithStamps_other": "göndərilib (möhür verilib): {{count}}",
+      "pending_one": "gözləyir: {{count}}",
+      "pending_other": "gözləyir: {{count}}",
+      "failed_one": "göndərilmədi: {{count}}",
+      "failed_other": "göndərilmədi: {{count}}",
+      "skipped_one": "ötürülüb: {{count}}",
+      "skipped_other": "ötürülüb: {{count}}"
+    },
+    "failures": {
+      "toggle": "Göndərilməyənlər",
+      "noName": "Adsız"
+    }
+  },
+  "stampCampaigns": {
+    "title": "Möhür kampaniyası",
+    "subtitle": "Kartı boş olan müştərilərə hədiyyə möhür verin — SMS ilə birlikdə. Kampaniya platformanın təsdiqindən sonra gedir.",
+    "new": {
+      "title": "Yeni möhür kampaniyası",
+      "description": "Kartında möhürü olmayan aktiv müştərilər seçilir. Möhür SMS göndəriləndə verilir.",
+      "stampCount": "Hər müştəriyə möhür",
+      "stamps_one": "{{count}} möhür",
+      "stamps_other": "{{count}} möhür"
+    },
+    "preview": {
+      "stamps": "{{recipients}} müştəriyə {{stamps}} möhür — cəmi {{total}} möhür",
+      "rule": "Möhür yalnız SMS uğurla göndərilən müştəriyə verilir. Təsdiqə qədər kartına möhür düşən müştəri də kampaniya möhürünü alır."
     }
   }
 }

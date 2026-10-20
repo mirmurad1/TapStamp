@@ -5,7 +5,7 @@ import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
 import { AuditPage } from './pages/audit/AuditPage';
-import { CampaignsPage } from './pages/campaigns/CampaignsPage';
+import { CampaignsPage, StampCampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -77,6 +77,7 @@ export const adminRouter = createBrowserRouter(
                         { path: 'settings/*', element: <SettingsPage /> },
                         { path: 'audit', element: <AuditPage /> },
                         { path: 'campaigns', element: <CampaignsPage /> },
+                        { path: 'stamp-campaigns', element: <StampCampaignsPage /> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

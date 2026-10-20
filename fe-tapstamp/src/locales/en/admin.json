@@ -17,7 +17,8 @@
     "simulator": "NFC simulator",
     "tags": "NFC tags",
     "smsUsage": "SMS report",
-    "campaigns": "Campaigns"
+    "campaigns": "Campaigns",
+    "stampCampaigns": "Stamp campaign"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -366,11 +367,17 @@
       "recipients": "Recipients",
       "perMessage": "SMS per customer",
       "totalSms": "Total SMS",
-      "delivery": "Sent / failed",
+      "delivery": "Sent / pending / failed",
       "approve": "Approve",
       "reject": "Cancel",
       "rejectReason": "Cancellation reason",
-      "approveConfirm": "Has the payment been received? {{total}} SMS will be sent after approval."
+      "approveConfirm": "Has the payment been received? {{total}} SMS will be sent after approval.",
+      "stampType_one": "Stamp campaign: {{count}} stamp",
+      "stampType_other": "Stamp campaign: {{count}} stamps",
+      "stampsGranted": "Stamps granted",
+      "pauseReason": "Pause reason: {{reason}}",
+      "resume": "Resume",
+      "resumeConfirm": "Is the SMS account problem fixed? Sending will resume."
     }
   },
   "staffConsole": {
@@ -618,7 +625,8 @@
       "reward": "Gift card: {{name}}",
       "stamp": {
         "NFC_TAP": "Stamp (NFC)",
-        "MANUAL": "Stamp (manual)"
+        "MANUAL": "Stamp (manual)",
+        "CAMPAIGN": "Stamp (campaign)"
       },
       "status": {
         "PENDING": "Awaiting approval",
@@ -774,7 +782,8 @@
       "greetingPrefix": "Hörmətli <name>,",
       "latin": "Latin letters",
       "edit": "Edit",
-      "updated": "Edited: {{time}}"
+      "updated": "Edited: {{time}}",
+      "pausedNote": "Sending is paused because of an SMS account problem. The platform will resume it once fixed."
     },
     "status": {
       "PENDING_APPROVAL": "Awaiting approval",
@@ -782,18 +791,51 @@
       "SENDING": "Sending",
       "SENT": "Sent",
       "REJECTED": "Rejected",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "PAUSED": "Paused"
     },
     "audience": {
       "ALL": "All customers",
       "INACTIVE": "Customers who have not visited for a while",
       "NEAR_REWARD": "1–2 stamps away from a reward",
-      "UNUSED_GIFT_CARD": "With an unused gift card"
+      "UNUSED_GIFT_CARD": "With an unused gift card",
+      "EMPTY_CARD": "Customers with an empty card"
     },
     "edit": {
       "title": "Edit campaign",
       "save": "Save",
       "cancel": "Discard"
+    },
+    "summary": {
+      "sent_one": "sent: {{count}}",
+      "sent_other": "sent: {{count}}",
+      "sentWithStamps_one": "sent (stamps granted): {{count}}",
+      "sentWithStamps_other": "sent (stamps granted): {{count}}",
+      "pending_one": "pending: {{count}}",
+      "pending_other": "pending: {{count}}",
+      "failed_one": "not sent: {{count}}",
+      "failed_other": "not sent: {{count}}",
+      "skipped_one": "skipped: {{count}}",
+      "skipped_other": "skipped: {{count}}"
+    },
+    "failures": {
+      "toggle": "Not sent",
+      "noName": "No name"
+    }
+  },
+  "stampCampaigns": {
+    "title": "Stamp campaign",
+    "subtitle": "Give bonus stamps to customers with an empty card — together with an SMS. The campaign is sent after platform approval.",
+    "new": {
+      "title": "New stamp campaign",
+      "description": "Active customers with no stamps on their card are selected. Stamps are granted when the SMS is sent.",
+      "stampCount": "Stamps per customer",
+      "stamps_one": "{{count}} stamp",
+      "stamps_other": "{{count}} stamps"
+    },
+    "preview": {
+      "stamps": "{{stamps}} stamps to {{recipients}} customers — {{total}} stamps in total",
+      "rule": "Stamps are granted only to customers whose SMS was sent. Customers who get a stamp before approval still receive the campaign stamps."
     }
   }
 }

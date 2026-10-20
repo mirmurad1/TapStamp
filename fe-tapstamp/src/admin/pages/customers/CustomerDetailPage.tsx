@@ -330,7 +330,7 @@ function TimelineRow({ item, branchName, lang }: { item: TimelineItem; branchNam
       </span>
       <div className="min-w-0 flex-1 text-sm">
         <p className={cn('font-medium', muted && 'text-muted-foreground line-through')}>
-          {isReward ? t('customers.timeline.reward', { name: rewardName }) : t(`customers.timeline.stamp.${item.source === 'MANUAL' ? 'MANUAL' : 'NFC_TAP'}`)}
+          {isReward ? t('customers.timeline.reward', { name: rewardName }) : t(`customers.timeline.stamp.${item.source === 'MANUAL' || item.source === 'CAMPAIGN' ? item.source : 'NFC_TAP'}`)}
         </p>
         <p className="text-muted-foreground">
           {item.at ? formatDateTime(item.at, lang) : null}

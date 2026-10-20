@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Megaphone, Pencil, Send, Trash2 } from 'lucide-react';
+import { ChevronDown, Megaphone, Pencil, Send, Stamp, Trash2 } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -26,24 +26,41 @@ import {
   NAME_TOKEN,
   toLatin,
   type CampaignAudience,
+  type CampaignType,
 } from './campaignLabels';
 
-const LIST_KEY = ['campaigns'] as const;
 const MAX_TEXT = 1000;
+const listKey = (type: CampaignType) => ['campaigns', type] as const;
 
 /** Kampaniya SMS-ləri: yaratmaq (önizləmə ilə) və vəziyyətini izləmək. */
 export function CampaignsPage() {
+  return <CampaignWorkspace type="SMS" />;
+}
+
+/** Möhür kampaniyası: kartı boş olan müştərilərə SMS + hədiyyə möhür (möhür SMS göndəriləndə verilir). */
+export function StampCampaignsPage() {
+  return <CampaignWorkspace type="STAMPS" />;
+}
+
+function CampaignWorkspace({ type }: { type: CampaignType }) {
   const { t } = useTranslation('admin');
   // Dəyişdirilən (təsdiq gözləyən) kampaniya: forma onun dəyərləri ilə açılır
   const [editing, setEditing] = useState<CampaignView>();
+  const page = type === 'STAMPS' ? 'stampCampaigns' : 'campaigns';
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">{t('campaigns.title')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('campaigns.subtitle')}</p>
+        <h1 className="font-display text-2xl font-semibold">{t(`${page}.title`)}</h1>
+        <p className="mt-1 text-muted-foreground">{t(`${page}.subtitle`)}</p>
       </div>
-      <NewCampaignCard key={editing?.id ?? 'new'} editing={editing} onDone={() => setEditing(undefined)} />
+      <NewCampaignCard
+        key={editing?.id ?? 'new'}
+        type={type}
+        editing={editing}
+        onDone={() => setEditing(undefined)}
+      />
       <CampaignList
+        type={type}
         onEdit={(campaign) => {
           setEditing(campaign);
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -70,22 +87,26 @@ function useDebounced<T>(value: T, delay = 400): T {
   return debounced;
 }
 
-function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: () => void }) {
+function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editing?: CampaignView; onDone: () => void }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const queryClient = useQueryClient();
+  const stamps = type === 'STAMPS';
   const [text, setText] = useState(editing?.text ?? '');
   const [audience, setAudience] = useState<CampaignAudience>(editing?.audience ?? 'ALL');
   const [inactiveDays, setInactiveDays] = useState<number>(editing?.inactiveDays ?? 30);
   const [branchId, setBranchId] = useState(editing?.branchId ?? '');
   const [personalized, setPersonalized] = useState(editing?.personalized ?? false);
   const [latin, setLatin] = useState(editing?.latin ?? false);
+  const [stampCount, setStampCount] = useState<number>(editing?.stampCount ?? 1);
   const branches = useQuery({ queryKey: ['settings-branches'], queryFn: companyApi.branches });
 
   const request: CampaignRequest = {
+    type,
+    stampCount: stamps ? stampCount : undefined,
     text: text.trim(),
-    audience,
-    inactiveDays: audience === 'INACTIVE' ? inactiveDays : undefined,
+    audience: stamps ? 'EMPTY_CARD' : audience,
+    inactiveDays: !stamps && audience === 'INACTIVE' ? inactiveDays : undefined,
     branchId: branchId || undefined,
     personalized,
     latin,
@@ -103,7 +124,7 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
       setText('');
       setLatin(false);
       setPersonalized(false);
-      void queryClient.invalidateQueries({ queryKey: LIST_KEY });
+      void queryClient.invalidateQueries({ queryKey: listKey(type) });
       if (editing) {
         onDone();
       }
@@ -115,26 +136,29 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
   };
 
   const data = text.trim() ? preview.data : undefined;
+  // Möhür sayı: 1 … "hədd − 1" (müştəri hədiyyə üçün yenə ən azı bir dəfə gəlməlidir)
+  const maxStamps = Math.max(preview.data?.maxStamps ?? stampCount, 1);
   // Bildiriş yalnız istifadəçinin öz mətnindən asılıdır ("Hörmətli" müraciəti nəzərə alınmır)
   const nonLatin = !isAscii(text);
   // Latın variantı yalnız mətn həqiqətən latına çevrilə bilirsə təklif olunur (məs. kiril hərfləri çevrilmir)
   const latinizable = nonLatin && isAscii(toLatin(text));
   const withNamePlaceholder = (value: string) => value.replaceAll(NAME_TOKEN, t('campaigns.preview.namePlaceholder'));
+  const Icon = stamps ? Stamp : Megaphone;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Megaphone className="size-5 text-primary" aria-hidden="true" />
-          {editing ? t('campaigns.edit.title') : t('campaigns.new.title')}
+          <Icon className="size-5 text-primary" aria-hidden="true" />
+          {editing ? t('campaigns.edit.title') : t(stamps ? 'stampCampaigns.new.title' : 'campaigns.new.title')}
         </CardTitle>
-        <CardDescription>{t('campaigns.new.description')}</CardDescription>
+        <CardDescription>{t(stamps ? 'stampCampaigns.new.description' : 'campaigns.new.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="flex flex-col gap-4" onSubmit={submit}>
           {create.isSuccess ? <Alert tone="success">{t('campaigns.new.sent')}</Alert> : null}
           <ApiErrorAlert error={create.error} />
-          <Field id="campaign-text" label={t('campaigns.new.text')} hint={t('campaigns.new.textHint')}>
+          <Field id={`${type}-text`} label={t('campaigns.new.text')} hint={t('campaigns.new.textHint')}>
             <textarea
               value={text}
               maxLength={MAX_TEXT}
@@ -157,27 +181,49 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
             </span>
           </label>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field id="campaign-audience" label={t('campaigns.new.audience')}>
-              <Select value={audience} onChange={(event) => setAudience(event.target.value as CampaignAudience)}>
-                {CAMPAIGN_AUDIENCES.map((value) => (
-                  <option key={value} value={value}>
-                    {t(`campaigns.audience.${value}`)}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            {audience === 'INACTIVE' ? (
-              <Field id="campaign-days" label={t('campaigns.new.inactiveDays')}>
-                <Select value={inactiveDays} onChange={(event) => setInactiveDays(Number(event.target.value))}>
-                  {INACTIVE_DAYS.map((days) => (
-                    <option key={days} value={days}>
-                      {t('campaigns.new.days', { count: days })}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            ) : null}
-            <Field id="campaign-branch" label={t('campaigns.new.branch')}>
+            {stamps ? (
+              <>
+                <Field id={`${type}-stamps`} label={t('stampCampaigns.new.stampCount')}>
+                  <Select value={stampCount} onChange={(event) => setStampCount(Number(event.target.value))}>
+                    {Array.from({ length: maxStamps }, (_, i) => i + 1).map((count) => (
+                      <option key={count} value={count}>
+                        {t('stampCampaigns.new.stamps', { count })}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <div className="flex flex-col gap-1.5 text-sm">
+                  <span className="font-medium">{t('campaigns.new.audience')}</span>
+                  <span className="flex min-h-11 items-center text-muted-foreground">
+                    {t('campaigns.audience.EMPTY_CARD')}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <Field id={`${type}-audience`} label={t('campaigns.new.audience')}>
+                  <Select value={audience} onChange={(event) => setAudience(event.target.value as CampaignAudience)}>
+                    {CAMPAIGN_AUDIENCES.map((value) => (
+                      <option key={value} value={value}>
+                        {t(`campaigns.audience.${value}`)}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                {audience === 'INACTIVE' ? (
+                  <Field id={`${type}-days`} label={t('campaigns.new.inactiveDays')}>
+                    <Select value={inactiveDays} onChange={(event) => setInactiveDays(Number(event.target.value))}>
+                      {INACTIVE_DAYS.map((days) => (
+                        <option key={days} value={days}>
+                          {t('campaigns.new.days', { count: days })}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : null}
+              </>
+            )}
+            <Field id={`${type}-branch`} label={t('campaigns.new.branch')}>
               <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
                 <option value="">{t('campaigns.new.allBranches')}</option>
                 {(branches.data ?? []).map((branch) => (
@@ -195,6 +241,15 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
               <p className="whitespace-pre-wrap rounded-lg bg-card p-3">
                 {withNamePlaceholder(data.template ?? data.fullText ?? '')}
               </p>
+              {stamps ? (
+                <p className="font-medium">
+                  {t('stampCampaigns.preview.stamps', {
+                    recipients: formatNumber(data.recipients ?? 0, lang),
+                    stamps: data.stampCount ?? stampCount,
+                    total: formatNumber(data.totalStamps ?? 0, lang),
+                  })}
+                </p>
+              ) : null}
               <p>
                 {t('campaigns.preview.summary', {
                   recipients: formatNumber(data.recipients ?? 0, lang),
@@ -205,6 +260,7 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
               <p className="font-display text-xl font-semibold">
                 {t('campaigns.preview.total', { total: formatNumber(data.totalSms ?? 0, lang) })}
               </p>
+              {stamps ? <p className="text-muted-foreground">{t('stampCampaigns.preview.rule')}</p> : null}
               {data.latin ? (
                 <Alert tone="info" className="bg-card">
                   <div className="flex flex-col gap-2">
@@ -238,7 +294,8 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
                 </Alert>
               ) : null}
             </div>
-          ) : null}          <ApiErrorAlert error={text.trim() ? preview.error : null} />
+          ) : null}
+          <ApiErrorAlert error={text.trim() ? preview.error : null} />
 
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={!text.trim() || create.isPending || !data?.recipients}>
@@ -257,15 +314,15 @@ function NewCampaignCard({ editing, onDone }: { editing?: CampaignView; onDone: 
   );
 }
 
-function CampaignList({ onEdit }: { onEdit: (campaign: CampaignView) => void }) {
+function CampaignList({ type, onEdit }: { type: CampaignType; onEdit: (campaign: CampaignView) => void }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const campaigns = useQuery({ queryKey: LIST_KEY, queryFn: campaignsApi.list });
+  const campaigns = useQuery({ queryKey: listKey(type), queryFn: () => campaignsApi.list(type) });
   const cancel = useMutation({
     mutationFn: (id: string) => campaignsApi.cancel(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: LIST_KEY }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: listKey(type) }),
   });
   const items: CampaignView[] = campaigns.data ?? [];
 
@@ -285,7 +342,12 @@ function CampaignList({ onEdit }: { onEdit: (campaign: CampaignView) => void }) 
             <li key={campaign.id} className="flex flex-col gap-2 py-3 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={campaignStatusTone(campaign.status)}>{t(`campaigns.status.${campaignStatus(campaign.status)}`)}</Badge>
+                  <Badge tone={campaignStatusTone(campaign.status)}>
+                    {t(`campaigns.status.${campaignStatus(campaign.status)}`)}
+                  </Badge>
+                  {campaign.stampCount ? (
+                    <Badge>{t('stampCampaigns.new.stamps', { count: campaign.stampCount })}</Badge>
+                  ) : null}
                   {campaign.personalized ? <Badge>{t('campaigns.list.personalized')}</Badge> : null}
                   {campaign.latin ? <Badge>{t('campaigns.list.latin')}</Badge> : null}
                   <span className="text-muted-foreground">
@@ -326,20 +388,77 @@ function CampaignList({ onEdit }: { onEdit: (campaign: CampaignView) => void }) 
                   recipients: formatNumber(campaign.recipients ?? 0, lang),
                   total: formatNumber(campaign.totalSms ?? 0, lang),
                 })}
-                {campaign.status === 'SENT' || campaign.status === 'SENDING'
-                  ? ` · ${t('campaigns.list.delivery', { sent: campaign.sentCount ?? 0, failed: campaign.failedCount ?? 0 })}`
-                  : null}
               </p>
+              <DeliverySummary campaign={campaign} />
               {campaign.status === 'PENDING_APPROVAL' ? (
                 <p className="text-xs text-muted-foreground">{t('campaigns.list.pendingNote')}</p>
               ) : null}
+              {campaign.status === 'PAUSED' ? <p className="text-destructive">{t('campaigns.list.pausedNote')}</p> : null}
               {campaign.rejectReason ? (
                 <p className="text-destructive">{t('campaigns.list.rejectReason', { reason: campaign.rejectReason })}</p>
               ) : null}
+              {(campaign.failedCount ?? 0) > 0 ? <FailedRecipients campaignId={campaign.id ?? ''} /> : null}
             </li>
           ))}
         </ul>
       </CardContent>
     </Card>
+  );
+}
+
+/** Göndəriş xülasəsi (təsdiqdən sonra): göndərilib, gözləyir, göndərilmədi, ötürülüb; möhür kampaniyasında möhürlər. */
+function DeliverySummary({ campaign }: { campaign: CampaignView }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  if (!['SENDING', 'PAUSED', 'SENT'].includes(campaign.status ?? '')) {
+    return null;
+  }
+  const parts = [
+    campaign.type === 'STAMPS'
+      ? t('campaigns.summary.sentWithStamps', { count: campaign.stampsGranted ?? 0 })
+      : t('campaigns.summary.sent', { count: campaign.sentCount ?? 0 }),
+    (campaign.pendingCount ?? 0) > 0 ? t('campaigns.summary.pending', { count: campaign.pendingCount ?? 0 }) : null,
+    (campaign.failedCount ?? 0) > 0 ? t('campaigns.summary.failed', { count: campaign.failedCount ?? 0 }) : null,
+    (campaign.skippedCount ?? 0) > 0 ? t('campaigns.summary.skipped', { count: campaign.skippedCount ?? 0 }) : null,
+  ].filter(Boolean);
+  return <p className="font-medium">{parts.join(' · ').replace(/\d+/g, (n) => formatNumber(Number(n), lang))}</p>;
+}
+
+/** SMS-i göndərilməyən müştərilər (ad, nömrə, səbəb) — açılanda yüklənir. */
+function FailedRecipients({ campaignId }: { campaignId: string }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const [open, setOpen] = useState(false);
+  const failures = useQuery({
+    queryKey: ['campaign-failures', campaignId],
+    queryFn: () => campaignsApi.failures(campaignId),
+    enabled: open,
+  });
+  return (
+    <div className="flex flex-col gap-2">
+      <Button type="button" variant="ghost" className="self-start" onClick={() => setOpen(!open)}>
+        <ChevronDown className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        {t('campaigns.failures.toggle')}
+      </Button>
+      {open ? (
+        <div className="rounded-xl bg-muted p-3">
+          <ApiErrorAlert error={failures.error} />
+          {failures.isPending ? <InlineLoading /> : null}
+          <ul className="flex flex-col gap-2">
+            {(failures.data ?? []).map((item) => (
+              <li key={item.customerId} className="flex flex-col">
+                <span className="font-medium">
+                  {item.name || t('campaigns.failures.noName')} · <span className="tabular-nums">{item.phone}</span>
+                </span>
+                <span className="break-all text-xs text-destructive">
+                  {item.error}
+                  {item.at ? ` · ${formatDateTime(item.at, lang)}` : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }

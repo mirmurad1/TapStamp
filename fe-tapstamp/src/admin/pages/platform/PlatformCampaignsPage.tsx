@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, X } from 'lucide-react';
+import { Check, Play, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -72,6 +72,7 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
   const id = campaign.id ?? '';
   const approve = useMutation({ mutationFn: () => platformCampaignsApi.approve(tenantId, id), onSuccess: refresh });
   const reject = useMutation({ mutationFn: () => platformCampaignsApi.reject(tenantId, id, reason.trim()), onSuccess: refresh });
+  const resume = useMutation({ mutationFn: () => platformCampaignsApi.resume(tenantId, id), onSuccess: refresh });
   const pending = campaign.status === 'PENDING_APPROVAL';
   const total = formatNumber(campaign.totalSms ?? 0, lang);
 
@@ -82,6 +83,9 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{resolveText(campaign.displayName, lang)}</span>
             <span className="text-muted-foreground">{campaign.slug}</span>
+            {campaign.type === 'STAMPS' ? (
+              <Badge>{t('admin:platform.campaigns.stampType', { count: campaign.stampCount ?? 0 })}</Badge>
+            ) : null}
             {campaign.latin ? <Badge>{t('admin:campaigns.list.latin')}</Badge> : null}
             <Badge tone={campaignStatusTone(campaign.status)}>{t(`admin:campaigns.status.${campaignStatus(campaign.status)}`)}</Badge>
           </div>
@@ -108,12 +112,18 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
             <p className="text-muted-foreground">{t('admin:platform.campaigns.totalSms')}</p>
             <p className="font-display text-xl font-semibold">{total}</p>
           </div>
-          {campaign.status === 'SENT' || campaign.status === 'SENDING' ? (
+          {['SENT', 'SENDING', 'PAUSED'].includes(campaign.status ?? '') ? (
             <div>
               <p className="text-muted-foreground">{t('admin:platform.campaigns.delivery')}</p>
               <p className="font-display text-xl font-semibold">
-                {campaign.sentCount} / {campaign.failedCount}
+                {campaign.sentCount} / {campaign.pendingCount} / {campaign.failedCount}
               </p>
+            </div>
+          ) : null}
+          {campaign.type === 'STAMPS' ? (
+            <div>
+              <p className="text-muted-foreground">{t('admin:platform.campaigns.stampsGranted')}</p>
+              <p className="font-display text-xl font-semibold">{formatNumber(campaign.stampsGranted ?? 0, lang)}</p>
             </div>
           ) : null}
         </div>
@@ -125,7 +135,26 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
         {campaign.rejectReason ? (
           <p className="text-destructive">{t('admin:campaigns.list.rejectReason', { reason: campaign.rejectReason })}</p>
         ) : null}
-        <ApiErrorAlert error={approve.error ?? reject.error} />
+        {campaign.pauseReason ? (
+          <p className="break-all text-destructive">
+            {t('admin:platform.campaigns.pauseReason', { reason: campaign.pauseReason })}
+          </p>
+        ) : null}
+        <ApiErrorAlert error={approve.error ?? reject.error ?? resume.error} />
+        {campaign.status === 'PAUSED' ? (
+          <Button
+            className="self-start"
+            disabled={resume.isPending}
+            onClick={async () => {
+              if (await confirm({ message: t('admin:platform.campaigns.resumeConfirm') })) {
+                resume.mutate();
+              }
+            }}
+          >
+            <Play className="size-4" aria-hidden="true" />
+            {t('admin:platform.campaigns.resume')}
+          </Button>
+        ) : null}
         {pending && !rejecting ? (
           <div className="flex flex-wrap gap-2">
             <Button

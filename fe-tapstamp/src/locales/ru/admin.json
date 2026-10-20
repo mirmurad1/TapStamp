@@ -17,7 +17,8 @@
     "simulator": "NFC-симулятор",
     "tags": "NFC-метки",
     "smsUsage": "Отчёт по SMS",
-    "campaigns": "Рассылки"
+    "campaigns": "Рассылки",
+    "stampCampaigns": "Кампания штампов"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -374,11 +375,19 @@
       "recipients": "Получатели",
       "perMessage": "SMS на клиента",
       "totalSms": "Всего SMS",
-      "delivery": "Отправлено / ошибки",
+      "delivery": "Отправлено / ожидает / ошибка",
       "approve": "Одобрить",
       "reject": "Отменить",
       "rejectReason": "Причина отмены",
-      "approveConfirm": "Оплата получена? После одобрения будет отправлено {{total}} SMS."
+      "approveConfirm": "Оплата получена? После одобрения будет отправлено {{total}} SMS.",
+      "stampType_one": "Кампания штампов: {{count}}",
+      "stampType_few": "Кампания штампов: {{count}}",
+      "stampType_many": "Кампания штампов: {{count}}",
+      "stampType_other": "Кампания штампов: {{count}}",
+      "stampsGranted": "Начислено штампов",
+      "pauseReason": "Причина остановки: {{reason}}",
+      "resume": "Продолжить",
+      "resumeConfirm": "Проблема SMS-аккаунта решена? Отправка продолжится."
     }
   },
   "staffConsole": {
@@ -638,7 +647,8 @@
       "reward": "Подарочная карта: {{name}}",
       "stamp": {
         "NFC_TAP": "Штамп (NFC)",
-        "MANUAL": "Штамп (вручную)"
+        "MANUAL": "Штамп (вручную)",
+        "CAMPAIGN": "Штамп (кампания)"
       },
       "status": {
         "PENDING": "Ожидает подтверждения",
@@ -798,7 +808,8 @@
       "greetingPrefix": "Hörmətli <имя>,",
       "latin": "Латиница",
       "edit": "Изменить",
-      "updated": "Изменена: {{time}}"
+      "updated": "Изменена: {{time}}",
+      "pausedNote": "Отправка приостановлена из-за проблемы SMS-аккаунта. Платформа возобновит её после исправления."
     },
     "status": {
       "PENDING_APPROVAL": "Ожидает одобрения",
@@ -806,18 +817,63 @@
       "SENDING": "Отправляется",
       "SENT": "Отправлена",
       "REJECTED": "Отклонена",
-      "CANCELLED": "Отменена"
+      "CANCELLED": "Отменена",
+      "PAUSED": "Приостановлена"
     },
     "audience": {
       "ALL": "Все клиенты",
       "INACTIVE": "Давно не приходившие",
       "NEAR_REWARD": "До подарка 1–2 штампа",
-      "UNUSED_GIFT_CARD": "С неиспользованной подарочной картой"
+      "UNUSED_GIFT_CARD": "С неиспользованной подарочной картой",
+      "EMPTY_CARD": "С пустой картой"
     },
     "edit": {
       "title": "Изменить рассылку",
       "save": "Сохранить",
       "cancel": "Отмена"
+    },
+    "summary": {
+      "sent_one": "отправлено: {{count}}",
+      "sent_few": "отправлено: {{count}}",
+      "sent_many": "отправлено: {{count}}",
+      "sent_other": "отправлено: {{count}}",
+      "sentWithStamps_one": "отправлено (штампы начислены): {{count}}",
+      "sentWithStamps_few": "отправлено (штампы начислены): {{count}}",
+      "sentWithStamps_many": "отправлено (штампы начислены): {{count}}",
+      "sentWithStamps_other": "отправлено (штампы начислены): {{count}}",
+      "pending_one": "ожидает: {{count}}",
+      "pending_few": "ожидает: {{count}}",
+      "pending_many": "ожидает: {{count}}",
+      "pending_other": "ожидает: {{count}}",
+      "failed_one": "не отправлено: {{count}}",
+      "failed_few": "не отправлено: {{count}}",
+      "failed_many": "не отправлено: {{count}}",
+      "failed_other": "не отправлено: {{count}}",
+      "skipped_one": "пропущено: {{count}}",
+      "skipped_few": "пропущено: {{count}}",
+      "skipped_many": "пропущено: {{count}}",
+      "skipped_other": "пропущено: {{count}}"
+    },
+    "failures": {
+      "toggle": "Не отправлено",
+      "noName": "Без имени"
+    }
+  },
+  "stampCampaigns": {
+    "title": "Кампания штампов",
+    "subtitle": "Подарите штампы клиентам с пустой картой — вместе с SMS. Кампания отправляется после одобрения платформой.",
+    "new": {
+      "title": "Новая кампания штампов",
+      "description": "Выбираются активные клиенты без штампов на карте. Штампы начисляются при отправке SMS.",
+      "stampCount": "Штампов каждому",
+      "stamps_one": "{{count}} штамп",
+      "stamps_few": "{{count}} штампа",
+      "stamps_many": "{{count}} штампов",
+      "stamps_other": "{{count}} штампа"
+    },
+    "preview": {
+      "stamps": "{{recipients}} клиентам по {{stamps}} — всего {{total}} штампов",
+      "rule": "Штампы начисляются только клиентам, которым SMS отправлено. Клиенты, получившие штамп до одобрения, тоже получат штампы кампании."
     }
   }
 }
