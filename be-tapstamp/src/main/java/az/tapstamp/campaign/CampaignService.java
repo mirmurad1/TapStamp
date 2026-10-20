@@ -212,7 +212,9 @@ public class CampaignService {
     /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək (provayder problemi həll olunandan sonra). */
     public Campaign resume(UUID platformAdminId, UUID id) {
         campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-        if (campaigns.resume(id) == 0) {
+        // Dayandırılma müddəti son müddətə sayılmır: 48 saat yenidən başlayır (əks halda gözləyənlər dərhal FAILED olardı)
+        Instant deadline = clock.instant().plus(Duration.ofHours(CampaignSender.DEADLINE_HOURS));
+        if (campaigns.resume(id, deadline) == 0) {
             throw new ApiException(ErrorCode.CAMPAIGN_STATE_CHANGED);
         }
         audit.tenant("CAMPAIGN_RESUMED", AuditLogger.ActorType.PLATFORM, platformAdminId, "campaign", id, Map.of());

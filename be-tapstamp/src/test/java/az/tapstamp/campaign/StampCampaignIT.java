@@ -131,14 +131,17 @@ class StampCampaignIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.pauseReason").value(org.hamcrest.Matchers.containsString("ACCOUNT")));
         assertThat(customer.stamps()).isZero();
 
+        // Platforma 48 saatdan gec davam etdirsə də, gözləyən alıcılar itmir (son müddət yenidən başlayır)
+        clock.advance(Duration.ofHours(49));
         AdminClient platform = signedInPlatformAdmin();
         platform.get("/campaigns").andExpect(jsonPath("$[?(@.id == '" + id + "')].status")
                 .value(org.hamcrest.Matchers.contains("PAUSED")));
         platform.post("/campaigns/" + alpha().id() + "/" + id + "/resume").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SENDING"));
         sendUntilDone();
-        assertThat(customer.stamps()).isEqualTo(1);
-        owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"));
+        // 49 saat keçib — müştəri sessiyası bitib, yenidən daxil olur
+        assertThat(new Customer(customer.phone(), signedIn(customer.phone())).stamps()).isEqualTo(1);
+        signedInStaff(HOST, AdminRole.COMPANY_OWNER, null).get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"));
     }
 
     private static int jsonInt(AdminClient client, String id, String path) throws Exception {

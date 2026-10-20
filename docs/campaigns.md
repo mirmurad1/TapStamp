@@ -48,11 +48,14 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
   - **TRANSIENT** (qoşulmaq olmadı, müvəqqəti xəta) — alıcı 10 dəq, 30 dəq, 2 saat sonra yenidən cəhd olunur (ən çox 4
     cəhd), sonra `FAILED`;
   - **PROVIDER_DOWN** — partiyanın qalanı geri qaytarılır, növbəti dövrdə yenidən cəhd;
-  - **ACCOUNT** (balans, icazə, açar) — kampaniya `PAUSED` olur; platforma problemi həll edib "Davam et" basır;
+  - **ACCOUNT** (balans, icazə, açar) — kampaniya `PAUSED` olur; platforma problemi həll edib "Davam et" basır
+    (48 saatlıq son müddət davam etmə anından yenidən başlayır);
   - **RECIPIENT** (nömrə rədd edildi) — dərhal `FAILED`;
   - **UNKNOWN** (cavab çatmadı, proses SMS-in ortasında kəsildi) — SMS **göndərilmiş sayılır** və təkrar edilmir
     (müştəriyə iki SMS getməsin).
 - Kampaniya təsdiqdən 48 saat sonra hələ bitməyibsə, gözləyən alıcılar `FAILED` olur.
+- Nömrə və ad göndəriş anında müştərinin cari məlumatından götürülür: müştəri nömrəsini dəyişibsə, SMS yeni nömrəyə
+  gedir. Göndərişdən əvvəl bloklanmış/silinmiş və ya nömrəsi olmayan müştəri `SKIPPED` (ötürülüb) olur.
 - Kampaniyanın yaradılması, ləğvi, təsdiqi və rəddi şirkətin audit jurnalına, təsdiq və rədd həm də platformanın
   audit jurnalına yazılır.
 

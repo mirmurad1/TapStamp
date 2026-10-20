@@ -153,7 +153,8 @@
     </update>
 
     <update id="resume">
-        UPDATE campaigns SET status = 'SENDING', pause_reason = NULL WHERE id = #{id} AND status = 'PAUSED'
+        UPDATE campaigns SET status = 'SENDING', pause_reason = NULL, deadline_at = #{deadlineAt}
+        WHERE id = #{id} AND status = 'PAUSED'
     </update>
 
     <update id="skipIneligible">
