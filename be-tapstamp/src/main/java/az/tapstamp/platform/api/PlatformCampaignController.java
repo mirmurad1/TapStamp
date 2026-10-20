@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import az.tapstamp.campaign.CampaignService.Audience;
+import az.tapstamp.campaign.CampaignService.Type;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
 import az.tapstamp.platform.service.PlatformCampaignService;
 import az.tapstamp.platform.service.PlatformCampaignService.TenantCampaign;
@@ -41,19 +42,22 @@ public class PlatformCampaignController {
     }
 
     @Schema(description = "Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət")
-    public record PlatformCampaignView(UUID tenantId, String slug, LocalizedText displayName, UUID id, String text,
-                                       boolean personalized, boolean latin,
+    public record PlatformCampaignView(UUID tenantId, String slug, LocalizedText displayName, UUID id, Type type,
+                                       Integer stampCount, String text, boolean personalized, boolean latin,
                                        Audience audience, Integer inactiveDays, int recipients, int segmentsPerMessage,
-                                       int totalSms, String status, String rejectReason, Instant createdAt,
-                                       Instant updatedAt,
-                                       Instant decidedAt, int sentCount, int failedCount, Instant finishedAt) {
+                                       int totalSms, String status, String rejectReason, String pauseReason,
+                                       Instant createdAt, Instant updatedAt, Instant decidedAt, Instant deadlineAt,
+                                       Instant finishedAt, int sentCount, int failedCount, int pendingCount,
+                                       int skippedCount, int stampsGranted) {
 
         static PlatformCampaignView from(TenantCampaign tc) {
             Campaign c = tc.campaign();
             return new PlatformCampaignView(tc.tenant().id(), tc.tenant().slug(), tc.tenant().displayName(), c.id(),
-                    c.text(), c.personalized(), c.latin(), Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
-                    c.totalSms(), c.status(), c.rejectReason(), c.createdAt(), c.updatedAt(), c.decidedAt(), c.sentCount(),
-                    c.failedCount(), c.finishedAt());
+                    Type.valueOf(c.type()), c.stampCount(), c.text(), c.personalized(), c.latin(),
+                    Audience.valueOf(c.audience()), c.inactiveDays(), c.recipients(), c.segmentsPerMessage(),
+                    c.totalSms(), c.status(), c.rejectReason(), c.pauseReason(), c.createdAt(), c.updatedAt(),
+                    c.decidedAt(), c.deadlineAt(), c.finishedAt(), c.sentCount(), c.failedCount(), c.pendingCount(),
+                    c.skippedCount(), c.stampsGranted());
         }
     }
 
@@ -63,10 +67,11 @@ public class PlatformCampaignController {
 
     @GetMapping
     @Operation(summary = "Kampaniyalar", description = """
-            `status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).""")
+            `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son \
+            kampaniyalar: hər şirkətdən ən çox 100).""")
     List<PlatformCampaignView> list(@RequestParam(defaultValue = "PENDING") @Pattern(regexp = "PENDING|ALL") String status) {
-        List<String> statuses = "PENDING".equals(status) ? List.of("PENDING_APPROVAL")
-                : List.of("PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED", "CANCELLED");
+        List<String> statuses = "PENDING".equals(status) ? List.of("PENDING_APPROVAL", "PAUSED")
+                : List.of("PENDING_APPROVAL", "APPROVED", "SENDING", "PAUSED", "SENT", "REJECTED", "CANCELLED");
         return campaigns.list(statuses).stream().map(PlatformCampaignView::from).toList();
     }
 
@@ -76,6 +81,14 @@ public class PlatformCampaignController {
     PlatformCampaignView approve(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
                                  @PathVariable UUID campaignId) {
         return PlatformCampaignView.from(campaigns.decide(principal, tenantId, campaignId, true, null));
+    }
+
+    @PostMapping("/{tenantId}/{campaignId}/resume")
+    @Operation(summary = "Dayandırılmış kampaniyanı davam etdirmək", description = """
+            Provayderin hesab xətası (icazə, balans) həll olunandan sonra; göndəriş qaldığı yerdən davam edir.""")
+    PlatformCampaignView resume(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                                @PathVariable UUID campaignId) {
+        return PlatformCampaignView.from(campaigns.resume(principal, tenantId, campaignId));
     }
 
     @PostMapping("/{tenantId}/{campaignId}/reject")

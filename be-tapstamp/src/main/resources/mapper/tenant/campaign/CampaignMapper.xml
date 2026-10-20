@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- Kampaniya SMS-ləri: auditoriya, alıcılar və göndəriş vəziyyəti -->
+<!-- Kampaniyalar (SMS və möhür): auditoriya, alıcılar və göndəriş vəziyyəti -->
 <mapper namespace="az.tapstamp.campaign.repository.CampaignMapper">
 
-    <!-- Kampaniya SMS-i ala bilən müştərilər (aktiv, imtina etməyib, nömrəsi var) + auditoriya şərti -->
+    <!-- Kampaniya SMS-i ala bilən müştərilər (aktiv, nömrəsi var) + auditoriya şərti -->
     <sql id="audience">
         FROM customers c
         LEFT JOIN loyalty_accounts la ON la.customer_id = c.id
@@ -24,6 +24,9 @@
             <when test="a.audience == 'UNUSED_GIFT_CARD'">
                 AND EXISTS (SELECT 1 FROM rewards w WHERE w.customer_id = c.id AND w.status = 'AVAILABLE')
             </when>
+            <when test="a.audience == 'EMPTY_CARD'">
+                AND coalesce(la.current_stamps, 0) = 0
+            </when>
         </choose>
     </sql>
 
@@ -33,6 +36,14 @@
 
     <select id="branchExists" resultType="boolean">
         SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId})
+    </select>
+
+    <select id="activeStampsRequired" resultType="java.lang.Integer">
+        SELECT stamps_required FROM reward_rules WHERE active
+    </select>
+
+    <select id="defaultBranch" resultType="java.util.UUID">
+        SELECT id FROM branches WHERE status = 'ACTIVE' ORDER BY created_at, id LIMIT 1
     </select>
 
     <select id="audienceNames" resultType="java.lang.String">
@@ -45,10 +56,11 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO campaigns (id, text, personalized, latin, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms,
-                               status, created_by, created_at)
-        VALUES (#{id}, #{text}, #{personalized}, #{latin}, #{audience}, #{inactiveDays}, #{branchId}, #{recipients}, #{segmentsPerMessage},
-                #{totalSms}, #{status}, #{createdBy}, #{createdAt})
+        INSERT INTO campaigns (id, type, stamp_count, text, personalized, latin, audience, inactive_days, branch_id,
+                               recipients, segments_per_message, total_sms, status, created_by, created_at)
+        VALUES (#{c.id}, #{c.type}, #{c.stampCount}, #{c.text}, #{c.personalized}, #{c.latin}, #{c.audience},
+                #{c.inactiveDays}, #{c.branchId}, #{c.recipients}, #{c.segmentsPerMessage}, #{c.totalSms}, #{c.status},
+                #{c.createdBy}, #{c.createdAt})
     </insert>
 
     <insert id="insertRecipients">
@@ -64,8 +76,8 @@
 
     <update id="updateDraft">
         UPDATE campaigns
-        SET text = #{text}, personalized = #{personalized}, latin = #{latin}, audience = #{audience},
-            inactive_days = #{inactiveDays}, branch_id = #{branchId}, updated_at = #{now}
+        SET stamp_count = #{stampCount}, text = #{text}, personalized = #{personalized}, latin = #{latin},
+            audience = #{audience}, inactive_days = #{inactiveDays}, branch_id = #{branchId}, updated_at = #{now}
         WHERE id = #{id} AND status = 'PENDING_APPROVAL'
     </update>
 
@@ -73,28 +85,48 @@
         DELETE FROM campaign_recipients WHERE campaign_id = #{campaignId}
     </delete>
 
+    <!-- Sayğaclar canlıdır: alıcıların cari vəziyyətindən -->
     <sql id="campaign">
-        SELECT id, text, personalized, latin, audience, inactive_days, branch_id, recipients, segments_per_message, total_sms, status,
-               reject_reason, created_by, created_at, updated_at, decided_at, sent_count, failed_count, finished_at
-        FROM campaigns
+        SELECT c.id, c.type, c.stamp_count, c.text, c.personalized, c.latin, c.audience, c.inactive_days, c.branch_id,
+               c.recipients, c.segments_per_message, c.total_sms, c.status, c.reject_reason, c.pause_reason,
+               c.created_by, c.created_at, c.updated_at, c.decided_at, c.deadline_at, c.finished_at,
+               coalesce(n.sent, 0) AS sent_count, coalesce(n.failed, 0) AS failed_count,
+               coalesce(n.pending, 0) AS pending_count, coalesce(n.skipped, 0) AS skipped_count,
+               coalesce(n.stamped, 0) AS stamps_granted
+        FROM campaigns c
+        LEFT JOIN LATERAL (
+            SELECT count(*) FILTER (WHERE r.status = 'SENT') AS sent,
+                   count(*) FILTER (WHERE r.status = 'FAILED') AS failed,
+                   count(*) FILTER (WHERE r.status IN ('PENDING', 'SENDING')) AS pending,
+                   count(*) FILTER (WHERE r.status = 'SKIPPED') AS skipped,
+                   count(*) FILTER (WHERE r.stamps_granted_at IS NOT NULL) AS stamped
+            FROM campaign_recipients r WHERE r.campaign_id = c.id) n ON true
     </sql>
 
     <select id="list" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
         <include refid="campaign"/>
-        ORDER BY created_at DESC, id DESC
+        WHERE c.type = #{type}
+        ORDER BY c.created_at DESC, c.id DESC
         LIMIT #{limit}
     </select>
 
     <select id="listByStatus" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
         <include refid="campaign"/>
-        WHERE status IN <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
-        ORDER BY created_at DESC, id DESC
+        WHERE c.status IN <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        ORDER BY c.created_at DESC, c.id DESC
         LIMIT #{limit}
     </select>
 
     <select id="find" resultType="az.tapstamp.campaign.repository.CampaignMapper$Campaign">
         <include refid="campaign"/>
-        WHERE id = #{id}
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="failedRecipients" resultType="az.tapstamp.campaign.repository.CampaignMapper$FailedRecipient">
+        SELECT r.customer_id, c.name, c.phone_enc, r.error, r.sent_at AS at
+        FROM campaign_recipients r JOIN customers c ON c.id = r.customer_id
+        WHERE r.campaign_id = #{campaignId} AND r.status = 'FAILED'
+        ORDER BY r.sent_at DESC NULLS LAST, r.customer_id
     </select>
 
     <update id="changeStatus">
@@ -106,9 +138,23 @@
         WHERE id = #{id} AND status = #{from}
     </update>
 
+    <!-- ===================================================== göndəriş -->
+
     <select id="sendable" resultType="java.util.UUID">
         SELECT id FROM campaigns WHERE status IN ('APPROVED', 'SENDING') ORDER BY decided_at, id
     </select>
+
+    <update id="startSending">
+        UPDATE campaigns SET status = 'SENDING', deadline_at = #{deadlineAt} WHERE id = #{id} AND status = 'APPROVED'
+    </update>
+
+    <update id="pause">
+        UPDATE campaigns SET status = 'PAUSED', pause_reason = #{reason} WHERE id = #{id} AND status = 'SENDING'
+    </update>
+
+    <update id="resume">
+        UPDATE campaigns SET status = 'SENDING', pause_reason = NULL WHERE id = #{id} AND status = 'PAUSED'
+    </update>
 
     <update id="skipIneligible">
         UPDATE campaign_recipients r SET status = 'SKIPPED'
@@ -117,9 +163,16 @@
           AND (c.status &lt;&gt; 'ACTIVE' OR c.marketing_opt_out_at IS NOT NULL OR c.phone_enc IS NULL)
     </update>
 
-    <update id="failStale">
-        UPDATE campaign_recipients SET status = 'FAILED', sent_at = #{now}, error = 'Göndəriş yarımçıq qaldı'
-        WHERE campaign_id = #{campaignId} AND status = 'SENDING' AND claimed_at &lt; #{claimedBefore}
+    <select id="staleSending" resultType="az.tapstamp.campaign.repository.CampaignMapper$Recipient">
+        SELECT r.customer_id, c.phone_enc, c.name, c.last_branch_id, r.attempts
+        FROM campaign_recipients r JOIN customers c ON c.id = r.customer_id
+        WHERE r.campaign_id = #{campaignId} AND r.status = 'SENDING' AND r.claimed_at &lt; #{claimedBefore}
+    </select>
+
+    <update id="expirePending">
+        UPDATE campaign_recipients SET status = 'FAILED', sent_at = #{now},
+               error = coalesce(error || ' · ', '') || 'Son müddət bitdi'
+        WHERE campaign_id = #{campaignId} AND status = 'PENDING'
     </update>
 
     <select id="claim" resultType="az.tapstamp.campaign.repository.CampaignMapper$Recipient">
@@ -129,15 +182,39 @@
           AND (r.campaign_id, r.customer_id) IN (
               SELECT campaign_id, customer_id FROM campaign_recipients
               WHERE campaign_id = #{campaignId} AND status = 'PENDING'
+                AND (next_attempt_at IS NULL OR next_attempt_at &lt;= #{now})
               ORDER BY customer_id
               LIMIT #{limit}
               FOR UPDATE SKIP LOCKED)
-        RETURNING r.customer_id, c.phone_enc, c.name
+        RETURNING r.customer_id, c.phone_enc, c.name, c.last_branch_id, r.attempts
     </select>
 
-    <update id="markRecipient">
-        UPDATE campaign_recipients SET status = #{status}, sent_at = #{now}, error = #{error}
+    <update id="markSent">
+        UPDATE campaign_recipients SET status = 'SENT', sent_at = #{now}, error = #{note}, next_attempt_at = NULL,
+               attempts = attempts + 1
         WHERE campaign_id = #{campaignId} AND customer_id = #{customerId}
+    </update>
+
+    <update id="markFailed">
+        UPDATE campaign_recipients SET status = 'FAILED', sent_at = #{now}, error = #{error}, next_attempt_at = NULL,
+               attempts = attempts + 1
+        WHERE campaign_id = #{campaignId} AND customer_id = #{customerId}
+    </update>
+
+    <update id="retryLater">
+        UPDATE campaign_recipients SET status = 'PENDING', attempts = attempts + 1, next_attempt_at = #{nextAttemptAt},
+               error = #{error}
+        WHERE campaign_id = #{campaignId} AND customer_id = #{customerId}
+    </update>
+
+    <update id="release">
+        UPDATE campaign_recipients SET status = 'PENDING'
+        WHERE campaign_id = #{campaignId} AND customer_id = #{customerId} AND status = 'SENDING'
+    </update>
+
+    <update id="markStampsGranted">
+        UPDATE campaign_recipients SET stamps_granted_at = #{now}
+        WHERE campaign_id = #{campaignId} AND customer_id = #{customerId} AND stamps_granted_at IS NULL
     </update>
 
     <update id="finishIfDone">
@@ -145,9 +222,8 @@
         SET status = 'SENT', finished_at = #{now},
             sent_count = (SELECT count(*) FROM campaign_recipients WHERE campaign_id = c.id AND status = 'SENT'),
             failed_count = (SELECT count(*) FROM campaign_recipients WHERE campaign_id = c.id AND status = 'FAILED')
-        WHERE c.id = #{campaignId} AND c.status IN ('APPROVED', 'SENDING')
+        WHERE c.id = #{campaignId} AND c.status = 'SENDING'
           AND NOT EXISTS (SELECT 1 FROM campaign_recipients
                           WHERE campaign_id = c.id AND status IN ('PENDING', 'SENDING'))
     </update>
-
 </mapper>

@@ -13,11 +13,16 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface CampaignMapper {
 
-    record Campaign(UUID id, String text, boolean personalized, boolean latin, String audience,
-                    @Nullable Integer inactiveDays, @Nullable UUID branchId,
+    /**
+     * Kampaniya. Sayğaclar canlıdır (alıcıların vəziyyətindən): göndərilib, xəta, gözləyir (təkrar cəhd daxil),
+     * ötürülüb; möhür kampaniyasında — möhür verilmiş alıcılar.
+     */
+    record Campaign(UUID id, String type, @Nullable Integer stampCount, String text, boolean personalized, boolean latin,
+                    String audience, @Nullable Integer inactiveDays, @Nullable UUID branchId,
                     int recipients, int segmentsPerMessage, int totalSms, String status, @Nullable String rejectReason,
-                    UUID createdBy, Instant createdAt, @Nullable Instant updatedAt, @Nullable Instant decidedAt,
-                    int sentCount, int failedCount, @Nullable Instant finishedAt) {
+                    @Nullable String pauseReason, UUID createdBy, Instant createdAt, @Nullable Instant updatedAt,
+                    @Nullable Instant decidedAt, @Nullable Instant deadlineAt, @Nullable Instant finishedAt,
+                    int sentCount, int failedCount, int pendingCount, int skippedCount, int stampsGranted) {
     }
 
     /** Auditoriya filtri: {@code inactiveSince} — INACTIVE üçün, {@code branchId} — istəyə bağlı. */
@@ -25,12 +30,24 @@ public interface CampaignMapper {
     }
 
     /** Göndərişə götürülmüş alıcı. */
-    record Recipient(UUID customerId, byte[] phoneEnc, @Nullable String name) {
+    record Recipient(UUID customerId, byte[] phoneEnc, @Nullable String name, @Nullable UUID lastBranchId,
+                     int attempts) {
+    }
+
+    /** SMS-i göndərilməyən alıcı (sahibə səbəbi ilə göstərilir). */
+    record FailedRecipient(UUID customerId, @Nullable String name, byte @Nullable [] phoneEnc, @Nullable String error,
+                           @Nullable Instant at) {
     }
 
     long countAudience(@Param("a") Audience audience);
 
     boolean branchExists(UUID branchId);
+
+    /** Aktiv hədiyyə qaydasının möhür həddi (qayda yoxdursa boş). */
+    Optional<Integer> activeStampsRequired();
+
+    /** Şirkətin ilk aktiv filialı — möhürün filialı müəyyən deyilsə. */
+    Optional<UUID> defaultBranch();
 
     /** Auditoriyadakı müştərilərin adları (adı yoxdursa null) — fərdi müraciətdə SMS sayını hesablamaq üçün. */
     List<@Nullable String> audienceNames(@Param("a") Audience audience);
@@ -38,7 +55,7 @@ public interface CampaignMapper {
     /** Kampaniyanın alıcılarının adları (adı yoxdursa null). */
     List<@Nullable String> recipientNames(UUID campaignId);
 
-    void insert(Campaign campaign);
+    void insert(@Param("c") Campaign campaign);
 
     /** Auditoriyanı kampaniyanın alıcıları kimi yazır; yazılan sayı qaytarır. */
     int insertRecipients(@Param("campaignId") UUID campaignId, @Param("a") Audience audience);
@@ -46,36 +63,64 @@ public interface CampaignMapper {
     void updateCounts(UUID id, int recipients, int segmentsPerMessage, int totalSms);
 
     /** Təsdiq gözləyən kampaniyanın mətni və auditoriyası dəyişir; 0 — artıq təsdiq gözləmir. */
-    int updateDraft(UUID id, String text, boolean personalized, boolean latin, String audience,
-                    @Nullable Integer inactiveDays, @Nullable UUID branchId, Instant now);
+    int updateDraft(UUID id, @Nullable Integer stampCount, String text, boolean personalized, boolean latin,
+                    String audience, @Nullable Integer inactiveDays, @Nullable UUID branchId, Instant now);
 
     /** Alıcılar yenidən müəyyənləşəndən əvvəl köhnələri silinir (yalnız təsdiq gözləyən kampaniya). */
     void deleteRecipients(UUID campaignId);
 
-    List<Campaign> list(int limit);
+    List<Campaign> list(String type, int limit);
 
     List<Campaign> listByStatus(List<String> statuses, int limit);
 
     Optional<Campaign> find(UUID id);
 
+    List<FailedRecipient> failedRecipients(UUID campaignId);
+
     /** Status yalnız {@code from} vəziyyətindədirsə dəyişir; dəyişən sətir sayı (0 — artıq dəyişib). */
     int changeStatus(UUID id, String from, String to, @Nullable Instant decidedAt, @Nullable UUID decidedBy,
                      @Nullable String rejectReason);
 
-    /** Göndərilməli kampaniyalar (APPROVED və ya SENDING). */
+    // ---------------------------------------------------------------- göndəriş
+
+    /** Göndərilməli kampaniyalar (APPROVED və ya SENDING; PAUSED gözləyir). */
     List<UUID> sendable();
 
-    /** Artıq SMS ala bilməyən alıcılar (bloklanıb, silinib, imtina edib) SKIPPED olur. */
+    /** APPROVED → SENDING; son müddət bu andan sayılır. */
+    int startSending(UUID id, Instant deadlineAt);
+
+    /** Hesab səviyyəli xəta: SENDING → PAUSED (səbəb ilə). */
+    int pause(UUID id, String reason);
+
+    /** Platforma admini: PAUSED → SENDING. */
+    int resume(UUID id);
+
+    /** Artıq SMS ala bilməyən alıcılar (bloklanıb, silinib) SKIPPED olur. */
     int skipIneligible(UUID campaignId);
 
-    /** Uzun müddət SENDING-də qalanlar (proses kəsilib) FAILED olur — iki dəfə göndərmək riskinə girmirik. */
-    int failStale(UUID campaignId, Instant claimedBefore, Instant now);
+    /** Uzun müddət SENDING-də qalanlar (proses SMS-in ortasında kəsilib) — nəticə məlum deyil. */
+    List<Recipient> staleSending(UUID campaignId, Instant claimedBefore);
 
-    /** PENDING alıcılardan {@code limit} qədərini SENDING kimi götürür (başqa backend eyni sətirləri götürmür). */
+    /** Son müddət bitib: gözləyən alıcılar son olaraq FAILED olur. */
+    int expirePending(UUID campaignId, Instant now);
+
+    /** Vaxtı çatmış PENDING alıcılardan {@code limit} qədərini SENDING kimi götürür (başqa backend götürmür). */
     List<Recipient> claim(UUID campaignId, int limit, Instant now);
 
-    void markRecipient(UUID campaignId, UUID customerId, String status, Instant now, @Nullable String error);
+    /** SMS qəbul olundu (və ya nəticə məlum deyil — göndərilmiş sayılır); {@code note} — izah (adətən null). */
+    void markSent(UUID campaignId, UUID customerId, Instant now, @Nullable String note);
 
-    /** PENDING və SENDING qalmayıbsa kampaniyanı SENT edir, sayları yazır; 1 — bitdi. */
+    void markFailed(UUID campaignId, UUID customerId, Instant now, String error);
+
+    /** Müvəqqəti xəta: cəhd sayılır, alıcı {@code nextAttemptAt}-də yenidən növbəyə düşür. */
+    void retryLater(UUID campaignId, UUID customerId, Instant nextAttemptAt, String error);
+
+    /** Göndəriş cəhdi edilmədi (provayder əlçatmaz, kampaniya dayandı) — cəhd sayılmır. */
+    void release(UUID campaignId, UUID customerId);
+
+    /** Möhürlərin verildiyini qeyd edir (bir dəfə); 1 — indi qeyd olundu, 0 — artıq verilib. */
+    int markStampsGranted(UUID campaignId, UUID customerId, Instant now);
+
+    /** PENDING və SENDING qalmayıbsa kampaniyanı SENT edir; 1 — bitdi. */
     int finishIfDone(UUID campaignId, Instant now);
 }

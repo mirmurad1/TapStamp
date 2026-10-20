@@ -603,8 +603,18 @@
     },
     "/api/v1/admin/campaigns" : {
       "get" : {
-        "description" : "Yenidən köhnəyə, son 100.",
+        "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.",
         "operationId" : "list_2",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "SMS",
+            "enum" : [ "SMS", "STAMPS" ]
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
@@ -773,6 +783,38 @@
           }
         },
         "summary" : "Kampaniyanı ləğv etmək",
+        "tags" : [ "Admin: kampaniyalar" ]
+      }
+    },
+    "/api/v1/admin/campaigns/{campaignId}/failures" : {
+      "get" : {
+        "description" : "Ad, tam nömrə və səbəb; möhür də verilməyib.",
+        "operationId" : "failures",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CampaignFailureView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "SMS-i göndərilməyən müştərilər",
         "tags" : [ "Admin: kampaniyalar" ]
       }
     },
@@ -2829,7 +2871,7 @@
     },
     "/api/v1/platform/campaigns" : {
       "get" : {
-        "description" : "`status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).",
+        "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).",
         "operationId" : "list_4",
         "parameters" : [ {
           "in" : "query",
@@ -2941,6 +2983,43 @@
           }
         },
         "summary" : "Kampaniyanı ləğv etmək (rədd)",
+        "tags" : [ "Platforma: kampaniyalar" ]
+      }
+    },
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume" : {
+      "post" : {
+        "description" : "Provayderin hesab xətası (icazə, balans) həll olunandan sonra; göndəriş qaldığı yerdən davam edir.",
+        "operationId" : "resume",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "campaignId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlatformCampaignView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Dayandırılmış kampaniyanı davam etdirmək",
         "tags" : [ "Platforma: kampaniyalar" ]
       }
     },
@@ -4390,13 +4469,36 @@
           }
         }
       },
+      "CampaignFailureView" : {
+        "type" : "object",
+        "description" : "SMS-i göndərilməyən müştəri: ad, nömrə, səbəb",
+        "properties" : {
+          "at" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          }
+        }
+      },
       "CampaignRequest" : {
         "type" : "object",
         "description" : "Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial",
         "properties" : {
           "audience" : {
             "type" : "string",
-            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD", "EMPTY_CARD" ]
           },
           "branchId" : {
             "type" : "string",
@@ -4418,27 +4520,43 @@
             "type" : "boolean",
             "description" : "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")"
           },
+          "stampCount" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Yalnız STAMPS: hər müştəriyə neçə möhür (1 … hədd − 1)",
+            "maximum" : 49,
+            "minimum" : 1
+          },
           "text" : {
             "type" : "string",
             "maxLength" : 1000,
             "minLength" : 0
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "SMS (standart) və ya STAMPS — kartı boş olan müştərilərə SMS + möhür",
+            "enum" : [ "SMS", "STAMPS" ]
           }
         },
         "required" : [ "audience", "text" ]
       },
       "CampaignView" : {
         "type" : "object",
-        "description" : "Kampaniya və vəziyyəti",
+        "description" : "Kampaniya və vəziyyəti. Sayğaclar canlıdır: sentCount — SMS göndərilib, failedCount — göndərilmədi, pendingCount — gözləyir (təkrar cəhd daxil), skippedCount — ötürülüb (bloklanıb, silinib), stampsGranted — möhür verilmiş müştərilər (yalnız STAMPS). pauseReason — PAUSED olanda provayderin xətası.",
         "properties" : {
           "audience" : {
             "type" : "string",
-            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD", "EMPTY_CARD" ]
           },
           "branchId" : {
             "type" : "string",
             "format" : "uuid"
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "deadlineAt" : {
             "type" : "string",
             "format" : "date-time"
           },
@@ -4465,6 +4583,13 @@
           "latin" : {
             "type" : "boolean"
           },
+          "pauseReason" : {
+            "type" : "string"
+          },
+          "pendingCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "personalized" : {
             "type" : "boolean"
           },
@@ -4483,9 +4608,21 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "skippedCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "stampCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "stampsGranted" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "status" : {
             "type" : "string",
-            "enum" : [ "PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED", "CANCELLED" ]
+            "enum" : [ "PENDING_APPROVAL", "APPROVED", "SENDING", "PAUSED", "SENT", "REJECTED", "CANCELLED" ]
           },
           "text" : {
             "type" : "string"
@@ -4493,6 +4630,10 @@
           "totalSms" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "SMS", "STAMPS" ]
           },
           "updatedAt" : {
             "type" : "string",
@@ -5593,9 +5734,13 @@
         "properties" : {
           "audience" : {
             "type" : "string",
-            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD" ]
+            "enum" : [ "ALL", "INACTIVE", "NEAR_REWARD", "UNUSED_GIFT_CARD", "EMPTY_CARD" ]
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "deadlineAt" : {
             "type" : "string",
             "format" : "date-time"
           },
@@ -5625,6 +5770,13 @@
           "latin" : {
             "type" : "boolean"
           },
+          "pauseReason" : {
+            "type" : "string"
+          },
+          "pendingCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "personalized" : {
             "type" : "boolean"
           },
@@ -5643,8 +5795,20 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "skippedCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "slug" : {
             "type" : "string"
+          },
+          "stampCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "stampsGranted" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "status" : {
             "type" : "string"
@@ -5659,6 +5823,10 @@
           "totalSms" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "SMS", "STAMPS" ]
           },
           "updatedAt" : {
             "type" : "string",
@@ -5731,6 +5899,10 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "maxStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "minSegments" : {
             "type" : "integer",
             "format" : "int32"
@@ -5746,10 +5918,18 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "stampCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "template" : {
             "type" : "string"
           },
           "totalSms" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalStamps" : {
             "type" : "integer",
             "format" : "int64"
           }

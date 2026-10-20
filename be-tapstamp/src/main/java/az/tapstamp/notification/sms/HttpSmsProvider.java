@@ -59,12 +59,15 @@ public class HttpSmsProvider implements SmsProvider {
     @Override
     public void send(SmsMessage message) {
         if (clock.instant().isBefore(openUntil.get())) {
-            throw new SmsDeliveryException("SMS provider circuit is open");
+            throw new SmsDeliveryException(SmsDeliveryException.Kind.PROVIDER_DOWN, "SMS provider circuit is open");
         }
         try {
             deliver(message);
             consecutiveFailures.set(0);
         } catch (SmsDeliveryException first) {
+            if (first.kind() != SmsDeliveryException.Kind.TRANSIENT) {
+                throw first;
+            }
             try {
                 deliver(message);
                 consecutiveFailures.set(0);
@@ -94,27 +97,31 @@ public class HttpSmsProvider implements SmsProvider {
         try {
             HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
             if (response.statusCode() >= 500) {
-                throw new SmsDeliveryException("SMS provider returned " + response.statusCode());
+                throw new SmsDeliveryException(SmsDeliveryException.Kind.TRANSIENT,
+                        "SMS provider returned " + response.statusCode());
             }
             if (response.statusCode() >= 400) {
                 // 4xx təkrar cəhd ilə düzəlmir (məs. yanlış nömrə) — loga yalnız maskalı nömrə
                 log.warn("SMS rədd edildi: status={}, to={}", response.statusCode(), PhoneMasker.mask(message.to()));
             }
         } catch (IOException e) {
-            throw new SmsDeliveryException("SMS provider is unreachable", e);
+            throw networkFailure(e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new SmsDeliveryException("SMS sending was interrupted", e);
+            throw new SmsDeliveryException(SmsDeliveryException.Kind.UNKNOWN, "SMS sending was interrupted", e);
         }
     }
 
-    public static class SmsDeliveryException extends RuntimeException {
-        public SmsDeliveryException(String message) {
-            super(message);
-        }
-
-        public SmsDeliveryException(String message, Throwable cause) {
-            super(message, cause);
-        }
+    /**
+     * Qoşulma alınmayıbsa — SMS getməyib (təkrar etmək olar); sorğu göndəriləndən sonra cavab gəlməyibsə (vaxt aşımı və
+     * s.) — SMS getmiş ola bilər, təkrar göndərilməməlidir.
+     */
+    static SmsDeliveryException networkFailure(IOException e) {
+        boolean notConnected = e instanceof java.net.ConnectException
+                || e instanceof java.net.http.HttpConnectTimeoutException
+                || e instanceof java.net.UnknownHostException;
+        return notConnected
+                ? new SmsDeliveryException(SmsDeliveryException.Kind.TRANSIENT, "SMS provider is unreachable", e)
+                : new SmsDeliveryException(SmsDeliveryException.Kind.UNKNOWN, "SMS provider did not answer", e);
     }
 }

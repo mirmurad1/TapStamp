@@ -45,6 +45,9 @@ public interface StampMapper {
     void insertManualStamp(UUID id, UUID branchId, UUID customerId, UUID staffId, String reason, LocalDate day,
                            Instant at);
 
+    /** Kampaniya möhürü (mənbə CAMPAIGN, təsdiqlənmiş). */
+    void insertCampaignStamp(UUID id, UUID branchId, UUID customerId, UUID campaignId, LocalDate day, Instant at);
+
     Optional<Stamp> findByTapToken(UUID tapTokenId);
 
     Optional<Stamp> lockStamp(UUID stampId);

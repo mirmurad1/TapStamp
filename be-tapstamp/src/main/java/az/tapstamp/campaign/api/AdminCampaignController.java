@@ -8,6 +8,7 @@ import az.tapstamp.campaign.CampaignService;
 import az.tapstamp.campaign.CampaignService.Audience;
 import az.tapstamp.campaign.CampaignService.Draft;
 import az.tapstamp.campaign.CampaignService.Preview;
+import az.tapstamp.campaign.CampaignService.Type;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
 import az.tapstamp.security.admin.AdminPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +48,9 @@ public class AdminCampaignController {
 
     @Schema(description = "Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial")
     public record CampaignRequest(
+            @Schema(description = "SMS (standart) və ya STAMPS — kartı boş olan müştərilərə SMS + möhür") Type type,
+            @Schema(description = "Yalnız STAMPS: hər müştəriyə neçə möhür (1 … hədd − 1)") @Min(1) @Max(49)
+            Integer stampCount,
             @NotBlank @Size(max = 1000) String text,
             @NotNull Audience audience,
             @Schema(description = "Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)") @Min(7) @Max(365) Integer inactiveDays,
@@ -56,26 +61,35 @@ public class AdminCampaignController {
             Boolean latin) {
 
         Draft draft() {
-            return new Draft(text, audience, inactiveDays, branchId, Boolean.TRUE.equals(personalized),
-                    Boolean.TRUE.equals(latin));
+            return new Draft(type == null ? Type.SMS : type, stampCount, text, audience, inactiveDays, branchId,
+                    Boolean.TRUE.equals(personalized), Boolean.TRUE.equals(latin));
         }
     }
 
-    @Schema(description = "Kampaniya və vəziyyəti")
-    public record CampaignView(UUID id, String text, boolean personalized, boolean latin, Audience audience, Integer inactiveDays, UUID branchId,
+    @Schema(description = """
+            Kampaniya və vəziyyəti. Sayğaclar canlıdır: sentCount — SMS göndərilib, failedCount — göndərilmədi, \
+            pendingCount — gözləyir (təkrar cəhd daxil), skippedCount — ötürülüb (bloklanıb, silinib), stampsGranted — \
+            möhür verilmiş müştərilər (yalnız STAMPS). pauseReason — PAUSED olanda provayderin xətası.""")
+    public record CampaignView(UUID id, Type type, Integer stampCount, String text, boolean personalized,
+                               boolean latin, Audience audience, Integer inactiveDays, UUID branchId,
                                int recipients, int segmentsPerMessage, int totalSms,
-                               @Schema(allowableValues = {"PENDING_APPROVAL", "APPROVED", "SENDING", "SENT", "REJECTED",
-                                       "CANCELLED"}) String status,
-                               String rejectReason, Instant createdAt, Instant updatedAt, Instant decidedAt,
-                               int sentCount, int failedCount,
-                               Instant finishedAt) {
+                               @Schema(allowableValues = {"PENDING_APPROVAL", "APPROVED", "SENDING", "PAUSED", "SENT",
+                                       "REJECTED", "CANCELLED"}) String status,
+                               String rejectReason, String pauseReason, Instant createdAt, Instant updatedAt,
+                               Instant decidedAt, Instant deadlineAt, Instant finishedAt, int sentCount,
+                               int failedCount, int pendingCount, int skippedCount, int stampsGranted) {
 
         public static CampaignView from(Campaign c) {
-            return new CampaignView(c.id(), c.text(), c.personalized(), c.latin(), Audience.valueOf(c.audience()), c.inactiveDays(), c.branchId(),
-                    c.recipients(), c.segmentsPerMessage(), c.totalSms(), c.status(), c.rejectReason(), c.createdAt(),
-                    c.updatedAt(),
-                    c.decidedAt(), c.sentCount(), c.failedCount(), c.finishedAt());
+            return new CampaignView(c.id(), Type.valueOf(c.type()), c.stampCount(), c.text(), c.personalized(),
+                    c.latin(), Audience.valueOf(c.audience()), c.inactiveDays(), c.branchId(), c.recipients(),
+                    c.segmentsPerMessage(), c.totalSms(), c.status(), c.rejectReason(), c.pauseReason(), c.createdAt(),
+                    c.updatedAt(), c.decidedAt(), c.deadlineAt(), c.finishedAt(), c.sentCount(), c.failedCount(),
+                    c.pendingCount(), c.skippedCount(), c.stampsGranted());
         }
+    }
+
+    @Schema(description = "SMS-i göndərilməyən müştəri: ad, nömrə, səbəb")
+    public record CampaignFailureView(UUID customerId, String name, String phone, String error, Instant at) {
     }
 
     @PostMapping("/preview")
@@ -96,9 +110,18 @@ public class AdminCampaignController {
     }
 
     @GetMapping
-    @Operation(summary = "Kampaniyalar", description = "Yenidən köhnəyə, son 100.")
-    List<CampaignView> list(@AuthenticationPrincipal AdminPrincipal principal) {
-        return campaigns.list(principal).stream().map(CampaignView::from).toList();
+    @Operation(summary = "Kampaniyalar", description = "Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.")
+    List<CampaignView> list(@AuthenticationPrincipal AdminPrincipal principal,
+                            @RequestParam(defaultValue = "SMS") Type type) {
+        return campaigns.list(principal, type).stream().map(CampaignView::from).toList();
+    }
+
+    @GetMapping("/{campaignId}/failures")
+    @Operation(summary = "SMS-i göndərilməyən müştərilər", description = "Ad, tam nömrə və səbəb; möhür də verilməyib.")
+    List<CampaignFailureView> failures(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId) {
+        return campaigns.failures(principal, campaignId).stream()
+                .map(f -> new CampaignFailureView(f.customerId(), f.name(), f.phone(), f.error(), f.at()))
+                .toList();
     }
 
     @GetMapping("/{campaignId}")

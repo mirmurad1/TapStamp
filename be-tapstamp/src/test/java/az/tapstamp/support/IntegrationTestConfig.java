@@ -2,6 +2,7 @@ package az.tapstamp.support;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import az.tapstamp.notification.sms.SmsProvider;
 import az.tapstamp.tenancy.provisioning.TenantProvisioner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationRunner;
@@ -38,6 +39,13 @@ public class IntegrationTestConfig {
     @Bean
     TestSmsInbox testSmsInbox() {
         return new TestSmsInbox();
+    }
+
+    /** SMS provayderi: konsol provayderinə ötürür, lazım olanda nömrəyə görə xəta verir (bax: TestSmsFailures). */
+    @Bean
+    @Primary
+    TestSmsFailures testSmsProvider(@Qualifier("consoleSmsProvider") SmsProvider console) {
+        return new TestSmsFailures(console);
     }
 
     @Bean

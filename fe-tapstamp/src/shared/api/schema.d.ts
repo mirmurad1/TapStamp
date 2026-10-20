@@ -367,7 +367,7 @@ export interface paths {
         };
         /**
          * Kampaniyalar
-         * @description Yenidən köhnəyə, son 100.
+         * @description Növə görə (SMS və ya STAMPS), yenidən köhnəyə, son 100.
          */
         get: operations["list_2"];
         put?: never;
@@ -437,6 +437,26 @@ export interface paths {
          * @description Yalnız təsdiqə qədər; sonra `CAMPAIGN_STATE_CHANGED`.
          */
         post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/campaigns/{campaignId}/failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SMS-i göndərilməyən müştərilər
+         * @description Ad, tam nömrə və səbəb; möhür də verilməyib.
+         */
+        get: operations["failures"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1734,7 +1754,7 @@ export interface paths {
         };
         /**
          * Kampaniyalar
-         * @description `status` — PENDING (təsdiq gözləyənlər) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).
+         * @description `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL (son kampaniyalar: hər şirkətdən ən çox 100).
          */
         get: operations["list_4"];
         put?: never;
@@ -1779,6 +1799,26 @@ export interface paths {
          * @description Səbəb sahibə göstərilir. Platforma kampaniyanı dəyişə bilməz.
          */
         post: operations["reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dayandırılmış kampaniyanı davam etdirmək
+         * @description Provayderin hesab xətası (icazə, balans) həll olunandan sonra; göndəriş qaldığı yerdən davam edir.
+         */
+        post: operations["resume"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2586,10 +2626,20 @@ export interface components {
             policyOverridden?: boolean;
             status?: string;
         };
+        /** @description SMS-i göndərilməyən müştəri: ad, nömrə, səbəb */
+        CampaignFailureView: {
+            /** Format: date-time */
+            at?: string;
+            /** Format: uuid */
+            customerId?: string;
+            error?: string;
+            name?: string;
+            phone?: string;
+        };
         /** @description Kampaniya: mətn (əvvəlinə şirkətin SMS adı əlavə olunur), auditoriya, istəyə bağlı filial */
         CampaignRequest: {
             /** @enum {string} */
-            audience: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            audience: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD" | "EMPTY_CARD";
             /**
              * Format: uuid
              * @description Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı
@@ -2604,16 +2654,28 @@ export interface components {
             latin?: boolean;
             /** @description Mətn "Hörmətli <ad>," ilə başlasın (adı yoxdursa "Hörmətli istifadəçi,") */
             personalized?: boolean;
+            /**
+             * Format: int32
+             * @description Yalnız STAMPS: hər müştəriyə neçə möhür (1 … hədd − 1)
+             */
+            stampCount?: number;
             text: string;
+            /**
+             * @description SMS (standart) və ya STAMPS — kartı boş olan müştərilərə SMS + möhür
+             * @enum {string}
+             */
+            type?: "SMS" | "STAMPS";
         };
-        /** @description Kampaniya və vəziyyəti */
+        /** @description Kampaniya və vəziyyəti. Sayğaclar canlıdır: sentCount — SMS göndərilib, failedCount — göndərilmədi, pendingCount — gözləyir (təkrar cəhd daxil), skippedCount — ötürülüb (bloklanıb, silinib), stampsGranted — möhür verilmiş müştərilər (yalnız STAMPS). pauseReason — PAUSED olanda provayderin xətası. */
         CampaignView: {
             /** @enum {string} */
-            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD" | "EMPTY_CARD";
             /** Format: uuid */
             branchId?: string;
             /** Format: date-time */
             createdAt?: string;
+            /** Format: date-time */
+            deadlineAt?: string;
             /** Format: date-time */
             decidedAt?: string;
             /** Format: int32 */
@@ -2625,6 +2687,9 @@ export interface components {
             /** Format: int32 */
             inactiveDays?: number;
             latin?: boolean;
+            pauseReason?: string;
+            /** Format: int32 */
+            pendingCount?: number;
             personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
@@ -2633,11 +2698,19 @@ export interface components {
             segmentsPerMessage?: number;
             /** Format: int32 */
             sentCount?: number;
+            /** Format: int32 */
+            skippedCount?: number;
+            /** Format: int32 */
+            stampCount?: number;
+            /** Format: int32 */
+            stampsGranted?: number;
             /** @enum {string} */
-            status?: "PENDING_APPROVAL" | "APPROVED" | "SENDING" | "SENT" | "REJECTED" | "CANCELLED";
+            status?: "PENDING_APPROVAL" | "APPROVED" | "SENDING" | "PAUSED" | "SENT" | "REJECTED" | "CANCELLED";
             text?: string;
             /** Format: int32 */
             totalSms?: number;
+            /** @enum {string} */
+            type?: "SMS" | "STAMPS";
             /** Format: date-time */
             updatedAt?: string;
         };
@@ -3080,9 +3153,11 @@ export interface components {
         /** @description Şirkətin kampaniyası: mətn, auditoriya, alıcı və SMS sayı, vəziyyət */
         PlatformCampaignView: {
             /** @enum {string} */
-            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD";
+            audience?: "ALL" | "INACTIVE" | "NEAR_REWARD" | "UNUSED_GIFT_CARD" | "EMPTY_CARD";
             /** Format: date-time */
             createdAt?: string;
+            /** Format: date-time */
+            deadlineAt?: string;
             /** Format: date-time */
             decidedAt?: string;
             displayName?: components["schemas"]["LocalizedText"];
@@ -3095,6 +3170,9 @@ export interface components {
             /** Format: int32 */
             inactiveDays?: number;
             latin?: boolean;
+            pauseReason?: string;
+            /** Format: int32 */
+            pendingCount?: number;
             personalized?: boolean;
             /** Format: int32 */
             recipients?: number;
@@ -3103,13 +3181,21 @@ export interface components {
             segmentsPerMessage?: number;
             /** Format: int32 */
             sentCount?: number;
+            /** Format: int32 */
+            skippedCount?: number;
             slug?: string;
+            /** Format: int32 */
+            stampCount?: number;
+            /** Format: int32 */
+            stampsGranted?: number;
             status?: string;
             /** Format: uuid */
             tenantId?: string;
             text?: string;
             /** Format: int32 */
             totalSms?: number;
+            /** @enum {string} */
+            type?: "SMS" | "STAMPS";
             /** Format: date-time */
             updatedAt?: string;
         };
@@ -3138,15 +3224,21 @@ export interface components {
             /** Format: int64 */
             latinTotalSms?: number;
             /** Format: int32 */
+            maxStamps?: number;
+            /** Format: int32 */
             minSegments?: number;
             personalized?: boolean;
             /** Format: int64 */
             recipients?: number;
             /** Format: int32 */
             segments?: number;
+            /** Format: int32 */
+            stampCount?: number;
             template?: string;
             /** Format: int64 */
             totalSms?: number;
+            /** Format: int64 */
+            totalStamps?: number;
         };
         ProvisionRequest: {
             defaultLanguage: string;
@@ -3984,7 +4076,9 @@ export interface operations {
     };
     list_2: {
         parameters: {
-            query?: never;
+            query?: {
+                type?: "SMS" | "STAMPS";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4116,6 +4210,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CampaignView"];
+                };
+            };
+        };
+    };
+    failures: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CampaignFailureView"][];
                 };
             };
         };
@@ -5837,6 +5953,29 @@ export interface operations {
                 "application/json": components["schemas"]["RejectRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformCampaignView"];
+                };
+            };
+        };
+    };
+    resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

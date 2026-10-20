@@ -61,12 +61,26 @@ public class PlatformCampaignService {
         return result;
     }
 
-    public TenantCampaign decide(AdminPrincipal principal, UUID tenantId, UUID campaignId, boolean approve,
-                                 @Nullable String reason) {
+    /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək. */
+    public TenantCampaign resume(AdminPrincipal principal, UUID tenantId, UUID campaignId) {
+        TenantRecord tenant = tenant(tenantId);
+        Campaign campaign = TenantContext.callAs(tenant.toInfo(), () -> campaigns.resume(principal.userId(), campaignId));
+        realms.audit(AdminRealm.PLATFORM, "TENANT_CAMPAIGN_RESUMED", principal.userId(), "tenant", tenantId,
+                Map.of("campaignId", campaignId.toString()));
+        return new TenantCampaign(tenant, campaign);
+    }
+
+    private TenantRecord tenant(UUID tenantId) {
         TenantRecord tenant = directory.findById(tenantId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         if (tenant.status().outOfService()) {
             throw new ApiException(ErrorCode.TENANT_UNAVAILABLE);
         }
+        return tenant;
+    }
+
+    public TenantCampaign decide(AdminPrincipal principal, UUID tenantId, UUID campaignId, boolean approve,
+                                 @Nullable String reason) {
+        TenantRecord tenant = tenant(tenantId);
         Campaign campaign = TenantContext.callAs(tenant.toInfo(),
                 () -> campaigns.decide(principal.userId(), campaignId, approve, reason));
         realms.audit(AdminRealm.PLATFORM, approve ? "TENANT_CAMPAIGN_APPROVED" : "TENANT_CAMPAIGN_REJECTED",

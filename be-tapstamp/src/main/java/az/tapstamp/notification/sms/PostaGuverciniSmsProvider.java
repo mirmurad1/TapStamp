@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import az.tapstamp.notification.sms.HttpSmsProvider.SmsDeliveryException;
+import az.tapstamp.notification.sms.SmsDeliveryException.Kind;
 import az.tapstamp.shared.pii.PhoneMasker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,16 +96,22 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
     @Override
     public void send(SmsMessage message) {
         if (clock.instant().isBefore(openUntil.get())) {
-            throw new SmsDeliveryException("SMS provider circuit is open");
+            throw new SmsDeliveryException(Kind.PROVIDER_DOWN, "SMS provider circuit is open");
         }
         try {
             deliver(message);
             consecutiveFailures.set(0);
-        } catch (RetryableException first) {
+        } catch (SmsDeliveryException first) {
+            if (first.kind() != Kind.TRANSIENT) {
+                throw first;
+            }
             try {
                 deliver(message);
                 consecutiveFailures.set(0);
-            } catch (RetryableException second) {
+            } catch (SmsDeliveryException second) {
+                if (second.kind() != Kind.TRANSIENT) {
+                    throw second;
+                }
                 if (consecutiveFailures.incrementAndGet() >= FAILURE_THRESHOLD) {
                     openUntil.set(clock.instant().plus(OPEN_DURATION));
                     log.warn("SMS provayderi əlçatmazdır: {} saniyə sorğu göndərilməyəcək", OPEN_DURATION.toSeconds());
@@ -146,24 +152,26 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
         try {
             response = transport.send(request);
         } catch (IOException e) {
-            throw new RetryableException("SMS provider is unreachable", e);
+            throw HttpSmsProvider.networkFailure(e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new SmsDeliveryException("SMS sending was interrupted", e);
+            throw new SmsDeliveryException(Kind.UNKNOWN, "SMS sending was interrupted", e);
         }
         if (response.status() >= 500) {
-            throw new RetryableException("SMS provider returned HTTP " + response.status(), null);
+            throw new SmsDeliveryException(Kind.TRANSIENT, "SMS provider returned HTTP " + response.status());
         }
         String masked = PhoneMasker.mask(message.to());
         if (response.status() >= 400) {
+            // Açar, icazə və s. — bütün göndərişə aiddir
             log.warn("SMS rədd edildi: http={}, to={}", response.status(), masked);
-            throw new SmsDeliveryException("SMS provider rejected the request: HTTP " + response.status());
+            throw new SmsDeliveryException(Kind.ACCOUNT, "SMS provider rejected the request: HTTP " + response.status());
         }
         JsonNode root;
         try {
             root = JSON.readTree(response.body());
         } catch (RuntimeException e) {
-            throw new SmsDeliveryException("SMS provider returned an unreadable response", e);
+            // Uğurlu HTTP cavabı oxunmur — SMS qəbul olunmuş ola bilər
+            throw new SmsDeliveryException(Kind.UNKNOWN, "SMS provider returned an unreadable response", e);
         }
         int status = root.path("Status").asInt(-1);
         if (status != 200) {
@@ -171,16 +179,18 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
             log.warn("SMS rədd edildi: status={}, description={}, to={}", status,
                     root.path("Description").asString(""), masked);
             if (status >= 500) {
-                throw new RetryableException("SMS provider returned status " + status, null);
+                throw new SmsDeliveryException(Kind.TRANSIENT, "SMS provider returned status " + status);
             }
-            throw new SmsDeliveryException("SMS provider rejected the request: status " + status);
+            // Sorğu bütövlükdə rədd edildi (icazə, balans, növ) — hesabın problemidir
+            throw new SmsDeliveryException(Kind.ACCOUNT, "SMS provider rejected the request: status " + status + " "
+                    + root.path("Description").asString(""));
         }
         JsonNode rejected = root.path("Result").path("ReceiversRejected");
         if (rejected.isArray() && !rejected.isEmpty()) {
             JsonNode first = rejected.get(0);
             log.warn("SMS alıcısı rədd edildi: code={}, message={}, to={}", first.path("ErrorCode").asString(""),
                     first.path("ErrorMessage").asString(""), masked);
-            throw new SmsDeliveryException("SMS receiver rejected: " + first.path("ErrorCode").asString(""));
+            throw new SmsDeliveryException(Kind.RECIPIENT, "SMS receiver rejected: " + first.path("ErrorCode").asString(""));
         }
         JsonNode accepted = root.path("Result").path("ReceiversAccepted");
         if (accepted.isArray() && !accepted.isEmpty()) {
@@ -188,10 +198,4 @@ public class PostaGuverciniSmsProvider implements SmsProvider {
         }
     }
 
-    /** Təkrar cəhd edilə bilən xəta (şəbəkə, 5xx). */
-    static class RetryableException extends SmsDeliveryException {
-        RetryableException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

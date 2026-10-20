@@ -14,7 +14,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.Flow;
 
-import az.tapstamp.notification.sms.HttpSmsProvider.SmsDeliveryException;
 import az.tapstamp.notification.sms.PostaGuverciniSmsProvider.Response;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
@@ -31,12 +30,17 @@ class PostaGuverciniSmsProviderTest {
     private final List<HttpRequest> requests = new ArrayList<>();
     private final List<String> bodies = new ArrayList<>();
     private final Deque<Response> responses = new ArrayDeque<>();
+    /** Növbəti göndərişlərdə atılacaq şəbəkə xətaları (ardıcıl). */
+    private final Deque<java.io.IOException> failures = new ArrayDeque<>();
 
     private PostaGuverciniSmsProvider provider() {
         return new PostaGuverciniSmsProvider("https://sms.provider.test/", "pub-1", "priv-1", "TrendStamp",
                 Duration.ofSeconds(5), Clock.systemUTC(), request -> {
                     requests.add(request);
                     bodies.add(body(request));
+                    if (!failures.isEmpty()) {
+                        throw failures.removeFirst();
+                    }
                     return responses.isEmpty() ? new Response(200, ACCEPTED) : responses.removeFirst();
                 });
     }
@@ -72,12 +76,30 @@ class PostaGuverciniSmsProviderTest {
                 {"Status":200,"Result":{"ReceiversAccepted":[],"ReceiversRejected":[{"RowNumber":1,
                 "Receiver":"994501234567","ErrorCode":"ERRSMS4102","ErrorMessage":"Receiver must be valid MSISDN"}]}}"""));
         assertThatThrownBy(() -> provider().send(MESSAGE)).isInstanceOf(SmsDeliveryException.class)
-                .hasMessageContaining("ERRSMS4102");
+                .hasMessageContaining("ERRSMS4102")
+                .extracting(e -> ((SmsDeliveryException) e).kind()).isEqualTo(SmsDeliveryException.Kind.RECIPIENT);
         assertThat(requests).hasSize(1);
 
         requests.clear();
         responses.add(new Response(200, "{\"Status\":403,\"Description\":\"Yetki hatasi\"}"));
-        assertThatThrownBy(() -> provider().send(MESSAGE)).isInstanceOf(SmsDeliveryException.class);
+        // Sorğu bütövlükdə rədd edildi (icazə, balans) — hesab səviyyəli xəta
+        assertThatThrownBy(() -> provider().send(MESSAGE)).isInstanceOf(SmsDeliveryException.class)
+                .extracting(e -> ((SmsDeliveryException) e).kind()).isEqualTo(SmsDeliveryException.Kind.ACCOUNT);
+        assertThat(requests).hasSize(1);
+    }
+
+    @Test
+    void connectionFailureIsRetriedButATimeoutIsNot() {
+        // Qoşulma alınmadı — SMS getməyib, bir dəfə təkrar edilir
+        failures.add(new java.net.ConnectException("refused"));
+        provider().send(MESSAGE);
+        assertThat(requests).hasSize(2);
+
+        // Cavab gəlmədi — SMS getmiş ola bilər: təkrar göndərilmir, nəticə məlum deyil
+        requests.clear();
+        failures.add(new java.net.http.HttpTimeoutException("timed out"));
+        assertThatThrownBy(() -> provider().send(MESSAGE)).isInstanceOf(SmsDeliveryException.class)
+                .extracting(e -> ((SmsDeliveryException) e).kind()).isEqualTo(SmsDeliveryException.Kind.UNKNOWN);
         assertThat(requests).hasSize(1);
     }
 

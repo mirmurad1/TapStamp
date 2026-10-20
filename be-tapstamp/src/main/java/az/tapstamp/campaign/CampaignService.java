@@ -13,33 +13,47 @@ import az.tapstamp.campaign.repository.CampaignMapper;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.notification.sms.SmsSegments;
+import az.tapstamp.security.crypto.Aad;
+import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Kampaniya SMS-ləri (cari şirkət daxilində). Axın: sahib yaradır (alıcılar və SMS sayı həmin an müəyyənləşir) →
- * PENDING_APPROVAL → platforma admini ödənişdən sonra təsdiqləyir (APPROVED) və ya rədd edir → {@link CampaignSender}
- * göndərir (SENDING → SENT). Sahib təsdiqə qədər ləğv edə bilər.
+ * Kampaniyalar (cari şirkət daxilində): SMS kampaniyası və möhür kampaniyası (kartı boş olan müştərilərə SMS + möhür).
+ * Axın: sahib yaradır (alıcılar və SMS sayı həmin an müəyyənləşir) → PENDING_APPROVAL (sahib dəyişə və ya ləğv edə
+ * bilər) → platforma admini ödənişdən sonra təsdiqləyir (APPROVED) və ya ləğv edir → {@link CampaignSender} göndərir
+ * (SENDING → SENT; hesab xətasında PAUSED → platforma "Davam et"). Möhürlər SMS göndəriləndə verilir.
  */
 @Service
 public class CampaignService {
 
-    public enum Audience { ALL, INACTIVE, NEAR_REWARD, UNUSED_GIFT_CARD }
+    public enum Type { SMS, STAMPS }
+
+    /** EMPTY_CARD — kartı boş olan aktiv müştərilər (yalnız möhür kampaniyası). */
+    public enum Audience { ALL, INACTIVE, NEAR_REWARD, UNUSED_GIFT_CARD, EMPTY_CARD }
 
     /**
      * Kampaniyanın parametrləri. {@code inactiveDays} yalnız INACTIVE üçün (7–365); {@code personalized} — mətn
-     * "Hörmətli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Hörmətli istifadəçi,").
+     * "Hörmətli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Hörmətli istifadəçi,"); {@code stampCount} — yalnız möhür
+     * kampaniyası (1 … hədd − 1).
      */
-    public record Draft(String text, Audience audience, @Nullable Integer inactiveDays, @Nullable UUID branchId,
-                        boolean personalized, boolean latin) {
+    public record Draft(Type type, @Nullable Integer stampCount, String text, Audience audience,
+                        @Nullable Integer inactiveDays, @Nullable UUID branchId, boolean personalized, boolean latin) {
+    }
+
+    /** SMS-i göndərilməyən alıcı (sahib üçün: ad, tam nömrə, səbəb). */
+    public record FailedRecipient(UUID customerId, @Nullable String name, @Nullable String phone,
+                                  @Nullable String error, @Nullable Instant at) {
     }
 
     /**
@@ -51,7 +65,8 @@ public class CampaignService {
      */
     public record Preview(long recipients, boolean personalized, boolean latin, String fullText, String template,
                           String encoding, int characters, int segments, int minSegments, long totalSms,
-                          String latinText, int latinSegments, long latinTotalSms, boolean latinCheaper) {
+                          String latinText, int latinSegments, long latinTotalSms, boolean latinCheaper,
+                          @Nullable Integer stampCount, long totalStamps, @Nullable Integer maxStamps) {
     }
 
     private static final int LIST_LIMIT = 100;
@@ -62,14 +77,17 @@ public class CampaignService {
     private final CampaignMapper campaigns;
     private final CompanySettings company;
     private final AuditLogger audit;
+    private final EnvelopeCipher cipher;
     private final TransactionTemplate tx;
     private final Clock clock;
 
     public CampaignService(CampaignMapper campaigns, CompanySettings company, AuditLogger audit,
+                           @Qualifier("tenantCipher") EnvelopeCipher cipher,
                            PlatformTransactionManager transactionManager, Clock clock) {
         this.campaigns = campaigns;
         this.company = company;
         this.audit = audit;
+        this.cipher = cipher;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
     }
@@ -86,10 +104,10 @@ public class CampaignService {
         Instant now = clock.instant();
         Campaign created = Objects.requireNonNull(tx.execute(status -> {
             CampaignMapper.Audience audience = audience(draft, now);
-            Campaign row = new Campaign(id, draft.text().strip(), draft.personalized(), draft.latin(),
-                    draft.audience().name(),
-                    draft.inactiveDays(), draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null,
-                    principal.userId(), now, null, null, 0, 0, null);
+            Campaign row = new Campaign(id, draft.type().name(), draft.stampCount(), draft.text().strip(),
+                    draft.personalized(), draft.latin(), draft.audience().name(), draft.inactiveDays(),
+                    draft.branchId(), 0, preview.segments(), 0, "PENDING_APPROVAL", null, null, principal.userId(),
+                    now, null, null, null, null, 0, 0, 0, 0, 0);
             campaigns.insert(row);
             int recipients = campaigns.insertRecipients(id, audience);
             if (recipients == 0) {
@@ -102,14 +120,27 @@ public class CampaignService {
             return campaigns.find(id).orElseThrow();
         }));
         audit.tenant("CAMPAIGN_CREATED", AuditLogger.ActorType.STAFF, principal.userId(), "campaign", id,
-                Map.of("audience", draft.audience().name(), "recipients", created.recipients(),
-                        "totalSms", created.totalSms()));
+                Map.of("type", draft.type().name(), "audience", draft.audience().name(),
+                        "recipients", created.recipients(), "totalSms", created.totalSms()));
         return created;
     }
 
-    public List<Campaign> list(AdminPrincipal principal) {
+    public List<Campaign> list(AdminPrincipal principal, Type type) {
         AccessPolicy.requireCompanyWide(principal);
-        return campaigns.list(LIST_LIMIT);
+        return campaigns.list(type.name(), LIST_LIMIT);
+    }
+
+    /** SMS-i göndərilməyən alıcılar və səbəbləri (sahib tam nömrəni görür). */
+    public List<FailedRecipient> failures(AdminPrincipal principal, UUID id) {
+        AccessPolicy.requireCompanyWide(principal);
+        campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        UUID tenantId = TenantContext.require().id();
+        return campaigns.failedRecipients(id).stream()
+                .map(f -> new FailedRecipient(f.customerId(), f.name(), f.phoneEnc() == null ? null
+                        : cipher.decryptString(f.phoneEnc(),
+                                Aad.tenantField(tenantId, "customers", "phone_enc", f.customerId())),
+                        f.error(), f.at()))
+                .toList();
     }
 
     public Campaign get(AdminPrincipal principal, UUID id) {
@@ -126,9 +157,13 @@ public class CampaignService {
         campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         validate(draft);
         Instant now = clock.instant();
+        Campaign existing = campaigns.find(id).orElseThrow();
+        if (!existing.type().equals(draft.type().name())) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
         Campaign updated = Objects.requireNonNull(tx.execute(status -> {
-            if (campaigns.updateDraft(id, draft.text().strip(), draft.personalized(), draft.latin(),
-                    draft.audience().name(), draft.inactiveDays(), draft.branchId(), now) == 0) {
+            if (campaigns.updateDraft(id, draft.stampCount(), draft.text().strip(), draft.personalized(),
+                    draft.latin(), draft.audience().name(), draft.inactiveDays(), draft.branchId(), now) == 0) {
                 throw new ApiException(ErrorCode.CAMPAIGN_STATE_CHANGED);
             }
             campaigns.deleteRecipients(id);
@@ -174,6 +209,15 @@ public class CampaignService {
         return campaigns.find(id).orElseThrow();
     }
 
+    /** Hesab xətasına görə dayandırılmış kampaniyanı davam etdirmək (provayder problemi həll olunandan sonra). */
+    public Campaign resume(UUID platformAdminId, UUID id) {
+        campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        if (campaigns.resume(id) == 0) {
+            throw new ApiException(ErrorCode.CAMPAIGN_STATE_CHANGED);
+        }
+        audit.tenant("CAMPAIGN_RESUMED", AuditLogger.ActorType.PLATFORM, platformAdminId, "campaign", id, Map.of());
+        return campaigns.find(id).orElseThrow();
+    }
 
     // ---------------------------------------------------------------- köməkçilər
 
@@ -204,13 +248,24 @@ public class CampaignService {
                 draft.latin());
         CampaignTexts.Totals latinTotals = CampaignTexts.totals(company, draft.text(), draft.personalized(), forTotals,
                 true);
+        Integer stamps = draft.type() == Type.STAMPS ? draft.stampCount() : null;
         return new Preview(recipients, draft.personalized(), draft.latin(), full, template, info.encoding().name(),
                 info.units(), totals.maxSegments(), totals.minSegments(), totals.total(), latin,
-                latinTotals.maxSegments(), latinTotals.total(), latinTotals.total() < totals.total());
+                latinTotals.maxSegments(), latinTotals.total(), latinTotals.total() < totals.total(),
+                stamps, stamps == null ? 0 : recipients * stamps, draft.type() == Type.STAMPS ? maxStamps() : null);
+    }
+
+    /** Möhür kampaniyasında ən çox "hədd − 1" möhür: müştəri hədiyyə üçün yenə ən azı bir dəfə gəlməlidir. */
+    private int maxStamps() {
+        return campaigns.activeStampsRequired().map(required -> required - 1).orElse(0);
     }
 
     private void validate(Draft draft) {
-        if (draft.text() == null || draft.text().isBlank() || draft.text().length() > 1000
+        boolean stampsValid = draft.type() == Type.STAMPS
+                ? draft.audience() == Audience.EMPTY_CARD && draft.stampCount() != null && draft.stampCount() >= 1
+                        && draft.stampCount() <= maxStamps()
+                : draft.audience() != Audience.EMPTY_CARD && draft.stampCount() == null;
+        if (!stampsValid || draft.text() == null || draft.text().isBlank() || draft.text().length() > 1000
                 || (draft.audience() == Audience.INACTIVE
                     && (draft.inactiveDays() == null || draft.inactiveDays() < 7 || draft.inactiveDays() > 365))
                 || (draft.branchId() != null && !campaigns.branchExists(draft.branchId()))) {

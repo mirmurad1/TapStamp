@@ -50,6 +50,13 @@
                 #{confirmedAt}, #{at})
     </insert>
 
+    <insert id="insertCampaignStamp">
+        INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason, campaign_id, confirmed_at,
+                            created_at)
+        VALUES (#{id}, #{branchId}, #{customerId}, 'CAMPAIGN', 'CONFIRMED', #{day}, 'Kampaniya', #{campaignId}, #{at},
+                #{at})
+    </insert>
+
     <insert id="insertManualStamp">
         INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason, created_by_staff_id,
                             confirmed_at, confirmed_by, created_at)

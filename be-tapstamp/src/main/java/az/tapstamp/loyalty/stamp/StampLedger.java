@@ -83,6 +83,13 @@ public class StampLedger {
         return id;
     }
 
+    /** Kampaniya möhürü (platforma təsdiqli möhür kampaniyası; çağıran tranzaksiyada {@link #lockAccount} etməlidir). */
+    public UUID insertCampaignStamp(UUID branchId, UUID customerId, UUID campaignId, LocalDate localDate, Instant at) {
+        UUID id = Ids.newId();
+        stamps.insertCampaignStamp(id, branchId, customerId, campaignId, localDate, at);
+        return id;
+    }
+
     public Optional<Stamp> findByTapToken(UUID tapTokenId) {
         return stamps.findByTapToken(tapTokenId);
     }
