@@ -14,7 +14,6 @@ const BRUSH_RADIUS = 20;
 export function ScratchReveal({
   revealed,
   onReveal,
-  coverText,
   revealLabel,
   hiddenLabel,
   className,
@@ -22,7 +21,6 @@ export function ScratchReveal({
 }: {
   revealed: boolean;
   onReveal: () => void;
-  coverText: string;
   revealLabel: string;
   hiddenLabel: string;
   className?: string;
@@ -79,17 +77,7 @@ export function ScratchReveal({
       context.fillStyle = random() > 0.5 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(60, 60, 66, 0.18)';
       context.fillRect(random() * width, random() * height, 1, 1);
     }
-    // İzah: naxışın üstündə oxunsun deyə açıq haşiyə ilə
-    context.font = '700 15px system-ui, sans-serif';
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.lineJoin = 'round';
-    context.lineWidth = 4;
-    context.strokeStyle = 'rgba(214, 215, 217, 0.95)';
-    context.strokeText(coverText, width / 2, height / 2);
-    context.fillStyle = '#3c3d42';
-    context.fillText(coverText, width / 2, height / 2);
-  }, [coverText]);
+  }, []);
 
   // Ölçü dəyişəndə (dialoqun açılma animasiyası, ekranın dönməsi) — silinməyə başlanmayıbsa örtük yenidən çəkilir
   const touched = useRef(false);

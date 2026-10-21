@@ -104,7 +104,6 @@ export function GiftCardsPage() {
             <ScratchReveal
               revealed={revealed}
               onReveal={() => setRevealed(true)}
-              coverText={t('giftCards.scratch.cover')}
               revealLabel={t('giftCards.scratch.reveal')}
               hiddenLabel={t('giftCards.scratch.hidden')}
               className="mx-auto w-full max-w-xs bg-muted"

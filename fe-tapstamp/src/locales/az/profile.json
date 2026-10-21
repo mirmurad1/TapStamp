@@ -63,7 +63,6 @@
     "expiresSoon_one": "{{count}} gün qalıb",
     "expiresSoon_other": "{{count}} gün qalıb",
     "scratch": {
-      "cover": "Bu hissəni təmizləyin",
       "hint": "Kodu görmək üçün gümüşü sahəni barmağınızla silin.",
       "reveal": "Kodu aç",
       "hidden": "Kod gizlidir. Açmaq üçün «Kodu aç» düyməsindən istifadə edin."
