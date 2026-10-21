@@ -61,9 +61,21 @@ describe('hədiyyə kartları', () => {
     );
 
     expect(await screen.findByText('3 gün qalıb')).toBeInTheDocument();
+    // Siyahıda kod görünmür
+    expect(screen.queryByText('Q85J-QMJW')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Kodu göstər' }));
-    expect(await screen.findByTestId('gift-card-code')).toHaveTextContent('Q85J-QMJW');
     expect(screen.getByRole('img', { name: 'Hədiyyə kartının QR kodu' })).toBeInTheDocument();
+    // Kod "poz-qazan" örtüyü altındadır: ekran oxuyucudan gizlidir, klaviatura ilə açılır
+    expect(await screen.findByText('Kodu görmək üçün gümüşü sahəni barmağınızla silin.')).toBeInTheDocument();
+    expect(screen.getByTestId('gift-card-code').parentElement).toHaveAttribute('aria-hidden', 'true');
+    await user.click(screen.getByRole('button', { name: 'Kodu aç' }));
+    expect(screen.getByTestId('gift-card-code')).toHaveTextContent('Q85J-QMJW');
+    expect(screen.getByTestId('gift-card-code').parentElement).toHaveAttribute('aria-hidden', 'false');
+    expect(screen.queryByRole('button', { name: 'Kodu aç' })).not.toBeInTheDocument();
+    // Yenidən açılanda kod yenə örtük altındadır
+    await user.click(screen.getAllByRole('button', { name: 'Bağla' })[0] as HTMLElement);
+    await user.click(screen.getByRole('button', { name: 'Kodu göstər' }));
+    expect(await screen.findByRole('button', { name: 'Kodu aç' })).toBeInTheDocument();
 
     redeemed = true;
     expect(await screen.findByRole('heading', { name: 'Hədiyyəniz təhvil verildi! 🎉' }, { timeout: 6_000 })).toBeInTheDocument();

@@ -69,7 +69,13 @@
     "expiresSoon_one": "Остался {{count}} день",
     "expiresSoon_few": "Осталось {{count}} дня",
     "expiresSoon_many": "Осталось {{count}} дней",
-    "expiresSoon_other": "Осталось {{count}} дня"
+    "expiresSoon_other": "Осталось {{count}} дня",
+    "scratch": {
+      "cover": "Сотрите этот слой",
+      "hint": "Сотрите серебристый слой пальцем, чтобы увидеть код.",
+      "reveal": "Показать код",
+      "hidden": "Код скрыт. Нажмите «Показать код», чтобы увидеть его."
+    }
   },
   "celebrate": {
     "title": "Поздравляем!",

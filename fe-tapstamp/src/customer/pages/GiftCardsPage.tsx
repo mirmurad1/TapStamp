@@ -18,12 +18,19 @@ import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
 import { Confetti } from '../components/Celebration';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { ScratchReveal } from '../components/ScratchReveal';
 
 /** Hədiyyə kartları: istifadəyə hazır olanlar (kod və QR ilə) və tarixçə. */
 export function GiftCardsPage() {
   const { t } = useTranslation('profile');
   const { status } = useCustomerSession();
   const [shown, setShown] = useState<GiftCard>();
+  // Kod "poz-qazan" örtüyü altındadır — hər açılışda yenidən qazınır
+  const [revealed, setRevealed] = useState(false);
+  const open = (card: GiftCard) => {
+    setRevealed(false);
+    setShown(card);
+  };
   // Kod işçiyə göstərilərkən status hər 2,5 saniyədən bir yoxlanılır — təhvil olunan kimi təbrik görünür
   const cards = useQuery({
     queryKey: customerKeys.giftCards,
@@ -62,7 +69,7 @@ export function GiftCardsPage() {
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold">{t('giftCards.available')}</h2>
           {available.map((card) => (
-            <GiftCardTile key={card.id} card={card} onShow={() => setShown(card)} />
+            <GiftCardTile key={card.id} card={card} onShow={() => open(card)} />
           ))}
         </section>
       ) : null}
@@ -88,14 +95,25 @@ export function GiftCardsPage() {
             <Button onClick={() => setShown(undefined)}>{t('giftCards.close')}</Button>
           </DialogContent>
         ) : shown ? (
-          <DialogContent className="text-center">
+          // Avtomatik fokus yoxdur: əks halda klaviatura üçün olan "Kodu aç" düyməsi fokus alıb örtüyün üstündə görünərdi
+          <DialogContent className="text-center" onOpenAutoFocus={(event) => event.preventDefault()}>
             <DialogTitle className="text-2xl font-bold">{resolveText(shown.name, currentLanguage())}</DialogTitle>
             <DialogDescription>{t('giftCards.showHint')}</DialogDescription>
             <QrCode value={shown.code ?? ''} label={t('giftCards.qrLabel')} className="mx-auto w-56 rounded-xl" />
             <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('giftCards.code')}</p>
-            <p className="font-mono text-3xl font-bold tracking-[0.2em] text-primary" data-testid="gift-card-code">
-              {shown.code}
-            </p>
+            <ScratchReveal
+              revealed={revealed}
+              onReveal={() => setRevealed(true)}
+              coverText={t('giftCards.scratch.cover')}
+              revealLabel={t('giftCards.scratch.reveal')}
+              hiddenLabel={t('giftCards.scratch.hidden')}
+              className="mx-auto w-full max-w-xs bg-muted"
+            >
+              <p className="py-3 font-mono text-3xl font-bold tracking-[0.2em] text-primary" data-testid="gift-card-code">
+                {shown.code}
+              </p>
+            </ScratchReveal>
+            {!revealed ? <p className="text-sm text-muted-foreground">{t('giftCards.scratch.hint')}</p> : null}
             <Button variant="outline" onClick={() => setShown(undefined)}>
               {t('giftCards.close')}
             </Button>
@@ -124,7 +142,6 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-lg font-bold">{resolveText(card.name, lang)}</p>
-          <p className="mt-1 font-mono text-sm tracking-widest opacity-90">{card.code}</p>
         </div>
         {active ? (
           <span className="flex flex-col items-end gap-2">

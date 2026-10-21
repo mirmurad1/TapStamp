@@ -61,7 +61,13 @@
     "redeemedTitle": "Reward handed over! 🎉",
     "redeemedHint": "See you again soon!",
     "expiresSoon_one": "{{count}} day left",
-    "expiresSoon_other": "{{count}} days left"
+    "expiresSoon_other": "{{count}} days left",
+    "scratch": {
+      "cover": "Scratch this area",
+      "hint": "Scratch the silver area with your finger to see the code.",
+      "reveal": "Reveal code",
+      "hidden": "The code is hidden. Use the “Reveal code” button to see it."
+    }
   },
   "celebrate": {
     "title": "Congratulations!",
