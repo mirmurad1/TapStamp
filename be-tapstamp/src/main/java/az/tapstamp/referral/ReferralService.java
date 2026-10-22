@@ -20,6 +20,8 @@ import az.tapstamp.customer.auth.CustomerPrincipal;
 import az.tapstamp.loyalty.stamp.StampLedger;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.notification.push.PushService;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.referral.repository.ReferralMapper;
 import az.tapstamp.referral.repository.ReferralMapper.Claimed;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralRow;
@@ -78,28 +80,30 @@ public class ReferralService {
     private final AuditLogger audit;
     private final PushService push;
     private final Clock clock;
+    private final PlanService plans;
 
     public ReferralService(ReferralMapper referrals, StampLedger ledger, CompanySettings company, AuditLogger audit,
-                           Clock clock, PushService push) {
+                           Clock clock, PushService push, PlanService plans) {
         this.referrals = referrals;
         this.ledger = ledger;
         this.company = company;
         this.audit = audit;
         this.push = push;
         this.clock = clock;
+        this.plans = plans;
     }
 
     // ---------------------------------------------------------------- müştəri
 
     /** Dəvət səhifəsi üçün (giriş tələb etmir): proqram aktivdirmi və neçə bonus möhür. */
     public ProgramInfo program() {
-        ReferralSettings settings = referrals.settings();
+        ReferralSettings settings = effectiveSettings();
         return new ProgramInfo(settings.enabled(), settings.rewardOn(), settings.referrerStamps(), settings.friendStamps());
     }
 
     /** Müştərinin dəvət kodu (lazım olanda yaranır) və dəvətləri üzrə saylar. */
     public CustomerReferral forCustomer(CustomerPrincipal principal) {
-        ReferralSettings settings = referrals.settings();
+        ReferralSettings settings = effectiveSettings();
         if (!settings.enabled()) {
             return new CustomerReferral(false, settings.rewardOn(), null, settings.referrerStamps(), settings.friendStamps(),
                     settings.monthlyCap(), settings.validDays(), 0, 0, 0);
@@ -144,7 +148,7 @@ public class ReferralService {
             return;
         }
         String code = rawCode.strip().toUpperCase(Locale.ROOT);
-        ReferralSettings settings = referrals.settings();
+        ReferralSettings settings = effectiveSettings();
         if (!settings.enabled() || !CODE.matcher(code).matches()) {
             return;
         }
@@ -174,7 +178,7 @@ public class ReferralService {
      * @return dostun bonusdan sonrakı kartı; bonus verilməyibsə {@code null}
      */
     public @Nullable CardState onTapStampConfirmed(UUID friendId, UUID branchId, Instant at) {
-        ReferralSettings settings = referrals.settings();
+        ReferralSettings settings = effectiveSettings();
         if (!settings.enabled()) {
             return null;
         }
@@ -274,5 +278,13 @@ public class ReferralService {
     public ReferralSummary summary(AdminPrincipal principal) {
         AccessPolicy.requireCompanyWide(principal);
         return referrals.summary(clock.instant());
+    }
+
+    /** Paketdə dəvət proqramı yoxdursa (və ya sınaq bitibsə), proqram söndürülmüş sayılır; parametrlər saxlanılır. */
+    private ReferralSettings effectiveSettings() {
+        ReferralSettings settings = referrals.settings();
+        return !settings.enabled() || plans.has(Feature.REFERRALS) ? settings
+                : new ReferralSettings(false, settings.rewardOn(), settings.referrerStamps(), settings.friendStamps(),
+                        settings.monthlyCap(), settings.validDays());
     }
 }

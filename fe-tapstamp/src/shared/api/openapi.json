@@ -716,7 +716,7 @@
     },
     "/api/v1/admin/campaigns/{campaignId}" : {
       "get" : {
-        "operationId" : "get",
+        "operationId" : "get_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "campaignId",
@@ -743,7 +743,7 @@
       },
       "put" : {
         "description" : "Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.",
-        "operationId" : "update",
+        "operationId" : "update_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "campaignId",
@@ -1070,7 +1070,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_2",
+        "operationId" : "get_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -1289,7 +1289,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_4",
+        "operationId" : "update_5",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2868,7 +2868,7 @@
       },
       "patch" : {
         "description" : "Dil SMS-lərə və bütün cihazlara tətbiq olunur.",
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -3494,7 +3494,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -3876,7 +3876,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}" : {
       "get" : {
-        "operationId" : "get_1",
+        "operationId" : "get_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -4138,6 +4138,71 @@
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/plan" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantPlanResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin paketi",
+        "tags" : [ "Platforma: paketlər" ]
+      },
+      "put" : {
+        "description" : "`TRIAL` — həmin paketin 14 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TenantPlanRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TenantPlanResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Paketi dəyişmək",
+        "tags" : [ "Platforma: paketlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/sms-limit" : {
       "get" : {
         "description" : "Limit yalnız sistemdə olmayan (yeni) nömrələrə göndərilən giriş kodlarını sayır; qeydiyyatlı müştərilərin kodları limitə düşmür. `usedToday` — bu gün (şirkətin saatı ilə) yeni nömrələrə göndərilən kodlar.",
@@ -4358,7 +4423,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}" : {
       "patch" : {
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -4723,6 +4788,26 @@
         },
         "summary" : "Sənədin mətni",
         "tags" : [ "İctimai" ]
+      }
+    },
+    "/api/v1/public/plan" : {
+      "get" : {
+        "description" : "Paket, sınaq müddəti və açıq imkanlar. `expired = true` olanda şirkətin qalan API-si `PLAN_TRIAL_EXPIRED` qaytarır.",
+        "operationId" : "plan",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlanResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin paketi (giriş tələb etmir)",
+        "tags" : [ "Paket" ]
       }
     },
     "/api/v1/public/push" : {
@@ -6774,6 +6859,44 @@
           }
         }
       },
+      "PlanResponse" : {
+        "type" : "object",
+        "properties" : {
+          "branchLimit" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "expired" : {
+            "type" : "boolean",
+            "description" : "Sınaq bitib — şirkətin xidməti dayandırılıb"
+          },
+          "features" : {
+            "type" : "array",
+            "description" : "Açıq imkanlar (sınaq bitibsə boşdur)",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS" ]
+            }
+          },
+          "plan" : {
+            "type" : "string",
+            "description" : "BASIC, STANDARD və ya PREMIUM"
+          },
+          "staffLimit" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Sahiblərdən başqa işçilərin limiti; null — limitsiz"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "TRIAL (sınaq) və ya ACTIVE (ödənişli)"
+          },
+          "trialEndsAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "PlatformAuditEntry" : {
         "type" : "object",
         "properties" : {
@@ -7058,6 +7181,11 @@
           },
           "displayName" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "plan" : {
+            "type" : "string",
+            "description" : "Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)",
+            "enum" : [ "BASIC", "STANDARD", "PREMIUM" ]
           },
           "primaryDomain" : {
             "type" : "string",
@@ -8161,6 +8289,81 @@
           }
         }
       },
+      "TenantPlanRequest" : {
+        "type" : "object",
+        "properties" : {
+          "extraBranches" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Yalnız Premium: paketə daxil olan 5 filialdan əlavə",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "plan" : {
+            "type" : "string",
+            "enum" : [ "BASIC", "STANDARD", "PREMIUM" ]
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "TRIAL — 14 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub",
+            "enum" : [ "TRIAL", "ACTIVE" ]
+          }
+        },
+        "required" : [ "plan", "status" ]
+      },
+      "TenantPlanResponse" : {
+        "type" : "object",
+        "properties" : {
+          "branchLimit" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "expired" : {
+            "type" : "boolean"
+          },
+          "extraBranches" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "plan" : {
+            "type" : "string"
+          },
+          "staffLimit" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "trialEndsAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "trials" : {
+            "type" : "array",
+            "description" : "İstifadə olunmuş sınaqlar (hər paket üçün bir dəfə)",
+            "items" : {
+              "$ref" : "#/components/schemas/TenantPlanTrial"
+            }
+          }
+        }
+      },
+      "TenantPlanTrial" : {
+        "type" : "object",
+        "properties" : {
+          "endsAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "plan" : {
+            "type" : "string"
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "TenantResponse" : {
         "type" : "object",
         "properties" : {
@@ -8180,6 +8383,18 @@
             "type" : "string",
             "format" : "uuid"
           },
+          "plan" : {
+            "type" : "string",
+            "description" : "Paket: BASIC, STANDARD, PREMIUM"
+          },
+          "planExpired" : {
+            "type" : "boolean",
+            "description" : "Sınaq bitib — xidmət dayandırılıb"
+          },
+          "planStatus" : {
+            "type" : "string",
+            "description" : "TRIAL (sınaq) və ya ACTIVE (ödənişli)"
+          },
           "primaryDomain" : {
             "type" : "string"
           },
@@ -8191,6 +8406,10 @@
           },
           "timezone" : {
             "type" : "string"
+          },
+          "trialEndsAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },

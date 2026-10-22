@@ -16,6 +16,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { Feature } from '@/shared/plan/plan';
+
 import type { ContextScope, Me } from '../api/adminApi';
 
 export type AdminSection =
@@ -43,6 +45,8 @@ export interface NavItem {
   icon: LucideIcon;
   /** Bölməni görə bilən rollar (backend də eyni qaydanı yoxlayır — menyu yalnız rahatlıq üçündür). */
   roles: readonly Role[];
+  /** Bölmə yalnız bu imkan şirkətin paketində olanda açıqdır (menyuda kilid nişanı ilə görünür). */
+  feature?: Feature;
 }
 
 const TENANT_ITEMS: readonly NavItem[] = [
@@ -52,11 +56,11 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
   { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'] },
-  { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'] },
-  { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'] },
-  { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'] },
+  { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'], feature: 'STAMP_CAMPAIGNS' },
+  { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS' },
+  { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'], feature: 'REMINDERS' },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
-  { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'] },
+  { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'], feature: 'AUDIT_LOG' },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
 ];
 

@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.plan.Plan;
+import az.tapstamp.plan.PlanService;
+import az.tapstamp.plan.Subscription;
 import az.tapstamp.platform.repository.TenantOverviewMapper;
 import az.tapstamp.security.admin.AdminAuthService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -35,7 +38,8 @@ import org.springframework.stereotype.Service;
 public class PlatformTenantService {
 
     public record TenantSummary(UUID id, String slug, LocalizedText displayName, TenantStatus status,
-                                Language defaultLanguage, String timezone, String primaryDomain, List<String> domains) {
+                                Language defaultLanguage, String timezone, String primaryDomain, List<String> domains,
+                                Subscription subscription, boolean planExpired) {
     }
 
     public record TenantStats(int branches, long activeCustomers, int activeStaff) {
@@ -54,10 +58,11 @@ public class PlatformTenantService {
     private final AuditLogger audit;
     private final TenantOverviewMapper overview;
     private final Clock clock;
+    private final PlanService plans;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
-                                 TenantOverviewMapper overview, Clock clock) {
+                                 TenantOverviewMapper overview, Clock clock, PlanService plans) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -67,6 +72,7 @@ public class PlatformTenantService {
         this.audit = audit;
         this.overview = overview;
         this.clock = clock;
+        this.plans = plans;
     }
 
     public List<TenantSummary> list() {
@@ -77,8 +83,8 @@ public class PlatformTenantService {
         return summary(tenant(tenantId));
     }
 
-    /** Yeni şirkət: ayrıca baza, DB rolları, miqrasiyalar. Step-up tələb edir. */
-    public TenantSummary provision(AdminPrincipal principal, ProvisionTenantCommand command) {
+    /** Yeni şirkət: ayrıca baza, DB rolları, miqrasiyalar; seçilmiş paketin 14 günlük sınağı. Step-up tələb edir. */
+    public TenantSummary provision(AdminPrincipal principal, ProvisionTenantCommand command, Plan plan) {
         auth.requireStepUp(principal);
         if (!tenancy.provisioner().enabled()) {
             throw new ApiException(ErrorCode.PROVISIONING_DISABLED);
@@ -87,8 +93,9 @@ public class PlatformTenantService {
             throw new ApiException(ErrorCode.ALREADY_EXISTS);
         }
         TenantRecord tenant = provisioner.provision(command);
+        plans.startTrial(tenant.id(), plan, principal.userId());
         realms.audit(AdminRealm.PLATFORM, "TENANT_PROVISIONED", principal.userId(), "tenant", tenant.id(),
-                Map.of("slug", tenant.slug(), "domain", command.primaryDomain()));
+                Map.of("slug", tenant.slug(), "domain", command.primaryDomain(), "plan", plan.name()));
         return summary(tenant);
     }
 
@@ -164,8 +171,9 @@ public class PlatformTenantService {
     }
 
     private TenantSummary summary(TenantRecord tenant) {
+        Subscription subscription = plans.subscription(tenant.id());
         return new TenantSummary(tenant.id(), tenant.slug(), tenant.displayName(), tenant.status(),
                 tenant.defaultLanguage(), tenant.timezone().getId(), directory.primaryHost(tenant.id()).orElse(null),
-                directory.hostnames(tenant.id()));
+                directory.hostnames(tenant.id()), subscription, subscription.expired(clock.instant()));
     }
 }

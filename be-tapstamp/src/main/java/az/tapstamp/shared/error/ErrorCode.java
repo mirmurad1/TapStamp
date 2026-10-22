@@ -27,6 +27,14 @@ public enum ErrorCode {
     SMS_DAILY_LIMIT_REACHED(HttpStatus.TOO_MANY_REQUESTS),
     /** Serverdə web push qurulmayıb (VAPID açarları yoxdur). */
     PUSH_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
+    /** Bu imkan şirkətin paketinə daxil deyil. */
+    PLAN_FEATURE_UNAVAILABLE(HttpStatus.FORBIDDEN),
+    /** Paketin limiti (filial, işçi) dolub. */
+    PLAN_LIMIT_REACHED(HttpStatus.CONFLICT),
+    /** Sınaq müddəti bitib, ödəniş qeyd olunmayıb — şirkətin xidməti dayandırılıb. */
+    PLAN_TRIAL_EXPIRED(HttpStatus.PAYMENT_REQUIRED),
+    /** Bu paketin sınağı bu şirkət üçün artıq istifadə olunub (hər paket üçün bir dəfə). */
+    PLAN_TRIAL_ALREADY_USED(HttpStatus.CONFLICT),
     /** Sessiyanın vaxtı bitib (fəaliyyətsizlik və ya mütləq limit) — yenidən daxil olmaq lazımdır. */
     SESSION_EXPIRED(HttpStatus.UNAUTHORIZED),
     /** Email və ya şifrə yanlışdır (hansının səhv olduğu açıqlanmır). */

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import az.tapstamp.plan.Plan;
 import az.tapstamp.platform.service.PlatformTenantService;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.i18n.Language;
@@ -48,11 +49,17 @@ public class PlatformTenantController {
     }
 
     public record TenantResponse(UUID id, String slug, LocalizedText displayName, String status, String defaultLanguage,
-                                 String timezone, String primaryDomain, List<String> domains) {
+                                 String timezone, String primaryDomain, List<String> domains,
+                                 @Schema(description = "Paket: BASIC, STANDARD, PREMIUM") String plan,
+                                 @Schema(description = "TRIAL (sınaq) və ya ACTIVE (ödənişli)") String planStatus,
+                                 Instant trialEndsAt,
+                                 @Schema(description = "Sınaq bitib — xidmət dayandırılıb") boolean planExpired) {
 
         static TenantResponse from(PlatformTenantService.TenantSummary summary) {
             return new TenantResponse(summary.id(), summary.slug(), summary.displayName(), summary.status().name(),
-                    summary.defaultLanguage().tag(), summary.timezone(), summary.primaryDomain(), summary.domains());
+                    summary.defaultLanguage().tag(), summary.timezone(), summary.primaryDomain(), summary.domains(),
+                    summary.subscription().plan().name(), summary.subscription().status().name(),
+                    summary.subscription().trialEndsAt(), summary.planExpired());
         }
     }
 
@@ -63,7 +70,8 @@ public class PlatformTenantController {
             @Schema(description = "Şirkətin öz domeni, məs. bonus.mockcoffee.az")
             @NotBlank @Size(max = 253) @Pattern(regexp = "^[a-z0-9-]+(\\.[a-z0-9-]+)+$") String primaryDomain,
             @NotBlank @Pattern(regexp = "az|en|ru") String defaultLanguage,
-            @NotBlank @Size(max = 64) String timezone) {
+            @NotBlank @Size(max = 64) String timezone,
+            @Schema(description = "Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)") Plan plan) {
     }
 
     public record TenantStatusRequest(@NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status) {
@@ -106,7 +114,8 @@ public class PlatformTenantController {
         ProvisionTenantCommand command = new ProvisionTenantCommand(request.slug(), request.displayName(),
                 request.primaryDomain(), Language.fromTag(request.defaultLanguage()).orElse(Language.DEFAULT),
                 request.timezone());
-        return TenantResponse.from(tenants.provision(principal, command));
+        return TenantResponse.from(tenants.provision(principal, command,
+                request.plan() == null ? Plan.PREMIUM : request.plan()));
     }
 
     @PatchMapping("/{tenantId}/status")

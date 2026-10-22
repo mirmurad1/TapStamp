@@ -218,7 +218,8 @@
       "slug": "Technical name",
       "domain": "Domain",
       "status": "Status",
-      "language": "Language"
+      "language": "Language",
+      "plan": "Plan"
     },
     "status": {
       "ACTIVE": "Active",
@@ -240,7 +241,8 @@
       "language": "Default language",
       "timezone": "Time zone",
       "submit": "Create company",
-      "created": "Company created."
+      "created": "Company created.",
+      "planHint": "The company starts with a 14-day free trial of the selected plan."
     },
     "detail": {
       "back": "All companies",
@@ -389,6 +391,21 @@
       "reset": "Reset to default",
       "budgetTitle": "Daily SMS budget",
       "budgetDescription": "Sign-in codes sent today across all companies (Baku time). When the budget is used up, no new codes are sent; an alert is sent at 80%."
+    },
+    "plan": {
+      "title": "Plan",
+      "description": "Each plan’s 14-day free trial is given to a company only once. When the trial ends without a recorded payment, the company’s service is suspended.",
+      "current": "Current plan: {{plan}}",
+      "until": "trial until {{date}}",
+      "ended": "trial ended on {{date}}",
+      "trialsUsed": "Trials used: {{list}}",
+      "plan": "Plan",
+      "status": "Status",
+      "trialOption": "14-day free trial",
+      "activeOption": "Paid (active)",
+      "extraBranches": "Extra branches",
+      "extraBranchesHint": "On top of the 5 branches included in Premium.",
+      "trialUsed": "This company has already used the free trial of this plan."
     }
   },
   "staffConsole": {
@@ -958,6 +975,29 @@
       "sent": "Sent",
       "returned": "Visited after",
       "note": "“Visited after” — customers who got an NFC stamp within 7 days after the reminder."
+    }
+  },
+  "plan": {
+    "locked": "Not in your plan",
+    "lockedTitle": "This feature is in the {{plan}} plan",
+    "lockedBody": "It is not included in your current plan. Contact us to upgrade.",
+    "names": {
+      "BASIC": "Basic",
+      "STANDARD": "Standard",
+      "PREMIUM": "Premium"
+    },
+    "status": {
+      "TRIAL": "Trial",
+      "ACTIVE": "Active",
+      "EXPIRED": "Trial ended"
+    },
+    "card": {
+      "title": "Your plan: {{plan}}",
+      "description": "Contact us to change the plan or confirm a payment.",
+      "trialEnds_one": "The free trial ends on {{date}} ({{count}} day left). After that the service will be suspended.",
+      "trialEnds_other": "The free trial ends on {{date}} ({{count}} days left). After that the service will be suspended.",
+      "limits": "Branch limit: {{branches}} · Staff limit: {{staff}}",
+      "unlimited": "unlimited"
     }
   }
 }

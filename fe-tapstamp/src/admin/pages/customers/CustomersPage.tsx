@@ -8,6 +8,7 @@ import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { cn } from '@/shared/lib/cn';
 import { formatDate, formatNumber } from '@/shared/lib/format';
+import { useFeature } from '@/shared/plan/plan';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
@@ -53,6 +54,8 @@ export function CustomersPage() {
 
   const query = { ...filter, sort, direction, page: paging.page, size: paging.size };
   const customers = useQuery({ queryKey: ['customers', query], queryFn: () => customersApi.list(query), placeholderData: keepPreviousData });
+  // CSV ixracı Standard və Premium paketlərdə
+  const canExport = useFeature('CSV_EXPORT') === true;
   const exportCsv = useMutation({
     mutationFn: () => withStepUp(() => customersApi.exportCsv(filter)),
     onSuccess: (blob) => downloadBlob(blob, `customers-${new Date().toISOString().slice(0, 10)}.csv`),
@@ -95,7 +98,7 @@ export function CustomersPage() {
           <h1 className="font-display text-2xl font-semibold">{t('admin:customers.title')}</h1>
           <p className="mt-1 text-muted-foreground">{t('admin:customers.subtitle')}</p>
         </div>
-        {isOwner ? (
+        {isOwner && canExport ? (
           <Button variant="outline" onClick={() => exportCsv.mutate()} disabled={exportCsv.isPending}>
             <Download className="size-4" aria-hidden="true" />
             {t('admin:customers.export')}

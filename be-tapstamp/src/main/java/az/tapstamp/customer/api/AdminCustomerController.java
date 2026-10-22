@@ -14,6 +14,8 @@ import az.tapstamp.customer.admin.CustomerDirectory.Row;
 import az.tapstamp.customer.admin.CustomerDirectory.Sort;
 import az.tapstamp.customer.admin.CustomerDirectory.TimelineItem;
 import az.tapstamp.customer.admin.CustomerDirectory;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
@@ -148,6 +150,7 @@ public class AdminCustomerController {
         admin.resolveFraudFlag(principal, flagId, request.note());
     }
 
+    @RequiresFeature(Feature.CSV_EXPORT)
     @PostMapping(value = "/export", produces = "text/csv")
     @PreAuthorize("hasRole('COMPANY_OWNER')")
     @Operation(summary = "CSV ixracı", description = """

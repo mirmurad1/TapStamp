@@ -13,6 +13,8 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.notification.push.PushService;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.reminder.repository.ReminderMapper;
 import az.tapstamp.reminder.repository.ReminderMapper.Candidate;
 import az.tapstamp.reminder.repository.ReminderMapper.KindStats;
@@ -58,20 +60,22 @@ public class ReminderService {
     private final TenantDirectory directory;
     private final AuditLogger audit;
     private final Clock clock;
+    private final PlanService plans;
 
     public ReminderService(ReminderMapper reminders, PushService push, TenantDirectory directory, AuditLogger audit,
-                           Clock clock) {
+                           Clock clock, PlanService plans) {
         this.reminders = reminders;
         this.push = push;
         this.directory = directory;
         this.audit = audit;
         this.clock = clock;
+        this.plans = plans;
     }
 
     /** Bütün aktiv şirkətlər üçün bir addım (taymer çağırır). */
     public void run() {
         for (TenantRecord tenant : directory.findAll()) {
-            if (tenant.status().outOfService()) {
+            if (tenant.status().outOfService() || plans.expired(tenant.id())) {
                 continue;
             }
             try {
@@ -87,7 +91,8 @@ public class ReminderService {
         TenantInfo tenant = TenantContext.require();
         Instant now = clock.instant();
         LocalTime local = now.atZone(tenant.timezone()).toLocalTime();
-        if (local.isBefore(WINDOW_START) || !local.isBefore(WINDOW_END) || !push.config().enabled()) {
+        if (local.isBefore(WINDOW_START) || !local.isBefore(WINDOW_END) || !plans.has(Feature.REMINDERS)
+                || !push.config().enabled()) {
             return 0;
         }
         ReminderSettings settings = reminders.settings();

@@ -410,12 +410,12 @@ export interface paths {
             cookie?: never;
         };
         /** Kampaniya */
-        get: operations["get"];
+        get: operations["get_1"];
         /**
          * Kampaniyanı dəyişmək
          * @description Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.
          */
-        put: operations["update"];
+        put: operations["update_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -531,7 +531,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_2"];
+        get: operations["get_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -638,7 +638,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_4"];
+        patch: operations["update_5"];
         trace?: never;
     };
     "/api/v1/admin/me/mfa/pause": {
@@ -1596,7 +1596,7 @@ export interface paths {
          * Ad və dilin dəyişdirilməsi
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
-        patch: operations["update_3"];
+        patch: operations["update_4"];
         trace?: never;
     };
     "/api/v1/me/gift-cards": {
@@ -2028,7 +2028,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_2"];
+        patch: operations["update_3"];
         trace?: never;
     };
     "/api/v1/platform/me/mfa/pause": {
@@ -2257,7 +2257,7 @@ export interface paths {
             cookie?: never;
         };
         /** Şirkət haqqında məlumat */
-        get: operations["get_1"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2387,6 +2387,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Şirkətin paketi */
+        get: operations["get"];
+        /**
+         * Paketi dəyişmək
+         * @description `TRIAL` — həmin paketin 14 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.
+         */
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/sms-limit": {
         parameters: {
             query?: never;
@@ -2489,7 +2510,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** Etiket və ya filialın dəyişdirilməsi */
-        patch: operations["update_1"];
+        patch: operations["update_2"];
         trace?: never;
     };
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable": {
@@ -2681,6 +2702,26 @@ export interface paths {
          * @description `privacy` — məxfilik siyasəti, `terms` — istifadə şərtləri (3 dildə).
          */
         get: operations["document"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin paketi (giriş tələb etmir)
+         * @description Paket, sınaq müddəti və açıq imkanlar. `expired = true` olanda şirkətin qalan API-si `PLAN_TRIAL_EXPIRED` qaytarır.
+         */
+        get: operations["plan"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3578,6 +3619,25 @@ export interface components {
             id?: string;
             phoneMasked?: string;
         };
+        PlanResponse: {
+            /** Format: int32 */
+            branchLimit?: number;
+            /** @description Sınaq bitib — şirkətin xidməti dayandırılıb */
+            expired?: boolean;
+            /** @description Açıq imkanlar (sınaq bitibsə boşdur) */
+            features?: ("PUSH" | "REFERRALS" | "CSV_EXPORT" | "FULL_ANALYTICS" | "STAMP_CAMPAIGNS" | "REMINDERS" | "AUDIT_LOG" | "BRANCH_COMPARISON" | "REFERRAL_STATS")[];
+            /** @description BASIC, STANDARD və ya PREMIUM */
+            plan?: string;
+            /**
+             * Format: int32
+             * @description Sahiblərdən başqa işçilərin limiti; null — limitsiz
+             */
+            staffLimit?: number;
+            /** @description TRIAL (sınaq) və ya ACTIVE (ödənişli) */
+            status?: string;
+            /** Format: date-time */
+            trialEndsAt?: string;
+        };
         PlatformAuditEntry: {
             action?: string;
             /** Format: uuid */
@@ -3699,6 +3759,11 @@ export interface components {
         ProvisionRequest: {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
+            /**
+             * @description Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)
+             * @enum {string}
+             */
+            plan?: "BASIC" | "STANDARD" | "PREMIUM";
             /** @description Şirkətin öz domeni, məs. bonus.mockcoffee.az */
             primaryDomain: string;
             /** @description Texniki ad (baza adında istifadə olunur): kiçik latın hərfləri, rəqəm, alt xətt */
@@ -4181,16 +4246,60 @@ export interface components {
             slug?: string;
             timezone?: string;
         };
+        TenantPlanRequest: {
+            /**
+             * Format: int32
+             * @description Yalnız Premium: paketə daxil olan 5 filialdan əlavə
+             */
+            extraBranches?: number;
+            /** @enum {string} */
+            plan: "BASIC" | "STANDARD" | "PREMIUM";
+            /**
+             * @description TRIAL — 14 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub
+             * @enum {string}
+             */
+            status: "TRIAL" | "ACTIVE";
+        };
+        TenantPlanResponse: {
+            /** Format: int32 */
+            branchLimit?: number;
+            expired?: boolean;
+            /** Format: int32 */
+            extraBranches?: number;
+            plan?: string;
+            /** Format: int32 */
+            staffLimit?: number;
+            status?: string;
+            /** Format: date-time */
+            trialEndsAt?: string;
+            /** @description İstifadə olunmuş sınaqlar (hər paket üçün bir dəfə) */
+            trials?: components["schemas"]["TenantPlanTrial"][];
+        };
+        TenantPlanTrial: {
+            /** Format: date-time */
+            endsAt?: string;
+            plan?: string;
+            /** Format: date-time */
+            startedAt?: string;
+        };
         TenantResponse: {
             defaultLanguage?: string;
             displayName?: components["schemas"]["LocalizedText"];
             domains?: string[];
             /** Format: uuid */
             id?: string;
+            /** @description Paket: BASIC, STANDARD, PREMIUM */
+            plan?: string;
+            /** @description Sınaq bitib — xidmət dayandırılıb */
+            planExpired?: boolean;
+            /** @description TRIAL (sınaq) və ya ACTIVE (ödənişli) */
+            planStatus?: string;
             primaryDomain?: string;
             slug?: string;
             status?: string;
             timezone?: string;
+            /** Format: date-time */
+            trialEndsAt?: string;
         };
         TenantSmsLimit: {
             custom?: boolean;
@@ -4732,7 +4841,7 @@ export interface operations {
             };
         };
     };
-    get: {
+    get_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4754,7 +4863,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4909,7 +5018,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5054,7 +5163,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -6354,7 +6463,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -6859,7 +6968,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -7148,7 +7257,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7331,6 +7440,54 @@ export interface operations {
             };
         };
     };
+    get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantPlanResponse"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TenantPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantPlanResponse"];
+                };
+            };
+        };
+    };
     tenantLimit: {
         parameters: {
             query?: never;
@@ -7478,7 +7635,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7723,6 +7880,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LegalDocumentResponse"];
+                };
+            };
+        };
+    };
+    plan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlanResponse"];
                 };
             };
         };

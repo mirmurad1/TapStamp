@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Şirkətlərin paketləri və sınaq müddətləri (hər paket üçün bir dəfə) -->
+<mapper namespace="az.tapstamp.plan.repository.SubscriptionMapper">
+
+    <select id="find" resultType="az.tapstamp.plan.repository.SubscriptionMapper$SubscriptionRow">
+        SELECT tenant_id, plan, status, trial_ends_at, extra_branches
+        FROM tenant_subscriptions WHERE tenant_id = #{tenantId}
+    </select>
+
+    <select id="findAll" resultType="az.tapstamp.plan.repository.SubscriptionMapper$SubscriptionRow">
+        SELECT tenant_id, plan, status, trial_ends_at, extra_branches FROM tenant_subscriptions
+    </select>
+
+    <insert id="upsert">
+        INSERT INTO tenant_subscriptions (tenant_id, plan, status, trial_ends_at, extra_branches, updated_at, updated_by)
+        VALUES (#{tenantId}, #{plan}, #{status}, #{trialEndsAt}, #{extraBranches}, #{now}, #{updatedBy})
+        ON CONFLICT (tenant_id) DO UPDATE
+            SET plan = EXCLUDED.plan, status = EXCLUDED.status, trial_ends_at = EXCLUDED.trial_ends_at,
+                extra_branches = EXCLUDED.extra_branches, updated_at = EXCLUDED.updated_at,
+                updated_by = EXCLUDED.updated_by
+    </insert>
+
+    <select id="trials" resultType="az.tapstamp.plan.repository.SubscriptionMapper$TrialRow">
+        SELECT plan, started_at, ends_at FROM tenant_plan_trials WHERE tenant_id = #{tenantId} ORDER BY started_at
+    </select>
+
+    <insert id="insertTrial">
+        INSERT INTO tenant_plan_trials (tenant_id, plan, started_at, ends_at, started_by)
+        VALUES (#{tenantId}, #{plan}, #{startedAt}, #{endsAt}, #{startedBy})
+        ON CONFLICT DO NOTHING
+    </insert>
+</mapper>

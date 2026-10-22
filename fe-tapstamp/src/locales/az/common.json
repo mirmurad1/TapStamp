@@ -60,5 +60,17 @@
     "previous": "Əvvəlki",
     "next": "Növbəti",
     "page": "Səhifə {{page}}"
+  },
+  "plan": {
+    "expired": {
+      "staff": {
+        "title": "Pulsuz sınaq müddəti bitib",
+        "body": "Sınaq müddəti başa çatdığı üçün xidmət dayandırılıb. İstifadəni davam etdirmək üçün paketi aktivləşdirin — bizimlə əlaqə saxlayın."
+      },
+      "customer": {
+        "title": "Xidmət müvəqqəti dayandırılıb",
+        "body": "Bu şirkətin loyallıq proqramı hazırda əlçatan deyil. Möhürləriniz və hədiyyələriniz saxlanılır."
+      }
+    }
   }
 }

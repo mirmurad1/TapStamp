@@ -32,6 +32,7 @@ const schema = z.object({
     .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/, 'domain'),
   defaultLanguage: z.enum(SUPPORTED_LANGUAGES),
   timezone: z.string().trim().min(1, 'required').max(64, 'tooLong'),
+  plan: z.enum(['BASIC', 'STANDARD', 'PREMIUM']),
 });
 type Values = z.infer<typeof schema>;
 
@@ -52,6 +53,7 @@ export function ProvisionTenantPage() {
       primaryDomain: '',
       defaultLanguage: 'az',
       timezone: 'Asia/Baku',
+      plan: 'PREMIUM',
     },
   });
   const provision = useMutation({
@@ -63,6 +65,7 @@ export function ProvisionTenantPage() {
           primaryDomain: values.primaryDomain,
           defaultLanguage: values.defaultLanguage,
           timezone: values.timezone,
+          plan: values.plan,
         }),
       ),
     onSuccess: (tenant) => {
@@ -124,6 +127,15 @@ export function ProvisionTenantPage() {
                 <Input {...form.register('timezone')} autoComplete="off" />
               </Field>
             </div>
+            <Field id="plan" label={t('admin:platform.plan.plan')} hint={t('admin:platform.provision.planHint')}>
+              <Select {...form.register('plan')}>
+                {(['BASIC', 'STANDARD', 'PREMIUM'] as const).map((plan) => (
+                  <option key={plan} value={plan}>
+                    {t(`admin:plan.names.${plan}`)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
             <Button type="submit" size="lg" className="self-start" disabled={provision.isPending}>
               {t('admin:platform.provision.submit')}
             </Button>

@@ -7,6 +7,7 @@ import { Link } from 'react-router';
 import type { Language } from '@/shared/i18n/languages';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { DEFAULT_TIME_ZONE, formatDate, formatNumber, formatPercent } from '@/shared/lib/format';
+import { useFeature } from '@/shared/plan/plan';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Select } from '@/shared/ui/input';
@@ -21,6 +22,7 @@ import {
 import { useMe } from '../auth/AdminAuthProvider';
 import { ApiErrorAlert } from '../components/ApiErrorAlert';
 import { InlineLoading } from '../components/FullPageState';
+import { PlanLockedNotice } from '../components/PlanLocked';
 import { hasAnyRole } from '../layout/navigation';
 import { useBranchNames } from '../lib/branches';
 import { ReferralDashboard } from './referrals/ReferralDashboard';
@@ -85,6 +87,10 @@ function Analytics() {
   const lang = currentLanguage();
   const { branches } = useBranchNames();
   const isOwner = hasAnyRole(me, ['COMPANY_OWNER']);
+  // Paketə görə: Basic-də yalnız əsas göstəricilər; filial seçimi (sahib üçün) və dəvət statistikası Premium-da
+  const fullAnalytics = useFeature('FULL_ANALYTICS') === true;
+  const branchComparison = useFeature('BRANCH_COMPARISON') === true;
+  const referralStats = useFeature('REFERRAL_STATS') === true;
   const ownBranches = new Set((me.roles ?? []).map((grant) => grant.branchId).filter(Boolean));
   const branchOptions = isOwner ? branches : branches.filter((branch) => ownBranches.has(branch.id));
 
@@ -98,10 +104,11 @@ function Analytics() {
   const series = useQuery({
     queryKey: ['analytics', 'series', filter, granularity],
     queryFn: () => analyticsApi.series({ ...filter, granularity }),
+    enabled: fullAnalytics,
   });
-  const heatmap = useQuery({ queryKey: ['analytics', 'heatmap', filter], queryFn: () => analyticsApi.heatmap(filter) });
-  const retention = useQuery({ queryKey: ['analytics', 'retention', filter], queryFn: () => analyticsApi.retention(filter) });
-  const languages = useQuery({ queryKey: ['analytics', 'languages', filter.branchId], queryFn: () => analyticsApi.languages(filter) });
+  const heatmap = useQuery({ queryKey: ['analytics', 'heatmap', filter], queryFn: () => analyticsApi.heatmap(filter), enabled: fullAnalytics });
+  const retention = useQuery({ queryKey: ['analytics', 'retention', filter], queryFn: () => analyticsApi.retention(filter), enabled: fullAnalytics });
+  const languages = useQuery({ queryKey: ['analytics', 'languages', filter.branchId], queryFn: () => analyticsApi.languages(filter), enabled: fullAnalytics });
 
   const o = overview.data;
   const n = (value: number | undefined) => formatNumber(value ?? 0, lang);
@@ -120,7 +127,7 @@ function Analytics() {
             ))}
           </Select>
         </label>
-        {branchOptions.length > 1 || isOwner ? (
+        {(isOwner ? branchComparison : branchOptions.length > 1) ? (
           <label className="flex flex-col gap-1 text-sm font-medium">
             {t('admin:dashboard.filters.branch')}
             <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
@@ -156,43 +163,51 @@ function Analytics() {
             rate: o?.redemptionRate == null ? '—' : formatPercent(o.redemptionRate, lang),
           })}
         </Kpi>
-        <Kpi
-          icon={<Repeat />}
-          label={t('admin:dashboard.kpi.retention')}
-          value={retention.data?.rate == null ? '—' : formatPercent(retention.data.rate, lang)}
-          loading={!retention.data}
-        >
-          {t('admin:dashboard.kpi.retentionDetail', { returned: n(retention.data?.returned), cohort: n(retention.data?.cohort) })}
-        </Kpi>
+        {fullAnalytics ? (
+          <Kpi
+            icon={<Repeat />}
+            label={t('admin:dashboard.kpi.retention')}
+            value={retention.data?.rate == null ? '—' : formatPercent(retention.data.rate, lang)}
+            loading={!retention.data}
+          >
+            {t('admin:dashboard.kpi.retentionDetail', { returned: n(retention.data?.returned), cohort: n(retention.data?.cohort) })}
+          </Kpi>
+        ) : null}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('admin:dashboard.series.title')}</CardTitle>
-          <CardDescription>
-            {granularity === 'WEEK' ? t('admin:dashboard.series.weekly') : t('admin:dashboard.series.daily')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>{series.data ? <SeriesChart points={series.data} /> : <InlineLoading />}</CardContent>
-      </Card>
+      {fullAnalytics ? (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('admin:dashboard.series.title')}</CardTitle>
+              <CardDescription>
+                {granularity === 'WEEK' ? t('admin:dashboard.series.weekly') : t('admin:dashboard.series.daily')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>{series.data ? <SeriesChart points={series.data} /> : <InlineLoading />}</CardContent>
+          </Card>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Card className="min-w-0 xl:col-span-2">
-          <CardHeader>
-            <CardTitle>{t('admin:dashboard.heatmap.title')}</CardTitle>
-            <CardDescription>{t('admin:dashboard.heatmap.description')}</CardDescription>
-          </CardHeader>
-          <CardContent>{heatmap.data ? <Heatmap cells={heatmap.data} /> : <InlineLoading />}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('admin:dashboard.languages.title')}</CardTitle>
-          </CardHeader>
-          <CardContent>{languages.data ? <Languages shares={languages.data} /> : <InlineLoading />}</CardContent>
-        </Card>
-      </div>
+          <div className="grid gap-4 xl:grid-cols-3">
+            <Card className="min-w-0 xl:col-span-2">
+              <CardHeader>
+                <CardTitle>{t('admin:dashboard.heatmap.title')}</CardTitle>
+                <CardDescription>{t('admin:dashboard.heatmap.description')}</CardDescription>
+              </CardHeader>
+              <CardContent>{heatmap.data ? <Heatmap cells={heatmap.data} /> : <InlineLoading />}</CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('admin:dashboard.languages.title')}</CardTitle>
+              </CardHeader>
+              <CardContent>{languages.data ? <Languages shares={languages.data} /> : <InlineLoading />}</CardContent>
+            </Card>
+          </div>
+        </>
+      ) : (
+        <PlanLockedNotice feature="FULL_ANALYTICS" />
+      )}
 
-      {isOwner ? <ReferralDashboard filter={filter} /> : null}
+      {isOwner && referralStats ? <ReferralDashboard filter={filter} /> : null}
     </>
   );
 }

@@ -3,6 +3,8 @@ package az.tapstamp.referral.api;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.referral.ReferralService;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralRow;
 import az.tapstamp.referral.repository.ReferralMapper.ReferralSettings;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Dost dəvəti — şirkət sahibi üçün parametrlər və hesabat. */
 @RestController
+@RequiresFeature(Feature.REFERRALS)
 @RequestMapping("/api/v1/admin/referrals")
 @PreAuthorize("hasRole('COMPANY_OWNER')")
 @Tag(name = "Admin: dost dəvəti")
@@ -83,6 +86,7 @@ public class AdminReferralController {
         return referrals.list(principal, activity, PageQuery.of(page, size));
     }
 
+    @RequiresFeature(Feature.REFERRAL_STATS)
     @GetMapping("/dashboard")
     @Operation(summary = "İdarəetmə paneli üçün statistika", description = """
             Dövrdə yaranan dəvətlər: dəvət olunanlar, gələnlər (1+ NFC möhürü), qayıdanlar (2+ fərqli gün), gəlişlər, \

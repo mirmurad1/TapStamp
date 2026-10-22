@@ -13,6 +13,8 @@ import az.tapstamp.campaign.repository.CampaignMapper;
 import az.tapstamp.campaign.repository.CampaignMapper.Campaign;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.notification.sms.SmsSegments;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.security.admin.AccessPolicy;
@@ -81,16 +83,18 @@ public class CampaignService {
     private final EnvelopeCipher cipher;
     private final TransactionTemplate tx;
     private final Clock clock;
+    private final PlanService plans;
 
     public CampaignService(CampaignMapper campaigns, CompanySettings company, AuditLogger audit,
                            @Qualifier("tenantCipher") EnvelopeCipher cipher,
-                           PlatformTransactionManager transactionManager, Clock clock) {
+                           PlatformTransactionManager transactionManager, Clock clock, PlanService plans) {
         this.campaigns = campaigns;
         this.company = company;
         this.audit = audit;
         this.cipher = cipher;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
+        this.plans = plans;
     }
 
     public Preview preview(AdminPrincipal principal, Draft draft) {
@@ -269,6 +273,9 @@ public class CampaignService {
     }
 
     private void validate(Draft draft) {
+        if (draft.type() == Type.STAMPS) {
+            plans.require(Feature.STAMP_CAMPAIGNS);
+        }
         boolean stampsValid = draft.type() == Type.STAMPS
                 ? draft.audience() == Audience.EMPTY_CARD && draft.stampCount() != null && draft.stampCount() >= 1
                         && draft.stampCount() <= maxStamps()

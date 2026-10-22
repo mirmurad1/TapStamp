@@ -507,3 +507,14 @@ export const platformSmsApi = {
   messages: (query: { from: string; to: string; status?: 'SENT' | 'FAILED'; phone?: string } & PageParams) =>
     unwrap(api.GET('/api/v1/platform/sms-usage/messages', { params: { query } })),
 };
+
+export type TenantPlan = Schemas['TenantPlanResponse'];
+export type PlanName = Schemas['TenantPlanRequest']['plan'];
+
+/** Platforma paneli: şirkətin paketi və sınaq müddəti (hər paket üçün bir dəfə). */
+export const platformPlanApi = {
+  get: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } } })),
+  update: (tenantId: string, body: Schemas['TenantPlanRequest']) =>
+    unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } }, body })),
+};

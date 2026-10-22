@@ -58,5 +58,9 @@
   "CAMPAIGN_NO_RECIPIENTS": "No customer in the selected audience can receive campaign SMS.",
   "CAMPAIGN_STATE_CHANGED": "The campaign status has already changed. Refresh the page.",
   "SMS_DAILY_LIMIT_REACHED": "The SMS code limit for today has been reached. Please try again tomorrow.",
-  "PUSH_UNAVAILABLE": "Notifications are not set up right now. Please try again later."
+  "PUSH_UNAVAILABLE": "Notifications are not set up right now. Please try again later.",
+  "PLAN_FEATURE_UNAVAILABLE": "This feature is not included in your current plan. Contact us to upgrade.",
+  "PLAN_LIMIT_REACHED": "Your plan limit has been reached. Upgrade your plan for more.",
+  "PLAN_TRIAL_EXPIRED": "The free trial has ended and the service is suspended.",
+  "PLAN_TRIAL_ALREADY_USED": "The free trial of this plan has already been used by this company."
 }

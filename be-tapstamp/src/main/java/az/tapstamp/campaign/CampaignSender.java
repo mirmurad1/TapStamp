@@ -18,6 +18,7 @@ import az.tapstamp.notification.sms.SmsDeliveryException;
 import az.tapstamp.notification.sms.SmsLog;
 import az.tapstamp.notification.sms.SmsMessage;
 import az.tapstamp.notification.sms.SmsProvider;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.crypto.Aad;
 import az.tapstamp.security.crypto.EnvelopeCipher;
 import az.tapstamp.shared.i18n.Language;
@@ -76,11 +77,12 @@ public class CampaignSender {
     private final AuditLogger audit;
     private final TransactionTemplate tx;
     private final Clock clock;
+    private final PlanService plans;
 
     public CampaignSender(TenantDirectory directory, CampaignMapper campaigns, CompanySettings company,
                           @Qualifier("tenantCipher") EnvelopeCipher cipher, SmsProvider sms, SmsLog smsLog,
                           StampLedger ledger, AuditLogger audit, PlatformTransactionManager transactionManager,
-                          Clock clock) {
+                          Clock clock, PlanService plans) {
         this.directory = directory;
         this.campaigns = campaigns;
         this.company = company;
@@ -91,12 +93,14 @@ public class CampaignSender {
         this.audit = audit;
         this.tx = new TransactionTemplate(transactionManager);
         this.clock = clock;
+        this.plans = plans;
     }
 
     /** Bütün aktiv şirkətlər üçün bir addım. */
     public void run() {
         for (TenantRecord tenant : directory.findAll()) {
-            if (tenant.status().outOfService()) {
+            // Sınaq müddəti bitmiş şirkətin növbədəki kampaniyaları ödəniş qeyd olunana qədər gözləyir
+            if (tenant.status().outOfService() || plans.expired(tenant.id())) {
                 continue;
             }
             try {

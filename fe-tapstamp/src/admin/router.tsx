@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 
 import { RequireActive, RequireState } from './auth/guards';
+import { RequireFeature } from './components/PlanLocked';
 import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
@@ -77,11 +78,14 @@ export const adminRouter = createBrowserRouter(
                       element: <RequireRole roles={['COMPANY_OWNER']} />,
                       children: [
                         { path: 'settings/*', element: <SettingsPage /> },
-                        { path: 'audit', element: <AuditPage /> },
+                        { path: 'audit', element: <RequireFeature feature="AUDIT_LOG"><AuditPage /></RequireFeature> },
                         { path: 'campaigns', element: <CampaignsPage /> },
-                        { path: 'stamp-campaigns', element: <StampCampaignsPage /> },
-                        { path: 'referrals', element: <ReferralsPage /> },
-                        { path: 'reminders', element: <RemindersPage /> },
+                        {
+                          path: 'stamp-campaigns',
+                          element: <RequireFeature feature="STAMP_CAMPAIGNS"><StampCampaignsPage /></RequireFeature>,
+                        },
+                        { path: 'referrals', element: <RequireFeature feature="REFERRALS"><ReferralsPage /></RequireFeature> },
+                        { path: 'reminders', element: <RequireFeature feature="REMINDERS"><RemindersPage /></RequireFeature> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

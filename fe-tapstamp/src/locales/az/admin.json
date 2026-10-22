@@ -218,7 +218,8 @@
       "slug": "Texniki ad",
       "domain": "Domen",
       "status": "Status",
-      "language": "Dil"
+      "language": "Dil",
+      "plan": "Paket"
     },
     "status": {
       "ACTIVE": "Aktiv",
@@ -240,7 +241,8 @@
       "language": "Standart dil",
       "timezone": "Saat qurşağı",
       "submit": "Şirkəti yarat",
-      "created": "Şirkət yaradıldı."
+      "created": "Şirkət yaradıldı.",
+      "planHint": "Şirkət seçilmiş paketin 14 günlük pulsuz sınağı ilə başlayır."
     },
     "detail": {
       "back": "Bütün şirkətlər",
@@ -389,6 +391,21 @@
       "reset": "Standarta qaytar",
       "budgetTitle": "Gündəlik SMS büdcəsi",
       "budgetDescription": "Bütün şirkətlər üzrə bu gün (Bakı vaxtı) göndərilən giriş kodları. Büdcə dolanda yeni kodlar göndərilmir; 80%-də xəbərdarlıq gəlir."
+    },
+    "plan": {
+      "title": "Paket",
+      "description": "Hər paketin 14 günlük pulsuz sınağı şirkətə yalnız bir dəfə verilir. Sınaq bitəndə ödəniş qeyd olunmayıbsa, şirkətin xidməti dayandırılır.",
+      "current": "Cari paket: {{plan}}",
+      "until": "sınaq {{date}} tarixinədək",
+      "ended": "sınaq {{date}} tarixində bitib",
+      "trialsUsed": "İstifadə olunmuş sınaqlar: {{list}}",
+      "plan": "Paket",
+      "status": "Vəziyyət",
+      "trialOption": "14 günlük pulsuz sınaq",
+      "activeOption": "Ödənişli (aktiv)",
+      "extraBranches": "Əlavə filiallar",
+      "extraBranchesHint": "Premium-a daxil olan 5 filialdan əlavə.",
+      "trialUsed": "Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub."
     }
   },
   "staffConsole": {
@@ -958,6 +975,29 @@
       "sent": "Göndərilib",
       "returned": "Sonra gəlib",
       "note": "\"Sonra gəlib\" — xatırlatmadan sonra 7 gün ərzində NFC ilə möhür alan müştərilər."
+    }
+  },
+  "plan": {
+    "locked": "Paketinizdə yoxdur",
+    "lockedTitle": "Bu imkan {{plan}} paketindədir",
+    "lockedBody": "Cari paketinizə daxil deyil. Paketi yüksəltmək üçün bizimlə əlaqə saxlayın.",
+    "names": {
+      "BASIC": "Basic",
+      "STANDARD": "Standard",
+      "PREMIUM": "Premium"
+    },
+    "status": {
+      "TRIAL": "Sınaq müddəti",
+      "ACTIVE": "Aktiv",
+      "EXPIRED": "Sınaq bitib"
+    },
+    "card": {
+      "title": "Paketiniz: {{plan}}",
+      "description": "Paketi dəyişmək və ya ödənişi təsdiqləmək üçün bizimlə əlaqə saxlayın.",
+      "trialEnds_one": "Pulsuz sınaq {{date}} tarixində bitir ({{count}} gün qalıb). Sonra xidmət dayandırılacaq.",
+      "trialEnds_other": "Pulsuz sınaq {{date}} tarixində bitir ({{count}} gün qalıb). Sonra xidmət dayandırılacaq.",
+      "limits": "Filial limiti: {{branches}} · İşçi limiti: {{staff}}",
+      "unlimited": "limitsiz"
     }
   }
 }

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, Nfc, ShieldCheck } from 'lucide-react';
+import { LayoutGrid, Lock, Nfc, ShieldCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router';
 
 import type { Language } from '@/shared/i18n/languages';
 import { cn } from '@/shared/lib/cn';
+import { usePlan } from '@/shared/plan/plan';
 import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
@@ -31,6 +32,8 @@ export function AdminLayout() {
     retry: false,
     staleTime: 60_000,
   });
+  const plan = usePlan(scope === 'TENANT');
+  const features = plan.data?.features;
   const items = [
     ...navigationFor(scope, me),
     ...(simulator.isSuccess ? [{ section: 'simulator' as const, to: '/dev/simulator', icon: Nfc, roles: [] }] : []),
@@ -59,7 +62,7 @@ export function AdminLayout() {
             <span className="font-display text-lg font-semibold">{title}</span>
           </div>
           <nav aria-label={t('shell.mainNav')} className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-col md:overflow-visible">
-            {items.map(({ section, to, icon: ItemIcon }) => (
+            {items.map(({ section, to, icon: ItemIcon, feature }) => (
               <NavLink
                 key={section}
                 to={to}
@@ -74,6 +77,9 @@ export function AdminLayout() {
               >
                 <ItemIcon className="size-4 shrink-0" aria-hidden="true" />
                 <span>{t(`nav.${section}`)}</span>
+                {feature && features && !features.includes(feature) ? (
+                  <Lock className="ml-auto size-3.5 shrink-0" aria-label={t('plan.locked')} />
+                ) : null}
               </NavLink>
             ))}
           </nav>

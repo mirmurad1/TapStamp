@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogQuery.Entry;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Şirkətin audit jurnalı — yalnız sahib. */
 @RestController
+@RequiresFeature(Feature.AUDIT_LOG)
 @RequestMapping("/api/v1/admin/audit-logs")
 @PreAuthorize("hasRole('COMPANY_OWNER')")
 @Tag(name = "Admin: audit jurnalı")

@@ -16,7 +16,10 @@ import az.tapstamp.analytics.repository.AnalyticsMapper.RetentionCounts;
 import az.tapstamp.analytics.repository.AnalyticsMapper.Scope;
 import az.tapstamp.analytics.repository.AnalyticsMapper;
 import az.tapstamp.company.service.CompanySettings;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.security.admin.BranchScope;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
@@ -59,11 +62,13 @@ public class AnalyticsService {
     private final AnalyticsMapper analytics;
     private final CompanySettings company;
     private final Clock clock;
+    private final PlanService plans;
 
-    public AnalyticsService(AnalyticsMapper analytics, CompanySettings company, Clock clock) {
+    public AnalyticsService(AnalyticsMapper analytics, CompanySettings company, Clock clock, PlanService plans) {
         this.analytics = analytics;
         this.company = company;
         this.clock = clock;
+        this.plans = plans;
     }
 
     /** Parametrləri yoxlayır; tarix verilməyibsə son 30 gün (bu gün daxil). */
@@ -74,6 +79,10 @@ public class AnalyticsService {
         LocalDate start = from == null ? end.minusDays(29) : from;
         if (start.isAfter(end) || ChronoUnit.DAYS.between(start, end) >= MAX_PERIOD_DAYS) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        if (branchId != null && principal.hasRole(AdminRole.COMPANY_OWNER)) {
+            // Sahibin filial seçməsi — filialların müqayisəsi (menecer həmişə öz filiallarını görür)
+            plans.require(Feature.BRANCH_COMPARISON);
         }
         return new Query(start, end, BranchScope.of(principal, branchId), zone);
     }

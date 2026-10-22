@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.repository.CompanyMapper;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.error.ApiException;
@@ -52,11 +53,13 @@ public class CompanyAdminService {
     private final CompanyMapper companies;
     private final AuditLogger audit;
     private final Clock clock;
+    private final PlanService plans;
 
-    public CompanyAdminService(CompanyMapper companies, AuditLogger audit, Clock clock) {
+    public CompanyAdminService(CompanyMapper companies, AuditLogger audit, Clock clock, PlanService plans) {
         this.companies = companies;
         this.audit = audit;
         this.clock = clock;
+        this.plans = plans;
     }
 
     // ------------------------------------------------------------------ Şirkət
@@ -103,6 +106,7 @@ public class CompanyAdminService {
         if (trim(name) == null) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
+        plans.requireBranchCapacity(activeBranches());
         UUID id = Ids.newId();
         Instant now = clock.instant();
         companies.insertBranch(id, trim(name), trim(address), hoursJson(hours), now);
@@ -114,9 +118,12 @@ public class CompanyAdminService {
     public BranchView updateBranch(AdminPrincipal principal, UUID branchId, LocalizedText name, LocalizedText address,
                                    Map<String, List<List<String>>> hours, boolean clearHours, String status) {
         AccessPolicy.requireCompanyWide(principal);
-        branch(principal, branchId);
+        BranchView current = branch(principal, branchId);
         if (status != null && !List.of("ACTIVE", "CLOSED").contains(status)) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        if ("ACTIVE".equals(status) && !"ACTIVE".equals(current.status())) {
+            plans.requireBranchCapacity(activeBranches());
         }
         if ("CLOSED".equals(status)) {
             int active = companies.countOtherActiveBranches(branchId);
@@ -132,6 +139,11 @@ public class CompanyAdminService {
         }
         audit.tenant("BRANCH_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "branch", branchId, details);
         return branch(principal, branchId);
+    }
+
+    /** Paketin filial limiti aktiv filiallara görə yoxlanır (bağlanmış filial sayılmır). */
+    private long activeBranches() {
+        return companies.branches().stream().filter(row -> "ACTIVE".equals(row.status())).count();
     }
 
     // ------------------------------------------------------------------ Filialın qaydası

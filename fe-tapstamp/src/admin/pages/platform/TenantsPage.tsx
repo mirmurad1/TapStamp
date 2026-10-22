@@ -14,6 +14,7 @@ import { platformApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { TENANTS_KEY } from './keys';
+import { TenantPlanSummary } from './TenantPlanCard';
 import { TenantStatusBadge } from './TenantStatusBadge';
 
 /** Platforma panelinin ana səhifəsi: bütün şirkətlər. */
@@ -49,12 +50,13 @@ export function TenantsPage() {
           {tenants.data && items.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}
           {items.length > 0 ? (
             <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
-              <table className="w-full min-w-[36rem] text-left text-sm">
+              <table className="w-full min-w-[44rem] text-left text-sm">
                 <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('platform.columns.name')}</th>
                     <th scope="col" className="px-3 py-2 font-medium">{t('platform.columns.domain')}</th>
                     <th scope="col" className="px-3 py-2 font-medium">{t('platform.columns.language')}</th>
+                    <th scope="col" className="px-3 py-2 font-medium">{t('platform.columns.plan')}</th>
                     <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('platform.columns.status')}</th>
                   </tr>
                 </thead>
@@ -72,6 +74,9 @@ export function TenantsPage() {
                       </td>
                       <td className="break-all px-3 py-3">{tenant.primaryDomain}</td>
                       <td className="px-3 py-3 uppercase">{tenant.defaultLanguage}</td>
+                      <td className="px-3 py-3">
+                        <TenantPlanSummary tenant={tenant} />
+                      </td>
                       <td className="px-5 py-3 sm:px-6">
                         <TenantStatusBadge status={tenant.status} />
                       </td>

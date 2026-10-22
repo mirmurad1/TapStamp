@@ -11,6 +11,8 @@ import az.tapstamp.analytics.AnalyticsService.LanguageShare;
 import az.tapstamp.analytics.AnalyticsService.Overview;
 import az.tapstamp.analytics.AnalyticsService.Retention;
 import az.tapstamp.analytics.AnalyticsService.SeriesPoint;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.security.admin.AdminPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,6 +52,7 @@ public class AnalyticsController {
         return analytics.overview(analytics.query(principal, from, to, branchId));
     }
 
+    @RequiresFeature(Feature.FULL_ANALYTICS)
     @GetMapping("/stamps-series")
     @Operation(summary = "Möhürlər və təhvil verilən hədiyyələr (zaman sırası)",
             description = "Günlük və ya həftəlik (bazar ertəsindən); boş dövrlər 0 ilə qaytarılır.")
@@ -62,6 +65,7 @@ public class AnalyticsController {
         return analytics.series(analytics.query(principal, from, to, branchId), granularity);
     }
 
+    @RequiresFeature(Feature.FULL_ANALYTICS)
     @GetMapping("/heatmap")
     @Operation(summary = "Həftənin günü × saat üzrə möhürlər", description = "Gün ISO nömrəsi ilə (1 — bazar ertəsi).")
     List<HeatCell> heatmap(@AuthenticationPrincipal AdminPrincipal principal,
@@ -71,6 +75,7 @@ public class AnalyticsController {
         return analytics.heatmap(analytics.query(principal, from, to, branchId));
     }
 
+    @RequiresFeature(Feature.FULL_ANALYTICS)
     @GetMapping("/retention")
     @Operation(summary = "Geri qayıtma", description = """
             Dövrdə qeydiyyatdan keçənlərdən ilk möhürdən sonrakı 30 gün ərzində başqa bir gündə yenidən gələnlərin payı.""")
@@ -81,6 +86,7 @@ public class AnalyticsController {
         return analytics.retention(analytics.query(principal, from, to, branchId));
     }
 
+    @RequiresFeature(Feature.FULL_ANALYTICS)
     @GetMapping("/languages")
     @Operation(summary = "Müştərilərin dil üzrə bölgüsü")
     List<LanguageShare> languages(@AuthenticationPrincipal AdminPrincipal principal,

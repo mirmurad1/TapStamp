@@ -60,5 +60,17 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page {{page}}"
+  },
+  "plan": {
+    "expired": {
+      "staff": {
+        "title": "The free trial has ended",
+        "body": "The service is suspended because the trial period is over. To keep using it, activate a plan — please contact us."
+      },
+      "customer": {
+        "title": "Service temporarily suspended",
+        "body": "This company’s loyalty program is not available right now. Your stamps and gifts are kept."
+      }
+    }
   }
 }

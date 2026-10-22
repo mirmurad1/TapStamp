@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.notification.mail.MailMessage;
 import az.tapstamp.notification.mail.MailSender;
 import az.tapstamp.notification.mail.MailTemplates;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.admin.AdminAccount;
 import az.tapstamp.security.admin.AdminAccountStore;
 import az.tapstamp.security.admin.AdminAuthProperties;
@@ -66,12 +68,13 @@ public class InvitationService {
     private final AuditLogger audit;
     private final AdminAuthProperties properties;
     private final Clock clock;
+    private final PlanService plans;
 
     public InvitationService(StaffMapper staff, PlatformTransactionManager transactionManager,
                              AdminRealms realms, AdminAuthService auth, PasswordHasher hasher, RateLimiter rateLimiter,
                              MailSender mail, MailTemplates templates,
                              @Qualifier("applicationTaskExecutor") TaskExecutor mailExecutor, AuditLogger audit,
-                             AdminAuthProperties properties, Clock clock) {
+                             AdminAuthProperties properties, Clock clock, PlanService plans) {
         this.staff = staff;
         this.tx = new TransactionTemplate(transactionManager);
         this.realms = realms;
@@ -84,15 +87,38 @@ public class InvitationService {
         this.audit = audit;
         this.properties = properties;
         this.clock = clock;
+        this.plans = plans;
     }
 
     /** Şirkət daxilindən dəvət (sahib və ya menecer). */
     public InvitationView invite(AdminPrincipal inviter, String email, AdminRole role, UUID branchId, Language language) {
         TeamPermissions.requireCanGrant(inviter, role, branchId);
+        if (role != AdminRole.COMPANY_OWNER) {
+            plans.requireStaffCapacity(staffCount(email));
+        }
         InvitationView view = create(inviter.userId(), email, role, branchId, language);
         audit.tenant("STAFF_INVITATION_CREATED", AuditLogger.ActorType.STAFF, inviter.userId(), "invitation", view.id(),
                 Map.of("email", EmailMasker.mask(view.email()), "role", role.name()));
         return view;
+    }
+
+    /**
+     * Paketin işçi limiti üçün: sahib olmayan işçilər (silinməmiş) və gözləyən dəvətlər. Eyni email-ə təkrar dəvət
+     * köhnəsini əvəz etdiyi üçün o sayılmır.
+     */
+    private long staffCount(String email) {
+        Set<UUID> members = staff.members().stream().map(StaffMapper.MemberRow::id).collect(Collectors.toSet());
+        Set<UUID> owners = staff.roles().stream().filter(row -> row.role() == AdminRole.COMPANY_OWNER)
+                .map(StaffMapper.RoleRow::staffUserId).collect(Collectors.toSet());
+        long employees = staff.roles().stream()
+                .map(StaffMapper.RoleRow::staffUserId)
+                .filter(id -> members.contains(id) && !owners.contains(id))
+                .distinct()
+                .count();
+        long pending = staff.pendingInvitations(clock.instant()).stream()
+                .filter(view -> view.role() != AdminRole.COMPANY_OWNER && !view.email().equalsIgnoreCase(email))
+                .count();
+        return employees + pending;
     }
 
     /** Platforma admini tərəfindən şirkət sahibinin dəvəti. Tenant konteksti çağıran tərəfindən qurulur. */

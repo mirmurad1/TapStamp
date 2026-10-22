@@ -1,5 +1,7 @@
 package az.tapstamp.reminder.api;
 
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.reminder.ReminderService;
 import az.tapstamp.reminder.repository.ReminderMapper.ReminderSettings;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Avtomatik xatırlatmalar — şirkət sahibi üçün parametrlər və statistika. */
 @RestController
+@RequiresFeature(Feature.REMINDERS)
 @RequestMapping("/api/v1/admin/reminders")
 @PreAuthorize("hasRole('COMPANY_OWNER')")
 @Tag(name = "Admin: xatırlatmalar")

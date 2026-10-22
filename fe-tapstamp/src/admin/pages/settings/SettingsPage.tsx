@@ -16,6 +16,7 @@ import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { BranchesCard } from './BranchesCard';
 import { CompanyCard } from './CompanyForm';
+import { PlanCard } from './PlanCard';
 
 const POLICY_KEY = ['settings-stamp-policy'] as const;
 const REWARD_KEY = ['settings-reward-rule'] as const;
@@ -31,6 +32,7 @@ export function SettingsPage() {
         <h1 className="font-display text-2xl font-bold">{t('settings.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
+      <PlanCard />
       <ApiErrorAlert error={policy.error ?? reward.error} />
       {policy.isPending || reward.isPending ? <InlineLoading /> : null}
       <div className="grid gap-6 xl:grid-cols-2">

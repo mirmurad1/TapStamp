@@ -58,5 +58,9 @@
   "CAMPAIGN_NO_RECIPIENTS": "Seçilmiş auditoriyada kampaniya SMS-i ala bilən müştəri yoxdur.",
   "CAMPAIGN_STATE_CHANGED": "Kampaniyanın vəziyyəti artıq dəyişib. Səhifəni yeniləyin.",
   "SMS_DAILY_LIMIT_REACHED": "Bu gün üçün SMS kod limiti dolub. Sabah yenidən cəhd edin.",
-  "PUSH_UNAVAILABLE": "Bildirişlər hazırda qurulmayıb. Sonra yenidən cəhd et."
+  "PUSH_UNAVAILABLE": "Bildirişlər hazırda qurulmayıb. Sonra yenidən cəhd et.",
+  "PLAN_FEATURE_UNAVAILABLE": "Bu imkan cari paketinizə daxil deyil. Paketi yüksəltmək üçün bizimlə əlaqə saxlayın.",
+  "PLAN_LIMIT_REACHED": "Paketinizin limiti dolub. Daha çoxu üçün paketi yüksəldin.",
+  "PLAN_TRIAL_EXPIRED": "Pulsuz sınaq müddəti bitib, xidmət dayandırılıb.",
+  "PLAN_TRIAL_ALREADY_USED": "Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub."
 }

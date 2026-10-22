@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import az.tapstamp.notification.push.repository.PushSubscriptionMapper;
 import az.tapstamp.notification.push.repository.PushSubscriptionMapper.Subscription;
+import az.tapstamp.plan.Feature;
+import az.tapstamp.plan.PlanService;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
@@ -70,25 +72,33 @@ public class PushService {
     private final TaskExecutor executor;
     private final JsonMapper json;
     private final Clock clock;
+    private final PlanService plans;
 
     public PushService(PushSubscriptionMapper subscriptions, WebPushSender sender,
                        @Qualifier(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME) MessageSource messages,
-                       @Qualifier("applicationTaskExecutor") TaskExecutor executor, JsonMapper json, Clock clock) {
+                       @Qualifier("applicationTaskExecutor") TaskExecutor executor, JsonMapper json, Clock clock,
+                       PlanService plans) {
         this.subscriptions = subscriptions;
         this.sender = sender;
         this.messages = messages;
         this.executor = executor;
         this.json = json;
         this.clock = clock;
+        this.plans = plans;
     }
 
     public Config config() {
-        return new Config(sender.enabled(), sender.publicKey());
+        return new Config(available(), sender.publicKey());
+    }
+
+    /** Serverdə push qurulub və şirkətin paketində var. */
+    private boolean available() {
+        return sender.enabled() && plans.has(Feature.PUSH);
     }
 
     /** Brauzerin abunəsi: ünvan icazəli push serverində olmalı, açarlar düzgün ölçüdə. */
     public void subscribe(UUID customerId, String endpoint, String p256dh, String auth, @Nullable String userAgent) {
-        if (!sender.enabled()) {
+        if (!available()) {
             throw new ApiException(ErrorCode.PUSH_UNAVAILABLE);
         }
         if (!WebPushSender.allowedEndpoint(endpoint) || decodedLength(p256dh) != 65 || decodedLength(auth) != 16) {
@@ -117,7 +127,7 @@ public class PushService {
      * söndürülübsə heç nə etmir.
      */
     public void notify(UUID customerId, Kind kind, Object... args) {
-        if (!sender.enabled()) {
+        if (!available()) {
             return;
         }
         TenantInfo tenant = TenantContext.require();

@@ -78,5 +78,9 @@ Aşağıdakı cədvəldə mətnlər Azərbaycan dilindədir (`messages_az.proper
 | `DOMAIN_IS_PRIMARY` | 409 | Əsas domen silinə bilməz | Əvvəlcə başqa domeni əsas edin. Çiplərdəki linklər əsas domenə yazılıb. |
 | `CAMPAIGN_NO_RECIPIENTS` | 409 | Alıcı yoxdur | Seçilmiş auditoriyada kampaniya SMS-i ala bilən müştəri yoxdur. |
 | `CAMPAIGN_STATE_CHANGED` | 409 | Kampaniyanın vəziyyəti dəyişib | Kampaniya artıq təsdiqlənib, rədd edilib və ya ləğv olunub. Səhifəni yeniləyin. |
+| `PLAN_FEATURE_UNAVAILABLE` | 403 | Paketinizdə yoxdur | Bu imkan cari paketinizə daxil deyil. Paketi yüksəltmək üçün bizimlə əlaqə saxlayın. |
+| `PLAN_LIMIT_REACHED` | 409 | Paketin limiti dolub | Paketinizin limiti dolub. Daha çoxu üçün paketi yüksəldin. |
+| `PLAN_TRIAL_EXPIRED` | 402 | Sınaq müddəti bitib | Pulsuz sınaq müddəti bitib, xidmət dayandırılıb. |
+| `PLAN_TRIAL_ALREADY_USED` | 409 | Sınaq artıq istifadə olunub | Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub. |
 | `TENANT_UNAVAILABLE` | 503 | Xidmət müvəqqəti əlçatmazdır | Bu şirkətin loyallıq xidməti hazırda işləmir. Bir az sonra yenidən cəhd edin. |
 | `INTERNAL_ERROR` | 500 | Gözlənilməz xəta | Nəsə alınmadı. Bir azdan yenidən cəhd edin. |
