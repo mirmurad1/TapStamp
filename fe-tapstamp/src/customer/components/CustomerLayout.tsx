@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Gift, Settings, Stamp } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Outlet, useLocation } from 'react-router';
+import { Link, Outlet, ScrollRestoration, useLocation } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
@@ -43,7 +43,11 @@ export function CustomerLayout() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 bg-background/85 px-4 py-3 backdrop-blur">
+      {/* Səhifələr arasında keçəndə scroll yeni səhifədə yuxarıdan başlayır, "geri"də əvvəlki yerinə qayıdır */}
+      <ScrollRestoration />
+      {/* Başlıq tam rəngli və öz təbəqəsindədir: iOS Safari-də sticky + backdrop-blur geri qayıdanda başlığı
+          scroll edilənə qədər çəkmir */}
+      <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 bg-background px-4 py-3 [transform:translateZ(0)]">
         <Link
           to="/"
           className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
