@@ -70,10 +70,16 @@ function Profile({ me }: { me: Me }) {
       {rewards.length > 0 ? (
         <Link
           to="/gift-cards"
-          className="flex items-center justify-between gap-3 rounded-2xl bg-linear-to-br from-accent to-highlight p-5 text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="shine animate-slide-in relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-br from-primary to-[color-mix(in_srgb,var(--primary)_55%,var(--accent))] p-5 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="flex min-w-0 items-center gap-3">
-            <Gift className="size-8 shrink-0" aria-hidden="true" />
+            {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}
+            <span className="relative shrink-0">
+              <Gift className="animate-gift-wiggle size-8" aria-hidden="true" />
+              <span className="absolute -top-1.5 -right-2 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-white px-1 text-[10.5px] font-extrabold text-primary shadow">
+                {rewards.length}
+              </span>
+            </span>
             <span className="min-w-0">
               <span className="block text-lg font-bold">{t('rewards.title')}</span>
               <span className="block text-sm opacity-90">
@@ -81,7 +87,7 @@ function Profile({ me }: { me: Me }) {
               </span>
             </span>
           </span>
-          <ChevronRight className="size-6 shrink-0" aria-label={t('rewards.open')} />
+          <ChevronRight className="animate-nudge size-6 shrink-0" aria-label={t('rewards.open')} />
         </Link>
       ) : null}
       <NotificationsOffer />

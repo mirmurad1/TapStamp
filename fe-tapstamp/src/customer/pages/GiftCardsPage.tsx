@@ -135,7 +135,8 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
     <article
       className={cn(
         'relative overflow-hidden rounded-2xl p-5 shadow-sm',
-        active ? 'bg-linear-to-br from-primary via-primary to-accent text-primary-foreground' : 'bg-card text-muted-foreground',
+        // Hazır hədiyyə kartının üstündən vaxtaşırı işıq zolağı keçir (hologram)
+        active ? 'shine bg-linear-to-br from-primary via-primary to-accent text-primary-foreground' : 'bg-card text-muted-foreground',
       )}
     >
       <div className="flex items-start justify-between gap-3">

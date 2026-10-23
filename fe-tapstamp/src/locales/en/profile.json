@@ -17,7 +17,8 @@
     "pending_other": "{{count}} stamps are waiting for staff approval",
     "nextStampIn": "Next stamp in {{time}}",
     "returnTitle": "We won’t ask for your number again.",
-    "returnHint": "Next time, just tap the NFC tag — your stamp goes straight to your card."
+    "returnHint": "Next time, just tap the NFC tag — your stamp goes straight to your card.",
+    "lastOne": "Last stamp!"
   },
   "nav": {
     "home": "Home",

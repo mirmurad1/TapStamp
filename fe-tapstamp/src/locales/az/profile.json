@@ -17,7 +17,8 @@
     "pending_other": "{{count}} möhür işçi təsdiqini gözləyir",
     "nextStampIn": "Növbəti möhür {{time}} sonra",
     "returnTitle": "Nömrənizi bir daha soruşmayacağıq.",
-    "returnHint": "Növbəti gəlişinizdə NFC nişanına toxunun — möhürünüz birbaşa kartınıza düşəcək."
+    "returnHint": "Növbəti gəlişinizdə NFC nişanına toxunun — möhürünüz birbaşa kartınıza düşəcək.",
+    "lastOne": "Son möhür!"
   },
   "nav": {
     "home": "Ana səhifə",
