@@ -70,7 +70,7 @@ function Profile({ me }: { me: Me }) {
       {rewards.length > 0 ? (
         <Link
           to="/gift-cards"
-          className="shine animate-slide-in relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-br from-primary to-[color-mix(in_srgb,var(--primary)_55%,var(--accent))] p-5 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="shine animate-attention relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-br from-primary to-[color-mix(in_srgb,var(--primary)_55%,var(--accent))] p-5 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="flex min-w-0 items-center gap-3">
             {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}

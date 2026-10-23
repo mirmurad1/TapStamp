@@ -305,6 +305,20 @@ input::-ms-clear {
   animation: nudge-right 1.8s ease-in-out infinite;
 }
 
-@utility animate-slide-in {
-  animation: fade-up 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) 0.8s both;
+/* Blok əvvəldən yerində görünür (yeri boş qalmır); möhürlər yandıqdan sonra yüngülcə "nəfəs alıb" diqqət çəkir */
+@keyframes attention-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.03);
+  }
+  70% {
+    transform: scale(0.99);
+  }
+}
+
+@utility animate-attention {
+  animation: attention-pop 0.6s ease-in-out 0.8s;
 }
