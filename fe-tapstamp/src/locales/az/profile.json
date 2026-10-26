@@ -91,7 +91,8 @@
     "tryAgain": "Telefonu NFC nişanına yenidən toxundurun.",
     "retryIn": "Növbəti möhürü {{time}} sonra ala bilərsiniz.",
     "otherBrowser": "Bu link başqa cihazda açılıb. Möhürü almaq üçün telefonunuzu NFC nişanına özünüz toxundurun.",
-    "errorTitle": "Möhür verilmədi"
+    "errorTitle": "Möhür verilmədi",
+    "opening": "Kartınız açılır"
   },
   "settings": {
     "title": "Parametrlər",
@@ -143,7 +144,9 @@
     "button": "Ana ekrana əlavə et",
     "iosStep1": "Safari-də aşağıdakı",
     "share": "Paylaş",
-    "iosStep2": "düyməsini basın, sonra \"Ana ekrana əlavə et\" seçin."
+    "iosStep2": "düyməsini basın, sonra \"Ana ekrana əlavə et\" seçin.",
+    "rowHint": "Ana ekranda ikon kimi, tam ekranda açılır",
+    "iosStepAdd": "\"Ana ekrana əlavə et\" seçin"
   },
   "referral": {
     "title": "Dostunu dəvət et",
@@ -169,7 +172,13 @@
     "descriptionRegistration": "Dostun linkinlə qeydiyyatdan keçən kimi sən {{mine}}, dostun isə {{friend}} bonus möhür qazanır.",
     "rulesRegistration": "Ayda ən çox {{cap}} dost sayılır.",
     "shareTextRegistration_one": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}",
-    "shareTextRegistration_other": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}"
+    "shareTextRegistration_other": "Səni dəvət edirəm! Linklə qeydiyyatdan keç və dərhal {{count}} bonus möhür qazan: {{link}}",
+    "rowHint": "Sən {{mine}}, dostun {{friend}} bonus möhür qazanır",
+    "forYou": "sənə",
+    "forFriend": "dostuna",
+    "statInvited": "dəvət etdiyin",
+    "statRewarded": "bonus qazandıran",
+    "statPending": "hələ gəlməyən"
   },
   "push": {
     "title": "Bildirişlər",
@@ -186,6 +195,10 @@
     "errors": {
       "denied": "İcazə verilmədi.",
       "failed": "Bildirişləri açmaq alınmadı. Bir azdan yenidən cəhd et."
-    }
+    },
+    "rowHint": "Hədiyyən hazır olanda xəbər alacaqsan",
+    "previewReward": "Kartın doldu, {{reward}} səni gözləyir!",
+    "previewStamp": "Möhürün təsdiqləndi: {{count}}/{{total}}",
+    "previewNow": "indi"
   }
 }

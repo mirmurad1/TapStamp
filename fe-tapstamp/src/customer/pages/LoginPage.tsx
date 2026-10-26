@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { isApiError } from '@/shared/api/client';
 import { currentLanguage } from '@/shared/i18n/setup';
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
@@ -56,8 +57,10 @@ export function LoginPage() {
     void navigate(afterLogin, { replace: true });
   };
 
+  const stepIndex = step.name === 'phone' ? 1 : step.name === 'code' ? 2 : 3;
   return (
     <div className="flex flex-col gap-4 pt-2">
+      <StepBar current={stepIndex} total={3} />
       {step.name === 'phone' ? (
         <PhoneStep
           onSent={(phone, challengeId, resendAt) => setStep({ name: 'code', phone, challengeId, resendAt })}
@@ -83,6 +86,21 @@ export function LoginPage() {
       {step.name === 'register' ? (
         <RegisterStep registrationToken={step.registrationToken} onRegistered={() => void finish()} />
       ) : null}
+    </div>
+  );
+}
+
+/** Girişin addımları (nömrə, SMS kodu, qeydiyyat): keçilmiş addımlar brend rəngində. */
+function StepBar({ current, total }: { current: number; total: number }) {
+  const { t } = useTranslation('auth');
+  return (
+    <div className="flex gap-1.5" role="img" aria-label={t('login.step', { current, total })}>
+      {Array.from({ length: total }, (_, index) => (
+        <span
+          key={index}
+          className={cn('h-1 flex-1 rounded-full transition-colors duration-500', index < current ? 'bg-primary' : 'bg-border')}
+        />
+      ))}
     </div>
   );
 }

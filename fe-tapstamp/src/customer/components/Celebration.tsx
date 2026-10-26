@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui/dialog';
 
-const COLORS = ['var(--primary)', 'var(--accent)', 'var(--highlight)', '#22c55e', '#0ea5e9'];
+const COLORS = ['var(--primary)', 'color-mix(in srgb, var(--primary) 45%, #fff)', '#f5c542', 'color-mix(in srgb, var(--primary) 70%, #000)', '#ffffff'];
 
 /**
  * Konfeti: dekorativ, ekran oxuyucularından gizlidir; "azaldılmış hərəkət" rejimində animasiya söndürülür.
@@ -66,11 +66,11 @@ export function Celebration({ open, rewardName, onClose }: CelebrationProps) {
       {open ? <Confetti /> : null}
       <Dialog open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
         <DialogContent className="text-center">
-          <div className="mx-auto grid size-24 place-items-center rounded-full bg-linear-to-br from-accent to-highlight text-white shadow-lg">
+          <div className="mx-auto grid size-24 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg">
             <Gift className="animate-gift-bounce size-12" aria-hidden="true" />
           </div>
           <DialogTitle className="flex items-center justify-center gap-2 text-3xl font-bold">
-            <PartyPopper className="size-7 text-[var(--highlight-ink)]" aria-hidden="true" />
+            <PartyPopper className="size-7 text-primary" aria-hidden="true" />
             {t('celebrate.title')}
           </DialogTitle>
           <DialogDescription className="text-base text-foreground">

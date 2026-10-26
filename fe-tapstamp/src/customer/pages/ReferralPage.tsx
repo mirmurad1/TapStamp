@@ -7,7 +7,6 @@ import { Link, Navigate, useParams } from 'react-router';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 
 import { publicApi, referralApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
@@ -46,30 +45,31 @@ export function ReferralPage() {
   const companyName = resolveText(company.data?.name, lang);
 
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <Gift className="size-10 text-primary" aria-hidden="true" />
-        <CardTitle className="text-2xl">{t('referral.landing.title', { company: companyName })}</CardTitle>
-        <CardDescription>
-          {t(program.data.rewardOn === 'REGISTRATION' ? 'referral.landing.descriptionRegistration' : 'referral.landing.description', {
-            count: program.data.friendStamps ?? 1,
-          })}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {status === 'signedIn' ? (
-          <>
-            <p className="text-sm text-muted-foreground">{t('referral.landing.alreadyMember')}</p>
-            <Button asChild size="lg">
-              <Link to="/">{t('referral.landing.home')}</Link>
-            </Button>
-          </>
-        ) : (
-          <Button asChild size="lg">
-            <Link to="/login">{t('referral.landing.join')}</Link>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-4 pt-4">
+      <section className="shine relative flex flex-col gap-2 overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground shadow-md">
+        <span className="grid size-12 place-items-center rounded-2xl bg-white/15">
+          <Gift className="animate-gift-wiggle size-7" aria-hidden="true" />
+        </span>
+        <h1 className="text-2xl leading-tight font-extrabold tracking-tight">
+          {t('referral.landing.title', { company: companyName })}
+        </h1>
+        <p className="text-sm opacity-90">
+          {status === 'signedIn'
+            ? t('referral.landing.alreadyMember')
+            : t(program.data.rewardOn === 'REGISTRATION' ? 'referral.landing.descriptionRegistration' : 'referral.landing.description', {
+                count: program.data.friendStamps ?? 1,
+              })}
+        </p>
+      </section>
+      {status === 'signedIn' ? (
+        <Button asChild size="lg">
+          <Link to="/">{t('referral.landing.home')}</Link>
+        </Button>
+      ) : (
+        <Button asChild size="lg">
+          <Link to="/login">{t('referral.landing.join')}</Link>
+        </Button>
+      )}
+    </div>
   );
 }

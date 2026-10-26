@@ -1,9 +1,11 @@
-import { Download, Share, Smartphone } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Copy, Download, Share, Smartphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+
+import { OfferRow, Sheet } from '../components/Sheet';
+import { useCompanyInitial } from '../lib/companyInitial';
 
 /** Chrome/Edge/Samsung brauzerinin quraşdırma hadisəsi (standart tiplərdə yoxdur). */
 interface InstallPromptEvent extends Event {
@@ -23,13 +25,15 @@ function isIos(): boolean {
 }
 
 /**
- * "Ana ekrana əlavə et": Android-də brauzerin quraşdırma pəncərəsi düymə ilə açılır, iPhone-da (Safari quraşdırma
- * düyməsi vermir) qısa təlimat göstərilir. Tətbiq artıq quraşdırılıbsa, kart görünmür.
+ * "Telefona quraşdırın" sətri və vərəqi: Android-də brauzerin quraşdırma pəncərəsi düymə ilə açılır (ana ekranın
+ * sxemində şirkətin ikonu yerinə "düşür"), iPhone-da (Safari quraşdırma düyməsi vermir) iki addımlı təlimat
+ * göstərilir. Tətbiq artıq quraşdırılıbsa, sətir görünmür.
  */
-export function InstallCard() {
-  const { t } = useTranslation('profile');
+export function InstallRow() {
+  const { t } = useTranslation(['profile', 'common']);
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent>();
   const [installed, setInstalled] = useState(isStandalone);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const onPrompt = (event: Event) => {
@@ -59,34 +63,99 @@ export function InstallCard() {
     await promptEvent.prompt();
     const choice = await promptEvent.userChoice;
     setPromptEvent(undefined);
+    setOpen(false);
     if (choice.outcome === 'accepted') {
       setInstalled(true);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Smartphone className="size-5 text-primary" aria-hidden="true" />
-          {t('install.title')}
-        </CardTitle>
-        <CardDescription>{t('install.description')}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <>
+      <OfferRow icon={<Smartphone />} title={t('install.title')} hint={t('install.rowHint')} onClick={() => setOpen(true)} />
+      <Sheet
+        open={open}
+        onOpenChange={setOpen}
+        icon={ios ? <Smartphone /> : undefined}
+        title={t('install.title')}
+        description={t('install.description')}
+      >
         {promptEvent && !ios ? (
-          <Button onClick={() => void install()}>
-            <Download className="size-4" aria-hidden="true" />
-            {t('install.button')}
-          </Button>
+          <>
+            <HomeScreenPreview />
+            <Button size="lg" onClick={() => void install()}>
+              <Download aria-hidden="true" />
+              {t('install.button')}
+            </Button>
+          </>
         ) : (
-          <p className="text-sm">
-            {t('install.iosStep1')}{' '}
-            <Share className="inline size-4 align-text-bottom text-primary" aria-label={t('install.share')} />{' '}
-            {t('install.iosStep2')}
-          </p>
+          <IosSteps />
         )}
-      </CardContent>
-    </Card>
+        <Button size="lg" variant="outline" onClick={() => setOpen(false)}>
+          {t('common:actions.close')}
+        </Button>
+      </Sheet>
+    </>
+  );
+}
+
+/** iPhone: iki ardıcıl addım; Safari panelinin sxemində "Paylaş" düyməsi yanıb-sönən halqa ilə göstərilir. */
+function IosSteps() {
+  const { t } = useTranslation('profile');
+  return (
+    <ol className="flex flex-col gap-3 text-left text-sm">
+      <li className="flex items-start gap-3">
+        <StepNumber value={1} />
+        <span>
+          {t('install.iosStep1')} <Share className="inline size-4 align-text-bottom text-primary" aria-hidden="true" />{' '}
+          {t('install.share')}
+        </span>
+      </li>
+      <li aria-hidden="true" className="flex justify-around rounded-2xl bg-muted py-2.5 text-muted-foreground">
+        <ChevronLeft className="size-5" />
+        <ChevronRight className="size-5" />
+        <span className="relative text-primary">
+          <Share className="size-5" />
+          <span className="animate-stamp-ring absolute -inset-2 rounded-full border-2 border-primary [animation-iteration-count:infinite]" />
+        </span>
+        <BookOpen className="size-5" />
+        <Copy className="size-5" />
+      </li>
+      <li className="flex items-start gap-3">
+        <StepNumber value={2} />
+        <span>{t('install.iosStepAdd')}</span>
+      </li>
+    </ol>
+  );
+}
+
+function StepNumber({ value }: { value: number }) {
+  return (
+    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+      {value}
+    </span>
+  );
+}
+
+/** Ana ekranın sxemi: şirkətin ikonu boş yerə "düşür" — quraşdırmadan sonra nə olacağı görünür. */
+function HomeScreenPreview() {
+  const initial = useCompanyInitial();
+  return (
+    <div
+      aria-hidden="true"
+      className="grid grid-cols-4 gap-3 rounded-2xl bg-[linear-gradient(160deg,color-mix(in_srgb,var(--primary)_14%,#dfe4ef),#ece6dd)] p-4"
+    >
+      {Array.from({ length: 8 }, (_, index) =>
+        index === 5 ? (
+          <span
+            key={index}
+            className="animate-stamp-pop grid aspect-square place-items-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground shadow-md [animation-delay:0.35s]"
+          >
+            {initial}
+          </span>
+        ) : (
+          <span key={index} className="aspect-square rounded-xl bg-white/55" />
+        ),
+      )}
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hourglass, LoaderCircle, MapPin, Nfc, TimerReset, TriangleAlert } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 
@@ -15,8 +15,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { publicApi, tapApi, type ClaimResult } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { customerKeys } from '../auth/queryClient';
-import { Celebration, Confetti } from '../components/Celebration';
-import { StampScene } from '../components/stamp3d/StampScene';
+import { Celebration } from '../components/Celebration';
+import { STAMP_BURST_MS, StampBurst } from '../components/StampBurst';
+import { useCompanyName } from '../lib/companyInitial';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 
 /**
@@ -118,27 +119,23 @@ function Claim({ token, branch }: { token: string; branch: string }) {
   );
 }
 
-/** Möhür animasiyasının uzunluğu (damğa enir, kağıza vurulur, iz qalır). */
-const STAMP_ANIMATION_MS = 2400;
-/** Möhür animasiyası (~2,4 san) və izin 2D-yə keçidi (~0,7 san) bitəndən bir az sonra kart ekranına keçid. */
-const SUCCESS_REDIRECT_MS = 3800;
+/** Kart dolanda təbrik pəncərəsi möhür səhnəsi bitəndən sonra açılır. */
+const STAMP_ANIMATION_MS = STAMP_BURST_MS;
+/** Səhnə (~3 san) bitəndən sonra kartı və zolağı görməyə vaxt, sonra kart ekranına keçid. */
+const SUCCESS_REDIRECT_MS = 5000;
 /** Təsdiq gözləyən möhürdə mətni oxumağa vaxt. */
 const PENDING_REDIRECT_MS = 4000;
 
 /**
- * Möhür vurulandan sonrakı ekran: damğa animasiyası, "Möhür əlavə olundu!" və konfeti. Kart və digər bölmələr ana
- * səhifədədir: animasiyalar bitəndən sonra ana səhifə (kart) avtomatik açılır.
+ * Möhür vurulandan sonrakı ekran: tam ekran möhür səhnəsi (dalğa, zərbə, sayğac, kart). Animasiyalar bitəndən sonra
+ * ana səhifə (kart) avtomatik açılır.
  */
 function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string }) {
   const { t } = useTranslation('profile');
   const pending = result.status === 'PENDING';
   const completed = Boolean(result.giftCardId);
-  const [impact, setImpact] = useState(false);
-
+  const companyName = useCompanyName();
   const navigate = useNavigate();
-
-  // Damğa masaya dəyən an konfeti başlayır
-  const onImpact = useCallback(() => setImpact(true), []);
 
   // Animasiyalar bitəndən sonra kart ekranı avtomatik açılır (geri düyməsi istifadə olunmuş toxunuşa qaytarmır).
   // Kart dolubsa, təbrik pəncərəsi açılır — keçid onu bağlayanda olur.
@@ -150,27 +147,38 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
     return () => window.clearTimeout(timer);
   }, [completed, pending, navigate]);
 
-  return (
-    <div className="flex flex-col items-center gap-6 pt-6 text-center">
-      {impact && !completed ? <Confetti count={28} small /> : null}
-      {pending ? (
-        <span className="animate-fade-up grid size-20 place-items-center rounded-full bg-highlight text-white">
-          <Hourglass className="size-10" aria-hidden="true" />
+  if (pending) {
+    return (
+      <div className="flex flex-col items-center gap-3 pt-10 text-center">
+        <span className="animate-gift-breathe grid size-28 place-items-center rounded-full bg-highlight text-white shadow-lg">
+          <Hourglass className="size-12" aria-hidden="true" />
         </span>
-      ) : (
-        <StampScene onImpact={onImpact} />
-      )}
-      <section className="animate-fade-up flex flex-col items-center gap-2" style={pending ? undefined : { animationDelay: '1.4s' }}>
-        <h1 className="text-2xl font-bold">{pending ? t('tap.pending') : t('tap.stamped')}</h1>
-        {pending ? <p className="text-muted-foreground">{t('tap.pendingHint')}</p> : null}
+        <h1 className="mt-3 text-2xl font-extrabold tracking-tight">{t('tap.pending')}</h1>
+        <p className="text-muted-foreground">{t('tap.pendingHint')}</p>
         {branch ? (
           <p className="flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="size-4" aria-hidden="true" />
             {branch}
           </p>
         ) : null}
-      </section>
-    </div>
+      </div>
+    );
+  }
+
+  const required = result.stampsRequired ?? 9;
+  // Kart dolanda server sayğacı sıfırlayır — səhnədə dolu kart göstərilir
+  const after = completed ? required : Math.min(Math.max(result.currentStamps ?? 1, 1), required);
+  const remaining = required - after;
+  return (
+    <StampBurst
+      before={after - 1}
+      after={after}
+      stampsRequired={required}
+      companyName={companyName}
+      branch={branch}
+      progressText={remaining > 0 ? t('card.progress', { count: remaining }) : t('card.complete')}
+      redirectMs={completed ? undefined : SUCCESS_REDIRECT_MS - STAMP_BURST_MS}
+    />
   );
 }
 

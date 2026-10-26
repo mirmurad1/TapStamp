@@ -91,7 +91,8 @@
     "tryAgain": "Tap your phone on the NFC tag again.",
     "retryIn": "You can collect your next stamp in {{time}}.",
     "otherBrowser": "This link was opened on another device. Tap the NFC tag with your own phone to collect the stamp.",
-    "errorTitle": "No stamp this time"
+    "errorTitle": "No stamp this time",
+    "opening": "Opening your card"
   },
   "settings": {
     "title": "Settings",
@@ -143,7 +144,9 @@
     "button": "Add to home screen",
     "iosStep1": "In Safari, tap the",
     "share": "Share",
-    "iosStep2": "button, then choose \"Add to Home Screen\"."
+    "iosStep2": "button, then choose \"Add to Home Screen\".",
+    "rowHint": "Opens from your home screen, full screen",
+    "iosStepAdd": "Choose \"Add to Home Screen\""
   },
   "referral": {
     "title": "Invite a friend",
@@ -169,7 +172,13 @@
     "descriptionRegistration": "As soon as your friend signs up with your link, you get {{mine}} and your friend gets {{friend}} bonus stamps.",
     "rulesRegistration": "Up to {{cap}} friends count per month.",
     "shareTextRegistration_one": "Join me! Sign up with this link and get {{count}} bonus stamp right away: {{link}}",
-    "shareTextRegistration_other": "Join me! Sign up with this link and get {{count}} bonus stamps right away: {{link}}"
+    "shareTextRegistration_other": "Join me! Sign up with this link and get {{count}} bonus stamps right away: {{link}}",
+    "rowHint": "You get {{mine}} and your friend {{friend}} bonus stamps",
+    "forYou": "for you",
+    "forFriend": "for your friend",
+    "statInvited": "invited",
+    "statRewarded": "earned a bonus",
+    "statPending": "not visited yet"
   },
   "push": {
     "title": "Notifications",
@@ -186,6 +195,10 @@
     "errors": {
       "denied": "Permission was not granted.",
       "failed": "Could not turn on notifications. Please try again shortly."
-    }
+    },
+    "rowHint": "Know when your gift is ready",
+    "previewReward": "Your card is full, {{reward}} is waiting for you!",
+    "previewStamp": "Stamp confirmed: {{count}}/{{total}}",
+    "previewNow": "now"
   }
 }

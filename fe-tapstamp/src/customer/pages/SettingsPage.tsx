@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Smartphone, Trash2 } from 'lucide-react';
+import { ChevronRight, FileText, Globe, Phone, Smartphone, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router';
@@ -58,51 +58,57 @@ export function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-4 pt-2">
-      <h1 className="font-display text-3xl font-semibold">{t('settings.title')}</h1>
+      <h1 className="font-display text-3xl font-extrabold tracking-tight">{t('settings.title')}</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('settings.account')}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">{t('settings.phone')}</span>
-            <span className="font-medium" dir="ltr">
+      <section className="flex flex-col gap-2">
+        <h2 className="px-0.5 text-sm font-bold text-muted-foreground">{t('settings.account')}</h2>
+        <div className="divide-y divide-border rounded-2xl border border-border bg-card">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Phone className="size-5" aria-hidden="true" />
+            </span>
+            <span className="flex-1 text-sm font-semibold">{t('settings.phone')}</span>
+            <span className="text-sm text-muted-foreground" dir="ltr">
               {formatPhone(me.phone)}
             </span>
           </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-muted-foreground">{t('settings.language')}</span>
-              <LanguageSwitcher onSelect={(lang) => saveLanguage.mutate(lang)} />
-            </div>
-            <p className="text-xs text-muted-foreground">{t('settings.languageHint')}</p>
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Globe className="size-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold">{t('settings.language')}</span>
+              <span className="block text-xs text-muted-foreground">{t('settings.languageHint')}</span>
+            </span>
+            <LanguageSwitcher onSelect={(lang) => saveLanguage.mutate(lang)} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <SwitchNumber />
 
       <DevicesCard />
 
       <NotificationsSettings />
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('settings.legal.title')}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
+
+      <section className="flex flex-col gap-2">
+        <h2 className="px-0.5 text-sm font-bold text-muted-foreground">{t('settings.legal.title')}</h2>
+        <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {LEGAL_SLUGS.map((slug) => (
             <Link
               key={slug}
               to={`/legal/${slug}`}
-              className="flex min-h-11 items-center gap-3 rounded-xl bg-muted px-4 font-medium hover:underline"
+              className="flex min-h-14 items-center gap-3 px-4 py-2 text-sm font-semibold hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
             >
-              <FileText className="size-5 shrink-0 text-accent" aria-hidden="true" />
-              {t(`legal.${slug}`)}
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="size-5" aria-hidden="true" />
+              </span>
+              <span className="flex-1">{t(`legal.${slug}`)}</span>
+              <ChevronRight className="size-4 text-muted-foreground/60" aria-hidden="true" />
             </Link>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <DeleteAccount onDeleted={() => void leave({ accountDeleted: true })} />
     </div>

@@ -7,16 +7,15 @@ import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatCountdown } from '@/shared/lib/brand';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 
 import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
-import { InviteFriendCard } from '../components/InviteFriendCard';
-import { StampCard } from '../components/StampCard';
+import { InviteFriendRow } from '../components/InviteFriendCard';
+import { StampCard, StampCardNote } from '../components/StampCard';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
-import { InstallCard } from '../pwa/InstallCard';
-import { NotificationsOffer } from '../pwa/NotificationsCard';
+import { InstallRow } from '../pwa/InstallCard';
+import { NotificationsRow } from '../pwa/NotificationsCard';
 
 /** Ana səhifə: daxil olmuş müştəri üçün möhür kartı, qonaq üçün kafe haqqında qısa məlumat və giriş düyməsi. */
 export function HomePage() {
@@ -46,10 +45,10 @@ function Profile({ me }: { me: Me }) {
   return (
     <>
       <section className="pt-2">
-        <h1 className="font-display text-3xl font-bold leading-tight">
+        <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight">
           {me.name ? t('greeting.named', { name: me.name }) : t('greeting.guest')}
         </h1>
-        <p className="mt-2 text-muted-foreground">{t('intro')}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{t('intro')}</p>
       </section>
       {card ? (
         <StampCard
@@ -58,46 +57,53 @@ function Profile({ me }: { me: Me }) {
           pending={card.pendingStamps ?? 0}
           showReturnHint={justSignedIn}
           rewardName={resolveText(card.rewardName, lang)}
+          footer={
+            <>
+              {card.pendingStamps ? (
+                <StampCardNote tone="warn" icon={<Hourglass aria-hidden="true" />}>
+                  {t('card.pending', { count: card.pendingStamps })}
+                </StampCardNote>
+              ) : null}
+              <NextStamp at={card.nextStampAt} />
+            </>
+          }
         />
       ) : null}
-      {card?.pendingStamps ? (
-        <p className="flex items-center gap-2 rounded-xl bg-highlight/15 px-4 py-3 text-sm font-medium">
-          <Hourglass className="size-5 shrink-0 text-[var(--highlight-ink)]" aria-hidden="true" />
-          {t('card.pending', { count: card.pendingStamps })}
-        </p>
-      ) : null}
-      <NextStamp at={card?.nextStampAt} />
       {rewards.length > 0 ? (
+        // Bilet formalı blok: solda hədiyyə ikonu, qırıq xətt və iki yarımdairə kəsik, sağda hazır hədiyyələr
         <Link
           to="/gift-cards"
-          className="shine animate-attention relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-br from-primary to-[color-mix(in_srgb,var(--primary)_55%,var(--accent))] p-5 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="shine animate-attention relative flex items-center gap-3 overflow-hidden rounded-2xl bg-primary p-4 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="flex min-w-0 items-center gap-3">
-            {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}
-            <span className="relative shrink-0">
-              <Gift className="animate-gift-wiggle size-8" aria-hidden="true" />
-              <span className="absolute -top-1.5 -right-2 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-white px-1 text-[10.5px] font-extrabold text-primary shadow">
-                {rewards.length}
-              </span>
+          <span className="absolute -top-2 left-[3.6rem] size-4 rounded-full bg-background" aria-hidden="true" />
+          <span className="absolute -bottom-2 left-[3.6rem] size-4 rounded-full bg-background" aria-hidden="true" />
+          {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}
+          <span className="relative grid w-11 shrink-0 place-items-center border-r-2 border-dashed border-white/40 pr-3">
+            <Gift className="animate-gift-wiggle size-7" aria-hidden="true" />
+            <span className="absolute -top-2 right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-white px-1 text-[10.5px] font-extrabold text-primary shadow">
+              {rewards.length}
             </span>
-            <span className="min-w-0">
-              <span className="block text-lg font-bold">{t('rewards.title')}</span>
-              <span className="block text-sm opacity-90">
-                {rewards.map((reward) => resolveText(reward.name, lang)).join(', ')}
-              </span>
+          </span>
+          <span className="min-w-0 flex-1 pl-1">
+            <span className="block text-base font-bold">{t('rewards.title')}</span>
+            <span className="block truncate text-sm opacity-90">
+              {rewards.map((reward) => resolveText(reward.name, lang)).join(', ')}
             </span>
           </span>
           <ChevronRight className="animate-nudge size-6 shrink-0" aria-label={t('rewards.open')} />
         </Link>
       ) : null}
-      <NotificationsOffer />
-      <InviteFriendCard />
-      <InstallCard />
+      {/* Təkliflər bir siyahıdadır; heç biri göstərilmirsə siyahı da görünmür */}
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card empty:hidden">
+        <InviteFriendRow />
+        <NotificationsRow />
+        <InstallRow />
+      </div>
     </>
   );
 }
 
-/** Cooldown: növbəti möhürə qalan vaxt (şirkətin standart qaydası ilə). */
+/** Cooldown: növbəti möhürə qalan vaxt (şirkətin standart qaydası ilə) — kartın alt zolağında. */
 function NextStamp({ at }: { at: string | undefined }) {
   const { t } = useTranslation('profile');
   const until = at ? Date.parse(at) : undefined;
@@ -106,10 +112,9 @@ function NextStamp({ at }: { at: string | undefined }) {
     return null;
   }
   return (
-    <p className="flex items-center gap-2 text-sm text-muted-foreground">
-      <TimerReset className="size-4 shrink-0" aria-hidden="true" />
+    <StampCardNote icon={<TimerReset aria-hidden="true" />}>
       {t('card.nextStampIn', { time: formatCountdown(secondsLeft) })}
-    </p>
+    </StampCardNote>
   );
 }
 
@@ -118,48 +123,60 @@ function Guest() {
   const lang = currentLanguage();
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const rule = company.data?.rewardRule;
+  const branches = company.data?.branches ?? [];
+  const required = rule?.stampsRequired ?? 0;
   return (
     <>
       <section className="pt-2">
-        <h1 className="font-display text-3xl font-semibold leading-tight">
+        <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight">
           {resolveText(company.data?.name, lang) || t('greeting.guest')}
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          {resolveText(company.data?.description, lang) || t('intro')}
-        </p>
+        <p className="mt-1.5 text-muted-foreground">{resolveText(company.data?.description, lang) || t('intro')}</p>
       </section>
-      {rule?.stampsRequired ? (
-        <Card className="bg-primary text-primary-foreground">
-          <CardContent className="flex items-center gap-4 pt-5 sm:pt-6">
-            <Gift className="size-8 shrink-0" aria-hidden="true" />
-            <p className="font-medium">
-              {t('guest.rule', { count: rule.stampsRequired, reward: resolveText(rule.rewardName, lang) })}
-            </p>
-          </CardContent>
-        </Card>
+      {rule && required > 0 ? (
+        // Qayda boş kartla göstərilir: müştəri nə toplayacağını görür
+        <section className="rounded-3xl border border-primary/15 bg-card p-5 shadow-[0_14px_30px_-18px_color-mix(in_srgb,var(--primary)_55%,transparent)]">
+          <p className="font-bold">
+            {t('guest.rule', { count: required, reward: resolveText(rule.rewardName, lang) })}
+          </p>
+          <ol className="mt-4 grid grid-cols-5 gap-2.5" aria-hidden="true">
+            {Array.from({ length: required }, (_, index) =>
+              index === required - 1 ? (
+                <li key={index} className="grid aspect-square place-items-center rounded-full border-2 border-primary/35 bg-primary/10 text-primary">
+                  <Gift className="size-5" />
+                </li>
+              ) : (
+                <li
+                  key={index}
+                  className="grid aspect-square place-items-center rounded-full border-2 border-dashed border-border text-sm font-bold text-muted-foreground/50"
+                >
+                  {index + 1}
+                </li>
+              ),
+            )}
+          </ol>
+        </section>
       ) : null}
       <Button asChild size="lg">
         <Link to="/login">{t('guest.cta')}</Link>
       </Button>
-      {company.data?.branches && company.data.branches.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('guest.branches')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-3">
-              {company.data.branches.map((branch) => (
-                <li key={branch.id} className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
-                  <span>
-                    <span className="block font-medium">{resolveText(branch.name, lang)}</span>
-                    <span className="block text-sm text-muted-foreground">{resolveText(branch.address, lang)}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      {branches.length > 0 ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="px-0.5 text-sm font-bold text-muted-foreground">{t('guest.branches')}</h2>
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+            {branches.map((branch) => (
+              <li key={branch.id} className="flex items-start gap-3 px-4 py-3.5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <MapPin className="size-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">{resolveText(branch.name, lang)}</span>
+                  <span className="block text-[13px] text-muted-foreground">{resolveText(branch.address, lang)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
     </>
   );
