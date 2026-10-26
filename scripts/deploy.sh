@@ -13,6 +13,7 @@
 #      eyni reload-da nginx konfiqurasiyası da yenilənir: fayllar (infra/nginx) konteynerə mount olunub, şablonlar
 #      (templates/*.template) yenidən emal olunur; "nginx -t" uğursuzdursa, köhnə konfiqurasiya bərpa olunur;
 #   4. köhnə konteyner yumşaq dayandırılır: yeni sorğu almır, başlanmış sorğuları bitirir (graceful shutdown).
+# nginx-in compose ayarları (yeni env dəyişəni, mount) dəyişibsə, nginx əvvəlcə avtomatik yenidən yaradılır (1–3 san).
 #
 # Baza miqrasiyaları yeni backend başlayanda tətbiq olunur. Keçid zamanı iki versiya qısa müddət eyni bazada
 # işlədiyi üçün miqrasiyalar geriyə uyğun olmalıdır (bax: docs/deployment.md, "Yeniləmə").
@@ -112,6 +113,25 @@ if [[ ${#SERVICES[@]} -gt 0 ]]; then
   else
     log "Yeni image-lər endirilir"
     dc pull --ignore-buildable "${SERVICES[@]}" || true
+  fi
+fi
+
+# Mərhələ 0: nginx-in compose ayarları (env dəyişənləri, mount-lar, portlar) dəyişibsə, reload kifayət etmir —
+# yeni dəyişən köhnə konteynerdə yoxdur və şablon emalı uğursuz olur. Belə halda konteyner əvvəlcədən yenidən
+# yaradılır (1–3 san fasilə); upstream-lər servis adına (hələ köhnə konteynerlərə) yönəlir, keçid aşağıda olur.
+nginx_id=$(dc ps -q nginx)
+if [[ -n "$nginx_id" ]]; then
+  running_hash=$(docker inspect --format '{{index .Config.Labels "com.docker.compose.config-hash"}}' "$nginx_id")
+  wanted_hash=$(dc config --hash nginx | awk '{ print $2 }')
+  if [[ -n "$wanted_hash" && "$running_hash" != "$wanted_hash" ]]; then
+    log "nginx ayarları dəyişib — konteyner yenidən yaradılır (qısa fasilə)"
+    dc up -d --no-deps --force-recreate nginx
+    for _ in $(seq 1 15); do
+      if dc exec -T nginx nginx -t -q 2>/dev/null; then
+        break
+      fi
+      sleep 1
+    done
   fi
 fi
 
