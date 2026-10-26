@@ -30,5 +30,7 @@ public abstract class IntegrationTest {
         // Fon işləri (token və möhür müddətləri) testlərdə birbaşa çağırılır — paralel işləyib nəticəni pozmasın
         registry.add("app.jobs.enabled", () -> false);
         registry.add("app.internal-token", () -> TestTenants.INTERNAL_TOKEN);
+        registry.add("app.site.domain", () -> TestTenants.SITE_HOST);
+        registry.add("app.site.inbox", () -> TestTenants.SITE_INBOX);
     }
 }

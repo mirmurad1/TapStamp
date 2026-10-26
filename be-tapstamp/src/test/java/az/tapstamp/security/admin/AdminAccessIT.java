@@ -142,6 +142,7 @@ class AdminAccessIT extends AdminIntegrationTest {
                         || pattern.startsWith("/api/v1/me/")
                         || pattern.startsWith("/api/v1/platform/") || pattern.startsWith("/api/v1/public/")
                         || pattern.startsWith("/api/v1/taps/") || pattern.startsWith("/t/")
+                        || pattern.equals("/api/v1/site/demo-requests")
                         || pattern.equals("/api/v1/csrf") || pattern.equals("/api/v1/context")
                         || pattern.equals("/manifest.webmanifest") || pattern.startsWith("/internal/")
                         || pattern.startsWith("/api/v1/docs") || pattern.startsWith("/api/v1/openapi.json")

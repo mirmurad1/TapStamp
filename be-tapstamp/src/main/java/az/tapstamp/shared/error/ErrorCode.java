@@ -27,6 +27,8 @@ public enum ErrorCode {
     SMS_DAILY_LIMIT_REACHED(HttpStatus.TOO_MANY_REQUESTS),
     /** Serverdə web push qurulmayıb (VAPID açarları yoxdur). */
     PUSH_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
+    /** Saytın poçt qutusu qurulmayıb və ya email göndərilmədi — müraciət qəbul olunmadı. */
+    SITE_INBOX_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
     /** Bu imkan şirkətin paketinə daxil deyil. */
     PLAN_FEATURE_UNAVAILABLE(HttpStatus.FORBIDDEN),
     /** Paketin limiti (filial, işçi) dolub. */

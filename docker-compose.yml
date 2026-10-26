@@ -53,6 +53,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       APP_PLATFORM_DOMAIN: ${APP_PLATFORM_DOMAIN:-platform.localhost}
+      # Şirkət saytı və demo müraciətlərinin poçt qutusu
+      APP_SITE_DOMAIN: ${APP_SITE_DOMAIN:-site.localhost}
+      APP_SITE_INBOX: ${APP_SITE_INBOX:-}
       APP_SMS_PROVIDER: ${APP_SMS_PROVIDER:-console}
       APP_SMS_SENDER: ${APP_SMS_SENDER:-TrendStamp}
       APP_MAIL_PROVIDER: ${APP_MAIL_PROVIDER:-console}
@@ -132,11 +135,14 @@ services:
       NGINX_HSTS_HEADER: ${NGINX_HSTS_HEADER:-}
       # Platforma domenində müştəri tətbiqi açılmır (bax: infra/nginx/templates/app.conf.template)
       APP_PLATFORM_DOMAIN: ${APP_PLATFORM_DOMAIN:-platform.localhost}
+      APP_SITE_DOMAIN: ${APP_SITE_DOMAIN:-site.localhost}
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/templates:/etc/nginx/templates:ro
       - ./infra/nginx/snippets:/etc/nginx/snippets:ro
       - ./infra/nginx/certs:/etc/nginx/certs:ro
+      # Şirkət saytının statik faylları (git pull ilə yenilənir, nginx-i yenidən qurmaq lazım deyil)
+      - ./site:/usr/share/nginx/site:ro
       - certbot-webroot:/var/www/certbot:ro
     security_opt:
       - no-new-privileges:true

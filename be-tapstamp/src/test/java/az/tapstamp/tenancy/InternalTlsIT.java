@@ -24,7 +24,9 @@ class InternalTlsIT extends AdminIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString(TestTenants.ALPHA_HOST + "\n")))
                 .andExpect(content().string(Matchers.containsString(TestTenants.BETA_HOST + "\n")))
-                .andExpect(content().string(Matchers.containsString("platform.localhost\n")));
+                .andExpect(content().string(Matchers.containsString("platform.localhost\n")))
+                .andExpect(content().string(Matchers.containsString(TestTenants.SITE_HOST + "\n")))
+                .andExpect(content().string(Matchers.containsString("www." + TestTenants.SITE_HOST + "\n")));
 
         mvc.perform(get("/internal/tls/domains").header("X-Internal-Token", "wrong")).andExpect(status().isNotFound());
         mvc.perform(get("/internal/tls/domains")).andExpect(status().isNotFound());

@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  * <ul>
  *   <li>şirkətin domeni → {@link TenantContext} qurulur;</li>
  *   <li>platformanın domeni → tenant yoxdur, yalnız platforma endpoint-ləri işləyir;</li>
+ *   <li>şirkət saytının domeni (və www.) → tenant yoxdur, yalnız sayt endpoint-ləri işləyir;</li>
  *   <li>platforma endpoint-ləri şirkət domenində, şirkət endpoint-ləri platforma domenində 404 qaytarır;</li>
  *   <li>tanınmayan domen → 404, aktiv olmayan tenant → 503 (sorğu heç bir emala çatmır).</li>
  * </ul>
@@ -50,18 +52,23 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
     private static final List<String> PLATFORM_PREFIXES = List.of(
             "/api/v1/platform/", "/api/v1/csrf", "/api/v1/context", "/api/v1/dev/");
     private static final String PLATFORM_API_PREFIX = "/api/v1/platform/";
+    /** Şirkət saytının (trendsolutions.az) endpoint-ləri; başqa domendə mövcud deyil. */
+    private static final String SITE_API_PREFIX = "/api/v1/site/";
     private static final Pattern VALID_HOST = Pattern.compile("^[a-z0-9.-]{1,253}$");
 
     private final TenantDirectory directory;
     private final AppProperties properties;
+    private final String siteDomain;
     /** Tənbəl: veb serversiz işə salmada (CLI əmrləri) MVC bean-ləri yoxdur. */
     private final ObjectProvider<HandlerExceptionResolver> resolver;
 
     public TenantResolutionFilter(TenantDirectory directory, AppProperties properties,
                                   @Qualifier("handlerExceptionResolver")
-                                  ObjectProvider<HandlerExceptionResolver> resolver) {
+                                  ObjectProvider<HandlerExceptionResolver> resolver,
+                                  @Value("${app.site.domain:}") String siteDomain) {
         this.directory = directory;
         this.properties = properties;
+        this.siteDomain = normalize(siteDomain);
         this.resolver = resolver;
     }
 
@@ -84,6 +91,20 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
             }
             request.setAttribute(RequestScope.ATTRIBUTE, RequestScope.PLATFORM);
             chain.doFilter(request, response);
+            return;
+        }
+
+        if (!siteDomain.isEmpty() && (host.equals(siteDomain) || host.equals("www." + siteDomain))) {
+            if (!path.startsWith(SITE_API_PREFIX)) {
+                reject(request, response, ErrorCode.NOT_FOUND);
+                return;
+            }
+            request.setAttribute(RequestScope.ATTRIBUTE, RequestScope.NONE);
+            chain.doFilter(request, response);
+            return;
+        }
+        if (path.startsWith(SITE_API_PREFIX)) {
+            reject(request, response, ErrorCode.NOT_FOUND);
             return;
         }
 

@@ -57,7 +57,8 @@ nano .env
 | `APP_SMS_PROVIDER`, `APP_SMS_PG_URL`, `APP_SMS_PG_PUBLIC_KEY`, `APP_SMS_PG_PRIVATE_KEY` | `postaguvercini` və Poçt Göyərçininin API ünvanı (yolsuz), PublicKey, PrivateKey. Başlıq (`APP_SMS_SENDER`, standart `TrendStamp`) provayderdə qeydiyyatdan keçmiş olmalıdır. Ümumi JSON adapteri üçün: `http`, `APP_SMS_HTTP_URL`, `APP_SMS_HTTP_API_KEY` |
 | `APP_SMS_TENANT_DAILY_NEW`, `APP_SMS_PLATFORM_DAILY`, `APP_SMS_ALERT_EMAIL` | Giriş kodlarının gündəlik SMS büdcəsi: şirkət üzrə **yeni nömrələrə** (standart 100; platforma panelində şirkət üçün dəyişdirilə bilər) və platforma üzrə **bütün kodlar** (standart 1500). 80% və 100%-də `APP_SMS_ALERT_EMAIL`-ə xəbərdarlıq (boşdursa yalnız platforma auditi). Bax: qərar #53 |
 | `APP_PUSH_VAPID_PUBLIC_KEY`, `APP_PUSH_VAPID_PRIVATE_KEY`, `APP_PUSH_SUBJECT` | Web push bildirişləri. Açarlar **bir dəfə** yaradılır: `scripts/gen-vapid-keys.sh` (və ya `.ps1`) iki sətri çap edir — `.env`-ə əlavə edin. Dəyişdirilsə, bütün müştərilərin abunələri etibarsız olur. Boşdursa push söndürülür. `APP_PUSH_SUBJECT` — `mailto:` ünvanı (boşdursa `APP_MAIL_FROM`). Bax: qərar #54 |
-| `APP_MAIL_PROVIDER`, `APP_MAIL_FROM`, `SMTP_*` | `smtp` və poçt serverinin məlumatları |
+| `APP_MAIL_PROVIDER`, `APP_MAIL_FROM`, `SMTP_*` | `smtp` və poçt serverinin məlumatları (Google Workspace üçün aşağıdakı bölməyə baxın) |
+| `APP_SITE_DOMAIN`, `APP_SITE_INBOX` | Şirkət saytı: `trendsolutions.az` və demo müraciətlərinin gəldiyi poçt qutusu (`info@trendsolutions.az`). Saytın faylları `site/` qovluğundadır, nginx onları birbaşa verir; `www.` əsas domenə yönləndirilir, sertifikatları certbot avtomatik alır. DNS-də `@` və `www` A yazıları serverə yönəlməlidir. `APP_SITE_INBOX` boşdursa forma 503 qaytarır. Bax: qərar #58 |
 | `APP_DEV_SIMULATOR_KEY`, `DEV_SEED_*` | boş saxlayın (prod-da istifadə olunmur) |
 
 **`.env` faylının ehtiyat nüsxəsini ayrıca, təhlükəsiz yerdə saxlayın** (məs. parol meneceri). Telefon nömrələri, çip açarları və TOTP sirləri bu açarlarla şifrələnib. Açarlar itərsə, bazanın nüsxəsi də oxunmaz olur.
@@ -184,3 +185,25 @@ Açarı ləğv etmək üçün `authorized_keys`-dən `github-deploy` sətrini si
 - [ ] `https://<şirkət>/actuator/env` → 404, `/actuator/health` → `UP`.
 - [ ] `scripts/backup.sh` əl ilə işlədilib, nüsxə yaranıb.
 - [ ] `.env` serverdən kənarda təhlükəsiz saxlanılır.
+
+## Email: Google Workspace (smtp.gmail.com)
+
+Sistem emailləri (işçi dəvəti, şifrə bərpası, SMS xəbərdarlığı) və saytın demo müraciətləri Google Workspace poçtu ilə göndərilir.
+
+1. Göndərən hesabda (məs. `info@trendsolutions.az`) **2 addımlı doğrulamanı** açın: Google hesabı → Təhlükəsizlik.
+2. Həmin bölmədə **Tətbiq parolları** (App passwords) → yeni parol yaradın (ad: `TapStamp server`). 16 simvollu parolu kopyalayın — bir dəfə göstərilir.
+   Bu bölmə görünmürsə, Workspace admin panelində (admin.google.com → Security → Authentication → 2-step verification) istifadəçilərə 2 addımlı doğrulamanın icazəli olduğunu yoxlayın.
+3. Serverdə `.env`:
+   ```
+   APP_MAIL_PROVIDER=smtp
+   APP_MAIL_FROM=info@trendsolutions.az
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USERNAME=info@trendsolutions.az
+   SMTP_PASSWORD=<tətbiq parolu, boşluqsuz>
+   APP_SITE_DOMAIN=trendsolutions.az
+   APP_SITE_INBOX=info@trendsolutions.az
+   ```
+4. `./scripts/deploy.sh --only backend` (sayt faylları və nginx üçün tam `./scripts/deploy.sh`).
+
+`APP_MAIL_FROM` SMTP hesabının özü və ya onun təsdiqlənmiş ləqəbi (alias) olmalıdır, əks halda Gmail göndərəni dəyişdirir. Gmail gündə ~2000 məktub limitinə malikdir — bu layihənin həcmi üçün kifayətdir.

@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trend Solutions</title>
+<!-- Brauzer tabının ikonu: loqonun T işarəsi, şəffaf fonda -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -57 380 380%27%3E%3Cpath d=%27M60 8H372V68M6 54H126M168 54V258H232M326 54H214V204%27 fill=%27none%27 stroke=%27%231F9AAA%27 stroke-width=%2730%27/%3E%3C/svg%3E">
+<!-- Maket v3: trendsolutions.az şirkət saytı (AZ/EN/RU). TapStamp ayrıca məhsul bölməsidir. Əlaqə məlumatları yer tutucudur. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Inter Tight (başlıqlar) və Inter (mətn): Azərbaycan (ə, ğ, ş) və kiril hərflərini tam dəstəkləyir -->
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0A1226; --night-line:rgba(255,255,255,.12);
+  --paper:#F4F6F9; --paper-2:#EBEEF3; --card:#FFFFFF; --ink:#0E1830; --ink-2:#53607A; --line:#DDE3EB;
+  --violet:#1F9AAA; --violet-ink:#127280; --teal-logo:#4CC3D0; --mint:#2EE6A8;
+  --display:"Inter Tight","Inter",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{overflow-x:clip}
+body{background:var(--paper);color:var(--ink);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;font:600 16px var(--body);text-decoration:none;border:0;cursor:pointer;transition:transform .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn.mint{background:var(--mint);color:var(--night)}
+.btn.mint:hover{background:#5ff0bf}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 0 0 1px var(--night-line)}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+
+/* ===== Tünd bloklar (şirkət girişi və TapStamp) ===== */
+.dark{background:var(--night);color:#fff;position:relative;overflow:hidden;isolation:isolate}
+.dark::before{content:"";position:absolute;inset:0;z-index:-1;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:28px 28px;
+  mask-image:radial-gradient(ellipse 80% 70% at 70% 40%,#000 30%,transparent 75%)}
+.glow{position:absolute;z-index:-1;border-radius:50%;filter:blur(90px);opacity:.55}
+.glow.a{width:520px;height:520px;background:var(--violet);right:-120px;top:-140px;animation:drift 14s ease-in-out infinite alternate}
+.glow.b{width:380px;height:380px;background:#1EC08B;right:220px;top:280px;opacity:.35;animation:drift 18s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(-60px,50px) scale(1.1)}}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font:800 18px var(--display);text-decoration:none;letter-spacing:-.02em}
+.brand{gap:12px}
+.brand .mark{width:48px;height:34px;color:var(--teal-logo);flex:none}
+.brand .bt{display:flex;flex-direction:column;line-height:1}
+.brand .bt b{font:800 17px var(--display);letter-spacing:.02em}
+.brand .bt small{font:500 9.5px var(--body);letter-spacing:.28em;margin-top:3px;opacity:.85}
+footer .brand .mark{color:var(--violet)}
+.nav{display:flex;align-items:center;gap:6px;font-weight:500;font-size:15px}
+.nav>a:not(.btn){text-decoration:none;color:rgba(255,255,255,.72);padding:8px 12px;border-radius:999px}
+.nav>a:not(.btn):hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav .btn{min-height:40px;padding:0 18px;font-size:14.5px;margin-left:6px}
+.lang{display:flex;border-radius:999px;padding:3px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--night-line);margin-left:6px}
+.lang button{border:0;background:none;font:600 12.5px var(--body);padding:5px 9px;border-radius:999px;color:rgba(255,255,255,.65);cursor:pointer}
+.lang button:hover{color:#fff}
+.lang button[aria-pressed=true]{background:#fff;color:var(--night)}
+
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding-top:64px;padding-bottom:112px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--night-line);font-size:14px;color:rgba(255,255,255,.82);text-decoration:none}
+.pill b{background:var(--mint);color:var(--night);border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600}
+h1{margin-top:28px;font-weight:800;font-size:clamp(40px,6vw,74px);line-height:1.04;letter-spacing:-.025em}
+.grad{background:linear-gradient(100deg,#fff 5%,#8FDCE4 50%,var(--mint) 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin-top:24px;max-width:31em;color:rgba(255,255,255,.7);font-size:19px}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px}
+
+/* Girişin sağ tərəfi: istiqamət kartları */
+.what{display:grid;gap:14px;width:min(100%,400px);justify-self:end}
+.w-card{display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:24px;text-decoration:none;color:#fff;background:rgba(255,255,255,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);transition:transform .25s,background .25s}
+a.w-card:hover{transform:translateX(-6px);background:rgba(255,255,255,.12)}
+.w-card:nth-child(2){margin-left:-40px}
+.w-card b{display:block;font:700 18px var(--display);letter-spacing:-.02em}
+.w-card small{color:rgba(255,255,255,.62);font-size:14px}
+.w-ico{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--violet)}
+.w-ico.mint{background:var(--mint);color:var(--night)}
+.w-ico svg{width:22px;height:22px}
+.w-card.soon{opacity:.55;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+
+/* ===== Açıq bölmələr ===== */
+section{padding:112px 0}
+.kicker{font-weight:600;color:var(--violet-ink);font-size:15px}
+.kicker.light{color:var(--mint)}
+h2{margin-top:10px;font-weight:800;font-size:clamp(30px,3.9vw,48px);line-height:1.1;letter-spacing:-.02em;max-width:17em}
+.sub{margin-top:16px;color:var(--ink-2);max-width:36em;font-size:18px}
+
+.dirs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:48px}
+.dir{display:flex;flex-direction:column;padding:36px;border-radius:28px;background:var(--card);box-shadow:0 0 0 1px var(--line);text-decoration:none;transition:transform .25s}
+.dir:hover{transform:translateY(-4px)}
+.dir svg{width:30px;height:30px;color:var(--violet)}
+.dir h3{margin-top:24px;font-weight:700;font-size:25px;line-height:1.2;letter-spacing:-.03em}
+.dir p{margin-top:10px;color:var(--ink-2)}
+.dir span{margin-top:24px;font-weight:600;color:var(--violet-ink)}
+.dir.dk{background:var(--night);color:#fff;box-shadow:none}
+.dir.dk p{color:rgba(255,255,255,.68)} .dir.dk svg,.dir.dk span{color:var(--mint)}
+
+.custom{display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;align-items:start}
+.list{display:grid;gap:12px}
+.li{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:22px 24px;border-radius:22px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.li svg{width:24px;height:24px;color:var(--violet);margin-top:3px}
+.li b{font-weight:600;font-size:18px}
+.li p{color:var(--ink-2);font-size:16px;margin-top:2px}
+
+/* ===== TapStamp ===== */
+.product{border-radius:48px 48px 0 0}
+.product .hero{padding-top:96px;padding-bottom:96px}
+.p-logo{display:flex;align-items:center;gap:10px;margin-top:14px;font:800 24px var(--display);letter-spacing:-.03em}
+.p-logo i{width:28px;height:28px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 6px rgba(46,230,168,.18)}
+.p-h{margin-top:20px;color:#fff;font-size:clamp(34px,4.8vw,58px);max-width:none}
+
+.demo{position:relative;justify-self:center;width:min(100%,360px)}
+.phone{border-radius:36px;padding:20px;background:rgba(255,255,255,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 40px 80px -30px rgba(0,0,0,.6)}
+.phone small{display:block;color:rgba(255,255,255,.62);font-size:13px}
+.phone b{font:700 20px var(--display);letter-spacing:-.02em}
+.wallet{margin-top:14px;border-radius:22px;background:linear-gradient(140deg,var(--violet),var(--violet-ink));padding:20px;position:relative;overflow:hidden}
+.wallet::after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.08);right:-60px;top:-90px}
+.wallet .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px;color:rgba(255,255,255,.88)}
+.wallet .count{font:800 30px var(--display);color:#fff;letter-spacing:-.03em}
+.slots{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:16px 0 4px}
+.slot{aspect-ratio:1;border-radius:50%;border:2px dashed rgba(255,255,255,.4);display:grid;place-items:center;font-size:12px;color:rgba(255,255,255,.8)}
+.slot.on{background:#fff;border:0}
+.slot.on::after{content:"";width:42%;height:42%;border-radius:50%;background:var(--violet)}
+.slot.new{animation:land .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes land{from{transform:scale(2.4);opacity:0}}
+.tap{margin-top:14px;width:100%;min-height:52px;border:0;border-radius:16px;background:#fff;color:var(--night);font:600 16px var(--body);cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:center;padding:0 12px}
+.tap:hover{background:#DDF3F5}
+.tap svg{width:20px;height:20px;flex:none}
+.chip{position:absolute;right:-18px;top:-24px;width:68px;height:68px;border-radius:50%;background:var(--mint);display:grid;place-items:center;color:var(--night);font:800 13px var(--display);box-shadow:0 12px 34px -8px rgba(46,230,168,.7)}
+.chip::before,.chip::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--mint);opacity:0}
+.demo.pulse .chip::before{animation:ring .9s ease-out}
+.demo.pulse .chip::after{animation:ring .9s .2s ease-out}
+@keyframes ring{from{opacity:.8;transform:scale(.8)}to{opacity:0;transform:scale(1.7)}}
+.caption{text-align:center;margin-top:14px;font-size:14px;color:rgba(255,255,255,.58)}
+
+.product-body{background:var(--paper-2)}
+.bento{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(200px,auto);gap:16px;margin-top:56px}
+.tile{background:var(--card);border-radius:28px;padding:30px;box-shadow:0 0 0 1px var(--line);display:flex;flex-direction:column}
+.tile h3{font-weight:700;font-size:22px;line-height:1.2;letter-spacing:-.03em}
+.tile p{margin-top:10px;color:var(--ink-2);font-size:16px}
+.t-big{grid-column:span 4;grid-row:span 2;background:var(--night);color:#fff;box-shadow:none}
+.t-big p{color:rgba(255,255,255,.68);max-width:28em}
+.t-2{grid-column:span 2}
+.t-3{grid-column:span 3}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:auto;padding-top:32px}
+.steps div{border-radius:20px;padding:18px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--night-line)}
+.steps span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--mint);color:var(--night);font:800 14px var(--display)}
+.steps b{display:block;margin-top:14px;font-weight:600}
+.steps small{display:block;margin-top:4px;color:rgba(255,255,255,.62);font-size:14px;line-height:1.45}
+.big-num{margin-top:auto;padding-top:16px;font:800 56px/1 var(--display);letter-spacing:-.05em;color:var(--violet)}
+.langs{margin-top:auto;padding-top:16px;display:flex;gap:8px}
+.langs span{padding:6px 14px;border-radius:999px;background:var(--paper);font-weight:600;font-size:14px}
+.gift{margin-top:auto;padding-top:16px;display:flex;gap:10px}
+.gift span{flex:1;border-radius:16px;padding:14px;background:linear-gradient(140deg,#E3F4F6,#E6FBF4);font-weight:600;font-size:15px}
+.gift small{display:block;color:var(--ink-2);font-weight:400;font-size:13px}
+
+.demo-sec{padding-bottom:112px}
+.demo-box{background:var(--night);color:#fff;border-radius:40px;padding:64px;display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;position:relative;overflow:hidden;isolation:isolate}
+.demo-box .glow.a{width:420px;height:420px;left:-160px;bottom:-200px;top:auto;right:auto}
+.demo-box h2{color:#fff}
+.demo-box .sub{color:rgba(255,255,255,.68)}
+.perks{list-style:none;padding:0;margin-top:32px;display:grid;gap:14px}
+.perks li{display:flex;gap:12px;color:rgba(255,255,255,.88)}
+.perks svg{flex:none;width:22px;height:22px;color:var(--mint);margin-top:2px}
+form{background:#fff;color:var(--ink);border-radius:28px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+.f{display:grid;gap:6px;align-content:start}
+.f.full{grid-column:1/-1}
+.f>label,.f>.lbl{font-weight:600;font-size:14.5px}
+.opt{font-weight:400;color:var(--ink-2)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid transparent;border-radius:14px;padding:12px 14px;min-height:50px;width:100%}
+textarea{min-height:96px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet);background:#fff}
+input.err{border-color:#E5484D}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;width:1px;height:1px}
+.chips span{display:inline-block;padding:9px 16px;border-radius:999px;background:var(--paper);font-size:15px;font-weight:500;border:1.5px solid transparent}
+.chips input:checked+span{background:#E3F4F6;border-color:var(--violet);color:var(--violet-ink)}
+.chips input:focus-visible+span{outline:3px solid var(--violet);outline-offset:2px}
+form .btn{grid-column:1/-1;background:var(--night);color:#fff;min-height:54px}
+form .btn:hover{background:var(--violet)}
+.note{grid-column:1/-1;font-size:13.5px;line-height:1.5;color:var(--ink-2);text-align:center}
+.done{grid-column:1/-1;text-align:center;padding:40px 8px}
+.done i{display:grid;place-items:center;width:64px;height:64px;margin:0 auto;border-radius:50%;background:var(--mint);animation:land .6s cubic-bezier(.2,1.6,.4,1)}
+.done i svg{width:30px;height:30px;color:var(--night)}
+.done h3{margin-top:18px;font-weight:700;font-size:23px;letter-spacing:-.02em}
+.done p{margin-top:8px;color:var(--ink-2)}
+
+.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.ci{display:flex;flex-direction:column;padding:18px 24px;border-radius:20px;background:var(--card);box-shadow:0 0 0 1px var(--line);text-decoration:none;min-width:240px;flex:1}
+.ci small{color:var(--ink-2);font-size:13.5px}
+.ci b{font-weight:600;font-size:18px}
+a.ci:hover{box-shadow:0 0 0 1.5px var(--ink)}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--ink-2);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:960px){
+  .nav>a:not(.btn){display:none}
+  .hero{grid-template-columns:1fr;padding-top:32px;padding-bottom:88px;gap:56px}
+  .what{justify-self:stretch;width:auto}
+  .w-card:nth-child(2){margin-left:0}
+  .dirs,.custom,.demo-box{grid-template-columns:1fr}
+  .custom,.demo-box{gap:40px}
+  .bento{grid-template-columns:1fr 1fr}
+  .t-big{grid-column:1/-1;grid-row:auto}
+  .t-2,.t-3{grid-column:span 1}
+  .demo-box{padding:40px 24px;border-radius:32px}
+  .product{border-radius:32px 32px 0 0}
+  .product .hero{padding-top:64px;padding-bottom:64px}
+  section{padding:80px 0}
+}
+@media (max-width:600px){
+  .wrap{padding-left:16px;padding-right:16px}
+  .nav .btn{display:none}
+  .bento{grid-template-columns:1fr}
+  .t-2,.t-3{grid-column:auto}
+  .steps{grid-template-columns:1fr}
+  .tile,.dir{padding:24px;border-radius:24px}
+  form{grid-template-columns:1fr;padding:22px}
+  .demo-box{padding:32px 16px}
+  .lead{font-size:17px}
+  .chip{right:8px}
+}
+/* ===== Scroll animasiyaları: element ekrana girəndə görünür, çıxanda yenidən gizlənir (hər iki istiqamətdə) ===== */
+.rv{opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .8s;transition-delay:calc(var(--i,0) * 90ms);will-change:transform,opacity}
+.rv.up{transform:translateY(48px)}
+.rv.down{transform:translateY(-32px)}
+.rv.left{transform:translateX(-64px)}
+.rv.right{transform:translateX(64px)}
+.rv.zoom{transform:scale(.88);filter:blur(6px)}
+.rv.tilt{transform:perspective(900px) rotateX(18deg) translateY(60px)}
+.rv.in{opacity:1;transform:none;filter:none}
+.w-card.soon.rv.in{opacity:.55}
+/* Başlıqlar söz-söz qalxır */
+.words .w{display:inline-block;opacity:0;transform:translateY(.6em) rotate(4deg);transition:opacity .6s,transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--w) * 45ms)}
+.words.in .w{opacity:1;transform:none}
+/* Səhifənin yuxarısında scroll irəliləyişi */
+.progress{position:fixed;inset:0 0 auto;height:3px;z-index:50;background:linear-gradient(90deg,var(--violet),var(--mint));transform-origin:0 50%;transform:scaleX(0)}
+/* Paralaks elementləri JS ilə --py dəyişənindən hərəkət edir */
+.px{translate:0 var(--py,0px)}
+.steps div{transition:background .4s,box-shadow .4s}
+.steps div.lit{background:rgba(46,230,168,.12);box-shadow:inset 0 0 0 1px rgba(46,230,168,.5)}
+
+@media (prefers-reduced-motion:reduce){.rv,.words .w{opacity:1!important;transform:none!important;filter:none!important}.px{translate:none!important}*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8.3a6 6 0 0 1 0 7.4M9.5 5.5a10 10 0 0 1 0 13M13 3a14 14 0 0 1 0 18"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></symbol>
+  <symbol id="web" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></symbol>
+  <symbol id="mob" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/></symbol>
+  <symbol id="plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M6 7h12v4a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/></symbol>
+  <!-- Trend Solutions loqosunun T işarəsi (xətlərdən qurulmuş T), rəngi currentColor ilə -->
+  <symbol id="logo" viewBox="0 0 380 265" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="butt" stroke-linejoin="miter"><path d="M60 8H372V68M6 54H126M168 54V258H232M326 54H214V204"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+</svg>
+
+<!-- Mətnlər data-t açarları ilə aşağıdakı lüğətdən (az/en/ru) yazılır -->
+<div class="dark">
+  <span class="glow a"></span><span class="glow b"></span>
+  <header class="wrap top">
+    <a class="brand" href="#" aria-label="Trend Solutions"><svg class="mark" aria-hidden="true"><use href="#logo"/></svg><span class="bt"><b>TREND</b><small>SOLUTIONS</small></span></a>
+    <nav class="nav" data-t-aria="nav.label">
+      <a href="#xidmetler" data-t="nav.services"></a>
+      <a href="#tapstamp">TapStamp</a>
+      <a href="#demo" data-t="nav.demo"></a>
+      <div class="lang" role="group" data-t-aria="nav.lang">
+        <button type="button" data-lang="az">AZ</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="ru">RU</button>
+      </div>
+      <a class="btn mint" href="#elaqe" data-t="nav.contact"></a>
+    </nav>
+  </header>
+
+  <div class="wrap hero">
+    <div>
+      <a class="pill" href="#tapstamp"><b data-t="hero.new"></b><span data-t="hero.pill"></span></a>
+      <h1 data-t="hero.title"></h1>
+      <p class="lead" data-t="hero.lead"></p>
+      <div class="ctas">
+        <a class="btn mint" href="#elaqe" data-t="hero.cta"></a>
+        <a class="btn ghost" href="#xidmetler" data-t="hero.cta2"></a>
+      </div>
+    </div>
+    <div class="what">
+      <a class="w-card" href="#xidmetler"><span class="w-ico"><svg><use href="#web"/></svg></span><span><b data-t="w.custom"></b><small data-t="w.customSub"></small></span></a>
+      <a class="w-card" href="#tapstamp"><span class="w-ico mint"><svg><use href="#nfc"/></svg></span><span><b>TapStamp</b><small data-t="w.tapSub"></small></span></a>
+      <div class="w-card soon"><span class="w-ico"><svg><use href="#plus"/></svg></span><span><b data-t="w.next"></b><small data-t="w.nextSub"></small></span></div>
+    </div>
+  </div>
+</div>
+
+<main>
+<section id="mehsullar">
+  <div class="wrap">
+    <p class="kicker" data-t="dirs.kicker"></p>
+    <h2 data-t="dirs.title"></h2>
+    <div class="dirs">
+      <a class="dir" href="#xidmetler"><svg><use href="#web"/></svg><h3 data-t="w.custom"></h3><p data-t="dirs.customText"></p><span data-t="dirs.more"></span></a>
+      <a class="dir dk" href="#tapstamp"><svg><use href="#nfc"/></svg><h3 data-t="dirs.tapTitle"></h3><p data-t="dirs.tapText"></p><span data-t="dirs.tapMore"></span></a>
+    </div>
+  </div>
+</section>
+
+<section id="xidmetler" style="padding-top:0">
+  <div class="wrap custom">
+    <div>
+      <p class="kicker" data-t="w.custom"></p>
+      <h2 data-t="custom.title"></h2>
+      <p class="sub" data-t="custom.sub"></p>
+    </div>
+    <div class="list">
+      <div class="li"><svg><use href="#web"/></svg><div><b data-t="custom.webT"></b><p data-t="custom.webP"></p></div></div>
+      <div class="li"><svg><use href="#mob"/></svg><div><b data-t="custom.mobT"></b><p data-t="custom.mobP"></p></div></div>
+      <div class="li"><svg><use href="#plug"/></svg><div><b data-t="custom.intT"></b><p data-t="custom.intP"></p></div></div>
+      <div class="li"><svg><use href="#shield"/></svg><div><b data-t="custom.supT"></b><p data-t="custom.supP"></p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TapStamp məhsul bölməsi ===== -->
+<div class="dark product" id="tapstamp">
+  <span class="glow a"></span><span class="glow b"></span>
+  <div class="wrap hero">
+    <div>
+      <p class="kicker light" data-t="tap.kicker"></p>
+      <p class="p-logo"><i></i>TapStamp</p>
+      <h2 class="p-h" data-t="tap.title"></h2>
+      <p class="lead" data-t="tap.lead"></p>
+      <div class="ctas">
+        <a class="btn mint" href="#demo" data-t="tap.cta"></a>
+        <a class="btn ghost" href="#imkanlar" data-t="tap.cta2"></a>
+      </div>
+    </div>
+    <div class="demo" id="demoCard">
+      <div class="phone">
+        <small data-t="card.company"></small>
+        <b data-t="card.title"></b>
+        <div class="wallet">
+          <div class="row"><span data-t="card.rule"></span><span class="count" id="count">3/6</span></div>
+          <div class="slots" id="slots"></div>
+        </div>
+        <button class="tap" id="tap" type="button"><svg><use href="#nfc"/></svg><span id="tapLabel"></span></button>
+      </div>
+      <div class="chip" aria-hidden="true">NFC</div>
+      <p class="caption" data-t="card.caption"></p>
+    </div>
+  </div>
+</div>
+
+<div class="product-body">
+<section id="imkanlar">
+  <div class="wrap">
+    <p class="kicker" data-t="feat.kicker"></p>
+    <h2 data-t="feat.title"></h2>
+    <p class="sub" data-t="feat.sub"></p>
+    <div class="bento">
+      <article class="tile t-big">
+        <h3 data-t="feat.tapT"></h3>
+        <p data-t="feat.tapP"></p>
+        <div class="steps">
+          <div><span>1</span><b data-t="feat.s1"></b><small data-t="feat.s1p"></small></div>
+          <div><span>2</span><b data-t="feat.s2"></b><small data-t="feat.s2p"></small></div>
+          <div><span>3</span><b data-t="feat.s3"></b><small data-t="feat.s3p"></small></div>
+        </div>
+      </article>
+      <article class="tile t-2"><h3 data-t="feat.appT"></h3><p data-t="feat.appP"></p><div class="big-num">0 MB</div></article>
+      <article class="tile t-2"><h3 data-t="feat.langT"></h3><p data-t="feat.langP"></p><div class="langs"><span>AZ</span><span>EN</span><span>RU</span></div></article>
+      <article class="tile t-3">
+        <h3 data-t="feat.giftT"></h3><p data-t="feat.giftP"></p>
+        <div class="gift"><span><span data-t="feat.g1"></span><small data-t="feat.g1s"></small></span><span><span data-t="feat.g2"></span><small data-t="feat.g2s"></small></span></div>
+      </article>
+      <article class="tile t-3"><h3 data-t="feat.statT"></h3><p data-t="feat.statP"></p></article>
+    </div>
+  </div>
+</section>
+
+<div class="wrap demo-sec" id="demo">
+  <div class="demo-box">
+    <span class="glow a"></span>
+    <div>
+      <h2 data-t="demo.title"></h2>
+      <p class="sub" data-t="demo.sub"></p>
+      <ul class="perks">
+        <li><svg><use href="#check"/></svg><span data-t="demo.p1"></span></li>
+        <li><svg><use href="#check"/></svg><span data-t="demo.p2"></span></li>
+        <li><svg><use href="#check"/></svg><span data-t="demo.p3"></span></li>
+      </ul>
+    </div>
+    <form id="demoForm" novalidate>
+      <div class="f"><label for="n" data-t="form.name"></label><input id="n" name="name" autocomplete="name" required></div>
+      <div class="f"><label for="p" data-t="form.phone"></label><input id="p" name="phone" type="tel" inputmode="tel" placeholder="+994 50 000 00 00" autocomplete="tel" required></div>
+      <div class="f full"><label for="c" data-t="form.company"></label><input id="c" name="company" autocomplete="organization" required></div>
+      <div class="f full" role="radiogroup" aria-labelledby="typeLbl"><span class="lbl" id="typeLbl" data-t="form.type"></span>
+        <div class="chips">
+          <label><input type="radio" name="type" value="cafe" checked><span data-t="form.cafe"></span></label>
+          <label><input type="radio" name="type" value="beauty"><span data-t="form.beauty"></span></label>
+          <label><input type="radio" name="type" value="retail"><span data-t="form.retail"></span></label>
+          <label><input type="radio" name="type" value="other"><span data-t="form.other"></span></label>
+        </div>
+      </div>
+      <div class="f full"><label for="b" data-t="form.branches"></label>
+        <select id="b" name="branches"><option value="1">1</option><option value="2-5">2–5</option><option value="6+" data-t="form.many"></option></select>
+      </div>
+      <div class="f full"><label for="m"><span data-t="form.note"></span> <span class="opt" data-t="form.optional"></span></label><textarea id="m" name="note"></textarea></div>
+      <button class="btn" type="submit" data-t="form.submit"></button>
+      <p class="note" data-t="form.consent"></p>
+    </form>
+  </div>
+</div>
+</div>
+
+<section id="elaqe">
+  <div class="wrap">
+    <h2 data-t="contact.title"></h2>
+    <p class="sub" data-t="contact.sub"></p>
+    <div class="contact">
+      <a class="ci" href="mailto:info@trendsolutions.az"><small data-t="contact.email"></small><b>info@trendsolutions.az</b></a>
+      <a class="ci" href="tel:+994000000000"><small data-t="contact.phone"></small><b>+994 00 000 00 00</b></a>
+      <div class="ci"><small data-t="contact.address"></small><b data-t="contact.addressValue"></b></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><span data-t="footer.copy"></span><a href="https://platform.trendsolutions.az/admin" data-t="footer.login"></a></div></footer>
+
+<script>
+const T={
+az:{
+ 'nav.label':'Əsas menyu','nav.lang':'Dil','nav.services':'Xidmətlər','nav.demo':'Demo','nav.contact':'Əlaqə',
+ 'hero.new':'Yeni','hero.pill':'TapStamp: NFC ilə rəqəmsal möhür kartı',
+ 'hero.title':'Biznesiniz üçün <span class="grad">etibarlı proqram təminatı</span> hazırlayırıq',
+ 'hero.lead':'Biz Azərbaycanda fəaliyyət göstərən proqram təminatı şirkətiyik. Sifarişlə veb və mobil tətbiqlər hazırlayır, eyni zamanda öz məhsullarımızı yaradırıq.',
+ 'hero.cta':'Layihənizi müzakirə edək','hero.cta2':'Xidmətlərimiz',
+ 'w.custom':'Fərdi proqram təminatı','w.customSub':'Veb, mobil və inteqrasiyalar','w.tapSub':'NFC əsaslı sadiqlik proqramı','w.next':'Yeni məhsullar','w.nextSub':'Tezliklə',
+ 'dirs.kicker':'Fəaliyyətimiz','dirs.title':'İki istiqamətdə işləyirik',
+ 'dirs.customText':'Hazır həllər ehtiyacınızı ödəmirsə, işinizə tam uyğun sistemi birlikdə qururuq: veb və mobil tətbiqlər, idarəetmə panelləri, inteqrasiyalar.','dirs.more':'Ətraflı',
+ 'dirs.tapTitle':'Məhsulumuz: TapStamp','dirs.tapText':'Kafe, gözəllik salonu və mağazalar üçün rəqəmsal möhür kartı. Müştəri telefonunu NFC çipə yaxınlaşdırır, möhür toplayır və hədiyyə qazanır.','dirs.tapMore':'Məhsulla tanış olun',
+ 'custom.title':'Hazır həll uyğun gəlmirsə, sizin üçün hazırlayırıq',
+ 'custom.sub':'Əvvəlcə ekranların maketini hazırlayırıq. Siz təsdiq etdikdən sonra proqramlaşdırmaya keçirik və hər mərhələnin nəticəsini sizə göstəririk.',
+ 'custom.webT':'Veb tətbiqlər və idarəetmə panelləri','custom.webP':'Sifariş, anbar və müştəri idarəetməsi (CRM) sistemləri.',
+ 'custom.mobT':'Mobil tətbiqlər','custom.mobP':'iPhone və Android üçün tətbiqlər, eləcə də telefona quraşdırılan veb tətbiqlər.',
+ 'custom.intT':'İnteqrasiyalar','custom.intP':'Ödəniş sistemləri, SMS xidmətləri, kassa proqramları və mövcud sistemlərinizlə əlaqə.',
+ 'custom.supT':'Dəstək və təhlükəsizlik','custom.supP':'İstifadəyə verildikdən sonra server, yeniləmələr və ehtiyat nüsxələr bizim nəzarətimizdədir.',
+ 'tap.kicker':'Məhsulumuz','tap.title':'Müştəriləriniz <span class="grad">bir toxunuşla geri qayıtsın</span>',
+ 'tap.lead':'Kağız möhür kartının yerini NFC çip və telefon tutur. Müştərinin heç bir tətbiq yükləməsinə ehtiyac yoxdur.',
+ 'tap.cta':'Pulsuz demo istəyin','tap.cta2':'İmkanlar',
+ 'card.company':'Qəhvə Evi','card.title':'Möhür kartınız','card.rule':'Hər 6-cı qəhvə hədiyyədir',
+ 'card.tap':'Telefonu çipə yaxınlaşdırın','card.added':'Möhür əlavə olundu','card.full':'Hədiyyəniz hazırdır! Yenidən başlayın',
+ 'card.caption':'Düyməyə basın və möhürün necə əlavə olunduğuna baxın.',
+ 'feat.kicker':'TapStamp imkanları','feat.title':'Kassada kart axtarmağa ehtiyac qalmır',
+ 'feat.sub':'Kafe, gözəllik salonu, avtoyuma, mağaza: müştəriləriniz təkrar gəlirsə, TapStamp sizin üçündür.',
+ 'feat.tapT':'Bir toxunuşla möhür','feat.tapP':'Müştəri telefonunu kassanın yanındakı çipə yaxınlaşdırır və möhür avtomatik olaraq kartına əlavə olunur. Çip hər toxunuşda yeni kod yaradır, buna görə möhürü saxtalaşdırmaq mümkün deyil.',
+ 'feat.s1':'Toxunur','feat.s1p':'Telefonda şirkətinizin səhifəsi açılır',
+ 'feat.s2':'Möhür toplayır','feat.s2p':'İlk dəfə nömrə ilə qeydiyyatdan keçir, sonrakı hər toxunuş bir möhürdür',
+ 'feat.s3':'Hədiyyəni alır','feat.s3p':'İşçi planşetdə QR kodu oxudaraq hədiyyəni təsdiqləyir',
+ 'feat.appT':'Tətbiq yükləmədən','feat.appP':'Brauzerdə açılır, istəyən ana ekrana əlavə edə bilər.',
+ 'feat.langT':'Üç dildə','feat.langP':'Müştəri istədiyi dili seçir.',
+ 'feat.giftT':'Hədiyyələr və dəvətlər','feat.giftP':'Müştəri dostunu dəvət edir və hər ikisi bonus möhür qazanır.',
+ 'feat.g1':'Pulsuz qəhvə','feat.g1s':'6 möhürdən sonra','feat.g2':'+1 möhür','feat.g2s':'hər dəvət üçün',
+ 'feat.statT':'Müştərilərinizi tanıyın','feat.statP':'Ziyarətləri, geri qayıdan müştəriləri və verilən hədiyyələri izləyin. Uzun müddət gəlməyən müştərilərə bildiriş və ya SMS göndərin.',
+ 'demo.title':'TapStamp-ı pulsuz sınayın','demo.sub':'Formu doldurun. Sizinlə əlaqə saxlayıb şirkətinizə uyğun demo hazırlayacağıq.',
+ 'demo.p1':'Şirkətinizin adı və rəngi ilə hazır səhifə','demo.p2':'İlk NFC çip pulsuzdur','demo.p3':'Bir iş günü ərzində sizinlə əlaqə saxlayırıq',
+ 'form.name':'Adınız','form.phone':'Telefon nömrəniz','form.company':'Şirkətin adı','form.type':'Fəaliyyət sahəsi',
+ 'form.cafe':'Kafe və restoran','form.beauty':'Gözəllik salonu','form.retail':'Mağaza','form.other':'Digər',
+ 'form.branches':'Filial sayı','form.many':'6 və daha çox','form.note':'Əlavə qeyd','form.optional':'(istəyə görə)',
+ 'form.submit':'Müraciət göndər','form.consent':'Müraciət göndərməklə məlumatlarınızın yalnız sizinlə əlaqə saxlamaq üçün istifadə olunmasına razılıq verirsiniz.',
+ 'form.doneT':'Müraciətiniz qəbul olundu','form.doneP':'Bir iş günü ərzində sizinlə əlaqə saxlayacağıq.',
+ 'contact.title':'Sualınız var?','contact.sub':'Bizə yazın və ya zəng edin.','contact.email':'Email','contact.phone':'Telefon','contact.address':'Ünvan','contact.addressValue':'Azərbaycan',
+ 'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.','footer.login':'TapStamp-a daxil olun'
+},
+en:{
+ 'nav.label':'Main menu','nav.lang':'Language','nav.services':'Services','nav.demo':'Demo','nav.contact':'Contact',
+ 'hero.new':'New','hero.pill':'TapStamp: a digital stamp card with NFC',
+ 'hero.title':'We build <span class="grad">reliable software</span> for your business',
+ 'hero.lead':'We are a software company based in Azerbaijan. We build custom web and mobile applications and create our own products.',
+ 'hero.cta':'Discuss your project','hero.cta2':'Our services',
+ 'w.custom':'Custom software','w.customSub':'Web, mobile and integrations','w.tapSub':'NFC-based loyalty program','w.next':'New products','w.nextSub':'Coming soon',
+ 'dirs.kicker':'What we do','dirs.title':'Two lines of work',
+ 'dirs.customText':'When off-the-shelf tools don’t fit, we build a system around the way you work: web and mobile apps, admin panels and integrations.','dirs.more':'Learn more',
+ 'dirs.tapTitle':'Our product: TapStamp','dirs.tapText':'A digital stamp card for cafés, beauty salons and shops. Customers tap their phone on an NFC chip, collect stamps and earn rewards.','dirs.tapMore':'Explore the product',
+ 'custom.title':'If a ready-made solution doesn’t fit, we build yours',
+ 'custom.sub':'We start with mockups of every screen. Once you approve them, we move to development and show you the result of each stage.',
+ 'custom.webT':'Web apps and admin panels','custom.webP':'Order, inventory and customer management (CRM) systems.',
+ 'custom.mobT':'Mobile apps','custom.mobP':'Apps for iPhone and Android, as well as installable web apps.',
+ 'custom.intT':'Integrations','custom.intP':'Payment systems, SMS services, POS software and the tools you already use.',
+ 'custom.supT':'Support and security','custom.supP':'After launch, we take care of servers, updates and backups.',
+ 'tap.kicker':'Our product','tap.title':'Bring customers back <span class="grad">with a single tap</span>',
+ 'tap.lead':'An NFC chip and a phone replace the paper stamp card. Customers don’t need to install any app.',
+ 'tap.cta':'Request a free demo','tap.cta2':'Features',
+ 'card.company':'Coffee House','card.title':'Your stamp card','card.rule':'Every 6th coffee is free',
+ 'card.tap':'Hold your phone to the chip','card.added':'Stamp added','card.full':'Your reward is ready! Start over',
+ 'card.caption':'Press the button to see how a stamp is added.',
+ 'feat.kicker':'TapStamp features','feat.title':'No more searching for cards at the till',
+ 'feat.sub':'Cafés, beauty salons, car washes, shops: if your customers come back, TapStamp is for you.',
+ 'feat.tapT':'One tap, one stamp','feat.tapP':'The customer holds their phone to the chip by the till and the stamp is added to their card automatically. The chip generates a new code on every tap, so stamps can’t be faked.',
+ 'feat.s1':'Tap','feat.s1p':'Your business page opens on the phone',
+ 'feat.s2':'Collect','feat.s2p':'Sign up once with a phone number; every tap after that is a stamp',
+ 'feat.s3':'Redeem','feat.s3p':'Staff scan a QR code on a tablet to confirm the reward',
+ 'feat.appT':'No app to install','feat.appP':'Opens in the browser and can be added to the home screen.',
+ 'feat.langT':'Three languages','feat.langP':'Customers choose their language.',
+ 'feat.giftT':'Rewards and referrals','feat.giftP':'Customers invite friends and both earn a bonus stamp.',
+ 'feat.g1':'Free coffee','feat.g1s':'after 6 stamps','feat.g2':'+1 stamp','feat.g2s':'for every referral',
+ 'feat.statT':'Know your customers','feat.statP':'Track visits, returning customers and rewards given. Send a notification or SMS to customers who haven’t visited in a while.',
+ 'demo.title':'Try TapStamp for free','demo.sub':'Fill in the form. We’ll get in touch and set up a demo for your business.',
+ 'demo.p1':'A ready page with your business name and colours','demo.p2':'Your first NFC chip is free','demo.p3':'We’ll contact you within one business day',
+ 'form.name':'Your name','form.phone':'Phone number','form.company':'Business name','form.type':'Type of business',
+ 'form.cafe':'Café or restaurant','form.beauty':'Beauty salon','form.retail':'Shop','form.other':'Other',
+ 'form.branches':'Number of locations','form.many':'6 or more','form.note':'Notes','form.optional':'(optional)',
+ 'form.submit':'Send request','form.consent':'By sending this request, you agree that we use your details only to contact you.',
+ 'form.doneT':'Request received','form.doneP':'We’ll contact you within one business day.',
+ 'contact.title':'Have a question?','contact.sub':'Write to us or give us a call.','contact.email':'Email','contact.phone':'Phone','contact.address':'Address','contact.addressValue':'Azerbaijan',
+ 'footer.copy':'© 2026 Trend Solutions. All rights reserved.','footer.login':'Sign in to TapStamp'
+},
+ru:{
+ 'nav.label':'Главное меню','nav.lang':'Язык','nav.services':'Услуги','nav.demo':'Демо','nav.contact':'Контакты',
+ 'hero.new':'Новинка','hero.pill':'TapStamp: цифровая карта лояльности с NFC',
+ 'hero.title':'Создаём <span class="grad">надёжное программное обеспечение</span> для вашего бизнеса',
+ 'hero.lead':'Мы — компания-разработчик программного обеспечения из Азербайджана. Разрабатываем веб- и мобильные приложения на заказ и создаём собственные продукты.',
+ 'hero.cta':'Обсудить проект','hero.cta2':'Наши услуги',
+ 'w.custom':'Разработка на заказ','w.customSub':'Веб, мобильные приложения и интеграции','w.tapSub':'Программа лояльности на основе NFC','w.next':'Новые продукты','w.nextSub':'Скоро',
+ 'dirs.kicker':'Чем мы занимаемся','dirs.title':'Работаем в двух направлениях',
+ 'dirs.customText':'Если готовые решения вам не подходят, мы вместе создадим систему под ваши задачи: веб- и мобильные приложения, панели управления, интеграции.','dirs.more':'Подробнее',
+ 'dirs.tapTitle':'Наш продукт: TapStamp','dirs.tapText':'Цифровая карта лояльности для кафе, салонов красоты и магазинов. Клиент подносит телефон к NFC-чипу, собирает штампы и получает подарки.','dirs.tapMore':'Узнать о продукте',
+ 'custom.title':'Если готовое решение не подходит, мы создадим ваше',
+ 'custom.sub':'Сначала мы готовим макеты всех экранов. После вашего утверждения переходим к разработке и показываем результат каждого этапа.',
+ 'custom.webT':'Веб-приложения и панели управления','custom.webP':'Системы заказов, складского учёта и управления клиентами (CRM).',
+ 'custom.mobT':'Мобильные приложения','custom.mobP':'Приложения для iPhone и Android, а также устанавливаемые веб-приложения.',
+ 'custom.intT':'Интеграции','custom.intP':'Платёжные системы, SMS-сервисы, кассовые программы и ваши текущие системы.',
+ 'custom.supT':'Поддержка и безопасность','custom.supP':'После запуска мы следим за серверами, обновлениями и резервными копиями.',
+ 'tap.kicker':'Наш продукт','tap.title':'Клиенты возвращаются <span class="grad">одним касанием</span>',
+ 'tap.lead':'NFC-чип и телефон заменяют бумажную карту со штампами. Клиенту не нужно устанавливать приложение.',
+ 'tap.cta':'Запросить бесплатное демо','tap.cta2':'Возможности',
+ 'card.company':'Кофейня','card.title':'Ваша карта','card.rule':'Каждый 6-й кофе в подарок',
+ 'card.tap':'Поднесите телефон к чипу','card.added':'Штамп добавлен','card.full':'Подарок готов! Начать заново',
+ 'card.caption':'Нажмите кнопку, чтобы увидеть, как добавляется штамп.',
+ 'feat.kicker':'Возможности TapStamp','feat.title':'Больше никаких поисков карты у кассы',
+ 'feat.sub':'Кафе, салон красоты, автомойка, магазин: если клиенты возвращаются к вам, TapStamp для вас.',
+ 'feat.tapT':'Штамп одним касанием','feat.tapP':'Клиент подносит телефон к чипу у кассы, и штамп автоматически добавляется на его карту. Чип создаёт новый код при каждом касании, поэтому подделать штамп невозможно.',
+ 'feat.s1':'Касается','feat.s1p':'На телефоне открывается страница вашей компании',
+ 'feat.s2':'Собирает штампы','feat.s2p':'Один раз регистрируется по номеру телефона, дальше каждое касание — штамп',
+ 'feat.s3':'Получает подарок','feat.s3p':'Сотрудник сканирует QR-код на планшете и подтверждает подарок',
+ 'feat.appT':'Без установки приложения','feat.appP':'Открывается в браузере, при желании добавляется на главный экран.',
+ 'feat.langT':'На трёх языках','feat.langP':'Клиент сам выбирает язык.',
+ 'feat.giftT':'Подарки и приглашения','feat.giftP':'Клиент приглашает друга, и оба получают бонусный штамп.',
+ 'feat.g1':'Бесплатный кофе','feat.g1s':'после 6 штампов','feat.g2':'+1 штамп','feat.g2s':'за каждое приглашение',
+ 'feat.statT':'Знайте своих клиентов','feat.statP':'Следите за визитами, возвращающимися клиентами и выданными подарками. Отправляйте уведомления или SMS тем, кто давно не заходил.',
+ 'demo.title':'Попробуйте TapStamp бесплатно','demo.sub':'Заполните форму. Мы свяжемся с вами и подготовим демо для вашей компании.',
+ 'demo.p1':'Готовая страница с названием и цветами вашей компании','demo.p2':'Первый NFC-чип бесплатно','demo.p3':'Свяжемся с вами в течение одного рабочего дня',
+ 'form.name':'Ваше имя','form.phone':'Номер телефона','form.company':'Название компании','form.type':'Сфера деятельности',
+ 'form.cafe':'Кафе и ресторан','form.beauty':'Салон красоты','form.retail':'Магазин','form.other':'Другое',
+ 'form.branches':'Количество филиалов','form.many':'6 и более','form.note':'Комментарий','form.optional':'(необязательно)',
+ 'form.submit':'Отправить заявку','form.consent':'Отправляя заявку, вы соглашаетесь, что мы используем ваши данные только для связи с вами.',
+ 'form.doneT':'Заявка принята','form.doneP':'Мы свяжемся с вами в течение одного рабочего дня.',
+ 'contact.title':'Есть вопросы?','contact.sub':'Напишите или позвоните нам.','contact.email':'Email','contact.phone':'Телефон','contact.address':'Адрес','contact.addressValue':'Азербайджан',
+ 'footer.copy':'© 2026 Trend Solutions. Все права защищены.','footer.login':'Войти в TapStamp'
+}};
+
+let lang='az';
+const t=k=>T[lang][k]??T.az[k];
+function applyLang(l){
+  lang=T[l]?l:'az';
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-t]').forEach(el=>{el.innerHTML=t(el.dataset.t)});
+  document.querySelectorAll('[data-t-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.tAria)));
+  document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
+  label.textContent=t(n>=TOTAL?'card.full':n===start?'card.tap':'card.added');
+  try{localStorage.setItem('ts-lang',lang)}catch(e){}
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>applyLang(b.dataset.lang)));
+
+// Demo kart: hər toxunuşda bir möhür; kart dolanda hədiyyə, sonra yenidən başlayır
+const TOTAL=6, start=3; let n=start;
+const slots=document.getElementById('slots'), count=document.getElementById('count'),
+      label=document.getElementById('tapLabel'), card=document.getElementById('demoCard');
+function render(fresh){
+  slots.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const s=document.createElement('span');
+    s.className='slot'+(i<n?' on':'')+(fresh&&i===n-1?' new':'');
+    if(i>=n) s.textContent=i===TOTAL-1?'🎁':i+1;
+    slots.appendChild(s);
+  }
+  count.textContent=n+'/'+TOTAL;
+}
+document.getElementById('tap').addEventListener('click',()=>{
+  if(n>=TOTAL){n=0;render();label.textContent=t('card.tap');return;}
+  n++; render(true);
+  card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
+  label.textContent=t(n===TOTAL?'card.full':'card.added');
+});
+render();
+
+let saved=null; try{saved=localStorage.getItem('ts-lang')}catch(e){}
+applyLang(saved||(navigator.language||'az').slice(0,2));
+
+// ===== Animasiyalar =====
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const bar=document.createElement('div'); bar.className='progress'; document.body.prepend(bar);
+
+// Hansı element necə görünür: [selektor, növ, qardaşlar arasında pillə-pillə gecikmə]
+const REVEAL=[
+  ['.pill','down'],['.lead,.ctas','up'],['.what .w-card','right',1],
+  ['.kicker','left'],['.sub','up'],
+  ['.dir','tilt',1],['.li','right',1],
+  ['.p-logo','left'],['.demo','zoom'],
+  ['.tile','up',1],['.steps div','up',1],
+  ['.perks li','left',1],['form','zoom'],['.ci','up',1],['footer .wrap','up']
+];
+REVEAL.forEach(([sel,kind,stagger])=>document.querySelectorAll(sel).forEach((el,i)=>{
+  el.classList.add('rv',kind); if(stagger) el.style.setProperty('--i',i);
+}));
+
+// Başlıqları sözlərə bölür (dil dəyişəndə yenidən)
+function splitWords(){
+  document.querySelectorAll('h1,h2').forEach(h=>{
+    let k=0;
+    const walk=node=>[...node.childNodes].forEach(c=>{
+      if(c.nodeType===3){
+        const frag=document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach(part=>{
+          if(!part) return;
+          if(/^\s+$/.test(part)){frag.append(part);return;}
+          const s=document.createElement('span'); s.className='w'; s.style.setProperty('--w',k++); s.textContent=part; frag.append(s);
+        });
+        c.replaceWith(frag);
+      } else if(c.nodeType===1 && c.classList.contains('grad')){c.classList.add('w'); c.style.setProperty('--w',k++);}
+      else if(c.nodeType===1 && !c.classList.contains('w')) walk(c);
+    });
+    walk(h); h.classList.add('words');
+  });
+}
+
+// Görünmə iki müşahidəçi ilə: element ekrana girəndə (aşağıdan 12% içəri) .in əlavə olunur, ekrandan 120 px uzaqlaşanda silinir.
+// Sərhədlər arasındakı boşluq animasiyanın öz sürüşməsindən (48–64 px) böyükdür, ona görə kənarda dayananda
+// element "gəlib-getmir"; aşağı və yuxarı scroll-da animasiya yenə təkrar oynayır.
+const showIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting || e.target.classList.contains('in')) return;
+  e.target.classList.add('in');
+  if(e.target.id==='demoCard') autoTap();
+}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
+const hideIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting) e.target.classList.remove('in');
+}),{threshold:0,rootMargin:'120px 0px 120px 0px'});
+function observeAll(){document.querySelectorAll('.rv,.words').forEach(el=>{showIO.observe(el);hideIO.observe(el)})}
+
+// Demo kart görünəndə bir möhür özü düşür
+let autoT; function autoTap(){clearTimeout(autoT); autoT=setTimeout(()=>{if(n<TOTAL) document.getElementById('tap').click()},700)}
+
+// Paralaks və irəliləyiş xətti
+const PX=[...document.querySelectorAll('.glow,.what,.demo .phone,.chip')];
+PX.forEach(el=>el.classList.add('px'));
+const steps=[...document.querySelectorAll('.steps div')];
+let ticking=false;
+function onScroll(){
+  if(ticking) return; ticking=true;
+  requestAnimationFrame(()=>{
+    const y=scrollY, max=document.documentElement.scrollHeight-innerHeight;
+    bar.style.transform=`scaleX(${max>0?y/max:0})`;
+    if(!reduce){
+      PX.forEach(el=>{
+        const r=el.getBoundingClientRect(), c=(r.top+r.height/2-innerHeight/2);
+        const k=el.classList.contains('glow')?-.25:el.classList.contains('chip')?-.18:-.08;
+        // Sürüşmə ±40 px ilə məhdudlaşır, telefonda yalnız fon ləkələri hərəkət edir — kartlar düymələrin üstünə çıxmasın
+        const v=(innerWidth<600 && !el.classList.contains('glow'))?0:Math.max(-40,Math.min(40,c*k));
+        el.style.setProperty('--py',v.toFixed(1)+'px');
+      });
+      // Böyük kafeldəki addımlar scroll-a görə növbə ilə işıqlanır
+      const big=document.querySelector('.t-big');
+      if(big){const r=big.getBoundingClientRect(), p=(innerHeight*.75-r.top)/r.height;
+        steps.forEach((s,i)=>s.classList.toggle('lit',p>.35+i*.18 && r.bottom>0));}
+    }
+    ticking=false;
+  });
+}
+addEventListener('scroll',onScroll,{passive:true}); addEventListener('resize',onScroll);
+
+if(!reduce){splitWords(); observeAll();}
+else document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
+onScroll();
+// Dil dəyişəndə başlıqlar yenidən sözlərə bölünür
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{if(!reduce){splitWords();observeAll();}}));
+
+// Maketdə forma heç yerə göndərilmir: yalnız uğur vəziyyəti göstərilir
+document.getElementById('demoForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const f=e.target, req=[...f.querySelectorAll('[required]')];
+  req.forEach(i=>i.classList.toggle('err',!i.value.trim()));
+  const miss=req.find(i=>!i.value.trim());
+  if(miss){miss.focus();return;}
+  f.innerHTML='<div class="done"><i><svg><use href="#check"/></svg></i><h3 data-t="form.doneT"></h3><p data-t="form.doneP"></p></div>';
+  f.querySelectorAll('[data-t]').forEach(el=>{el.innerHTML=t(el.dataset.t)});
+});
+</script>
+</body>
+</html>

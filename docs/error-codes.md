@@ -82,5 +82,6 @@ Aşağıdakı cədvəldə mətnlər Azərbaycan dilindədir (`messages_az.proper
 | `PLAN_LIMIT_REACHED` | 409 | Paketin limiti dolub | Paketinizin limiti dolub. Daha çoxu üçün paketi yüksəldin. |
 | `PLAN_TRIAL_EXPIRED` | 402 | Sınaq müddəti bitib | Pulsuz sınaq müddəti bitib, xidmət dayandırılıb. |
 | `PLAN_TRIAL_ALREADY_USED` | 409 | Sınaq artıq istifadə olunub | Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub. |
+| `SITE_INBOX_UNAVAILABLE` | 503 | Müraciət göndərilmədi | Müraciətiniz hazırda göndərilə bilmədi. Bir azdan yenidən cəhd edin və ya info@trendsolutions.az ünvanına yazın. |
 | `TENANT_UNAVAILABLE` | 503 | Xidmət müvəqqəti əlçatmazdır | Bu şirkətin loyallıq xidməti hazırda işləmir. Bir az sonra yenidən cəhd edin. |
 | `INTERNAL_ERROR` | 500 | Gözlənilməz xəta | Nəsə alınmadı. Bir azdan yenidən cəhd edin. |

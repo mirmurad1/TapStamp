@@ -43,9 +43,12 @@ public class InternalTlsController {
     private final TenantRegistryMapper registry;
     private final AppProperties properties;
     private final byte[] token;
+    private final String siteDomain;
 
     public InternalTlsController(TenantRegistryMapper registry, AppProperties properties,
-                                 @Value("${app.internal-token:}") String token) {
+                                 @Value("${app.internal-token:}") String token,
+                                 @Value("${app.site.domain:}") String siteDomain) {
+        this.siteDomain = siteDomain;
         this.registry = registry;
         this.properties = properties;
         this.token = token.getBytes(StandardCharsets.UTF_8);
@@ -56,6 +59,12 @@ public class InternalTlsController {
         requireToken(provided);
         List<String> domains = new ArrayList<>(registry.findCertificateHostnames());
         domains.add(properties.platformDomain().toLowerCase(Locale.ROOT));
+        // Şirkət saytı və onun www. ünvanı (www → əsas domenə yönləndirmə üçün də sertifikat lazımdır)
+        if (!siteDomain.isBlank()) {
+            String site = siteDomain.trim().toLowerCase(Locale.ROOT);
+            domains.add(site);
+            domains.add("www." + site);
+        }
         return String.join("\n", domains.stream().distinct().toList()) + "\n";
     }
 

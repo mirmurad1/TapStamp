@@ -16,6 +16,9 @@ public final class TestTenants {
     public static final String BETA_HOST = "beta.test";
     /** Daxili endpoint-lərin (TLS domen siyahısı) test sirri. */
     public static final String INTERNAL_TOKEN = "test-internal-token-0123456789";
+    /** Şirkət saytının domeni və demo müraciətlərinin poçt qutusu. */
+    public static final String SITE_HOST = "site.test";
+    public static final String SITE_INBOX = "info@site.test";
     /** Platforma panelinin domeni (app.platform-domain standart dəyəri). */
     public static final String PLATFORM_HOST = "platform.localhost";
 

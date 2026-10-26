@@ -40,27 +40,48 @@ server {
     ssl_reject_handshake on;
 }
 
+# Şirkət saytı (trendsolutions.az): statik fayllar nginx-dən verilir, backend-də yalnız demo müraciəti forması var.
+# www. ünvanı əsas domenə yönləndirilir. Dəqiq server_name aşağıdakı regex blokundan əvvəl seçilir.
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${APP_SITE_DOMAIN} www.${APP_SITE_DOMAIN};
+
+    include /etc/nginx/snippets/tls.conf;
+
+    if ($host = www.${APP_SITE_DOMAIN}) {
+        return 301 https://${APP_SITE_DOMAIN}$request_uri;
+    }
+
+    root /usr/share/nginx/site;
+
+    # Demo müraciəti: kiçik JSON, IP üzrə sıx limit (backend də IP və gündəlik limit tətbiq edir)
+    location = /api/v1/site/demo-requests {
+        client_max_body_size 8k;
+        limit_req zone=site_form_per_ip burst=3 nodelay;
+        include /etc/nginx/snippets/proxy-backend.conf;
+    }
+    location / {
+        try_files $uri $uri/ =404;
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
+        add_header Cache-Control "no-cache" always;
+    }
+    # CSS, JS və şriftlər: brauzer bir gün saxlayır (fayl adları versiyasızdır)
+    location /assets/ {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
+        add_header Cache-Control "public, max-age=86400" always;
+    }
+}
+
 server {
     listen 443 ssl;
     http2 on;
     # Yalnız düzgün formatlı domen adları (sertifikat faylının yolunda istifadə olunur)
     server_name ~^[a-z0-9-]+(\.[a-z0-9-]+)+$;
 
-    # Sertifikat SNI adına görə seçilir: certs/<domen>/fullchain.pem.
-    # Sertifikatı olmayan domenlə TLS bağlantısı qurulmur (fail closed).
-    ssl_certificate     /etc/nginx/certs/$ssl_server_name/fullchain.pem;
-    ssl_certificate_key /etc/nginx/certs/$ssl_server_name/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 1d;
-    ssl_session_tickets off;
-
-    # HTTP Host başlığı TLS SNI ilə eyni olmalıdır: bir domenin bağlantısı üzərindən
-    # başqa şirkətin domeninə sorğu göndərmək mümkün olmasın
-    if ($host != $ssl_server_name) {
-        return 421;
-    }
+    include /etc/nginx/snippets/tls.conf;
 
     location /api/ {
         limit_req zone=api_per_ip burst=40 nodelay;

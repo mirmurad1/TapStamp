@@ -90,8 +90,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
                         .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
-                        // Daxili certbot hesabatı: brauzerdən gəlmir, sirr token ilə qorunur (nginx xaricə açmır)
-                        .ignoringRequestMatchers("/internal/tls/status"))
+                        // Daxili certbot hesabatı: brauzerdən gəlmir, sirr token ilə qorunur (nginx xaricə açmır).
+                        // Saytın demo forması: sessiya və cookie yoxdur (CSRF ilə oğurlanacaq heç nə yoxdur), statik
+                        // saytda CSRF token-i almaq üçün endpoint də yoxdur; Origin yoxlaması isə qüvvədədir
+                        .ignoringRequestMatchers("/internal/tls/status", "/api/v1/site/demo-requests"))
                 .addFilterBefore(new OriginCheckFilter(problemHandlers), CsrfFilter.class)
                 .addFilterBefore(new AdminSessionFilter(realms, sessionCookies, authProperties, clock),
                         AnonymousAuthenticationFilter.class)
@@ -113,6 +115,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/internal/tls/status").permitAll()
                         .requestMatchers("/api/v1/csrf", "/api/v1/context", "/api/v1/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/manifest.webmanifest").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/site/demo-requests").permitAll()
                         // Admin girişi (işçi və platforma). Domen yoxlaması TenantResolutionFilter-dədir.
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/auth/session", "/api/v1/platform/auth/session").permitAll()
                         .requestMatchers(HttpMethod.POST,

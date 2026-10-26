@@ -14,6 +14,9 @@
   }, {
     "description" : "Kafenin ictimai məlumatı",
     "name" : "Kafe"
+  }, {
+    "description" : "trendsolutions.az saytının formaları",
+    "name" : "Şirkət saytı"
   } ],
   "paths" : {
     "/api/v1/admin/analytics/heatmap" : {
@@ -4850,6 +4853,29 @@
         "tags" : [ "Müştəri: dost dəvəti" ]
       }
     },
+    "/api/v1/site/demo-requests" : {
+      "post" : {
+        "description" : "Müraciət saxlanılmır: məzmunu şirkətin poçt qutusuna (`app.site.inbox`) email kimi göndərilir. Autentifikasiya tələb etmir; IP və ümumi gündəlik limit var. `website` sahəsi botlar üçün tələdir (honeypot — insan görmədiyi gizli sahə): doludursa müraciət səssizcə atılır.",
+        "operationId" : "submit",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DemoRequestBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "TapStamp demo müraciəti",
+        "tags" : [ "Şirkət saytı" ]
+      }
+    },
     "/api/v1/taps/{token}" : {
       "get" : {
         "description" : "Yan təsiri yoxdur. Token tanınmırsa `TAP_TOKEN_EXPIRED`.",
@@ -5662,6 +5688,52 @@
             }
           }
         }
+      },
+      "DemoRequestBody" : {
+        "type" : "object",
+        "properties" : {
+          "branches" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "^(1|2-5|6\\+)$"
+          },
+          "businessType" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "^(cafe|beauty|retail|other)$"
+          },
+          "company" : {
+            "type" : "string",
+            "maxLength" : 150,
+            "minLength" : 0
+          },
+          "language" : {
+            "type" : "string",
+            "pattern" : "^(az|en|ru)$"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "note" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "phone" : {
+            "type" : "string",
+            "maxLength" : 30,
+            "minLength" : 0,
+            "pattern" : "^[0-9+()\\-\\s]{5,30}$"
+          },
+          "website" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "branches", "businessType", "company", "name", "phone" ]
       },
       "DeviceResponse" : {
         "type" : "object",

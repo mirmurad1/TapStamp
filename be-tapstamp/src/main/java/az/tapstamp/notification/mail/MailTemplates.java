@@ -1,5 +1,7 @@
 package az.tapstamp.notification.mail;
 
+import java.util.Locale;
+
 import az.tapstamp.shared.i18n.Language;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -34,6 +36,15 @@ public class MailTemplates {
                                      java.time.LocalDate day) {
         return render(level >= 100 ? "smsLimitReached" : "smsLimitWarning", to, language, null, scope, used, limit,
                 day.toString());
+    }
+
+    /** Şirkətə: saytdan TapStamp demo müraciəti gəlib (həmişə Azərbaycan dilində). */
+    public MailMessage demoRequest(String to, String company, String name, String phone, String businessType,
+                                   String branches, String language, String note) {
+        Language az = Language.DEFAULT;
+        String type = messages.getMessage("mail.demoRequest.type." + businessType, null, az.locale());
+        return render("demoRequest", to, az, null, company, name, phone, type, branches,
+                language.toUpperCase(Locale.ROOT), note);
     }
 
     private MailMessage render(String template, String to, Language language, String tenantId, Object... args) {

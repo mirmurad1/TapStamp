@@ -39,7 +39,11 @@ public enum RateLimitPolicy {
      */
     TAP_PER_TAG(10, Duration.ofMinutes(1)),
     /** Hədiyyə kartı kodunun yoxlanması — işçi üzrə (kodları təxminlə tapmağın qarşısı). */
-    GIFT_CARD_LOOKUP_PER_STAFF(30, Duration.ofMinutes(1));
+    GIFT_CARD_LOOKUP_PER_STAFF(30, Duration.ofMinutes(1)),
+    /** Saytın demo müraciəti forması — IP üzrə (spam qorunması). */
+    SITE_DEMO_REQUEST_PER_IP(5, Duration.ofHours(1)),
+    /** Bütün sayt üzrə gündəlik müraciət sayı — poçt qutusunun spamla dolmasının qarşısı. */
+    SITE_DEMO_REQUEST_GLOBAL(100, Duration.ofDays(1));
 
     private final int defaultCapacity;
     private final Duration window;

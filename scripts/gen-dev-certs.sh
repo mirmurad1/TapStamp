@@ -16,7 +16,7 @@ esac
 if [[ $# -gt 0 ]]; then
   DOMAINS=("$@")
 else
-  DOMAINS=("mockcoffee.localhost" "demo-cay.localhost" "platform.localhost")
+  DOMAINS=("mockcoffee.localhost" "demo-cay.localhost" "platform.localhost" "site.localhost" "www.site.localhost")
 fi
 CERT_DIR="$(cd "$(dirname "$0")/.." && pwd)/infra/nginx/certs"
 mkdir -p "$CERT_DIR"
