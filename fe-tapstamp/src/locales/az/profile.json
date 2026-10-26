@@ -24,7 +24,9 @@
     "home": "Ana səhifə",
     "giftCards": "Hədiyyə kartları",
     "settings": "Parametrlər",
-    "signIn": "Daxil ol"
+    "signIn": "Daxil ol",
+    "giftCardsReady_one": "Hədiyyə kartları: {{count}} hazır",
+    "giftCardsReady_other": "Hədiyyə kartları: {{count}} hazır"
   },
   "guest": {
     "cta": "Daxil ol və möhür topla",

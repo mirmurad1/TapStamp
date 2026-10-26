@@ -23,6 +23,7 @@ export function CustomerLayout() {
   const location = useLocation();
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const companyName = resolveText(company.data?.name, currentLanguage());
+  const readyGifts = me?.availableRewards?.length ?? 0;
   const accountDeleted = Boolean((location.state as { accountDeleted?: boolean } | null)?.accountDeleted);
 
 
@@ -67,14 +68,29 @@ export function CustomerLayout() {
           {/* Dil yalnız qonaqda (daxil olmuş müştəri Parametrlərdə dəyişir); sessiya yoxlanılarkən heç nə göstərilmir */}
           {status === 'guest' ? <LanguageSwitcher /> : null}
           {status === 'signedIn' ? (
-            <Button asChild variant="ghost" size="icon">
-              <Link to="/gift-cards" aria-label={t('profile:nav.giftCards')}>
+            <Button asChild variant="ghost" size="icon" className="relative rounded-full [&_svg]:size-5">
+              <Link
+                to="/gift-cards"
+                aria-label={
+                  readyGifts > 0 ? t('profile:nav.giftCardsReady', { count: readyGifts }) : t('profile:nav.giftCards')
+                }
+              >
                 <Gift aria-hidden="true" />
+                {/* Hazır hədiyyələrin sayı: brend rəngli nişan, fondan ayrılsın deyə ağ halqa ilə */}
+                {readyGifts > 0 ? (
+                  <span
+                    key={readyGifts}
+                    className="animate-stamp-pop absolute top-1 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-primary px-1 text-[10.5px] leading-none font-extrabold text-primary-foreground ring-2 ring-background"
+                    aria-hidden="true"
+                  >
+                    {readyGifts}
+                  </span>
+                ) : null}
               </Link>
             </Button>
           ) : null}
           {status === 'signedIn' ? (
-            <Button asChild variant="ghost" size="icon">
+            <Button asChild variant="ghost" size="icon" className="rounded-full [&_svg]:size-5">
               <Link to="/settings" aria-label={t('profile:nav.settings')}>
                 <Settings aria-hidden="true" />
               </Link>

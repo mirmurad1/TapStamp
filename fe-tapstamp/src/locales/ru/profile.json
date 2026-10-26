@@ -28,7 +28,11 @@
     "home": "Главная",
     "giftCards": "Подарочные карты",
     "settings": "Настройки",
-    "signIn": "Войти"
+    "signIn": "Войти",
+    "giftCardsReady_one": "Подарочные карты: готово {{count}}",
+    "giftCardsReady_other": "Подарочные карты: готово {{count}}",
+    "giftCardsReady_few": "Подарочные карты: готово {{count}}",
+    "giftCardsReady_many": "Подарочные карты: готово {{count}}"
   },
   "guest": {
     "cta": "Войти и собирать штампы",

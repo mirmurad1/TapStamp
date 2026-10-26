@@ -24,7 +24,9 @@
     "home": "Home",
     "giftCards": "Gift cards",
     "settings": "Settings",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "giftCardsReady_one": "Gift cards: {{count}} ready",
+    "giftCardsReady_other": "Gift cards: {{count}} ready"
   },
   "guest": {
     "cta": "Sign in and collect stamps",
