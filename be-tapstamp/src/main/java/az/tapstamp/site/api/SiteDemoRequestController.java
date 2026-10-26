@@ -44,7 +44,7 @@ public class SiteDemoRequestController {
             @NotBlank @Size(max = 100) String name,
             @NotBlank @Size(max = 30) @Pattern(regexp = "^[0-9+()\\-\\s]{5,30}$") String phone,
             @NotBlank @Size(max = 150) String company,
-            @NotBlank @Pattern(regexp = "^(cafe|beauty|retail|other)$") String businessType,
+            @NotBlank @Pattern(regexp = "^(cafe|restaurant|beauty|barber|carwash|other)$") String businessType,
             @NotBlank @Pattern(regexp = "^(1|2-5|6\\+)$") String branches,
             @Size(max = 1000) String note,
             @Pattern(regexp = "^(az|en|ru)$") String language,

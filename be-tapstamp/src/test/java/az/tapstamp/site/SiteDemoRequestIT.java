@@ -36,7 +36,7 @@ class SiteDemoRequestIT extends IntegrationTest {
 
         MailMessage mail = mailbox.awaitMessage(TestTenants.SITE_INBOX, before + 1);
         assertThat(mail.subject()).contains(company).doesNotContain("\r").doesNotContain("\n");
-        assertThat(mail.textBody()).contains("+994 50 123 45 67", "Kafe və restoran", "2-5", "EN", "İki filial");
+        assertThat(mail.textBody()).contains("+994 50 123 45 67", "Kafe", "2-5", "EN", "İki filial");
     }
 
     @Test

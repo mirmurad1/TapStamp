@@ -5700,7 +5700,7 @@
           "businessType" : {
             "type" : "string",
             "minLength" : 1,
-            "pattern" : "^(cafe|beauty|retail|other)$"
+            "pattern" : "^(cafe|restaurant|beauty|barber|carwash|other)$"
           },
           "company" : {
             "type" : "string",
