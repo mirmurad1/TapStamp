@@ -67,11 +67,18 @@ server {
         add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
         add_header Cache-Control "no-cache" always;
     }
-    # CSS, JS və şriftlər: brauzer bir gün saxlayır (fayl adları versiyasızdır)
+    # CSS və JS: fayl adları versiyasızdır — brauzer hər dəfə yoxlayır (dəyişməyibsə 304, ucuzdur), yoxsa yeni HTML
+    # köhnə JS ilə birləşir (məs. yeni mətn açarları "undefined" görünür)
     location /assets/ {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
-        add_header Cache-Control "public, max-age=86400" always;
+        add_header Cache-Control "no-cache" always;
+    }
+    # Şriftlər dəyişmir: 30 gün
+    location /assets/fonts/ {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Strict-Transport-Security "${NGINX_HSTS_HEADER}" always;
+        add_header Cache-Control "public, max-age=2592000" always;
     }
 }
 
