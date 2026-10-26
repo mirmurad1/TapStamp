@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Müştəri ekranları – yeniləmə</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#7f6440;--bg:#f6f7fb;--fg:#161a33;--muted:#5b6280;--line:#e6e8f0;--hl:#b45309;--ok:#15803d;--bad:#b91c1c}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:#dfe2ea;color:var(--fg);font:15px/1.5 Inter,system-ui,sans-serif;padding:28px 16px 64px}
+.wrap{max-width:1400px;margin:0 auto}
+.top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:end;margin-bottom:12px}
+.top h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.top p{color:var(--muted);max-width:72ch}
+.sw{display:flex;gap:8px;position:sticky;top:10px}
+.sw button{width:30px;height:30px;border-radius:50%;border:3px solid #fff;cursor:pointer;box-shadow:0 0 0 1px #0002}
+.sw button:focus-visible,.demo:focus-visible,.act:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.grp{margin-top:36px}
+.grp>h2{font-size:19px;font-weight:800;margin-bottom:2px}
+.grp>p{color:var(--muted);font-size:14px;max-width:80ch;margin-bottom:14px}
+.row{display:flex;gap:24px;overflow-x:auto;padding:6px 4px 16px;align-items:flex-start}
+.col{flex:0 0 330px}
+.cap{font-weight:700;margin:10px 0 2px}
+.notes{color:var(--muted);font-size:13px;padding-left:18px}
+.phone{min-height:690px;border-radius:38px;border:8px solid #1b1d2b;background:var(--bg);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.scr{flex:1;padding:0 16px 20px;display:flex;flex-direction:column;gap:14px}
+.scr>*{flex-shrink:0}
+
+hdr{display:flex;align-items:center;gap:10px;padding:12px 0 2px}
+.logo{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+hdr b{font-weight:700;flex:1}
+.ib{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;position:relative;color:var(--fg)}
+.ib svg{width:20px;height:20px}
+.ib i{position:absolute;top:3px;right:2px;min-width:17px;height:17px;border-radius:9px;background:var(--brand);color:#fff;font:800 10px/17px Inter;font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+.lang{font-size:13px;font-weight:600;padding:6px 10px;border-radius:99px;border:1px solid var(--line);background:#fff}
+h2.g{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
+.sub{color:var(--muted);font-size:14px}
+.ftr{margin-top:auto;padding-top:18px;text-align:center;font-size:12px;color:var(--muted)}
+
+.card{background:#fff;border-radius:22px;border:1px solid color-mix(in srgb,var(--brand) 14%,#fff);box-shadow:0 14px 30px -18px color-mix(in srgb,var(--brand) 55%,transparent);overflow:hidden}
+.card .hd{padding:18px 18px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.card h3{font-size:17px;font-weight:700}
+.reward{font-size:13px;color:var(--muted);margin-top:2px}
+.reward b{color:var(--brand);font-weight:700}
+.cnt{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--brand);font-variant-numeric:tabular-nums;display:flex;align-items:baseline}
+.cnt small{font-size:15px;color:#a3a8bd;font-weight:700;margin-left:2px}
+.cnt .n{display:inline-block}
+.cnt .n.flip{animation:flip .45s cubic-bezier(.3,1.5,.5,1)}
+@keyframes flip{from{transform:translateY(-60%);opacity:0}}
+.slots{list-style:none;padding:16px 18px 6px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.s{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;font-size:13px;font-weight:700;color:#b5b9cc;border:2px dashed #dfe2ec}
+.s svg{width:20px;height:20px}
+.s.on{border:none;background:var(--brand);color:#fff;box-shadow:inset 0 -3px 0 #0002;animation:light .4s both;animation-delay:calc(var(--i)*70ms)}
+@keyframes light{from{transform:scale(.6);opacity:.2}}
+.s.pop{animation:pop .55s cubic-bezier(.3,1.7,.5,1) both}
+.s.pop::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:3px solid var(--brand);animation:ring .7s .15s ease-out both}
+@keyframes pop{0%{transform:scale(1.7);opacity:0}100%{transform:scale(1)}}
+@keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.9);opacity:0}}
+.s.wait{border:2px dashed var(--hl);color:var(--hl)}
+.s.wait svg{width:16px;height:16px}
+.s.gift{border:2px solid color-mix(in srgb,var(--brand) 35%,#fff);background:color-mix(in srgb,var(--brand) 10%,#fff);color:var(--brand)}
+.s.gift.last{animation:breathe 1.8s ease-in-out infinite}
+.s.gift.won{background:var(--brand);color:#fff;border-color:var(--brand);animation:bounce .8s 3}
+@keyframes breathe{50%{transform:scale(1.08);box-shadow:0 0 0 6px color-mix(in srgb,var(--brand) 15%,transparent)}}
+@keyframes bounce{40%{transform:translateY(-6px) rotate(-8deg)}70%{transform:translateY(0) rotate(5deg)}}
+.tag{position:absolute;top:-19px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--fg);color:#fff;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px}
+.bar{margin:8px 18px 0;height:6px;border-radius:9px;background:#eef0f7;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--brand);border-radius:9px;transition:width .7s cubic-bezier(.3,1.2,.5,1)}
+.foot{margin-top:14px;padding:11px 18px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.foot svg{width:16px;height:16px;flex:none}
+.foot.warn{color:var(--hl);background:#fdf6e9;border-top:1px solid #f3e1bd;font-weight:600}
+.foot.info{align-items:flex-start;gap:12px;color:var(--fg);background:color-mix(in srgb,var(--brand) 5%,#fff);border-top:1px solid var(--line)}
+.foot.info .ico{width:34px;height:34px}
+
+.ticket{display:flex;align-items:center;gap:12px;padding:16px;border-radius:18px;background:var(--brand);color:#fff;position:relative;overflow:hidden}
+.ticket::before,.ticket::after{content:"";position:absolute;left:60px;width:16px;height:16px;border-radius:50%;background:var(--bg)}
+.ticket::before{top:-8px}.ticket::after{bottom:-8px}
+.ticket .ic{width:44px;flex:none;display:grid;place-items:center;border-right:2px dashed #fff6;padding-right:12px;margin-right:4px;position:relative}
+.ticket .ic svg{width:28px;height:28px;animation:wig 3s 1s infinite}
+.ticket .ic i{position:absolute;top:-6px;right:4px;background:#fff;color:var(--brand);font:800 10px/17px Inter;font-style:normal;min-width:17px;border-radius:9px;text-align:center}
+@keyframes wig{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}94%{transform:rotate(12deg)}97%{transform:rotate(-6deg)}}
+.ticket b{display:block;font-size:16px}
+.ticket span{font-size:13px;opacity:.9}
+.ticket .go{margin-left:auto;font-size:22px;animation:nudge 1.6s infinite}
+@keyframes nudge{50%{transform:translateX(4px)}}
+.shine::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,#fff4 50%,transparent 65%);transform:translateX(-100%);animation:sh 4.5s 1.2s infinite;pointer-events:none}
+@keyframes sh{20%,100%{transform:translateX(100%)}}
+
+.list{background:#fff;border-radius:18px;border:1px solid var(--line)}
+.li{display:flex;gap:12px;align-items:center;padding:13px 14px}
+.li+.li{border-top:1px solid var(--line)}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--brand) 10%,#fff);color:var(--brand)}
+.ico svg{width:19px;height:19px}
+.li p{font-size:14px;font-weight:600;line-height:1.3}
+.li p small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.li .ch{margin-left:auto;color:#a3a8bd}
+.li .val{margin-left:auto;font-size:13px;color:var(--muted)}
+.sec{font-size:13px;font-weight:700;color:var(--muted);margin:4px 2px -6px}
+.btn{display:block;width:100%;text-align:center;padding:14px;border-radius:14px;background:var(--brand);color:#fff;border:0;font:700 15px Inter;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--fg);border:1px solid var(--line)}
+.btn.dark{background:var(--fg)}
+.btn.danger{background:#fff;color:var(--bad);border:1px solid #f1caca}
+.link{color:var(--brand);font-weight:600;font-size:14px;text-align:center}
+.demo{position:absolute;left:12px;right:12px;bottom:12px;z-index:5;background:var(--fg);color:#fff;border:0;border-radius:12px;padding:10px;font:600 13px Inter;cursor:pointer;opacity:.92}
+
+.gc{border-radius:20px;background:var(--brand);color:#fff;position:relative;overflow:hidden}
+.gc .top2{padding:16px 18px 14px;display:flex;justify-content:space-between;gap:10px}
+.gc .nm{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.gc .meta{font-size:12.5px;opacity:.88;margin-top:2px}
+.gc .soon{align-self:flex-start;background:#fff;color:var(--brand);font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.gc .perf{height:0;border-top:2px dashed #fff5;margin:0 14px;position:relative}
+.gc .perf::before,.gc .perf::after{content:"";position:absolute;top:-9px;width:16px;height:16px;border-radius:50%;background:var(--bg)}
+.gc .perf::before{left:-22px}.gc .perf::after{right:-22px}
+.gc .act{padding:12px 18px 14px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer;background:none;border:0;color:inherit;width:100%;font-family:inherit}
+.gc .act svg{width:18px;height:18px}
+.gc.old{background:#fff;color:var(--muted);border:1px solid var(--line)}
+.gc.old .nm{color:var(--fg);font-size:16px}
+.badge{font-size:11.5px;font-weight:700;background:#eef0f7;padding:3px 9px;border-radius:99px;align-self:flex-start;white-space:nowrap}
+.h3{font-size:15px;font-weight:700;margin-top:4px}
+.empty{border:2px dashed var(--line);border-radius:20px;padding:34px 20px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty .ico{width:56px;height:56px;border-radius:50%}
+.empty .ico svg{width:26px;height:26px}
+
+.dim{position:absolute;inset:0;background:#161a3366;z-index:3}
+.sheet{position:absolute;inset:auto 0 0 0;z-index:4;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px 24px;text-align:center;box-shadow:0 -20px 40px #0002;animation:up .45s cubic-bezier(.2,1,.3,1) both;display:flex;flex-direction:column;gap:6px}
+@keyframes up{from{transform:translateY(100%)}}
+.sheet .grab{width:40px;height:4px;background:#d6d9e4;border-radius:4px;margin:0 auto 8px}
+.qr{width:150px;height:150px;margin:8px auto;border-radius:14px;background:conic-gradient(from 90deg at 18% 18%,var(--fg) 25%,transparent 0) 0 0/28px 28px,#fff;border:10px solid #fff;outline:1px solid var(--line)}
+.scratch{margin:4px auto 0;width:230px;border-radius:12px;padding:12px;font:800 26px/1 ui-monospace,monospace;letter-spacing:.2em;background:linear-gradient(135deg,#c9ccd6,#eef0f5 45%,#b9bdca);color:transparent;position:relative}
+.scratch::after{content:"Kodu görmək üçün silin";position:absolute;inset:0;display:grid;place-items:center;font:600 12px Inter;color:#4c5168;letter-spacing:0}
+.scratch.open{background:color-mix(in srgb,var(--brand) 8%,#fff);color:var(--brand)}
+.scratch.open::after{content:none}
+
+.tap{align-items:center;text-align:center;justify-content:center;gap:12px;padding-top:20px}
+.big{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--brand) 70%,#fff),var(--brand));display:grid;place-items:center;color:#fff;box-shadow:0 18px 30px -10px color-mix(in srgb,var(--brand) 70%,transparent)}
+.big svg{width:64px;height:64px}
+.big.drop{animation:drop .7s cubic-bezier(.5,0,.4,1.6) both}
+.big.amber{background:radial-gradient(circle at 35% 30%,#f4b860,var(--hl));box-shadow:0 18px 30px -10px #b4530988;animation:pulse 1.6s infinite}
+.big.grey{background:#eceef4;color:var(--hl);box-shadow:none;width:120px;height:120px}
+.big.ok{background:radial-gradient(circle at 35% 30%,#4ade80,var(--ok));box-shadow:0 18px 30px -10px #15803d88}
+.big.sm{width:96px;height:96px}.big.sm svg{width:42px;height:42px}
+@keyframes drop{0%{transform:translateY(-140px) scale(1.25)}70%{transform:translateY(0) scale(.92)}100%{transform:scale(1)}}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.fu{animation:fu .5s both}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}}
+.mini{width:100%;padding:14px;border-radius:18px;background:#fff;border:1px solid var(--line);text-align:left}
+.mini .slots{padding:8px 0 0;gap:7px}
+.mini .s{font-size:11px}
+.mini .s svg{width:16px;height:16px}
+.auto{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:center}
+.auto i{width:60px;height:4px;border-radius:4px;background:#eef0f7;overflow:hidden;display:block}
+.auto i::after{content:"";display:block;height:100%;background:var(--brand);animation:fill 3.8s linear both}
+@keyframes fill{from{width:0}to{width:100%}}
+.timer{font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--brand);font-variant-numeric:tabular-nums}
+.where{display:flex;gap:4px;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.where svg{width:15px;height:15px}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
+.confetti i{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;animation:fall 2.6s linear infinite}
+@keyframes fall{to{transform:translateY(720px) rotate(540deg)}}
+
+.otp{display:flex;gap:7px;justify-content:center}
+.otp span{width:40px;height:52px;border-radius:12px;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;font-size:22px;font-weight:700}
+.otp span.f{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.otp span.f::after{content:"";width:2px;height:24px;background:var(--brand);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.lbl{font-size:13px;font-weight:600;margin-bottom:-8px}
+.field{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;font-weight:600}
+.field.f{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+.field span{color:var(--muted);font-weight:500;border-right:1px solid var(--line);padding-right:8px}
+.field.ph{color:#a3a8bd;font-weight:500}
+.steps{display:flex;gap:6px}.steps i{flex:1;height:4px;border-radius:4px;background:var(--line)}.steps i.on{background:var(--brand)}
+.check{display:flex;gap:10px;font-size:13.5px;align-items:flex-start}
+.check i{width:22px;height:22px;border-radius:7px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none;font-style:normal;font-size:13px}
+.check a{color:var(--brand);font-weight:600}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--brand) 8%,#fff);font-size:13.5px}
+.note svg{width:18px;height:18px;flex:none;color:var(--brand);margin-top:1px}
+.seg{display:flex;background:#eef0f7;border-radius:12px;padding:3px}
+.seg span{flex:1;text-align:center;padding:7px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg span.on{background:#fff;color:var(--fg);box-shadow:0 1px 3px #0001}
+.copy{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 14px;font-size:13.5px}
+.copy span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.copy button{border:0;background:var(--fg);color:#fff;border-radius:10px;padding:9px 12px;font:600 13px Inter;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stats b{display:block;font-size:22px;font-weight:800;color:var(--brand)}
+.stats span{font-size:11.5px;color:var(--muted)}
+.hero-ref{border-radius:22px;background:var(--brand);color:#fff;padding:18px;display:flex;gap:14px;align-items:center;position:relative;overflow:hidden}
+.hero-ref .pl{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
+.hero-ref .pl b{font-size:26px;line-height:1}
+.hero-ref .pl span{font-size:11px;opacity:.85}
+.hero-ref p{font-size:13.5px;line-height:1.4}
+/* Möhür səhnəsi */
+.fx{flex:1;position:relative;overflow:hidden;background:var(--bg);color:#fff}
+.fx::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--brand) 75%,#fff) 0%,var(--brand) 45%,color-mix(in srgb,var(--brand) 70%,#000) 100%);clip-path:circle(0 at 50% 6%)}
+.fx.go::before{animation:flood .7s cubic-bezier(.6,0,.3,1) forwards}
+@keyframes flood{to{clip-path:circle(150% at 50% 6%)}}
+.nfcdot{position:absolute;top:22px;left:50%;width:40px;height:40px;margin-left:-20px;border-radius:50%;background:#fff;color:var(--brand);display:grid;place-items:center;opacity:0}
+.nfcdot svg{width:20px;height:20px}
+.fx.go .nfcdot{animation:dot 1.1s ease-out both}
+@keyframes dot{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+.ripples i{position:absolute;top:42px;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;border:2px solid #fff;opacity:0}
+.fx.go .ripples i{animation:rip 1s ease-out both}
+.fx.go .ripples i:nth-child(2){animation-delay:.15s}.fx.go .ripples i:nth-child(3){animation-delay:.3s}
+@keyframes rip{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(9)}}
+.seal{position:absolute;top:64px;left:50%;width:170px;height:170px;margin-left:-85px;color:#fff;opacity:0;z-index:2;filter:drop-shadow(0 10px 18px #0004)}
+.seal svg{width:100%;height:100%}
+.burst{position:absolute;top:149px;left:50%;z-index:1}
+.burst i{position:absolute;border-radius:50%;background:#fff;opacity:0;animation:boom .7s cubic-bezier(.1,.8,.3,1) both}
+.burst i:nth-child(3n){background:color-mix(in srgb,var(--brand) 30%,#fff)}
+.burst i:nth-child(4n){border-radius:2px}
+@keyframes boom{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.3)}}
+.burst::before{content:"";position:absolute;width:180px;height:180px;margin:-90px;border-radius:50%;border:10px solid #fff;opacity:0}
+.burst:not(:empty)::before{animation:shock .6s ease-out}
+@keyframes shock{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.9);border-width:1px}}
+.odo{position:absolute;top:244px;left:0;right:0;display:flex;justify-content:center;align-items:baseline;gap:4px;font-weight:800;letter-spacing:-.04em;opacity:0}
+.fx.go .odo{animation:odoIn .4s .9s both}
+@keyframes odoIn{from{opacity:0;transform:translateY(12px)}to{opacity:1}}
+.odo .roll{height:84px;overflow:hidden;display:inline-block;font-size:84px;line-height:84px}
+.odo .roll>span{display:flex;flex-direction:column}
+.odo small{font-size:28px;opacity:.7}
+.fxsheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);color:var(--fg);border-radius:28px 28px 0 0;padding:22px 18px 60px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transform:translateY(105%);box-shadow:0 -16px 40px #0003}
+.fxsheet .auto i::after{animation:none;width:0}
+.fxsheet .auto i.run::after{animation:fill 3.8s linear both}
+.stepn{display:flex;gap:12px;align-items:flex-start;text-align:left;font-size:14px}
+.stepn b{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none;font-size:13px}
+.stepn svg{width:16px;height:16px;vertical-align:-3px;color:var(--brand)}
+.safari{margin-top:4px;border-radius:14px;background:#f1f2f6;padding:10px 0;display:flex;justify-content:space-around;color:#8b90a6}
+.safari svg{width:20px;height:20px}
+.safari .hit{color:var(--brand);position:relative}
+.safari .hit::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--brand);animation:ring 1.4s infinite}
+.homescr{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px;border-radius:18px;background:linear-gradient(160deg,#cfd6e6,#e9dfd3)}
+.homescr span{aspect-ratio:1;border-radius:12px;background:#fff8}
+.homescr span.me{background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;animation:pop .6s .4s cubic-bezier(.3,1.7,.5,1) both;box-shadow:0 6px 14px -6px var(--brand)}
+.push{display:flex;gap:10px;align-items:flex-start;text-align:left;background:#fff;border-radius:16px;padding:11px 12px;box-shadow:0 10px 24px -10px #0003;border:1px solid var(--line);font-size:13px;animation:slide .6s .3s cubic-bezier(.2,1.3,.4,1) both}
+.push+.push{animation-delay:.6s;opacity:.75;transform:scale(.97)}
+.push .logo{width:30px;height:30px;font-size:12px;border-radius:9px}
+.push b{display:block;font-size:13px}
+.push small{margin-left:auto;color:var(--muted);font-size:11px}
+@keyframes slide{from{transform:translateY(-30px);opacity:0}}
+.ring-bell{animation:bell 2.4s .8s infinite;transform-origin:50% 10%}
+@keyframes bell{0%,70%,100%{transform:rotate(0)}75%{transform:rotate(16deg)}80%{transform:rotate(-14deg)}85%{transform:rotate(9deg)}90%{transform:rotate(-5deg)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <div>
+    <h1>Müştəri ekranları: səliqəli yeniləmə</h1>
+    <p>Bütün müştəri ekranları və vəziyyətləri. Struktur, mətnlər və data mövcud tətbiqdəkidir, dəyişən görünüş və animasiyalardır. Bütün rənglər şirkətin brend rəngindən alınır. Rəngi dəyişib yoxlayın, "Möhür vur", "Kodu göstər" və "Yenidən oynat" düymələrini sınayın.</p>
+  </div>
+  <div class="sw" aria-label="Brend rəngi">
+    <button style="background:#7f6440" data-c="#7f6440" aria-label="Qəhvəyi"></button>
+    <button style="background:#d0121b" data-c="#d0121b" aria-label="Qırmızı"></button>
+    <button style="background:#1f6f5c" data-c="#1f6f5c" aria-label="Yaşıl"></button>
+    <button style="background:#3b3fd8" data-c="#3b3fd8" aria-label="Göy"></button>
+    <button style="background:#6d28d9" data-c="#6d28d9" aria-label="Bənövşəyi"></button>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="chk" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></symbol>
+  <symbol id="timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></symbol>
+  <symbol id="hour" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2h12M6 22h12M7 2v4l5 6 5-6V2M7 22v-4l5-6 5 6v4"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+  <symbol id="phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 18v3"/></symbol>
+  <symbol id="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8.3a6 6 0 0 1 0 7.4M9.5 5.5a10 10 0 0 1 0 13M13 3a14 14 0 0 1 0 18M16.5 1.5a17 17 0 0 1 0 21"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+  <symbol id="party" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5.8 11.3 2 22l10.7-3.8M4 3h.01M22 8h.01M15 2h.01M22 20h.01M22 2l-2.2.7a3 3 0 0 0-2 3.4c.1.9-.6 1.8-1.6 1.8h-.4M11 13l-2-2c-1-1-2.4-1-2.4 0 0 1.6 3.2 4.8 4.8 4.8 1 0 1-1.4 0-2.4z"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></symbol>
+  <symbol id="doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></symbol>
+  <symbol id="out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+</svg>
+
+<template id="hdr"><hdr><span class="logo">H</span><b>HəzzPoint</b><a class="ib" aria-label="Hədiyyə kartları"><svg><use href="#gift"/></svg><i>1</i></a><a class="ib" aria-label="Parametrlər"><svg><use href="#gear"/></svg></a></hdr></template>
+<template id="hdrg"><hdr><span class="logo">H</span><b>HəzzPoint</b><span class="lang">AZ ▾</span></hdr></template>
+<template id="ftr"><p class="ftr">© 2026 Trend Solutions. Bütün hüquqlar qorunur.</p></template>
+
+<!-- ============ 1. Ana səhifə ============ -->
+<section class="grp">
+<h2>Ana səhifə</h2>
+<p>Daxil olmuş müştəri üçün kart, qonaq üçün şirkət haqqında məlumat. Dəvət, bildiriş və quraşdırma təklifləri bir siyahıda birləşir.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Salam, Aysel!</h2><p class="sub">Hər ziyarət sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu NFC nişanına toxundurun.</p></div>
+  <div class="card">
+    <div class="hd"><div><h3>Möhür kartı</h3><p class="reward" id="prog">Hədiyyəyə 4 möhür qalıb</p></div><div class="cnt"><span class="n" id="num">5</span><small>/9</small></div></div>
+    <ol class="slots" id="slots"></ol>
+    <p class="reward" style="padding:4px 18px 0">Hədiyyə: <b>Hədiyyə qəhvə</b></p>
+    <div class="bar"><span id="bar" style="width:55%"></span></div>
+    <div class="foot"><svg><use href="#timer"/></svg>Növbəti möhür 12:40 sonra</div>
+  </div>
+  <a class="ticket shine"><span class="ic"><svg><use href="#gift"/></svg><i>1</i></span><span><b>Hədiyyələriniz</b><span>Hədiyyə qəhvə</span></span><span class="go">›</span></a>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#user"/></svg></span><p>Dostunu dəvət et<small>Sən 1, dostun 1 bonus möhür qazanır</small></p><span class="ch">›</span></div>
+    <div class="li"><span class="ico"><svg><use href="#bell"/></svg></span><p>Hədiyyəni qaçırma<small>Bildirişləri aç, hədiyyən hazır olanda xəbər alacaqsan</small></p><span class="ch">›</span></div>
+    <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>Telefona quraşdırın<small>Ana ekranda ikon kimi, tam ekranda açılır</small></p><span class="ch">›</span></div>
+  </div>
+  <div data-t="ftr"></div>
+  <div style="height:44px"></div>
+</div>
+<button class="demo" id="demo">Möhür vur (demo)</button>
+</div>
+<p class="cap">Adi vəziyyət</p>
+<ul class="notes">
+  <li>Sayğac (5/9) kartın başlığında. Möhür vurulanda rəqəm yuxarıdan düşür, yeni xana halqa ilə yanır.</li>
+  <li>Boş xanalarda ulduz əvəzinə nömrə.</li>
+  <li>Geri sayım kartın alt zolağıdır.</li>
+  <li>Hədiyyə banneri bilet formasında, ikon vaxtaşırı yellənir, üstündən işıq keçir.</li>
+</ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Salam, Aysel!</h2><p class="sub">Hər ziyarət sizi hədiyyəyə bir addım yaxınlaşdırır. Möhür almaq üçün telefonunuzu NFC nişanına toxundurun.</p></div>
+  <div class="card">
+    <div class="hd"><div><h3>Möhür kartı</h3><p class="reward">Hədiyyəyə 2 möhür qalıb</p></div><div class="cnt"><span class="n">7</span><small>/9</small></div></div>
+    <ol class="slots" data-cur="7" data-pending="1"></ol>
+    <p class="reward" style="padding:4px 18px 0">Hədiyyə: <b>Hədiyyə qəhvə</b></p>
+    <div class="bar"><span style="width:78%"></span></div>
+    <div class="foot warn"><svg><use href="#hour"/></svg>1 möhür işçi təsdiqini gözləyir</div>
+    <div class="foot info" style="margin-top:0"><span class="ico"><svg><use href="#nfc"/></svg></span><span style="font-size:13px"><b style="display:block">Nömrənizi bir daha soruşmayacağıq.</b><span style="color:var(--muted)">Növbəti gəlişinizdə NFC nişanına toxunun, möhürünüz birbaşa kartınıza düşəcək.</span></span></div>
+  </div>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#user"/></svg></span><p>Dostunu dəvət et<small>Sən 1, dostun 1 bonus möhür qazanır</small></p><span class="ch">›</span></div>
+    <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>Telefona quraşdırın<small>Ana ekranda ikon kimi, tam ekranda açılır</small></p><span class="ch">›</span></div>
+  </div>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">İlk girişdən sonra, təsdiq gözləyən möhür, son möhür</p>
+<ul class="notes">
+  <li>Təsdiq gözləyən möhür xanada qum saatı ilə, izahı kartın alt zolağında.</li>
+  <li>Hədiyyəyə 1 möhür qalanda hədiyyə xanası "nəfəs alır", üstündə "Son möhür!".</li>
+  <li>"Nömrənizi soruşmayacağıq" izahı kartın içində, ayrı blok deyil.</li>
+</ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdrg"></div>
+  <div><h2 class="g">HəzzPoint</h2><p class="sub">Şirin anlar üçün şirniyyat evi.</p></div>
+  <div class="card" style="padding:16px 18px">
+    <p style="font-weight:700">9 möhür toplayın, Hədiyyə qəhvə bizdən!</p>
+    <ol class="slots" style="padding:12px 0 0" data-cur="0"></ol>
+  </div>
+  <button class="btn">Daxil ol və möhür topla</button>
+  <p class="sec">Filiallarımız</p>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#pin"/></svg></span><p>Nərimanov filialı<small>Ə. Rəcəbli küç. 12</small></p></div>
+    <div class="li"><span class="ico"><svg><use href="#pin"/></svg></span><p>28 May filialı<small>S. Vurğun küç. 34</small></p></div>
+  </div>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Qonaq</p>
+<ul class="notes">
+  <li>Qayda boş kartla göstərilir: müştəri nə toplayacağını görür.</li>
+  <li>Filiallar eyni siyahı üslubunda.</li>
+</ul>
+</div>
+
+</div>
+</section>
+
+<!-- ============ 2. Giriş ============ -->
+<section class="grp">
+<h2>Giriş və qeydiyyat</h2>
+<p>Üç addım: nömrə, SMS kodu, ad və razılıq (yalnız yeni müştəri). Yuxarıdakı zolaq hansı addımda olduğunu göstərir.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdrg"></div>
+  <div class="steps"><i class="on"></i><i></i><i></i></div>
+  <div><h2 class="g">Daxil olun</h2><p class="sub">Telefon nömrənizə SMS ilə 6 rəqəmli kod göndərəcəyik. Yeni müştərisinizsə, hesab avtomatik yaranacaq.</p></div>
+  <p class="lbl">Telefon nömrəsi</p>
+  <div class="field f"><span>+994</span>050 123 45 67</div>
+  <p class="sub" style="font-size:12.5px;margin-top:-6px">Sizə SMS ilə təsdiq kodu göndərəcəyik.</p>
+  <button class="btn">Kod göndər</button>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Nömrə</p>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdrg"></div>
+  <div class="steps"><i class="on"></i><i class="on"></i><i></i></div>
+  <div><h2 class="g">SMS kodunu daxil edin</h2><p class="sub">+994 50 123 45 67 nömrəsinə kod göndərdik.</p></div>
+  <p class="lbl">Təsdiq kodu</p>
+  <div class="otp"><span>4</span><span>8</span><span>1</span><span class="f"></span><span></span><span></span></div>
+  <button class="btn">Təsdiqlə</button>
+  <p class="sub" style="text-align:center;font-size:13px">Kodu 42 saniyədən sonra yenidən göndərə bilərsiniz</p>
+  <p class="link">Nömrəni dəyiş</p>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">SMS kodu</p>
+<ul class="notes"><li>6 ayrı xana, aktiv xanada brend rəngli halqa və yanıb-sönən kursor.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdrg"></div>
+  <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+  <div><h2 class="g">Qeydiyyatı tamamlayın</h2><p class="sub">Sizə necə müraciət edək? Ad istəyə bağlıdır.</p></div>
+  <div class="note"><svg><use href="#gift"/></svg>Dostunun dəvəti ilə gəlmisən: ilk möhürünlə birlikdə 1 bonus möhür qazanacaqsan.</div>
+  <p class="lbl">Adınız</p>
+  <div class="field f">Aysel</div>
+  <label class="check"><i>✓</i><span>Mən <a>məxfilik siyasəti</a> və <a>istifadə şərtləri</a> ilə tanış oldum və razıyam.</span></label>
+  <button class="btn">Qeydiyyatı tamamla</button>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Qeydiyyat (dəvətlə gələn)</p>
+</div>
+
+</div>
+</section>
+
+<!-- ============ 3. NFC toxunuşu ============ -->
+<section class="grp">
+<h2>NFC toxunuşu</h2>
+<p>Toxunuşdan sonra açılan ekranlar. Hər vəziyyətin öz ikonu və rəngi var, amma quruluş eynidir: böyük ikon, başlıq, izah, filial, düymə.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone" id="fxphone"><div class="fx" id="fx">
+  <div class="ripples" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="nfcdot" aria-hidden="true"><svg><use href="#nfc"/></svg></div>
+  <div class="burst" id="burst" aria-hidden="true"></div>
+  <div class="seal" id="seal" aria-hidden="true"><svg viewBox="0 0 200 200">
+    <defs><path id="arc" d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0"/></defs>
+    <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="6"/>
+    <circle cx="100" cy="100" r="84" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 5"/>
+    <text font-size="14.5" font-weight="800" letter-spacing="3.6" fill="currentColor"><textPath href="#arc">HƏZZPOINT ★ 26.10.2026 ★ NƏRİMANOV ★</textPath></text>
+    <circle cx="100" cy="100" r="54" fill="currentColor"/>
+    <path d="M76 101l16 16 32-34" fill="none" stroke="var(--brand)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg></div>
+  <div class="odo" id="odo"><span class="roll"><span id="roll"><b>5</b><b>6</b></span></span><small>/9</small></div>
+  <div class="fxsheet" id="fxsheet">
+    <h2 class="g">Möhür əlavə olundu!</h2>
+    <p class="where"><svg><use href="#pin"/></svg>Nərimanov filialı</p>
+    <div class="mini">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600"><span>Hədiyyəyə 3 möhür qalıb</span><span style="color:var(--brand);font-weight:800">6/9</span></div>
+      <ol class="slots" id="mslots"></ol>
+    </div>
+    <p class="auto">Kartınız açılır <i id="autobar"></i></p>
+  </div>
+</div>
+<button class="demo" id="replay">Yenidən oynat</button>
+</div>
+<p class="cap">Möhür əlavə olundu (yeni)</p>
+<ul class="notes">
+  <li>0,0 san: toxunuş nöqtəsindən NFC dalğaları yayılır, ekran brend rənginə boyanır.</li>
+  <li>0,4 san: rezin möhür (şirkət, tarix, filial) yuxarıdan zərblə enir: ekran silkələnir, mürəkkəb dalğası və hissəciklər yayılır, telefon titrəyir.</li>
+  <li>1,0 san: iri sayğac 5-dən 6-ya fırlanır.</li>
+  <li>1,8 san: aşağıdan kart qalxır, möhür kiçilib 6-cı xanaya uçur və orada yanır.</li>
+  <li>Kart dolanda eyni ardıcıllıq hədiyyə xanasında bitir və təbrik açılır. Azaldılmış hərəkət seçilibsə, yalnız son vəziyyət göstərilir.</li>
+</ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap">
+  <div class="big amber"><svg><use href="#hour"/></svg></div>
+  <h2 class="g">İşçi təsdiqi gözlənilir</h2>
+  <p class="sub">Möhür işçi təsdiqləyən kimi kartınıza əlavə olunacaq.</p>
+  <p class="where"><svg><use href="#pin"/></svg>Nərimanov filialı</p>
+  <div class="mini"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600"><span>Hədiyyəyə 4 möhür qalıb</span><span style="color:var(--brand);font-weight:800">5/9</span></div><ol class="slots" data-cur="5" data-pending="1"></ol></div>
+  <p class="auto">Kartınız açılır <i></i></p>
+</div></div>
+<p class="cap">Təsdiq gözlənilir</p>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap">
+  <div class="big grey"><svg style="width:52px;height:52px"><use href="#timer"/></svg></div>
+  <h2 class="g">Möhür verilmədi</h2>
+  <p class="sub">Növbəti möhür üçün bir az gözləyin.</p>
+  <p class="timer" id="cd">12:40</p>
+  <div style="flex:1"></div>
+  <button class="btn ghost">Kartıma bax</button>
+</div></div>
+<p class="cap">Gözləmə müddəti</p>
+<ul class="notes"><li>Geri sayım iri rəqəmlə və canlı azalır.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap">
+  <div class="big grey" style="color:var(--bad)"><svg style="width:52px;height:52px"><use href="#warn"/></svg></div>
+  <h2 class="g">Möhür verilmədi</h2>
+  <p class="sub">Toxunuşun vaxtı keçib. Telefonu NFC nişanına yenidən toxundurun.</p>
+  <div style="flex:1"></div>
+  <button class="btn ghost">Kartıma bax</button>
+</div></div>
+<p class="cap">Xəta</p>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap">
+  <div data-t="hdrg" style="align-self:stretch"></div>
+  <div class="big sm"><svg><use href="#nfc"/></svg></div>
+  <h2 class="g">Möhür toplayın</h2>
+  <p class="where"><svg><use href="#pin"/></svg>Nərimanov filialı</p>
+  <p class="sub">Möhürü almaq üçün telefon nömrənizlə daxil olun. Toxunuşunuz 10 dəqiqə saxlanılır.</p>
+  <div style="flex:1"></div>
+  <button class="btn">Daxil ol və möhürü al</button>
+</div></div>
+<p class="cap">Qonaq toxundu</p>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap" style="background:color-mix(in srgb,var(--brand) 8%,var(--bg))">
+  <div class="confetti" id="conf"></div>
+  <div class="mini" style="margin-top:10px"><ol class="slots" data-cur="9"></ol></div>
+  <div class="big sm ok" style="background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--brand) 60%,#fff),var(--brand))"><svg><use href="#gift"/></svg></div>
+  <h2 class="g">Təbriklər!</h2>
+  <p style="font-weight:600">Kartınız doldu, Hədiyyə qəhvə sizindir!</p>
+  <p class="sub">Hədiyyə kartı "Hədiyyə kartları" bölməsinə əlavə olundu.</p>
+  <div style="flex:1"></div>
+  <button class="btn">Hədiyyə kartına bax</button>
+  <p class="link">Sonra</p>
+</div></div>
+<p class="cap">Kart doldu</p>
+<ul class="notes"><li>Doldurulmuş kart yuxarıda, hədiyyə xanası tullanır, konfeti brend çalarlarında.</li></ul>
+</div>
+
+</div>
+</section>
+
+<!-- ============ 4. Hədiyyə kartları ============ -->
+<section class="grp">
+<h2>Hədiyyə kartları</h2>
+<p>Hazır kartlar bilet kimidir, tarixçə solğun. Kod aşağıdan qalxan vərəqdə, gümüşü örtüyün altında.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone" id="gcphone"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Hədiyyə kartları</h2><p class="sub">Kart dolanda hədiyyə kartı burada yaranır. Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.</p></div>
+  <p class="h3">İstifadəyə hazır</p>
+  <div class="gc shine">
+    <div class="top2"><div><p class="nm">Hədiyyə qəhvə</p><p class="meta">Qazanıldı: 21 oktyabr 2026<br>Son tarix: 30 oktyabr 2026</p></div><span class="soon">4 gün qalıb</span></div>
+    <div class="perf"></div>
+    <button class="act" id="openqr"><svg><use href="#qr"/></svg>Kodu göstər<span style="margin-left:auto">›</span></button>
+  </div>
+  <p class="h3">Tarixçə</p>
+  <div class="gc old"><div class="top2"><div><p class="nm">Hədiyyə qəhvə</p><p class="meta">Qazanıldı: 14 avqust 2026<br>İstifadə olundu: 2 sentyabr 2026</p></div><span class="badge">İstifadə olunub</span></div></div>
+  <div class="gc old"><div class="top2"><div><p class="nm">Hədiyyə qəhvə</p><p class="meta">Qazanıldı: 2 iyul 2026<br>Son tarix: 1 avqust 2026</p></div><span class="badge">Müddəti bitib</span></div></div>
+  <div data-t="ftr"></div>
+</div>
+<div class="dim" id="dim" hidden></div>
+<div class="sheet" id="sheet" hidden>
+  <div class="grab"></div>
+  <p style="font-size:20px;font-weight:800">Hədiyyə qəhvə</p>
+  <p class="sub">Bu kodu və ya QR-ı işçiyə göstərin. İşçi kartın həqiqiliyini yoxlayıb hədiyyəni təqdim edəcək.</p>
+  <div class="qr"></div>
+  <p class="sub" style="font-size:12px">Kartın kodu</p>
+  <div class="scratch" id="scr1" role="button" tabindex="0">7KX4Q2</div>
+  <button class="btn ghost" style="margin-top:10px" id="closeqr">Bağla</button>
+</div>
+</div>
+<p class="cap">Siyahı (interaktiv)</p>
+<ul class="notes"><li>"Kodu göstər"-ə basın, sonra gümüşü sahəyə.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr" style="filter:blur(0)">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Hədiyyə kartları</h2></div>
+</div>
+<div class="dim"></div>
+<div class="sheet" style="animation:none">
+  <div class="grab"></div>
+  <p style="font-size:20px;font-weight:800">Hədiyyə qəhvə</p>
+  <p class="sub">Bu kodu və ya QR-ı işçiyə göstərin. İşçi kartın həqiqiliyini yoxlayıb hədiyyəni təqdim edəcək.</p>
+  <div class="qr"></div>
+  <p class="sub" style="font-size:12px">Kartın kodu</p>
+  <div class="scratch open">7KX4Q2</div>
+  <button class="btn ghost" style="margin-top:10px">Bağla</button>
+</div>
+</div>
+<p class="cap">Kod açılıb</p>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr"><div data-t="hdr"></div></div>
+<div class="dim"></div>
+<div class="confetti" data-conf></div>
+<div class="sheet" style="animation:none;padding-top:24px;gap:10px">
+  <div class="big sm ok" style="margin:0 auto"><svg><use href="#party"/></svg></div>
+  <p style="font-size:22px;font-weight:800">Hədiyyəniz təhvil verildi! 🎉</p>
+  <p class="sub">Hədiyyə qəhvə · Yenidən gözləyirik!</p>
+  <button class="btn">Bağla</button>
+</div>
+</div>
+<p class="cap">Təhvil verildi</p>
+<ul class="notes"><li>Kod göstərilərkən işçi təhvil verən kimi vərəq bu görünüşə keçir.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Hədiyyə kartları</h2><p class="sub">Kart dolanda hədiyyə kartı burada yaranır. Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.</p></div>
+  <div class="empty">
+    <span class="ico"><svg><use href="#gift"/></svg></span>
+    <p>Hələ hədiyyə kartınız yoxdur. Möhür toplamağa davam edin!</p>
+    <div class="mini" style="padding:10px 12px"><div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:var(--fg)"><span>Hədiyyəyə 4 möhür qalıb</span><span style="color:var(--brand)">5/9</span></div><ol class="slots" data-cur="5"></ol></div>
+  </div>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Boş</p>
+<ul class="notes"><li>Boş vəziyyətdə hədəfə nə qədər qaldığı göstərilir.</li></ul>
+</div>
+
+</div>
+</section>
+
+<!-- ============ 5. Dəvət və parametrlər ============ -->
+<section class="grp">
+<h2>Dəvət və parametrlər</h2>
+<p>Parametrlər qruplaşdırılmış siyahıdır, təhlükəli əməliyyat ən altda ayrıca.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h2 class="g">Dostunu dəvət et</h2></div>
+  <div class="hero-ref shine">
+    <div class="pl"><b>+1</b><span>sənə</span></div>
+    <div class="pl"><b>+1</b><span>dostuna</span></div>
+    <p>Dostun linkinlə qeydiyyatdan keçib ilk möhürünü alanda sən 1, dostun isə 1 bonus möhür qazanır.</p>
+  </div>
+  <p class="lbl">Dəvət linkin</p>
+  <div class="copy"><span>hezzpoint.trendstamp.az/r/AYS7K</span><button>Linki kopyala</button></div>
+  <button class="btn" style="display:flex;gap:8px;justify-content:center"><svg width="18" height="18"><use href="#share"/></svg>Paylaş</button>
+  <div class="stats"><div><b>4</b><span>dəvət etdiyin</span></div><div><b>2</b><span>bonus qazandıran</span></div><div><b>2</b><span>hələ gəlməyən</span></div></div>
+  <p class="sub" style="font-size:12.5px">Ayda ən çox 5 dost sayılır. Dost 30 gün ərzində gəlməlidir.</p>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Dostunu dəvət et</p>
+<ul class="notes"><li>Bonus "+1 sənə / +1 dostuna" iri rəqəmlə, statistika üç xanada.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdr"></div>
+  <h2 class="g">Parametrlər</h2>
+  <p class="sec">Hesab</p>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>Telefon</p><span class="val">+994 50 123 45 67</span></div>
+    <div class="li"><span class="ico"><svg><use href="#user"/></svg></span><p>Adınız</p><span class="val">Aysel</span></div>
+  </div>
+  <p class="sec">Dil</p>
+  <div class="seg"><span class="on">Azərbaycan</span><span>English</span><span>Русский</span></div>
+  <p class="sec">Bildirişlər</p>
+  <div class="list"><div class="li"><span class="ico"><svg><use href="#bell"/></svg></span><p>Bu cihazda bildirişlər açıqdır.</p><span class="val" style="width:40px;height:24px;border-radius:99px;background:var(--brand);position:relative;flex:none"><i style="position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff"></i></span></div></div>
+  <p class="sec">Cihazlarım</p>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>iPhone · Safari<small>Bu cihaz</small></p></div>
+    <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>Android · Chrome<small>Son aktivlik: 3 gün əvvəl</small></p><span class="link" style="margin-left:auto;font-size:13px">Çıxış et</span></div>
+  </div>
+  <p class="sec">Hüquqi sənədlər</p>
+  <div class="list">
+    <div class="li"><span class="ico"><svg><use href="#doc"/></svg></span><p>Məxfilik siyasəti</p><span class="ch">›</span></div>
+    <div class="li"><span class="ico"><svg><use href="#doc"/></svg></span><p>İstifadə şərtləri</p><span class="ch">›</span></div>
+  </div>
+  <button class="btn ghost" style="display:flex;gap:8px;justify-content:center"><svg width="18" height="18"><use href="#out"/></svg>Çıxış</button>
+  <button class="btn danger">Hesabı sil</button>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Parametrlər</p>
+<ul class="notes"><li>Dil seçimi üç düyməli seçicidir, açılan siyahı deyil.</li></ul>
+</div>
+
+</div>
+</section>
+
+<!-- ============ 6. Dəvət, quraşdırma, bildirişlər ============ -->
+<section class="grp">
+<h2>Dəvət, quraşdırma, bildirişlər</h2>
+<p>Ana səhifədəki siyahının üç sətri. "Dostunu dəvət et" ayrıca səhifəni açır (yuxarıda), digər ikisi aşağıdan qalxan vərəqi açır: ana səhifə arxada qalır. Dəvət linki ilə gələn dost üçün ayrıca qarşılama ekranı var.</p>
+<div class="row">
+
+<div class="col">
+<div class="phone"><div class="scr"><div data-t="hdr"></div><h2 class="g">Salam, Aysel!</h2></div>
+<div class="dim"></div>
+<div class="sheet" style="animation:none;gap:12px">
+  <div class="grab"></div>
+  <span class="ico" style="margin:0 auto;width:52px;height:52px;border-radius:16px"><svg style="width:24px;height:24px"><use href="#phone"/></svg></span>
+  <p style="font-size:20px;font-weight:800">Telefona quraşdırın</p>
+  <p class="sub">Tətbiq ana ekranda ikon kimi olacaq və brauzersiz, tam ekranda açılacaq.</p>
+  <div class="stepn"><b>1</b><span>Safari-də aşağıdakı <svg><use href="#share"/></svg> Paylaş düyməsini basın</span></div>
+  <div class="safari"><span>‹</span><span>›</span><span class="hit"><svg><use href="#share"/></svg></span><span>▢</span><span>⧉</span></div>
+  <div class="stepn"><b>2</b><span>"Ana ekrana əlavə et" seçin</span></div>
+  <button class="btn ghost">Bağla</button>
+</div>
+</div>
+<p class="cap">Quraşdırma: iPhone</p>
+<ul class="notes"><li>Safari quraşdırma düyməsi vermir, ona görə iki addımlı təlimat. Addımlar ardıcıl olduğu üçün nömrələnib.</li><li>Safari panelinin sxemində Paylaş düyməsi halqa ilə göstərilir.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr"><div data-t="hdr"></div><h2 class="g">Salam, Aysel!</h2></div>
+<div class="dim"></div>
+<div class="sheet" style="animation:none;gap:12px">
+  <div class="grab"></div>
+  <p style="font-size:20px;font-weight:800">Telefona quraşdırın</p>
+  <p class="sub">Tətbiq ana ekranda ikon kimi olacaq və brauzersiz, tam ekranda açılacaq.</p>
+  <div class="homescr"><span></span><span></span><span></span><span></span><span></span><span class="me">H</span><span></span><span></span></div>
+  <button class="btn">Ana ekrana əlavə et</button>
+  <button class="btn ghost">Bağla</button>
+</div>
+</div>
+<p class="cap">Quraşdırma: Android</p>
+<ul class="notes"><li>Ana ekranın sxemində şirkətin ikonu yerinə "düşür": nə baş verəcəyi görünür.</li><li>Düymə brauzerin öz quraşdırma pəncərəsini açır.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr"><div data-t="hdr"></div><h2 class="g">Salam, Aysel!</h2></div>
+<div class="dim"></div>
+<div class="sheet" style="animation:none;gap:12px">
+  <div class="grab"></div>
+  <span class="ico" style="margin:0 auto;width:52px;height:52px;border-radius:16px"><svg class="ring-bell" style="width:24px;height:24px"><use href="#bell"/></svg></span>
+  <p style="font-size:20px;font-weight:800">Hədiyyəni qaçırma</p>
+  <p class="sub">Bildirişləri aç: möhür təsdiqlənəndə və hədiyyən hazır olanda dərhal xəbər alacaqsan.</p>
+  <div class="push"><span class="logo">H</span><span><b>HəzzPoint</b>Kartın doldu, Hədiyyə qəhvə səni gözləyir!</span><small>indi</small></div>
+  <div class="push"><span class="logo">H</span><span><b>HəzzPoint</b>Möhürün təsdiqləndi: 6/9</span><small>2 dəq</small></div>
+  <button class="btn">Bildirişləri aç</button>
+  <button class="btn ghost">Bağla</button>
+</div>
+</div>
+<p class="cap">Bildirişlər: təklif</p>
+<ul class="notes"><li>Zəng ikonu yellənir, nümunə bildirişlər yuxarıdan düşür: müştəri nə alacağını görür.</li><li>Bildiriş mətnləri nümunədir, real mətnlər backend-dədir.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr"><div data-t="hdr"></div><h2 class="g">Salam, Aysel!</h2></div>
+<div class="dim"></div>
+<div class="sheet" style="animation:none;gap:12px">
+  <div class="grab"></div>
+  <p style="font-size:20px;font-weight:800">Hədiyyəni qaçırma</p>
+  <div class="note" style="text-align:left"><svg><use href="#phone"/></svg>iPhone-da bildirişlər üçün əvvəlcə tətbiqi ana ekrana əlavə et, sonra oradan aç.</div>
+  <button class="btn">Telefona quraşdırın</button>
+  <div class="note" style="text-align:left;background:#fdf0f0"><svg style="color:var(--bad)"><use href="#warn"/></svg>Bildirişlər brauzerin parametrlərində bloklanıb. Açmaq üçün saytın icazələrini dəyiş.</div>
+  <button class="btn ghost">Bağla</button>
+</div>
+</div>
+<p class="cap">Bildirişlər: mümkün olmayanda</p>
+<ul class="notes"><li>Burada iki hal bir arada göstərilib, real ekranda yalnız biri görünür.</li><li>iPhone halında düymə birbaşa quraşdırma təlimatını açır.</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr">
+  <div data-t="hdrg"></div>
+  <div class="hero-ref shine" style="flex-direction:column;align-items:flex-start;padding:22px">
+    <div style="display:flex;gap:-8px"><span class="logo" style="background:#fff;color:var(--brand);box-shadow:0 0 0 3px var(--brand)">A</span><span class="logo" style="background:#fff3;margin-left:-10px;box-shadow:0 0 0 3px var(--brand)">?</span></div>
+    <p style="font-size:20px;font-weight:800;line-height:1.2">HəzzPoint: dostun səni dəvət edir</p>
+    <p>Qeydiyyatdan keç və ilk gəlişində möhürünlə birlikdə 1 bonus möhür qazan.</p>
+  </div>
+  <div class="card" style="padding:14px 18px">
+    <p style="font-weight:700;font-size:14px">İlk gəlişindən sonra kartın</p>
+    <ol class="slots" style="padding:10px 0 0" data-cur="2"></ol>
+  </div>
+  <button class="btn">Qeydiyyatdan keç</button>
+  <div data-t="ftr"></div>
+</div></div>
+<p class="cap">Dəvət linki ilə gələn dost</p>
+<ul class="notes"><li>Bonusun nəticəsi kartda göstərilir: ilk gəlişdə 2 möhür (1 adi + 1 bonus).</li></ul>
+</div>
+
+<div class="col">
+<div class="phone"><div class="scr tap">
+  <div data-t="hdr"></div>
+  <div class="big sm" style="margin-top:30px"><svg><use href="#user"/></svg></div>
+  <h2 class="g">Sən artıq üzvsən</h2>
+  <p class="sub">Dəvət yalnız yeni müştərilər üçündür.</p>
+  <div style="flex:1"></div>
+  <button class="btn">Kartıma keç</button>
+</div></div>
+<p class="cap">Dəvət: artıq üzvdür</p>
+</div>
+
+</div>
+</section>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+document.querySelectorAll('[data-t]').forEach(el=>{el.replaceWith($(el.dataset.t).content.cloneNode(true))});
+const R=9;
+function slotsHtml(cur,{pop=-1,pending=0}={}){let h='';for(let i=0;i<R;i++){const gift=i===R-1;
+  if(gift){const won=cur>=R,last=cur+pending===R-1||cur===R-1;h+=`<li class="s gift${won?' won':''}${last&&!won?' last':''}">${last&&!won?'<span class="tag">Son möhür!</span>':''}<svg><use href="#gift"/></svg></li>`;continue}
+  if(i<cur)h+=`<li class="s on${i===pop?' pop':''}" style="--i:${i}"><svg><use href="#chk"/></svg></li>`;
+  else if(i<cur+pending)h+=`<li class="s wait"><svg><use href="#hour"/></svg></li>`;
+  else h+=`<li class="s">${i+1}</li>`}return h}
+document.querySelectorAll('ol[data-cur]').forEach(o=>o.innerHTML=slotsHtml(+o.dataset.cur,{pending:+(o.dataset.pending||0)}));
+let cur=5;
+function render(pop){$('slots').innerHTML=slotsHtml(cur,{pop});const left=R-cur;
+  $('prog').textContent=left>0?`Hədiyyəyə ${left} möhür qalıb`:'Kart doldu!';$('bar').style.width=cur/R*100+'%';
+  const n=$('num');n.textContent=cur;n.classList.remove('flip');void n.offsetWidth;n.classList.add('flip')}
+render();
+$('demo').onclick=()=>{cur=cur>=R?1:cur+1;render(cur-1)};
+/* Möhür səhnəsi: dalğa → zərbə → sayğac → kart və möhürün xanaya uçuşu */
+let tapRun=0;
+function tap(){
+  const run=++tapRun,fx=$('fx'),seal=$('seal'),sheet=$('fxsheet'),roll=$('roll');
+  const later=(ms,f)=>setTimeout(()=>run===tapRun&&f(),ms);
+  fx.getAnimations({subtree:true}).filter(a=>!(a instanceof CSSAnimation)).forEach(a=>a.cancel());
+  $('mslots').innerHTML=slotsHtml(5);
+  fx.classList.remove('go');void fx.offsetWidth;fx.classList.add('go');
+  seal.style.cssText='';roll.style.transform='';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){roll.style.transform='translateY(-50%)';seal.style.opacity=0;$('mslots').innerHTML=slotsHtml(6);return}
+  // zərbə
+  seal.animate([
+    {transform:'translateY(-120px) scale(2.6) rotate(-28deg)',opacity:0,filter:'blur(8px)'},
+    {transform:'translateY(0) scale(.9) rotate(-12deg)',opacity:1,filter:'blur(0)',offset:.7},
+    {transform:'scale(1.04,.96) rotate(-12deg)',offset:.85},
+    {transform:'scale(1) rotate(-12deg)',opacity:1}],{duration:560,delay:380,easing:'cubic-bezier(.6,0,.9,.5)',fill:'both'});
+  later(700,()=>{
+    $('fxphone').animate([{transform:'translate(0,0)'},{transform:'translate(-6px,4px)'},{transform:'translate(5px,-3px)'},{transform:'translate(-3px,2px)'},{transform:'translate(0,0)'}],{duration:320});
+    navigator.vibrate?.(30);
+    let h='';for(let i=0;i<22;i++){const a=i/22*Math.PI*2+Math.random()*.3,d=90+Math.random()*80,s=4+Math.random()*7;
+      h+=`<i style="--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;width:${s}px;height:${s}px;animation-delay:${Math.random()*60}ms"></i>`}
+    $('burst').innerHTML=h;
+  });
+  // sayğac
+  later(1000,()=>roll.animate([{transform:'translateY(0)'},{transform:'translateY(-58%)'},{transform:'translateY(-50%)'}],{duration:650,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'forwards'}));
+  // kart qalxır, möhür xanaya uçur
+  later(1750,()=>{
+    sheet.animate([{transform:'translateY(105%)'},{transform:'translateY(0)'}],{duration:520,easing:'cubic-bezier(.2,1.1,.3,1)',fill:'forwards'});
+    $('odo').animate([{transform:'translateY(0)'},{transform:'translateY(-22px) scale(.75)'}],{duration:520,easing:'ease-out',fill:'forwards'});
+  });
+  later(2300,()=>{
+    const slot=$('mslots').children[5].getBoundingClientRect(),r=seal.getBoundingClientRect();
+    const dx=slot.left+slot.width/2-(r.left+r.width/2),dy=slot.top+slot.height/2-(r.top+r.height/2),k=slot.width/r.width;
+    seal.animate([{transform:'scale(1) rotate(-12deg)'},{transform:`translate(${dx}px,${dy}px) scale(${k}) rotate(0deg)`}],
+      {duration:560,easing:'cubic-bezier(.5,-.3,.3,1)',fill:'forwards'}).onfinish=()=>{
+      if(run!==tapRun)return;seal.getAnimations().forEach(a=>a.cancel());seal.style.opacity=0;$('mslots').innerHTML=slotsHtml(6,{pop:5});
+      $('autobar').classList.remove('run');void $('autobar').offsetWidth;$('autobar').classList.add('run')};
+  });
+}
+tap();$('replay').onclick=tap;
+const show=v=>{$('sheet').hidden=$('dim').hidden=!v;$('scr1').classList.remove('open')};
+$('openqr').onclick=()=>show(true);$('closeqr').onclick=$('dim').onclick=()=>show(false);
+$('scr1').onclick=$('scr1').onkeydown=()=>$('scr1').classList.add('open');
+let sec=760;setInterval(()=>{sec=sec>0?sec-1:760;$('cd').textContent=String(sec/60|0).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')},1000);
+function confetti(el){const c=getComputedStyle(document.documentElement).getPropertyValue('--brand');let h='';
+  for(let i=0;i<26;i++)h+=`<i style="left:${Math.random()*100}%;background:${i%3?'var(--brand)':i%2?'#f5c542':'color-mix(in srgb,var(--brand) 40%,#fff)'};animation-delay:${-Math.random()*2.6}s;animation-duration:${2+Math.random()*1.5}s"></i>`;el.innerHTML=h}
+confetti($('conf'));document.querySelectorAll('[data-conf]').forEach(confetti);
+document.querySelectorAll('.sw button').forEach(b=>b.onclick=()=>document.documentElement.style.setProperty('--brand',b.dataset.c));
+</script>
+</body>
+</html>
