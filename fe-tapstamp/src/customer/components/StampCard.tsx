@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/cn';
 
+import { useCompanyName } from '../lib/companyInitial';
+
 interface StampCardProps {
   /** Hədiyyə üçün lazım olan möhür sayı. */
   stampsRequired: number;
@@ -43,69 +45,66 @@ export function StampCard({
   const remaining = Math.max(stampsRequired - shown, 0);
   const pendingSlots = Math.min(pending, stampsRequired - shown);
   const lastOne = !completed && remaining === 1;
+  const companyName = useCompanyName();
 
   return (
-    <section
-      className="overflow-hidden rounded-3xl border border-primary/15 bg-card shadow-[0_14px_30px_-18px_color-mix(in_srgb,var(--primary)_55%,transparent)]"
-      aria-labelledby="stamp-card-title"
-    >
-      <div className="flex items-start justify-between gap-3 px-5 pt-5">
-        <div className="min-w-0">
-          <h2 id="stamp-card-title" className="text-lg font-bold">
-            {t('card.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {completed ? t('card.complete') : t('card.progress', { count: remaining })}
+    <section className="overflow-hidden rounded-3xl bg-card shadow-[0_18px_30px_-16px_color-mix(in_srgb,var(--primary)_80%,transparent)]" aria-labelledby="stamp-card-title">
+      {/* Kartın özü cüzdandakı plastik kart kimidir: tam brend rəngində, möhürlər ağ */}
+      <div className="shine relative overflow-hidden bg-[radial-gradient(120%_90%_at_0%_0%,color-mix(in_srgb,var(--primary)_80%,#fff),var(--primary)_55%,color-mix(in_srgb,var(--primary)_75%,#000))] p-5 text-primary-foreground">
+        <span className="pointer-events-none absolute -top-12 -right-12 size-44 rounded-full border-[24px] border-white/[0.07]" aria-hidden="true" />
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 id="stamp-card-title" className="text-lg font-bold">
+              {t('card.title')}
+            </h2>
+            <p className="text-sm opacity-80">{completed ? t('card.complete') : t('card.progress', { count: remaining })}</p>
+          </div>
+          <p
+            className="flex shrink-0 items-baseline text-4xl leading-none font-extrabold tracking-tight tabular-nums"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={stampsRequired}
+            aria-valuenow={shown}
+            aria-label={t('card.title')}
+          >
+            <span key={shown} className="animate-count-in inline-block">
+              {shown}
+            </span>
+            <span className="ml-0.5 text-base font-bold opacity-60">/{stampsRequired}</span>
           </p>
         </div>
-        <p className="flex shrink-0 items-baseline text-3xl leading-none font-extrabold tracking-tight text-primary tabular-nums" aria-hidden="true">
-          <span key={shown} className="animate-count-in inline-block">
-            {shown}
-          </span>
-          <span className="ml-0.5 text-base font-bold text-muted-foreground/60">/{stampsRequired}</span>
-        </p>
+        {/* N xana: sonuncu xana hədiyyənin özüdür (N-ci möhür vurulanda hədiyyə qazanılır) */}
+        <ol className="relative mt-4 grid grid-cols-5 gap-2.5">
+          {Array.from({ length: stampsRequired }, (_, index) => {
+            const filled = index < shown;
+            const waiting = !filled && index < shown + pendingSlots;
+            const fresh = filled && animateFrom !== undefined && index >= animateFrom;
+            const isGift = index === stampsRequired - 1;
+            return (
+              <li key={index} className="flex justify-center">
+                {isGift ? (
+                  <GiftSlot filled={filled} completed={Boolean(completed)} lastOne={lastOne} />
+                ) : (
+                  <StampSlot
+                    filled={filled}
+                    waiting={waiting}
+                    fresh={fresh}
+                    index={index}
+                    delay={fresh ? (index - (animateFrom ?? 0)) * 120 : 0}
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        {rewardName || companyName ? (
+          <p className="relative mt-4 flex items-center justify-between gap-3 border-t border-dashed border-white/25 pt-3 text-[13px]">
+            <span className="min-w-0 font-semibold">{rewardName ? t('card.reward', { name: rewardName }) : null}</span>
+            <span className="shrink-0 truncate opacity-75">{companyName}</span>
+          </p>
+        ) : null}
       </div>
-      {/* N xana: sonuncu xana hədiyyənin özüdür (N-ci möhür vurulanda hədiyyə qazanılır) */}
-      <ol className="grid grid-cols-5 gap-2.5 px-5 pt-5 pb-1">
-        {Array.from({ length: stampsRequired }, (_, index) => {
-          const filled = index < shown;
-          const waiting = !filled && index < shown + pendingSlots;
-          const fresh = filled && animateFrom !== undefined && index >= animateFrom;
-          const isGift = index === stampsRequired - 1;
-          return (
-            <li key={index} className="flex justify-center">
-              {isGift ? (
-                <GiftSlot filled={filled} completed={Boolean(completed)} lastOne={lastOne} />
-              ) : (
-                <StampSlot
-                  filled={filled}
-                  waiting={waiting}
-                  fresh={fresh}
-                  index={index}
-                  delay={fresh ? (index - (animateFrom ?? 0)) * 120 : 0}
-                />
-              )}
-            </li>
-          );
-        })}
-      </ol>
-      {rewardName ? (
-        <p className="px-5 pt-2 text-sm font-semibold text-primary">{t('card.reward', { name: rewardName })}</p>
-      ) : null}
-      <div
-        className="mx-5 mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={stampsRequired}
-        aria-valuenow={shown}
-        aria-label={t('card.title')}
-      >
-        <div
-          className="animate-progress-grow h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${(shown / stampsRequired) * 100}%` }}
-        />
-      </div>
-      <div className="mt-4 flex flex-col">
+      <div className="flex flex-col empty:hidden">
         {footer}
         {showReturnHint ? (
           <div className="flex items-start gap-3 border-t border-border bg-primary/5 px-5 py-3.5">
@@ -156,8 +155,8 @@ function GiftSlot({ filled, completed, lastOne }: { filled: boolean; completed: 
         className={cn(
           'grid size-12 place-items-center rounded-full',
           filled
-            ? 'bg-primary text-primary-foreground shadow-md'
-            : 'border-2 border-primary/35 bg-primary/10 text-primary',
+            ? 'bg-white text-primary shadow-md'
+            : 'border-2 border-white bg-white/10 text-white',
           completed && 'animate-gift-bounce',
           lastOne && 'animate-gift-breathe',
         )}
@@ -187,7 +186,7 @@ function StampSlot({
       <span
         role="img"
         aria-label={t('card.pending', { count: 1 })}
-        className="grid size-12 place-items-center rounded-full border-2 border-dashed border-highlight text-[var(--highlight-ink)]"
+        className="grid size-12 place-items-center rounded-full animate-pulse border-2 border-dashed border-white text-white"
       >
         <Hourglass className="size-4" aria-hidden="true" />
       </span>
@@ -197,7 +196,7 @@ function StampSlot({
     <span className="relative grid size-12 place-items-center">
       {fresh ? (
         <span
-          className="animate-stamp-ring absolute inset-0 rounded-full border-4 border-primary"
+          className="animate-stamp-ring absolute inset-0 rounded-full border-4 border-white"
           style={{ animationDelay: `${delay + 250}ms` }}
           aria-hidden="true"
         />
@@ -208,8 +207,8 @@ function StampSlot({
         className={cn(
           'grid size-12 place-items-center rounded-full text-sm font-bold',
           filled
-            ? 'bg-primary text-primary-foreground shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]'
-            : 'border-2 border-dashed border-border text-muted-foreground/50',
+            ? 'bg-white text-primary shadow-[0_3px_8px_rgb(0_0_0/0.18)]'
+            : 'border-2 border-dashed border-white/35 text-white/60',
           fresh && 'animate-stamp-pop',
           // Açılışda toplanmış möhürlər soldan sağa bir-bir yanır (yeni vurulanın öz animasiyası var)
           filled && !fresh && 'animate-stamp-light',

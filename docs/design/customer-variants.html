@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Müştəri ekranları – variantlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#7f6440;--bg:#f6f7fb;--fg:#161a33;--muted:#5b6280;--line:#e6e8f0}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:#dfe2ea;color:var(--fg);font:15px/1.5 Inter,system-ui,sans-serif;padding:28px 16px 64px}
+.wrap{max-width:1400px;margin:0 auto}
+.top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:end;margin-bottom:8px}
+.top h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.top p{color:var(--muted);max-width:74ch}
+.sw{display:flex;gap:8px}
+.sw button{width:30px;height:30px;border-radius:50%;border:3px solid #fff;cursor:pointer;box-shadow:0 0 0 1px #0002}
+.sw button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.grp{margin-top:34px}
+.grp>h2{font-size:19px;font-weight:800}
+.grp>p{color:var(--muted);font-size:14px;max-width:80ch;margin-bottom:14px}
+.row{display:flex;gap:24px;overflow-x:auto;padding:6px 4px 16px;align-items:flex-start}
+.col{flex:0 0 330px}
+.cap{font-weight:700;margin:10px 0 2px}
+.notes{color:var(--muted);font-size:13px;padding-left:18px}
+.phone{min-height:690px;border-radius:38px;border:8px solid #1b1d2b;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+.scr{flex:1;padding:0 16px 20px;display:flex;flex-direction:column;gap:14px}
+.scr>*{flex-shrink:0}
+hdr{display:flex;align-items:center;gap:10px;padding:12px 0 2px}
+.logo{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+hdr b{flex:1}
+.ib{width:34px;height:34px;display:grid;place-items:center;position:relative}
+.ib svg{width:20px;height:20px}
+.ib i{position:absolute;top:0;right:0;min-width:16px;height:16px;border-radius:8px;background:var(--brand);color:#fff;font:800 10px/16px Inter;font-style:normal;text-align:center}
+h3.g{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
+.sub{color:var(--muted);font-size:14px}
+.ftr{margin-top:auto;padding-top:16px;text-align:center;font-size:12px;color:var(--muted)}
+.list{background:#fff;border-radius:18px;border:1px solid var(--line)}
+.li{display:flex;gap:12px;align-items:center;padding:13px 14px}
+.li+.li{border-top:1px solid var(--line)}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--brand) 10%,#fff);color:var(--brand)}
+.ico svg{width:19px;height:19px}
+.li p{font-size:14px;font-weight:600;line-height:1.3}
+.li small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.ch{margin-left:auto;color:#a3a8bd}
+.h4{font-size:15px;font-weight:700}
+.s svg{width:18px;height:18px}
+@keyframes light{from{transform:scale(.6);opacity:.2}}
+@keyframes breathe{50%{transform:scale(1.08)}}
+@keyframes sh{20%,100%{transform:translateX(100%)}}
+.shine{position:relative;overflow:hidden}
+.shine::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,#fff4 50%,transparent 65%);transform:translateX(-100%);animation:sh 4.5s 1.2s infinite;pointer-events:none}
+
+/* ===== A: Brend kart ===== */
+.A .lc{border-radius:24px;background:radial-gradient(120% 90% at 0% 0%,color-mix(in srgb,var(--brand) 80%,#fff),var(--brand) 55%,color-mix(in srgb,var(--brand) 75%,#000));color:#fff;padding:18px;box-shadow:0 18px 30px -16px color-mix(in srgb,var(--brand) 80%,transparent);position:relative;overflow:hidden}
+.A .lc::before{content:"";position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;border:24px solid #ffffff12}
+.A .lc .t{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.A .lc .t small{display:block;opacity:.8;font-size:12.5px}
+.A .lc .num{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.A .lc .num span{font-size:15px;opacity:.6}
+.A .lc ol{list-style:none;padding:0;margin-top:16px;display:grid;grid-template-columns:repeat(5,1fr);gap:9px;position:relative}
+.A .s{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;border:2px dashed #ffffff55;color:#ffffff99}
+.A .s.on{border:none;background:#fff;color:var(--brand);animation:light .4s both;animation-delay:calc(var(--i)*70ms)}
+.A .s.gift{border:2px solid #fff;color:#fff;background:#ffffff1a}
+.A .s.gift.last{animation:breathe 1.8s infinite}
+.A .lc .rw{margin-top:14px;padding-top:12px;border-top:1px dashed #ffffff40;font-size:13px;display:flex;justify-content:space-between;position:relative}
+.A .note{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);padding:0 4px}
+.A .note svg{width:16px;height:16px}
+.A .rew{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;background:#fff;border:1.5px solid color-mix(in srgb,var(--brand) 35%,#fff)}
+.A .rew .ico{background:var(--brand);color:#fff}
+.A .gc{border-radius:22px;background:#fff;border:1.5px solid color-mix(in srgb,var(--brand) 30%,#fff);overflow:hidden}
+.A .gc .bandA{background:var(--brand);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.A .gc .bandA b{font-size:17px}
+.A .gc .body{padding:12px 16px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.A .gc .body button{border:0;background:var(--fg);color:#fff;border-radius:10px;padding:8px 12px;font:600 13px Inter}
+.A .gc.old{border-color:var(--line)}.A .gc.old .bandA{background:#eef0f7;color:var(--muted)}
+
+/* ===== B: Halqa ===== */
+.B .hero{background:#fff;border-radius:24px;border:1px solid var(--line);padding:18px;display:flex;gap:16px;align-items:center}
+.B .ring{width:112px;height:112px;flex:none;position:relative;display:grid;place-items:center}
+.B .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.B .ring circle{fill:none;stroke-width:10}
+.B .ring .bgc{stroke:#eef0f7}
+.B .ring .fg{stroke:var(--brand);stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:283;animation:ringfill 1.2s .2s cubic-bezier(.3,1,.4,1) forwards}
+@keyframes ringfill{to{stroke-dashoffset:var(--off)}}
+.B .ring b{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.B .ring b span{font-size:14px;color:#a3a8bd}
+.B .hero p{font-size:13px;color:var(--muted)}
+.B .hero p.big{font-size:17px;font-weight:800;color:var(--fg);letter-spacing:-.01em;line-height:1.25}
+.B .hero p.rw{color:var(--brand);font-weight:700;margin-top:6px}
+.B .strip{display:flex;gap:6px;padding:0 2px}
+.B .strip i{flex:1;height:8px;border-radius:5px;background:#e3e6ef}
+.B .strip i.on{background:var(--brand);animation:light .4s both;animation-delay:calc(var(--i)*70ms)}
+.B .strip i.gift{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--brand) 30%,#fff) 0 4px,#fff 4px 8px);outline:1.5px solid var(--brand)}
+.B .chips{display:flex;gap:8px;flex-wrap:wrap}
+.B .chip{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 11px;font-size:12.5px;color:var(--muted)}
+.B .chip svg{width:14px;height:14px}
+.B .rew{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:var(--fg);color:#fff}
+.B .rew .ico{background:#ffffff1f;color:#fff}
+.B .rew b{display:block}.B .rew span{font-size:13px;opacity:.8}
+.B .gc{display:flex;border-radius:20px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.B .gc .stub{width:84px;flex:none;background:var(--brand);color:#fff;display:grid;place-items:center;position:relative}
+.B .gc .stub svg{width:30px;height:30px}
+.B .gc .stub::after{content:"";position:absolute;right:-1px;top:8px;bottom:8px;border-right:3px dotted var(--bg)}
+.B .gc .bd{padding:13px 14px;flex:1}
+.B .gc .bd b{display:block}
+.B .gc .bd small{display:block;font-size:12px;color:var(--muted)}
+.B .gc .bd a{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:13px;font-weight:700;color:var(--brand)}
+.B .gc.old .stub{background:#eef0f7;color:#a3a8bd}
+
+/* ===== C: Yığcam ===== */
+.C{background:#fff}
+.C .scr{gap:0;padding:0}
+.C hdr{padding:12px 16px 8px}
+.C .band{background:var(--brand);color:#fff;padding:18px 16px 22px}
+.C .band h3{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.C .band .meta{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}
+.C .band .meta b{font-size:44px;line-height:1;font-weight:800;letter-spacing:-.04em}
+.C .band .meta b span{font-size:16px;opacity:.6}
+.C .band .meta p{text-align:right;font-size:13px;opacity:.9}
+.C .band ol{list-style:none;padding:0;margin-top:14px;display:grid;grid-template-columns:repeat(9,1fr);gap:5px}
+.C .s{aspect-ratio:1;border-radius:50%;border:1.5px solid #ffffff55}
+.C .s.on{background:#fff;border:none;animation:light .4s both;animation-delay:calc(var(--i)*70ms)}
+.C .s.gift{border:none;background:#ffffff26;display:grid;place-items:center;color:#fff}
+.C .s.gift svg{width:12px;height:12px}
+.C .sec{padding:16px}
+.C .sec+.sec{border-top:8px solid var(--bg)}
+.C .lbl{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.C .row2{display:flex;gap:12px;align-items:center;padding:10px 0}
+.C .row2+.row2{border-top:1px solid var(--line)}
+.C .row2 p{font-size:14px;font-weight:600;line-height:1.3}
+.C .row2 small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.C .rw{display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--brand) 8%,#fff);border-radius:14px;padding:12px}
+.C .rw b{display:block;font-size:15px}
+.C .rw span{font-size:13px;color:var(--muted)}
+.C .rw .go{margin-left:auto;background:var(--brand);color:#fff;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700}
+.C .ftr{padding:16px}
+.C .gcard{display:flex;align-items:center;gap:12px;padding:12px 0}
+.C .gcard+.gcard{border-top:1px solid var(--line)}
+.C .gcard .ic{width:44px;height:44px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none}
+.C .gcard .ic svg{width:22px;height:22px}
+.C .gcard.old .ic{background:#eef0f7;color:#a3a8bd}
+.C .gcard p{font-size:14px;font-weight:700;line-height:1.3}
+.C .gcard small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.C .gcard .go{margin-left:auto;font-size:13px;font-weight:700;color:var(--brand)}
+.C .badge{margin-left:auto;font-size:11.5px;font-weight:700;background:#eef0f7;color:var(--muted);padding:3px 9px;border-radius:99px}
+.soon{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:#fff;color:var(--brand)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}.B .ring .fg{stroke-dashoffset:var(--off)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <div>
+    <h1>Müştəri ekranları: üç yaxın variant</h1>
+    <p>Hamısı indiki dizaynın davamıdır: eyni struktur, mətnlər, data və brend rəngi. Fərq möhür kartının necə göstərilməsində və səhifənin sıxlığındadır. Hər variant üçün ana səhifə və hədiyyə kartları göstərilib.</p>
+  </div>
+  <div class="sw" aria-label="Brend rəngi">
+    <button style="background:#7f6440" data-c="#7f6440" aria-label="Qəhvəyi"></button>
+    <button style="background:#d0121b" data-c="#d0121b" aria-label="Qırmızı"></button>
+    <button style="background:#1f6f5c" data-c="#1f6f5c" aria-label="Yaşıl"></button>
+    <button style="background:#3b3fd8" data-c="#3b3fd8" aria-label="Göy"></button>
+    <button style="background:#6d28d9" data-c="#6d28d9" aria-label="Bənövşəyi"></button>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="chk" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h.1a2 2 0 1 1 0 4z"/></symbol>
+  <symbol id="timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></symbol>
+  <symbol id="phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 18v3"/></symbol>
+  <symbol id="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8.3a6 6 0 0 1 0 7.4M9.5 5.5a10 10 0 0 1 0 13M13 3a14 14 0 0 1 0 18M16.5 1.5a17 17 0 0 1 0 21"/></symbol>
+</svg>
+
+<template id="hdr"><hdr><span class="logo">H</span><b>HəzzPoint</b><span class="ib"><svg><use href="#gift"/></svg><i>1</i></span><span class="ib"><svg><use href="#gear"/></svg></span></hdr></template>
+<template id="ftr"><p class="ftr">© 2026 Trend Solutions. Bütün hüquqlar qorunur.</p></template>
+<template id="offers"><div class="list">
+  <div class="li"><span class="ico"><svg><use href="#user"/></svg></span><p>Dostunu dəvət et<small>Sən 1, dostun 1 bonus möhür qazanır</small></p><span class="ch">›</span></div>
+  <div class="li"><span class="ico"><svg><use href="#phone"/></svg></span><p>Telefona quraşdırın<small>Ana ekranda ikon kimi, tam ekranda açılır</small></p><span class="ch">›</span></div>
+</div></template>
+
+<!-- ===== A ===== -->
+<section class="grp">
+<h2>A. Brend kart</h2>
+<p>Möhür kartı cüzdandakı plastik kart kimidir: tam brend rəngində, möhürlər ağ. Ekranın əsas obyekti kartın özüdür, qalan hər şey ağ fonda sakit qalır.</p>
+<div class="row">
+<div class="col"><div class="phone A"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h3 class="g">Salam, Aysel!</h3><p class="sub">Möhür almaq üçün telefonunuzu NFC nişanına toxundurun.</p></div>
+  <div class="lc shine">
+    <div class="t"><div><b style="font-size:17px">Möhür kartı</b><small>Hədiyyəyə 4 möhür qalıb</small></div><div class="num">5<span>/9</span></div></div>
+    <ol data-cur="5"></ol>
+    <div class="rw"><span>Hədiyyə: <b>Hədiyyə qəhvə</b></span><span>HəzzPoint</span></div>
+  </div>
+  <p class="note"><svg><use href="#timer"/></svg>Növbəti möhür 12:40 sonra</p>
+  <div class="rew"><span class="ico"><svg><use href="#gift"/></svg></span><span style="flex:1"><b style="display:block">Hədiyyələriniz</b><span class="sub" style="font-size:13px">Hədiyyə qəhvə</span></span><span class="ch">›</span></div>
+  <div data-t="offers"></div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Ana səhifə</p>
+<ul class="notes"><li>Kart cüzdan kartı ölçüsündə, küncündə şirkət adı.</li><li>Hədiyyə bloku ağdır ki, brend kartla rəqabət aparmasın.</li></ul></div>
+
+<div class="col"><div class="phone A"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h3 class="g">Hədiyyə kartları</h3><p class="sub">Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.</p></div>
+  <p class="h4">İstifadəyə hazır</p>
+  <div class="gc"><div class="bandA shine"><b>Hədiyyə qəhvə</b><span class="soon">4 gün qalıb</span></div><div class="body"><span>Qazanıldı: 21 oktyabr 2026<br>Son tarix: 30 oktyabr 2026</span><button>Kodu göstər</button></div></div>
+  <p class="h4">Tarixçə</p>
+  <div class="gc old"><div class="bandA"><b>Hədiyyə qəhvə</b><span style="font-size:12px">İstifadə olunub</span></div><div class="body"><span>İstifadə olundu: 2 sentyabr 2026</span></div></div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Hədiyyə kartları</p></div>
+</div>
+</section>
+
+<!-- ===== B ===== -->
+<section class="grp">
+<h2>B. Halqa</h2>
+<p>İrəliləyiş dairəvi halqa ilə göstərilir, yanında qalan möhür sayı iri yazılır. Möhür xanaları nazik zolaq olur. Kart çoxsaylı möhürdə (12–15) də yığcam qalır.</p>
+<div class="row">
+<div class="col"><div class="phone B"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h3 class="g">Salam, Aysel!</h3><p class="sub">Möhür almaq üçün telefonunuzu NFC nişanına toxundurun.</p></div>
+  <div class="hero">
+    <div class="ring"><svg viewBox="0 0 112 112"><circle class="bgc" cx="56" cy="56" r="45"/><circle class="fg" cx="56" cy="56" r="45" style="--off:126"/></svg><b>5<span>/9</span></b></div>
+    <div><p>Möhür kartı</p><p class="big">Hədiyyəyə 4 möhür qalıb</p><p class="rw">Hədiyyə qəhvə</p></div>
+  </div>
+  <div class="strip" id="strip"></div>
+  <div class="chips"><span class="chip"><svg><use href="#timer"/></svg>Növbəti möhür 12:40 sonra</span><span class="chip"><svg><use href="#nfc"/></svg>NFC nişanına toxunun</span></div>
+  <div class="rew"><span class="ico"><svg><use href="#gift"/></svg></span><span style="flex:1"><b>Hədiyyələriniz</b><span>Hədiyyə qəhvə</span></span><span>›</span></div>
+  <div data-t="offers"></div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Ana səhifə</p>
+<ul class="notes"><li>Açılışda halqa sıfırdan dolur.</li><li>Hədiyyə bloku tünd: səhifədə yeganə tünd element, diqqəti çəkir.</li></ul></div>
+
+<div class="col"><div class="phone B"><div class="scr">
+  <div data-t="hdr"></div>
+  <div><h3 class="g">Hədiyyə kartları</h3><p class="sub">Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.</p></div>
+  <p class="h4">İstifadəyə hazır</p>
+  <div class="gc"><div class="stub"><svg><use href="#gift"/></svg></div><div class="bd"><b>Hədiyyə qəhvə</b><small>Son tarix: 30 oktyabr 2026 · 4 gün qalıb</small><a><svg width="16" height="16"><use href="#qr"/></svg>Kodu göstər</a></div></div>
+  <p class="h4">Tarixçə</p>
+  <div class="gc old"><div class="stub"><svg><use href="#gift"/></svg></div><div class="bd"><b>Hədiyyə qəhvə</b><small>İstifadə olundu: 2 sentyabr 2026</small></div></div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Hədiyyə kartları</p>
+<ul class="notes"><li>Bilet yan tərəfdən kəsilir: solda rəngli qopan hissə.</li></ul></div>
+</div>
+</section>
+
+<!-- ===== C ===== -->
+<section class="grp">
+<h2>C. Yığcam</h2>
+<p>Kartlar və kölgələr yoxdur. Yuxarıda brend rəngli zolaqda sayğac və 9 kiçik nöqtə, aşağıda düz bölmələr. Hər şey ilk ekrana sığır, aşağı sürüşdürmək lazım olmur.</p>
+<div class="row">
+<div class="col"><div class="phone C"><div class="scr">
+  <div data-t="hdr"></div>
+  <div class="band">
+    <h3>Salam, Aysel!</h3>
+    <div class="meta"><b>5<span>/9</span></b><p>Hədiyyəyə 4 möhür qalıb<br><b style="font-size:14px;letter-spacing:0">Hədiyyə qəhvə</b></p></div>
+    <ol id="cdots"></ol>
+  </div>
+  <div class="sec"><div class="rw"><span class="ico" style="background:var(--brand);color:#fff"><svg><use href="#gift"/></svg></span><span><b>Hədiyyələriniz</b><span>Hədiyyə qəhvə</span></span><span class="go">Bax</span></div>
+    <p class="sub" style="font-size:13px;margin-top:10px;display:flex;gap:6px;align-items:center"><svg width="15" height="15"><use href="#timer"/></svg>Növbəti möhür 12:40 sonra</p></div>
+  <div class="sec">
+    <div class="row2"><span class="ico"><svg><use href="#user"/></svg></span><p>Dostunu dəvət et<small>Sən 1, dostun 1 bonus möhür qazanır</small></p><span class="ch">›</span></div>
+    <div class="row2"><span class="ico"><svg><use href="#phone"/></svg></span><p>Telefona quraşdırın<small>Ana ekranda ikon kimi, tam ekranda açılır</small></p><span class="ch">›</span></div>
+  </div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Ana səhifə</p>
+<ul class="notes"><li>Ən sakit variant: animasiya yalnız nöqtələrin yanmasıdır.</li><li>Bölmələr arasında boz ayırıcı zolaq, iOS parametrləri kimi.</li></ul></div>
+
+<div class="col"><div class="phone C"><div class="scr">
+  <div data-t="hdr"></div>
+  <div class="sec" style="padding-top:4px"><h3 class="g">Hədiyyə kartları</h3><p class="sub">Hədiyyəni almaq üçün kodu və ya QR-ı işçiyə göstərin.</p></div>
+  <div class="sec"><p class="lbl">İstifadəyə hazır</p>
+    <div class="gcard"><span class="ic"><svg><use href="#gift"/></svg></span><p>Hədiyyə qəhvə<small>Son tarix: 30 oktyabr 2026 · 4 gün qalıb</small></p><span class="go">Kodu göstər</span></div></div>
+  <div class="sec"><p class="lbl">Tarixçə</p>
+    <div class="gcard old"><span class="ic"><svg><use href="#gift"/></svg></span><p>Hədiyyə qəhvə<small>İstifadə olundu: 2 sentyabr 2026</small></p><span class="badge">İstifadə olunub</span></div>
+    <div class="gcard old"><span class="ic"><svg><use href="#gift"/></svg></span><p>Hədiyyə qəhvə<small>Son tarix: 1 avqust 2026</small></p><span class="badge">Müddəti bitib</span></div></div>
+  <div data-t="ftr"></div>
+</div></div><p class="cap">Hədiyyə kartları</p></div>
+</div>
+</section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+document.querySelectorAll('[data-t]').forEach(el=>el.replaceWith($(el.dataset.t).content.cloneNode(true)));
+const R=9,cur=5;
+document.querySelectorAll('.A ol[data-cur]').forEach(o=>{let h='';for(let i=0;i<R;i++){h+=i===R-1?`<li class="s gift"><svg><use href="#gift"/></svg></li>`:i<cur?`<li class="s on" style="--i:${i}"><svg><use href="#chk"/></svg></li>`:`<li class="s">${i+1}</li>`}o.innerHTML=h});
+let st='';for(let i=0;i<R;i++)st+=i===R-1?'<i class="gift"></i>':`<i class="${i<cur?'on':''}" style="--i:${i}"></i>`;$('strip').innerHTML=st;
+let cd='';for(let i=0;i<R;i++)cd+=i===R-1?'<li class="s gift"><svg><use href="#gift"/></svg></li>':`<li class="s ${i<cur?'on':''}" style="--i:${i}"></li>`;$('cdots').innerHTML=cd;
+document.querySelectorAll('.sw button').forEach(b=>b.onclick=()=>document.documentElement.style.setProperty('--brand',b.dataset.c));
+</script>
+</body>
+</html>
