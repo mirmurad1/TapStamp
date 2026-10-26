@@ -15,11 +15,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Field } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
-import { customerAuthApi, publicApi, referralApi } from '../api/customerApi';
+import { customerAuthApi, publicApi, referralApi, type LegalSlug } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { markJustSignedIn } from '../auth/justSignedIn';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { Sheet } from '../components/Sheet';
 import { clearReferralCode, readReferralCode } from '../lib/referral';
+import { LegalDocument } from './LegalPage';
 
 type Step =
   | { name: 'phone' }
@@ -339,17 +341,34 @@ function RegisterStep({ registrationToken, onRegistered }: { registrationToken: 
   );
 }
 
-/** Hüquqi sənəd yeni tabda açılır — doldurulmuş forma itmir. */
-function LegalLink({ slug, children }: { slug: string; children?: ReactNode }) {
+/**
+ * Hüquqi sənəd qeydiyyat ekranının üstündə vərəqdə açılır — səhifədən çıxılmır, ona görə bağlayanda müştəri yazdığı
+ * ad və qeydiyyat addımı ilə eyni yerə qayıdır (yeni tab quraşdırılmış tətbiqdə və daxili brauzerlərdə eyni pəncərədə
+ * açılırdı və giriş sıfırlanırdı).
+ */
+function LegalLink({ slug, children }: { slug: LegalSlug; children?: ReactNode }) {
+  const { t } = useTranslation('profile');
+  const [open, setOpen] = useState(false);
   return (
-    <a
-      href={`/legal/${slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="font-medium text-foreground underline underline-offset-4"
-    >
-      {children}
-    </a>
+    <>
+      <button
+        type="button"
+        onClick={(event) => {
+          // Mətn razılıq qutusunun etiketindədir — klik qutunu işarələməsin
+          event.preventDefault();
+          setOpen(true);
+        }}
+        className="font-medium text-foreground underline underline-offset-4"
+      >
+        {children}
+      </button>
+      <Sheet open={open} onOpenChange={setOpen} title={t(`legal.${slug}`)}>
+        <LegalDocument slug={slug} />
+        <Button size="lg" className="sticky bottom-0" onClick={() => setOpen(false)}>
+          {t('legal.back')}
+        </Button>
+      </Sheet>
+    </>
   );
 }
 

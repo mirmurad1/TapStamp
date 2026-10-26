@@ -200,5 +200,11 @@
     "previewReward": "Kartın doldu, {{reward}} səni gözləyir!",
     "previewStamp": "Möhürün təsdiqləndi: {{count}}/{{total}}",
     "previewNow": "indi"
+  },
+  "switchNumberConfirm": {
+    "title": "Hesabdan çıxılsın?",
+    "description": "Bu nömrədən çıxış ediləcək və başqa nömrə ilə daxil ola biləcəksiniz. Möhürləriniz hesabınızda qalır.",
+    "confirm": "Çıx və başqa nömrə ilə daxil ol",
+    "cancel": "Ləğv et"
   }
 }

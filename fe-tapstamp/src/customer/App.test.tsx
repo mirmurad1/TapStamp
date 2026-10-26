@@ -63,6 +63,8 @@ describe('müştəri tətbiqi', () => {
           return json({ status: 'REGISTRATION_REQUIRED', registrationToken: 'reg-token' });
         case 'GET /api/v1/public/legal':
           return json([{ type: 'PRIVACY_POLICY', slug: 'privacy', version: 1 }, { type: 'TERMS', slug: 'terms', version: 2 }]);
+        case 'GET /api/v1/public/legal/privacy':
+          return json({ type: 'PRIVACY_POLICY', version: 1, content: { az: '# Məxfilik\n\nMəlumatlarınız qorunur.' } });
         case 'POST /api/v1/auth/register':
           signedIn = true;
           return json({ status: 'AUTHENTICATED' }, 201);
@@ -98,7 +100,14 @@ describe('müştəri tətbiqi', () => {
     await user.type(screen.getByLabelText('Adınız'), 'Aysel');
     await user.click(screen.getByRole('button', { name: 'Qeydiyyatı tamamla' }));
     expect(await screen.findByText('Davam etmək üçün razılıq vermək lazımdır.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'məxfilik siyasəti' })).toHaveAttribute('href', '/legal/privacy');
+    // Sənəd vərəqdə açılır: bağlayanda qeydiyyat addımı və yazılmış ad yerində qalır
+    await user.click(screen.getByRole('button', { name: 'məxfilik siyasəti' }));
+    expect(await screen.findByText('Məlumatlarınız qorunur.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Geri' }));
+    await waitFor(() => expect(screen.queryByText('Məlumatlarınız qorunur.')).not.toBeInTheDocument());
+    expect(screen.getByRole('heading', { name: 'Qeydiyyatı tamamlayın' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Adınız')).toHaveValue('Aysel');
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
 
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: 'Qeydiyyatı tamamla' }));
@@ -213,6 +222,10 @@ describe('müştəri tətbiqi', () => {
     await user.click(screen.getByRole('link', { name: 'Parametrlər' }));
     // Parametrlər səhifəsi keçid (transition) kimi render olunur — düyməni gözləyirik
     await user.click(await screen.findByRole('button', { name: 'Fərqli nömrə ilə yoxla' }, slow));
+    // Səhvən toxunuşdan qorunma: əvvəlcə təsdiq vərəqi açılır, çıxış hələ olmayıb
+    await screen.findByRole('heading', { name: 'Hesabdan çıxılsın?' });
+    expect(calls).not.toContain('POST /api/v1/auth/logout');
+    await user.click(screen.getByRole('button', { name: 'Çıx və başqa nömrə ilə daxil ol' }));
 
     expect(await screen.findByLabelText('Telefon nömrəsi', {}, slow)).toBeInTheDocument();
     await waitFor(() => expect(window.location.pathname).toBe('/login'), slow);

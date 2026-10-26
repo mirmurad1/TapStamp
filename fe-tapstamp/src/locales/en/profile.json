@@ -200,5 +200,11 @@
     "previewReward": "Your card is full, {{reward}} is waiting for you!",
     "previewStamp": "Stamp confirmed: {{count}}/{{total}}",
     "previewNow": "now"
+  },
+  "switchNumberConfirm": {
+    "title": "Sign out of this number?",
+    "description": "You will be signed out and can sign in with another number. Your stamps stay on your account.",
+    "confirm": "Sign out and use another number",
+    "cancel": "Cancel"
   }
 }
