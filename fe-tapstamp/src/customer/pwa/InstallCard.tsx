@@ -148,7 +148,7 @@ function HomeScreenPreview() {
         index === 5 ? (
           <span
             key={index}
-            className="animate-stamp-pop grid aspect-square place-items-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground shadow-md [animation-delay:0.35s]"
+            className="animate-stamp-pop flex aspect-square items-center justify-center rounded-xl leading-none bg-primary text-lg font-extrabold text-primary-foreground shadow-md [animation-delay:0.35s]"
           >
             {initial}
           </span>

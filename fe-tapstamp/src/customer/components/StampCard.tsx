@@ -205,7 +205,7 @@ function StampSlot({
         role="img"
         aria-label={t(filled ? 'card.filled' : 'card.empty')}
         className={cn(
-          'grid size-12 place-items-center rounded-full text-sm font-bold',
+          'flex size-12 items-center justify-center rounded-full text-sm leading-none font-bold',
           filled
             ? 'bg-white text-primary shadow-[0_3px_8px_rgb(0_0_0/0.18)]'
             : 'border-2 border-dashed border-white/35 text-white/60',

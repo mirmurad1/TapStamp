@@ -259,7 +259,7 @@ export function StampBurst({ before, after, stampsRequired, companyName, branch,
                 <li
                   key={index}
                   className={cn(
-                    'relative grid aspect-square place-items-center rounded-full text-xs font-bold [&_svg]:size-4',
+                    'relative flex size-11 items-center justify-center justify-self-center rounded-full text-xs leading-none font-bold [&_svg]:size-4',
                     filled
                       ? 'bg-primary text-primary-foreground shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]'
                       : isGift

@@ -142,15 +142,16 @@ function Guest() {
           <ol className="mt-4 grid grid-cols-5 gap-2.5" aria-hidden="true">
             {Array.from({ length: required }, (_, index) =>
               index === required - 1 ? (
-                <li key={index} className="grid aspect-square place-items-center rounded-full border-2 border-primary/35 bg-primary/10 text-primary">
-                  <Gift className="size-5" />
+                <li key={index} className="flex justify-center">
+                  <span className="flex size-12 items-center justify-center rounded-full border-2 border-primary/35 bg-primary/10 text-primary">
+                    <Gift className="size-5" />
+                  </span>
                 </li>
               ) : (
-                <li
-                  key={index}
-                  className="grid aspect-square place-items-center rounded-full border-2 border-dashed border-border text-sm font-bold text-muted-foreground/50"
-                >
-                  {index + 1}
+                <li key={index} className="flex justify-center">
+                  <span className="flex size-12 items-center justify-center rounded-full border-2 border-dashed border-border text-sm leading-none font-bold text-muted-foreground/50">
+                    {index + 1}
+                  </span>
                 </li>
               ),
             )}
