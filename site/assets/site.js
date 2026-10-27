@@ -21,7 +21,7 @@ az:{
  'tap.lead':'Kağız möhür kartının yerini NFC çip və telefon tutur. Müştərinin heç bir tətbiq yükləməsinə ehtiyac yoxdur.',
  'tap.cta':'Pulsuz demo istəyin','tap.cta2':'İmkanlar',
  'card.company':'Qəhvə Evi','card.title':'Möhür kartınız','card.rule':'Hər 6-cı qəhvə hədiyyədir',
- 'card.tap':'Telefonu çipə yaxınlaşdırın','card.added':'Möhür əlavə olundu','card.full':'Hədiyyəniz hazırdır! Yenidən başlayın',
+ 'card.tap':'Telefonu çipə yaxınlaşdırın','card.wait':'İşçi təsdiqi gözlənilir…','sticky.demo':'Demo al','card.added':'Möhür əlavə olundu','card.full':'Hədiyyəniz hazırdır! Yenidən başlayın',
  'card.caption':'Düyməyə basın və möhürün necə əlavə olunduğuna baxın.',
  'feat.kicker':'TapStamp imkanları','feat.title':'Kassada kart axtarmağa ehtiyac qalmır',
  'feat.sub':'Kafe, gözəllik salonu, avtoyuma, mağaza: müştəriləriniz təkrar gəlirsə, TapStamp sizin üçündür.',
@@ -65,7 +65,7 @@ en:{
  'tap.lead':'An NFC chip and a phone replace the paper stamp card. Customers don’t need to install any app.',
  'tap.cta':'Request a free demo','tap.cta2':'Features',
  'card.company':'Coffee House','card.title':'Your stamp card','card.rule':'Every 6th coffee is free',
- 'card.tap':'Hold your phone to the chip','card.added':'Stamp added','card.full':'Your reward is ready! Start over',
+ 'card.tap':'Hold your phone to the chip','card.wait':'Waiting for staff approval…','sticky.demo':'Get a demo','card.added':'Stamp added','card.full':'Your reward is ready! Start over',
  'card.caption':'Press the button to see how a stamp is added.',
  'feat.kicker':'TapStamp features','feat.title':'No more searching for cards at the till',
  'feat.sub':'Cafés, beauty salons, car washes, shops: if your customers come back, TapStamp is for you.',
@@ -109,7 +109,7 @@ ru:{
  'tap.lead':'NFC-чип и телефон заменяют бумажную карту со штампами. Клиенту не нужно устанавливать приложение.',
  'tap.cta':'Запросить бесплатное демо','tap.cta2':'Возможности',
  'card.company':'Кофейня','card.title':'Ваша карта','card.rule':'Каждый 6-й кофе в подарок',
- 'card.tap':'Поднесите телефон к чипу','card.added':'Штамп добавлен','card.full':'Подарок готов! Начать заново',
+ 'card.tap':'Поднесите телефон к чипу','card.wait':'Ждём подтверждения сотрудника…','sticky.demo':'Демо','card.added':'Штамп добавлен','card.full':'Подарок готов! Начать заново',
  'card.caption':'Нажмите кнопку, чтобы увидеть, как добавляется штамп.',
  'feat.kicker':'Возможности TapStamp','feat.title':'Больше никаких поисков карты у кассы',
  'feat.sub':'Кафе, салон красоты, автомойка, магазин: если клиенты возвращаются к вам, TapStamp для вас.',
@@ -162,9 +162,16 @@ function render(fresh){
 }
 document.getElementById('tap').addEventListener('click',()=>{
   if(n>=TOTAL){n=0;render();label.textContent=t('card.tap');return;}
-  n++; render(true);
-  card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
-  label.textContent=t(n===TOTAL?'card.full':'card.added');
+  if(card.classList.contains('wait')) return;
+  // Əvvəl işçi təsdiqi gözlənilir, sonra möhür düşür (real məhsulda olduğu kimi)
+  card.classList.add('wait'); label.textContent=t('card.wait');
+  slots.children[n].classList.add('pending');
+  setTimeout(()=>{
+    card.classList.remove('wait');
+    n++; render(true);
+    card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
+    label.textContent=t(n===TOTAL?'card.full':'card.added');
+  },1600);
 });
 render();
 

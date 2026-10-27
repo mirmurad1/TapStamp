@@ -242,3 +242,22 @@ section.flush{padding-top:0}
 .form-err{margin:0;padding:12px 14px;border-radius:14px;background:#FDECEC;color:#B4232A;font-size:14.5px;line-height:1.45}
 .form-err a{color:inherit;font-weight:600}
 form .btn[disabled]{opacity:.6;cursor:progress;transform:none}
+
+/* Demo kart: işçi təsdiqi gözləmə halı */
+.slot.pending{border:2px solid #fff;animation:pend 1s ease-in-out infinite}
+@keyframes pend{50%{transform:scale(1.18);background:rgba(255,255,255,.25)}}
+.demo.wait .tap{background:#DDF3F5;cursor:wait}
+.demo.wait .tap svg{animation:pend 1s ease-in-out infinite}
+/* Sakit animasiyalar: bölmələr yalnız yumşaq görünür, sürüşmə və bulanıqlıq yoxdur */
+.rv.up,.rv.down,.rv.left,.rv.right,.rv.zoom,.rv.tilt{transform:translateY(14px);filter:none}
+.rv{transition-duration:.6s;transition-delay:calc(var(--i,0) * 50ms)}
+.px{translate:none!important}
+/* Telefonda aşağıda sabit "Demo al" və WhatsApp */
+.sticky-cta{display:none}
+@media (max-width:600px){
+  .sticky-cta{display:flex;gap:8px;position:fixed;left:12px;right:12px;bottom:12px;z-index:50;padding:8px;border-radius:18px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(14,24,48,.18)}
+  .sticky-cta a{flex:1;min-height:48px;display:grid;place-items:center;border-radius:12px;font:600 16px var(--body);text-decoration:none}
+  .sticky-cta .d{background:var(--violet);color:#fff}
+  .sticky-cta .w{flex:0 0 auto;padding:0 18px;background:#E5F7EC;color:#127A3E}
+  body{padding-bottom:80px}
+}

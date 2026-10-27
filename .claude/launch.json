@@ -25,6 +25,16 @@
       "env": {
         "VITE_BACKEND_URL": "http://localhost:8081"
       }
+    },
+    {
+      "name": "site-current",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve-static.js",
+        "site",
+        "4180"
+      ],
+      "port": 4180
     }
   ]
 }

@@ -244,6 +244,25 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .steps div.lit{background:rgba(46,230,168,.12);box-shadow:inset 0 0 0 1px rgba(46,230,168,.5)}
 
 @media (prefers-reduced-motion:reduce){.rv,.words .w{opacity:1!important;transform:none!important;filter:none!important}.px{translate:none!important}*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Demo kart: işçi təsdiqi gözləmə halı */
+.slot.pending{border:2px solid #fff;animation:pend 1s ease-in-out infinite}
+@keyframes pend{50%{transform:scale(1.18);background:rgba(255,255,255,.25)}}
+.demo.wait .tap{background:#DDF3F5;cursor:wait}
+.demo.wait .tap svg{animation:pend 1s ease-in-out infinite}
+/* Sakit animasiyalar: bölmələr yalnız yumşaq görünür, sürüşmə və bulanıqlıq yoxdur */
+.rv.up,.rv.down,.rv.left,.rv.right,.rv.zoom,.rv.tilt{transform:translateY(14px);filter:none}
+.rv{transition-duration:.6s;transition-delay:calc(var(--i,0) * 50ms)}
+.px{translate:none!important}
+/* Telefonda aşağıda sabit "Demo al" və WhatsApp */
+.sticky-cta{display:none}
+@media (max-width:600px){
+  .sticky-cta{display:flex;gap:8px;position:fixed;left:12px;right:12px;bottom:12px;z-index:50;padding:8px;border-radius:18px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(14,24,48,.18)}
+  .sticky-cta a{flex:1;min-height:48px;display:grid;place-items:center;border-radius:12px;font:600 16px var(--body);text-decoration:none}
+  .sticky-cta .d{background:var(--violet);color:#fff}
+  .sticky-cta .w{flex:0 0 auto;padding:0 18px;background:#E5F7EC;color:#127A3E}
+  body{padding-bottom:80px}
+}
 </style>
 </head>
 <body>
@@ -429,6 +448,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <footer><div class="wrap"><span data-t="footer.copy"></span><a href="https://platform.trendsolutions.az/admin" data-t="footer.login"></a></div></footer>
 
+<nav class="sticky-cta"><a class="d" href="#demo" data-t="sticky.demo"></a><a class="w" href="https://wa.me/994000000000">WhatsApp</a></nav>
 <script>
 const T={
 az:{
@@ -451,7 +471,7 @@ az:{
  'tap.lead':'Kağız möhür kartının yerini NFC çip və telefon tutur. Müştərinin heç bir tətbiq yükləməsinə ehtiyac yoxdur.',
  'tap.cta':'Pulsuz demo istəyin','tap.cta2':'İmkanlar',
  'card.company':'Qəhvə Evi','card.title':'Möhür kartınız','card.rule':'Hər 6-cı qəhvə hədiyyədir',
- 'card.tap':'Telefonu çipə yaxınlaşdırın','card.added':'Möhür əlavə olundu','card.full':'Hədiyyəniz hazırdır! Yenidən başlayın',
+ 'card.tap':'Telefonu çipə yaxınlaşdırın','card.wait':'İşçi təsdiqi gözlənilir…','sticky.demo':'Demo al','card.added':'Möhür əlavə olundu','card.full':'Hədiyyəniz hazırdır! Yenidən başlayın',
  'card.caption':'Düyməyə basın və möhürün necə əlavə olunduğuna baxın.',
  'feat.kicker':'TapStamp imkanları','feat.title':'Kassada kart axtarmağa ehtiyac qalmır',
  'feat.sub':'Kafe, gözəllik salonu, avtoyuma, mağaza: müştəriləriniz təkrar gəlirsə, TapStamp sizin üçündür.',
@@ -494,7 +514,7 @@ en:{
  'tap.lead':'An NFC chip and a phone replace the paper stamp card. Customers don’t need to install any app.',
  'tap.cta':'Request a free demo','tap.cta2':'Features',
  'card.company':'Coffee House','card.title':'Your stamp card','card.rule':'Every 6th coffee is free',
- 'card.tap':'Hold your phone to the chip','card.added':'Stamp added','card.full':'Your reward is ready! Start over',
+ 'card.tap':'Hold your phone to the chip','card.wait':'Waiting for staff approval…','sticky.demo':'Get a demo','card.added':'Stamp added','card.full':'Your reward is ready! Start over',
  'card.caption':'Press the button to see how a stamp is added.',
  'feat.kicker':'TapStamp features','feat.title':'No more searching for cards at the till',
  'feat.sub':'Cafés, beauty salons, car washes, shops: if your customers come back, TapStamp is for you.',
@@ -537,7 +557,7 @@ ru:{
  'tap.lead':'NFC-чип и телефон заменяют бумажную карту со штампами. Клиенту не нужно устанавливать приложение.',
  'tap.cta':'Запросить бесплатное демо','tap.cta2':'Возможности',
  'card.company':'Кофейня','card.title':'Ваша карта','card.rule':'Каждый 6-й кофе в подарок',
- 'card.tap':'Поднесите телефон к чипу','card.added':'Штамп добавлен','card.full':'Подарок готов! Начать заново',
+ 'card.tap':'Поднесите телефон к чипу','card.wait':'Ждём подтверждения сотрудника…','sticky.demo':'Демо','card.added':'Штамп добавлен','card.full':'Подарок готов! Начать заново',
  'card.caption':'Нажмите кнопку, чтобы увидеть, как добавляется штамп.',
  'feat.kicker':'Возможности TapStamp','feat.title':'Больше никаких поисков карты у кассы',
  'feat.sub':'Кафе, салон красоты, автомойка, магазин: если клиенты возвращаются к вам, TapStamp для вас.',
@@ -590,9 +610,16 @@ function render(fresh){
 }
 document.getElementById('tap').addEventListener('click',()=>{
   if(n>=TOTAL){n=0;render();label.textContent=t('card.tap');return;}
-  n++; render(true);
-  card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
-  label.textContent=t(n===TOTAL?'card.full':'card.added');
+  if(card.classList.contains('wait')) return;
+  // Əvvəl işçi təsdiqi gözlənilir, sonra möhür düşür (real məhsulda olduğu kimi)
+  card.classList.add('wait'); label.textContent=t('card.wait');
+  slots.children[n].classList.add('pending');
+  setTimeout(()=>{
+    card.classList.remove('wait');
+    n++; render(true);
+    card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
+    label.textContent=t(n===TOTAL?'card.full':'card.added');
+  },1600);
 });
 render();
 
