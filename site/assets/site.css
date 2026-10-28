@@ -252,12 +252,16 @@ form .btn[disabled]{opacity:.6;cursor:progress;transform:none}
 .rv.up,.rv.down,.rv.left,.rv.right,.rv.zoom,.rv.tilt{transform:translateY(14px);filter:none}
 .rv{transition-duration:.6s;transition-delay:calc(var(--i,0) * 50ms)}
 .px{translate:none!important}
-/* Telefonda aşağıda sabit "Demo al" və WhatsApp */
-.sticky-cta{display:none}
+/* Küncdə WhatsApp: yalnız ikon */
+.wa{position:fixed;right:16px;bottom:16px;z-index:50;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#25D366;color:#fff;box-shadow:0 8px 24px rgba(14,24,48,.25);transition:transform .2s}
+.wa:hover{transform:scale(1.06)}
+.wa svg{width:28px;height:28px}
+/* Telefonda: hero-dan aşağı düşəndə yuxarıda yığcam zolaq (loqo + Demo al) */
+.mbar{display:none}
 @media (max-width:600px){
-  .sticky-cta{display:flex;gap:8px;position:fixed;left:12px;right:12px;bottom:12px;z-index:50;padding:8px;border-radius:18px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(14,24,48,.18)}
-  .sticky-cta a{flex:1;min-height:48px;display:grid;place-items:center;border-radius:12px;font:600 16px var(--body);text-decoration:none}
-  .sticky-cta .d{background:var(--violet);color:#fff}
-  .sticky-cta .w{flex:0 0 auto;padding:0 18px;background:#E5F7EC;color:#127A3E}
-  body{padding-bottom:80px}
+  .mbar{display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:50;padding:8px 16px;background:rgba(10,18,38,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--night-line);transform:translateY(-100%);transition:transform .3s}
+  .mbar.show{transform:none}
+  .mbar .mark{width:34px;height:24px;color:var(--teal-logo)}
+  .mbar .btn{min-height:36px;padding:0 16px;font-size:14.5px}
+  .wa{width:48px;height:48px;right:12px;bottom:12px}
 }

@@ -257,7 +257,11 @@ function onScroll(){
     ticking=false;
   });
 }
-addEventListener('scroll',onScroll,{passive:true}); addEventListener('resize',onScroll);
+addEventListener('scroll',onScroll,{passive:true});
+// Telefonda yığcam zolaq: hero-dan aşağı düşəndə görünür
+const mbar=document.querySelector('.mbar');
+const onBar=()=>mbar.classList.toggle('show',scrollY>480);
+addEventListener('scroll',onBar,{passive:true}); onBar(); addEventListener('resize',onScroll);
 
 if(!reduce){splitWords(); observeAll();}
 else document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
