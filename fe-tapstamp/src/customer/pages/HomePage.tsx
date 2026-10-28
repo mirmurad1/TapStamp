@@ -78,27 +78,28 @@ function Profile({ me }: { me: Me }) {
       ) : null}
       {rewards.length > 0 ? (
         // Bilet formalı blok: solda hədiyyə ikonu, qırıq xətt və iki yarımdairə kəsik, sağda hazır hədiyyələr
-        <Link
-          to="/gift-cards"
-          className="shine animate-attention relative flex items-center gap-3 overflow-hidden rounded-2xl bg-primary p-4 text-primary-foreground shadow-md [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <span className="absolute -top-2 left-[3.6rem] size-4 rounded-full bg-background" aria-hidden="true" />
-          <span className="absolute -bottom-2 left-[3.6rem] size-4 rounded-full bg-background" aria-hidden="true" />
-          {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}
-          <span className="relative grid w-11 shrink-0 place-items-center border-r-2 border-dashed border-white/40 pr-3">
-            <Gift className="animate-gift-wiggle size-7" aria-hidden="true" />
-            <span className="absolute -top-2 right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-white px-1 text-[10.5px] font-extrabold text-primary shadow">
-              {rewards.length}
+        // Kölgə valideyndədir: kəsilmiş bilet formasını izləyir
+        <div className="drop-shadow-[0_6px_10px_rgb(0_0_0/0.16)]">
+          <Link
+            to="/gift-cards"
+            className="shine animate-attention ticket-ends relative flex items-center gap-3 overflow-hidden rounded-2xl bg-primary p-4 text-primary-foreground [--notch-x:calc(3.75rem-1px)] [--shine-delay:1.2s] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {/* Hədiyyə ikonu vaxtaşırı yellənir, yanında hazır hədiyyələrin sayı */}
+            <span className="relative grid w-11 shrink-0 place-items-center border-r-2 border-dashed border-white/40 pr-3">
+              <Gift className="animate-gift-wiggle size-7" aria-hidden="true" />
+              <span className="absolute -top-2 right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-white px-1 text-[10.5px] font-extrabold text-primary shadow">
+                {rewards.length}
+              </span>
             </span>
-          </span>
-          <span className="min-w-0 flex-1 pl-1">
-            <span className="block text-base font-bold">{t('rewards.title')}</span>
-            <span className="block truncate text-sm opacity-90">
-              {rewards.map((reward) => resolveText(reward.name, lang)).join(', ')}
+            <span className="min-w-0 flex-1 pl-1">
+              <span className="block text-base font-bold">{t('rewards.title')}</span>
+              <span className="block truncate text-sm opacity-90">
+                {rewards.map((reward) => resolveText(reward.name, lang)).join(', ')}
+              </span>
             </span>
-          </span>
-          <ChevronRight className="animate-nudge size-6 shrink-0" aria-label={t('rewards.open')} />
-        </Link>
+            <ChevronRight className="animate-nudge size-6 shrink-0" aria-label={t('rewards.open')} />
+          </Link>
+        </div>
       ) : null}
       {/* Təkliflər bir siyahıdadır; heç biri göstərilmirsə siyahı da görünmür */}
       <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card empty:hidden">

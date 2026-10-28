@@ -166,70 +166,76 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
   const daysLeft = card.expiresAt
     ? Math.max(0, Math.ceil((Date.parse(card.expiresAt) - Date.now()) / 86_400_000))
     : undefined;
+  const ticket = active && onShow;
   return (
-    <article
-      className={cn(
-        'relative overflow-hidden rounded-3xl',
-        active ? 'shine bg-primary text-primary-foreground shadow-md' : 'border border-border bg-card text-muted-foreground',
-      )}
-    >
-      <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3.5">
-        <div className="min-w-0">
-          <p className={cn('font-extrabold tracking-tight', active ? 'text-lg' : 'text-base text-foreground')}>
-            {resolveText(card.name, lang)}
-          </p>
-          {/* Niyə verilib: möhür kartı doldu və ya səviyyəyə çatdı */}
-          <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold">
-            {card.source === 'TIER' ? (
-              <Medal className="size-3.5 shrink-0" aria-hidden="true" />
-            ) : (
-              <Stamp className="size-3.5 shrink-0" aria-hidden="true" />
-            )}
-            {card.source === 'TIER'
-              ? t('giftCards.reason.TIER', { tier: resolveText(card.tierName, lang) })
-              : t('giftCards.reason.CARD')}
-          </p>
-          <p className="mt-0.5 flex flex-col text-xs opacity-90">
-            {card.earnedAt ? <span>{t('giftCards.earnedAt', { date: formatDate(card.earnedAt, lang) })}</span> : null}
-            {card.status === 'REDEEMED' && card.redeemedAt ? (
-              <span>{t('giftCards.redeemedAt', { date: formatDate(card.redeemedAt, lang) })}</span>
-            ) : (
-              <span>
-                {card.expiresAt ? t('giftCards.expiresAt', { date: formatDate(card.expiresAt, lang) }) : t('giftCards.noExpiry')}
-              </span>
-            )}
-          </p>
-        </div>
-        {active ? (
-          daysLeft !== undefined && daysLeft <= 7 ? (
-            <span className="shrink-0 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold whitespace-nowrap text-primary">
-              {t('giftCards.expiresSoon', { count: daysLeft })}
-            </span>
-          ) : (
-            <Gift className="size-7 shrink-0 opacity-90" aria-hidden="true" />
-          )
-        ) : (
-          <Badge>{t(`giftCards.status.${card.status ?? 'EXPIRED'}`)}</Badge>
+    // Kölgə valideyndədir (drop-shadow): kartın kəsilmiş formasını, o cümlədən yarımdairə kəsikləri izləyir
+    <div className={active ? 'drop-shadow-[0_6px_10px_rgb(0_0_0/0.16)]' : undefined}>
+      <article
+        className={cn(
+          'relative overflow-hidden rounded-3xl',
+          active ? 'shine bg-primary text-primary-foreground' : 'border border-border bg-card text-muted-foreground',
+          // Kəsiklər qırıq xəttin bərabərində: düymə 48px + xətt 2px → mərkəz aşağıdan 49px
+          ticket ? 'ticket-sides [--notch-y:calc(100%-49px)]' : null,
         )}
-      </div>
-      {active && onShow ? (
-        <>
-          {/* Perforasiya: qırıq xətt və kənarlarda yarımdairə kəsiklər */}
-          <div className="relative mx-4 border-t-2 border-dashed border-white/35" aria-hidden="true">
-            <span className="absolute -top-[9px] -left-6 size-4 rounded-full bg-background" />
-            <span className="absolute -top-[9px] -right-6 size-4 rounded-full bg-background" />
+      >
+        <div className="px-5 pt-4 pb-3.5">
+          {/* Yuxarı sətir: ad və vəziyyət yan-yana; səbəb və tarixlər altda kartın tam enində */}
+          <div className="flex items-start justify-between gap-3">
+            <p className={cn('min-w-0 font-extrabold tracking-tight', active ? 'text-lg' : 'text-base text-foreground')}>
+              {resolveText(card.name, lang)}
+            </p>
+            {active ? (
+              daysLeft !== undefined && daysLeft <= 7 ? (
+                <span className="shrink-0 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold whitespace-nowrap text-primary">
+                  {t('giftCards.expiresSoon', { count: daysLeft })}
+                </span>
+              ) : (
+                <Gift className="size-7 shrink-0 opacity-90" aria-hidden="true" />
+              )
+            ) : (
+              <Badge className="shrink-0 whitespace-nowrap">{t(`giftCards.status.${card.status ?? 'EXPIRED'}`)}</Badge>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={onShow}
-            className="flex w-full items-center gap-2 px-5 py-3.5 text-sm font-bold focus-visible:bg-white/10 focus-visible:outline-none"
-          >
-            <QrIcon className="size-[18px]" aria-hidden="true" />
-            {t('giftCards.show')}
-            <ChevronRight className="ml-auto size-5" aria-hidden="true" />
-          </button>
-        </>
-      ) : null}
-    </article>
+          <div className="min-w-0">
+            {/* Niyə verilib: möhür kartı doldu və ya səviyyəyə çatdı */}
+            <p className="mt-1 flex items-start gap-1.5 text-xs font-semibold">
+              {card.source === 'TIER' ? (
+                <Medal className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+              ) : (
+                <Stamp className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+              )}
+              {card.source === 'TIER'
+                ? t('giftCards.reason.TIER', { tier: resolveText(card.tierName, lang) })
+                : t('giftCards.reason.CARD')}
+            </p>
+            <p className="mt-0.5 flex flex-col text-xs opacity-90">
+              {card.earnedAt ? <span>{t('giftCards.earnedAt', { date: formatDate(card.earnedAt, lang) })}</span> : null}
+              {card.status === 'REDEEMED' && card.redeemedAt ? (
+                <span>{t('giftCards.redeemedAt', { date: formatDate(card.redeemedAt, lang) })}</span>
+              ) : (
+                <span>
+                  {card.expiresAt ? t('giftCards.expiresAt', { date: formatDate(card.expiresAt, lang) }) : t('giftCards.noExpiry')}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+        {active && onShow ? (
+          <>
+            {/* Perforasiya: qırıq xətt; kənarlardakı yarımdairə kəsiklər kartın maskasındadır (ticket-sides) */}
+            <div className="mx-4 border-t-2 border-dashed border-white/35" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={onShow}
+              className="flex h-12 w-full items-center gap-2 px-5 text-sm font-bold focus-visible:bg-white/10 focus-visible:outline-none"
+            >
+              <QrIcon className="size-[18px]" aria-hidden="true" />
+              {t('giftCards.show')}
+              <ChevronRight className="ml-auto size-5" aria-hidden="true" />
+            </button>
+          </>
+        ) : null}
+      </article>
+    </div>
   );
 }

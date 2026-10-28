@@ -250,6 +250,26 @@ input::-ms-clear {
   }
 }
 
+/*
+ * Bilet kəsikləri: kartda həqiqi yarımdairə deşiklər (mask). Fon rəngində dairə qoymaqdan fərqli olaraq, kölgə
+ * (valideyndə filter: drop-shadow) kəsiyin ətrafında yarımdairə kimi dönür. Hər mask qatı kartın yarısını örtür.
+ *   ticket-sides — sol və sağ kənarda, yuxarıdan --notch-y məsafədə (məs. calc(100% - 49px));
+ *   ticket-ends — yuxarı və aşağı kənarda, soldan --notch-x məsafədə.
+ */
+@utility ticket-sides {
+  mask:
+    radial-gradient(circle var(--notch-r, 8px) at 0 var(--notch-y, 50%), #0000 calc(100% - 0.5px), #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch-r, 8px) at 100% var(--notch-y, 50%), #0000 calc(100% - 0.5px), #000) right / 51% 100%
+      no-repeat;
+}
+
+@utility ticket-ends {
+  mask:
+    radial-gradient(circle var(--notch-r, 8px) at var(--notch-x, 50%) 0, #0000 calc(100% - 0.5px), #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch-r, 8px) at var(--notch-x, 50%) 100%, #0000 calc(100% - 0.5px), #000) bottom / 100% 51%
+      no-repeat;
+}
+
 @utility shine {
   &::after {
     content: '';
