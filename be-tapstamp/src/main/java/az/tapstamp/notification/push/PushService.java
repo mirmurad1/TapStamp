@@ -52,7 +52,9 @@ public class PushService {
         REMINDER_WINBACK_EMPTY("/"),
         REMINDER_UNUSED_GIFT("/gift-cards"),
         /** Bonus qaydası başladı (qərar #59); arqumentlər: qaydanın adı ({@link LocalizedText}), bonus möhür. */
-        BONUS_RULE_STARTED("/");
+        BONUS_RULE_STARTED("/"),
+        /** Səviyyəyə çatdı (çatma imtiyazı ilə); arqument: səviyyənin adı ({@link LocalizedText}). */
+        TIER_REACHED("/gift-cards");
 
         private final String url;
 

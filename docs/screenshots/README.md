@@ -84,3 +84,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase11-05-tier-customer.jpg` | Səviyyə möhür kartının içində: nişan kartın aşağı xəttində, növbəti səviyyəyə irəliləyiş kartın alt zolağında |
 | `phase11-06-first-login-with-tier.jpg` | İlk girişdən sonra: səviyyə zolağı və "Nömrənizi bir daha soruşmayacağıq" izahı kartın alt hissəsində |
 | `phase11-07-tier-sheet.jpg` | Səviyyə nişanına toxunanda: bütün səviyyələr medal, imtiyaz və hədd ilə; cari səviyyə vurğulanıb |
+| `phase11-08-tier-reached-celebration.jpg` | Səviyyəyə çatanda təbrik: səviyyə hədiyyəsi, bir dəfəlik möhürlər (eyni ziyarətdə kart da dolub) |
+| `phase11-09-gift-card-reason.jpg` | Hədiyyə kartlarında səbəb: "Bürünc səviyyəsinə çatdığınız üçün" və "Möhür kartını doldurduğunuz üçün" |

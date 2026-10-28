@@ -13,7 +13,12 @@ import org.jspecify.annotations.Nullable;
 @TenantMapper
 public interface TierMapper {
 
-    record Tier(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps) {
+    /**
+     * Səviyyə. İmtiyazlar: {@code bonusStamps} — hər NFC möhürünə əlavə; {@code reachGift} — çatanda cari hədiyyə;
+     * {@code reachStamps} — çatanda bir dəfəlik möhür.
+     */
+    record Tier(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, boolean reachGift,
+                int reachStamps) {
     }
 
     /** Səviyyədəki aktiv müştərilərin sayı. */
@@ -30,11 +35,18 @@ public interface TierMapper {
 
     Optional<Tier> findById(UUID id);
 
-    void insert(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, UUID staffId, Instant now);
+    void insert(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, boolean reachGift,
+                int reachStamps, UUID staffId, Instant now);
 
-    void update(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, UUID staffId, Instant now);
+    void update(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, boolean reachGift,
+                int reachStamps, UUID staffId, Instant now);
 
-    /** Bonus möhürü olmayan səviyyə silinir; varsa 0. */
+    /** Səviyyəyə çatma imtiyazının qeydi; bu müştəriyə bu səviyyə üçün artıq verilibsə 0. */
+    int insertReachGrant(UUID customerId, UUID tierId, Instant now);
+
+    void setReachGrantReward(UUID customerId, UUID tierId, UUID rewardId);
+
+    /** Bonus möhürü və ya çatma imtiyazı verməmiş səviyyə silinir; vermişsə 0. */
     int deleteUnused(UUID id);
 
     boolean minVisitsTaken(int minVisits, @Nullable UUID exceptId);

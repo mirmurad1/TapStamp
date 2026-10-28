@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,10 +47,13 @@ public class AdminTierController {
     public record TierRequest(@NotNull @Valid LocalizedText name,
                               @NotNull @Pattern(regexp = "^#[0-9A-Fa-f]{6}$") String color,
                               @NotNull @Min(0) @Max(10000) Integer minVisits,
-                              @NotNull @Min(0) @Max(3) Integer bonusStamps) {
+                              @NotNull @Min(0) @Max(3) Integer bonusStamps,
+                              @Nullable Boolean reachGift,
+                              @Nullable @Min(0) @Max(10) Integer reachStamps) {
 
         TierInput toInput() {
-            return new TierInput(name, color, minVisits, bonusStamps);
+            return new TierInput(name, color, minVisits, bonusStamps, Boolean.TRUE.equals(reachGift),
+                    reachStamps == null ? 0 : reachStamps);
         }
     }
 
@@ -76,8 +80,10 @@ public class AdminTierController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Səviyyə yaratmaq", description = """
             Ən çox 5 səviyyə. `minVisits` — keçid üçün ziyarət sayı (hər səviyyədə fərqli, yoxsa 409 \
-            `TIER_THRESHOLD_TAKEN`); `bonusStamps` — hər NFC möhürünə əlavə möhür (0–3, bonus qaydaları ilə \
-            toplanır). Auditə yazılır.""")
+            `TIER_THRESHOLD_TAKEN`); `bonusStamps` — hər NFC möhürünə əlavə möhür (0–3, bonus kampaniyaları ilə \
+            toplanır). Səviyyəyə ilk dəfə çatanda: `reachGift` — şirkətin cari hədiyyəsi (kartda səbəb kimi \
+            səviyyənin adı), `reachStamps` — 0–10 bir dəfəlik möhür; hər müştəriyə hər səviyyə üçün bir dəfə. \
+            Auditə yazılır.""")
     TierOverview create(@AuthenticationPrincipal AdminPrincipal principal, @Valid @RequestBody TierRequest request) {
         return tiers.create(principal, request.toInput());
     }

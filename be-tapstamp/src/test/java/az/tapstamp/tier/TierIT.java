@@ -31,6 +31,7 @@ class TierIT extends TapIntegrationTest {
     void removeTiers() {
         TenantContext.runAs(alpha(), () -> {
             tenantJdbc.sql("DELETE FROM stamps WHERE tier_id IS NOT NULL").update();
+            tenantJdbc.sql("DELETE FROM tier_reach_grants").update();
             tenantJdbc.sql("DELETE FROM loyalty_tiers").update();
             tenantJdbc.sql("UPDATE tier_settings SET enabled = true").update();
         });
@@ -131,6 +132,36 @@ class TierIT extends TapIntegrationTest {
         owner.put("/tiers/settings", Map.of("enabled", true)).andExpect(jsonPath("$.enabled").value(true));
         customer.get("/api/v1/me/tier").andExpect(jsonPath("$.enabled").value(true))
                 .andExpect(jsonPath("$.current.name.az").value("Hamı"));
+    }
+
+    @Test
+    void reachingATierGivesTheGiftAndOneTimeStampsOnce() throws Exception {
+        Map<String, Object> silver = new java.util.HashMap<>(tier("Gümüş", 2, 0));
+        silver.put("reachGift", true);
+        silver.put("reachStamps", 2);
+        owner().post("/tiers", silver).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.tiers[0].reachGift").value(true))
+                .andExpect(jsonPath("$.tiers[0].reachStamps").value(2));
+        TestTag tag = newTag(newBranch(Policy.relaxed()));
+        CustomerClient customer = signedIn(uniquePhone());
+
+        claim(customer, tag, 1);
+        assertThat((Integer) read(customer, "/api/v1/me", "$.card.totalStamps")).isEqualTo(1);
+        // 2-ci ziyarət: Gümüşə çatdı — 1 (toxunuş) + 2 (bir dəfəlik) və hədiyyə kartı səbəbi ilə
+        customer.post(claimPath(tapToken(customer, tag, 2))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.reachedTier.az").value("Gümüş"))
+                .andExpect(jsonPath("$.reachedTierStamps").value(2))
+                .andExpect(jsonPath("$.tierGiftCardId").isNotEmpty())
+                .andExpect(jsonPath("$.giftCardId").doesNotExist());
+        assertThat((Integer) read(customer, "/api/v1/me", "$.card.totalStamps")).isEqualTo(4);
+        customer.get("/api/v1/me/gift-cards").andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.source == 'TIER')].tierName.az")
+                        .value(org.hamcrest.Matchers.contains("Gümüş")));
+        // 3-cü ziyarət: təkrar verilmir
+        claim(customer, tag, 3);
+        assertThat((Integer) read(customer, "/api/v1/me", "$.card.totalStamps")).isEqualTo(5);
+        customer.get("/api/v1/me/gift-cards")
+                .andExpect(jsonPath("$[?(@.source == 'TIER')]").value(org.hamcrest.Matchers.hasSize(1)));
     }
 
     @Test

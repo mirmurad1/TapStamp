@@ -20,9 +20,9 @@
 
     <insert id="insert">
         INSERT INTO rewards (id, customer_id, rule_id, stamps_required_snapshot, reward_name_snapshot, status,
-                             earned_at, expires_at, code_nonce, code_lookup, created_at)
+                             earned_at, expires_at, code_nonce, code_lookup, created_at, source, tier_name_snapshot)
         VALUES (#{id}, #{customerId}, #{ruleId}, #{stampsRequired}, CAST(#{name} AS jsonb), 'AVAILABLE', #{earnedAt},
-                #{expiresAt}, #{codeNonce}, #{codeLookup}, #{earnedAt})
+                #{expiresAt}, #{codeNonce}, #{codeLookup}, #{earnedAt}, #{source}, CAST(#{tierName} AS jsonb))
     </insert>
 
     <select id="codeTaken" resultType="boolean">
@@ -30,7 +30,8 @@
     </select>
 
     <select id="listForCustomer" resultType="az.tapstamp.loyalty.repository.GiftCardMapper$GiftCardRow">
-        SELECT id, reward_name_snapshot AS name, status, earned_at, expires_at, redeemed_at, code_nonce
+        SELECT id, reward_name_snapshot AS name, status, earned_at, expires_at, redeemed_at, code_nonce, source,
+               tier_name_snapshot AS tier_name
         FROM rewards
         WHERE customer_id = #{customerId}
         ORDER BY CASE WHEN status = 'AVAILABLE' THEN 0 ELSE 1 END, earned_at DESC

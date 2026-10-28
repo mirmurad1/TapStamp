@@ -52,14 +52,24 @@ export function Confetti({ count = 60, small = false }: { count?: number; small?
   );
 }
 
+/** Bu ziyarətdə çatılan səviyyə: ad, hədiyyə verildimi, bir dəfəlik möhürlər. */
+export interface ReachedTier {
+  name: string;
+  gift: boolean;
+  stamps: number;
+}
+
 interface CelebrationProps {
   open: boolean;
   rewardName?: string;
+  /** Kart doldu (hədiyyə kartı yarandı). */
+  cardFull?: boolean;
+  tier?: ReachedTier;
   onClose: () => void;
 }
 
-/** Kart dolanda: konfeti, təbrik və hədiyyə kartına keçid. */
-export function Celebration({ open, rewardName, onClose }: CelebrationProps) {
+/** Kart dolanda və ya səviyyəyə çatanda: konfeti, təbrik (səbəbi ilə) və hədiyyə kartlarına keçid. */
+export function Celebration({ open, rewardName, cardFull = true, tier, onClose }: CelebrationProps) {
   const { t } = useTranslation('profile');
   return (
     <>
@@ -74,18 +84,39 @@ export function Celebration({ open, rewardName, onClose }: CelebrationProps) {
             {t('celebrate.title')}
           </DialogTitle>
           <DialogDescription className="text-base text-foreground">
-            {rewardName ? t('celebrate.subtitle', { reward: rewardName }) : t('celebrate.subtitleGeneric')}
+            {tier ? t('celebrate.tierSubtitle', { tier: tier.name }) : null}
+            {tier && cardFull ? ' ' : null}
+            {cardFull ? (rewardName ? t('celebrate.subtitle', { reward: rewardName }) : t('celebrate.subtitleGeneric')) : null}
           </DialogDescription>
-          <p className="text-sm text-muted-foreground">{t('celebrate.hint')}</p>
+          {tier && (tier.gift || tier.stamps) ? (
+            <ul className="mx-auto flex flex-col gap-1 text-sm font-semibold">
+              {tier.gift ? (
+                <li>{rewardName ? t('celebrate.tierGift', { reward: rewardName }) : t('celebrate.tierGiftGeneric')}</li>
+              ) : null}
+              {tier.stamps ? <li>{t('celebrate.tierStamps', { count: tier.stamps })}</li> : null}
+            </ul>
+          ) : null}
+          {cardFull || tier?.gift ? (
+            <p className="text-sm text-muted-foreground">{t(cardFull && tier?.gift ? 'celebrate.hintMany' : 'celebrate.hint')}</p>
+          ) : null}
           <div className="flex flex-col gap-2 pt-2">
-            <Button asChild size="lg">
-              <Link to="/gift-cards" onClick={onClose}>
-                {t('celebrate.open')}
-              </Link>
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              {t('celebrate.later')}
-            </Button>
+            {cardFull || tier?.gift ? (
+              <>
+                <Button asChild size="lg">
+                  <Link to="/gift-cards" onClick={onClose}>
+                    {t('celebrate.open')}
+                  </Link>
+                </Button>
+                <Button variant="ghost" onClick={onClose}>
+                  {t('celebrate.later')}
+                </Button>
+              </>
+            ) : (
+              // Yalnız möhürlər verilib — hədiyyə kartına keçməyə ehtiyac yoxdur
+              <Button size="lg" onClick={onClose}>
+                {t('celebrate.continue')}
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

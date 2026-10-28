@@ -1,11 +1,12 @@
-import { Check, ChevronRight, Medal } from 'lucide-react';
-import { useState } from 'react';
+import { Check, ChevronRight, Gift, Medal, Sparkles, Stamp } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { cn } from '@/shared/lib/cn';
 
+import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useMyTier } from '../lib/useMyTier';
 import { Sheet } from './Sheet';
 
@@ -64,6 +65,7 @@ export function TierNote() {
           <span className="block">
             {next ? t('tier.toNext', { count: visitsToNext, name: resolveText(next.name, currentLanguage()) }) : t('tier.top')}
             {next?.bonusStamps ? ` ${t('tier.nextPerk', { count: next.bonusStamps })}` : ''}
+            {next?.reachGift ? ` ${t('tier.reachGiftGeneric')} 🎁` : ''}
           </span>
           {next ? (
             <span
@@ -91,12 +93,14 @@ export function TierNote() {
  */
 function TierSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useTranslation('profile');
+  const { me } = useCustomerSession();
   const lang = currentLanguage();
   const tier = useMyTier();
   if (!tier) {
     return null;
   }
   const { current, visits } = tier;
+  const rewardName = resolveText(me?.card?.rewardName, lang);
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={t('tier.allTitle')} description={t('tier.visits', { count: visits })}>
       <ol className="flex flex-col gap-2">
@@ -125,9 +129,7 @@ function TierSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open:
                     </span>
                   ) : null}
                 </span>
-                <span className="block text-sm text-muted-foreground">
-                  {item.bonusStamps ? t('tier.benefit', { count: item.bonusStamps }) : t('tier.badgeOnly')}
-                </span>
+                <TierPerks tier={item} rewardName={rewardName} />
                 <span className="block text-xs text-muted-foreground">
                   {item.minVisits ? t('tier.from', { count: item.minVisits }) : t('tier.fromStart')}
                 </span>
@@ -139,5 +141,38 @@ function TierSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open:
       </ol>
       <p className="mt-3 text-xs text-muted-foreground">{t('tier.howItWorks')}</p>
     </Sheet>
+  );
+}
+
+type TierItem = NonNullable<ReturnType<typeof useMyTier>>['tiers'][number];
+
+/** Səviyyənin imtiyazları ikonları ilə: hər möhürə bonus, çatanda hədiyyə, çatanda bir dəfəlik möhür. */
+function TierPerks({ tier, rewardName }: { tier: TierItem; rewardName: string }) {
+  const { t } = useTranslation('profile');
+  const perks: { icon: ReactNode; text: string }[] = [];
+  if (tier.bonusStamps) {
+    perks.push({ icon: <Stamp aria-hidden="true" />, text: t('tier.benefit', { count: tier.bonusStamps }) });
+  }
+  if (tier.reachGift) {
+    perks.push({
+      icon: <Gift aria-hidden="true" />,
+      text: rewardName ? t('tier.reachGift', { reward: rewardName }) : t('tier.reachGiftGeneric'),
+    });
+  }
+  if (tier.reachStamps) {
+    perks.push({ icon: <Sparkles aria-hidden="true" />, text: t('tier.reachStamps', { count: tier.reachStamps }) });
+  }
+  if (perks.length === 0) {
+    perks.push({ icon: <Medal aria-hidden="true" />, text: t('tier.badgeOnly') });
+  }
+  return (
+    <ul className="mt-0.5 flex flex-col gap-0.5 text-sm text-muted-foreground">
+      {perks.map((perk) => (
+        <li key={perk.text} className="flex items-center gap-1.5 [&_svg]:size-3.5 [&_svg]:shrink-0">
+          {perk.icon}
+          {perk.text}
+        </li>
+      ))}
+    </ul>
   );
 }

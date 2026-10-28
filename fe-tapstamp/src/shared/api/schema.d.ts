@@ -1436,7 +1436,7 @@ export interface paths {
         put?: never;
         /**
          * Səviyyə yaratmaq
-         * @description Ən çox 5 səviyyə. `minVisits` — keçid üçün ziyarət sayı (hər səviyyədə fərqli, yoxsa 409 `TIER_THRESHOLD_TAKEN`); `bonusStamps` — hər NFC möhürünə əlavə möhür (0–3, bonus qaydaları ilə toplanır). Auditə yazılır.
+         * @description Ən çox 5 səviyyə. `minVisits` — keçid üçün ziyarət sayı (hər səviyyədə fərqli, yoxsa 409 `TIER_THRESHOLD_TAKEN`); `bonusStamps` — hər NFC möhürünə əlavə möhür (0–3, bonus kampaniyaları ilə toplanır). Səviyyəyə ilk dəfə çatanda: `reachGift` — şirkətin cari hədiyyəsi (kartda səbəb kimi səviyyənin adı), `reachStamps` — 0–10 bir dəfəlik möhür; hər müştəriyə hər səviyyə üçün bir dəfə. Auditə yazılır.
          */
         post: operations["create"];
         delete?: never;
@@ -3264,7 +3264,7 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
-        /** @description Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı. */
+        /** @description Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı; reachedTier — bu ziyarətdə səviyyəyə çatdı (tierGiftCardId — səviyyə hədiyyəsi, reachedTierStamps — bir dəfəlik möhürlər). */
         ClaimResponse: {
             /** Format: uuid */
             branchId?: string;
@@ -3272,12 +3272,17 @@ export interface components {
             currentStamps?: number;
             /** Format: uuid */
             giftCardId?: string;
+            reachedTier?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            reachedTierStamps?: number;
             /** Format: uuid */
             stampId?: string;
             /** Format: int32 */
             stampsRequired?: number;
             /** @enum {string} */
             status?: "PENDING" | "CONFIRMED";
+            /** Format: uuid */
+            tierGiftCardId?: string;
         };
         CodeRequest: {
             /** @description 6 rəqəmli TOTP kodu və ya bərpa kodu (xxxxx-xxxxx) */
@@ -3500,8 +3505,15 @@ export interface components {
             name?: components["schemas"]["LocalizedText"];
             /** Format: date-time */
             redeemedAt?: string;
+            /**
+             * @description Niyə verilib: CARD — möhür kartı doldu, TIER — səviyyəyə çatdı
+             * @enum {string}
+             */
+            source?: "CARD" | "TIER";
             /** @enum {string} */
             status?: "AVAILABLE" | "REDEEMED" | "REVOKED" | "EXPIRED";
+            /** @description source = TIER olanda səviyyənin adı */
+            tierName?: components["schemas"]["LocalizedText"];
         };
         HeatCell: {
             /** Format: int32 */
@@ -4628,6 +4640,9 @@ export interface components {
             /** Format: int32 */
             minVisits?: number;
             name?: components["schemas"]["LocalizedText"];
+            reachGift?: boolean;
+            /** Format: int32 */
+            reachStamps?: number;
         };
         TierOverview: {
             /** Format: int64 */
@@ -4642,6 +4657,9 @@ export interface components {
             /** Format: int32 */
             minVisits: number;
             name: components["schemas"]["LocalizedText"];
+            reachGift?: boolean;
+            /** Format: int32 */
+            reachStamps?: number;
         };
         TierSettingsRequest: {
             enabled: boolean;
@@ -4657,6 +4675,9 @@ export interface components {
             /** Format: int32 */
             minVisits?: number;
             name?: components["schemas"]["LocalizedText"];
+            reachGift?: boolean;
+            /** Format: int32 */
+            reachStamps?: number;
         };
         TimelineItem: {
             /** Format: date-time */

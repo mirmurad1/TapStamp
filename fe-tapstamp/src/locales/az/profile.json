@@ -69,6 +69,10 @@
       "hint": "Kodu görmək üçün gümüşü sahəni barmağınızla silin.",
       "reveal": "Kodu aç",
       "hidden": "Kod gizlidir. Açmaq üçün «Kodu aç» düyməsindən istifadə edin."
+    },
+    "reason": {
+      "CARD": "Möhür kartını doldurduğunuz üçün",
+      "TIER": "{{tier}} səviyyəsinə çatdığınız üçün"
     }
   },
   "celebrate": {
@@ -77,7 +81,14 @@
     "subtitleGeneric": "Kartınız doldu — hədiyyə sizindir!",
     "hint": "Hədiyyə kartı “Hədiyyə kartları” bölməsinə əlavə olundu.",
     "open": "Hədiyyə kartına bax",
-    "later": "Sonra"
+    "later": "Sonra",
+    "tierSubtitle": "{{tier}} səviyyəsinə çatdınız!",
+    "tierGift": "🎁 Səviyyə hədiyyəsi: {{reward}}",
+    "tierGiftGeneric": "🎁 Səviyyə hədiyyəsi",
+    "tierStamps_one": "⭐ Kartınıza +{{count}} möhür əlavə olundu",
+    "tierStamps_other": "⭐ Kartınıza +{{count}} möhür əlavə olundu",
+    "continue": "Davam et",
+    "hintMany": "Hədiyyə kartları “Hədiyyə kartları” bölməsinə əlavə olundu."
   },
   "tap": {
     "checking": "Toxunuş yoxlanılır…",
@@ -251,6 +262,10 @@
     "from_other": "{{count}} ziyarətdən",
     "fromStart": "İlk ziyarətdən",
     "reached": "Keçilib",
-    "howItWorks": "Hər NFC möhürü bir ziyarət sayılır. Səviyyə avtomatik yüksəlir."
+    "howItWorks": "Hər NFC möhürü bir ziyarət sayılır. Səviyyə avtomatik yüksəlir.",
+    "reachGift": "Çatanda hədiyyə: {{reward}}",
+    "reachGiftGeneric": "Çatanda hədiyyə",
+    "reachStamps_one": "Çatanda bir dəfəlik +{{count}} möhür",
+    "reachStamps_other": "Çatanda bir dəfəlik +{{count}} möhür"
   }
 }

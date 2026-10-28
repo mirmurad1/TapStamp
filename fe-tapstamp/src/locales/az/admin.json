@@ -1116,13 +1116,24 @@
       "customColor": "Başqa rəng",
       "minVisits": "Lazım olan ziyarət sayı",
       "minVisitsHint": "0 yazsanız, bütün müştərilər bu səviyyədən başlayır.",
-      "bonus": "İmtiyaz",
-      "bonusHint": "Bu səviyyədəki müştəri hər NFC möhürü ilə əlavə bu qədər möhür alır."
+      "bonus": "Hər möhürə əlavə",
+      "bonusHint": "Bu səviyyədəki müştəri hər NFC möhürü ilə əlavə bu qədər möhür alır.",
+      "perks": "İmtiyazlar",
+      "none": "Yoxdur",
+      "reachGift": "Səviyyəyə çatanda hədiyyə verilsin",
+      "reachGiftHint": "Müştəri bu səviyyəyə çatdığı ziyarətdə hazırkı hədiyyəni alır: {{reward}}. Hədiyyə kartında səbəb yazılır.",
+      "reachGiftNoReward": "Əvvəlcə Parametrlərdə hədiyyə qaydasını təyin edin.",
+      "reachStamps": "Səviyyəyə çatanda bir dəfəlik möhür",
+      "reachStampsHint": "Müştəri bu səviyyəyə çatdığı ziyarətdə kartına bu qədər möhür əlavə olunur.",
+      "perksNote": "Çatma imtiyazları hər müştəriyə hər səviyyə üçün bir dəfə verilir. Artıq bu səviyyədə olan müştərilər onu növbəti ziyarətdə alır."
     },
     "switch": {
       "title": "Səviyyələr aktivdir",
       "hint": "Söndürsəniz, müştərilər səviyyəni görməyəcək və səviyyə bonusu verilməyəcək. Səviyyələr və tarixçə silinmir — yenidən açanda hər şey əvvəlki kimi işləyəcək.",
       "off": "Səviyyələr söndürülüb: müştərilər onları görmür və səviyyə bonusu verilmir."
-    }
+    },
+    "reachGiftShort": "çatanda hədiyyə",
+    "reachStampsShort_one": "çatanda +{{count}} möhür",
+    "reachStampsShort_other": "çatanda +{{count}} möhür"
   }
 }

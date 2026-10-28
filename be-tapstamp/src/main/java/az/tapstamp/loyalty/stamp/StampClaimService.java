@@ -57,8 +57,13 @@ public class StampClaimService {
     /** Bir brauzerdən bir gündə bu qədər fərqli hesab — fırıldaq işarəsi. */
     static final int MULTI_ACCOUNT_THRESHOLD = 3;
     static final int COOLDOWN_HAMMERING_THRESHOLD = 3;
+    /**
+     * {@code giftCardId} — kart doldu; {@code reachedTier} — bu ziyarətdə çatılan səviyyə (çatma imtiyazı ilə),
+     * {@code tierGiftCardId} və {@code reachedTierStamps} — onun hədiyyəsi və bir dəfəlik möhürləri.
+     */
     public record ClaimResult(UUID stampId, StampStatus status, int currentStamps, int stampsRequired,
-                              UUID giftCardId, UUID branchId) {
+                              @Nullable UUID giftCardId, UUID branchId, @Nullable LocalizedText reachedTier,
+                              @Nullable UUID tierGiftCardId, int reachedTierStamps) {
     }
 
     private record Outcome(ClaimResult result, ErrorCode error, Map<String, Object> properties) {
@@ -223,9 +228,11 @@ public class StampClaimService {
         UUID stampId = ledger.insertTapStamp(token.branchId(), customerId, token.tagId(), token.id(), status, day, tapAt);
         CardState card = status == StampStatus.CONFIRMED ? ledger.applyConfirmed(customerId, stampId, tapAt)
                 : ledger.card(customerId);
+        TierService.TierBonus tierBonus = TierService.TierBonus.NONE;
         if (status == StampStatus.CONFIRMED) {
             card = withBonus(card, bonusRules.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt));
-            card = withBonus(card, tiers.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt));
+            tierBonus = tiers.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt);
+            card = withBonus(card, tierBonus.card());
             card = withBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
         }
         tokens.markConsumed(token.id(), customerId, now);
@@ -234,7 +241,8 @@ public class StampClaimService {
                 .withClaim(customerId, token.id(), stampId), now);
         detectMultiAccount(token, customerId, source, now);
         return Outcome.ok(new ClaimResult(stampId, status, card.currentStamps(), card.stampsRequired(),
-                card.giftCardId(), token.branchId()));
+                card.giftCardId(), token.branchId(), tierBonus.reached() == null ? null : tierBonus.reached().name(),
+                tierBonus.giftCardId(), tierBonus.reachStamps()));
     }
 
     /** Bonus (qayda və ya dəvət) verilibsə, kart bonusdan sonrakı vəziyyətdir; hədiyyə kartı — ilk yaranan. */
@@ -251,7 +259,7 @@ public class StampClaimService {
                 .orElseThrow(() -> new IllegalStateException("Consumed token without stamp: " + token.id()));
         CardState card = ledger.card(customerId);
         return new ClaimResult(stamp.id(), stamp.status(), card.currentStamps(), card.stampsRequired(),
-                stamp.rewardId(), stamp.branchId());
+                stamp.rewardId(), stamp.branchId(), null, null, 0);
     }
 
     /** Səhifə yenilənəndə eyni rədd səbəbi (məs. cooldown-un qalan vaxtı ilə) göstərilir. */

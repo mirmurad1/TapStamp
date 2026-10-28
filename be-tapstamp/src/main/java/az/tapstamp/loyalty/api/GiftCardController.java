@@ -36,7 +36,10 @@ public class GiftCardController {
             @Schema(allowableValues = {"AVAILABLE", "REDEEMED", "REVOKED", "EXPIRED"}) String status,
             Instant earnedAt,
             @Schema(description = "Müddəti; null — müddətsiz") Instant expiresAt,
-            Instant redeemedAt) {
+            Instant redeemedAt,
+            @Schema(description = "Niyə verilib: CARD — möhür kartı doldu, TIER — səviyyəyə çatdı",
+                    allowableValues = {"CARD", "TIER"}) String source,
+            @Schema(description = "source = TIER olanda səviyyənin adı") LocalizedText tierName) {
     }
 
     @GetMapping("/api/v1/me/gift-cards")
@@ -44,7 +47,7 @@ public class GiftCardController {
     List<GiftCardResponse> list(@AuthenticationPrincipal CustomerPrincipal principal) {
         return giftCards.list(principal.customerId(), clock.instant()).stream()
                 .map(card -> new GiftCardResponse(card.id(), card.code(), card.name(), card.status().name(),
-                        card.earnedAt(), card.expiresAt(), card.redeemedAt()))
+                        card.earnedAt(), card.expiresAt(), card.redeemedAt(), card.source(), card.tierName()))
                 .toList();
     }
 }

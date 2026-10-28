@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Medal, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
@@ -14,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 
-import { tiersApi, type Localized, type TierOverview, type TierView } from '../../api/adminApi';
+import { settingsApi, tiersApi, type Localized, type TierOverview, type TierView } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { toLocalized } from '../../lib/localized';
@@ -23,6 +24,8 @@ import { LocalizedFields } from '../settings/CompanyForm';
 const TIERS_KEY = ['tiers'] as const;
 const MAX_TIERS = 5;
 const BONUS_OPTIONS = [0, 1, 2, 3] as const;
+const REACH_STAMP_OPTIONS = [0, 1, 2, 3, 4, 5, 10] as const;
+const REWARD_KEY = ['settings-reward-rule'] as const;
 /** Hazır rənglər: bürünc, gümüş, qızıl, platin, brilyant. */
 const COLORS = ['#CD7F32', '#9CA3AF', '#D4A017', '#64748B', '#38BDF8'] as const;
 
@@ -155,7 +158,7 @@ function TierRow({ tier, total, onEdit }: { tier: TierView; total: number; onEdi
             <span className="block text-sm text-muted-foreground">
               {t('admin:tiers.from', { count: tier.minVisits ?? 0 })}
               {' · '}
-              {tier.bonusStamps ? t('admin:tiers.perk', { count: tier.bonusStamps }) : t('admin:tiers.badgeOnly')}
+              {perkSummary(tier, t)}
             </span>
           </span>
         </span>
@@ -176,6 +179,21 @@ function TierRow({ tier, total, onEdit }: { tier: TierView; total: number; onEdi
   );
 }
 
+/** Səviyyənin imtiyazları bir sətirdə: hər möhürə bonus, çatanda hədiyyə, çatanda möhür; yoxdursa "yalnız nişan". */
+function perkSummary(tier: Pick<TierView, 'bonusStamps' | 'reachGift' | 'reachStamps'>, t: TFunction<['admin', 'common']>): string {
+  const perks: string[] = [];
+  if (tier.bonusStamps) {
+    perks.push(t('admin:tiers.perk', { count: tier.bonusStamps }));
+  }
+  if (tier.reachGift) {
+    perks.push(t('admin:tiers.reachGiftShort'));
+  }
+  if (tier.reachStamps) {
+    perks.push(t('admin:tiers.reachStampsShort', { count: tier.reachStamps }));
+  }
+  return perks.length > 0 ? perks.join(', ') : t('admin:tiers.badgeOnly');
+}
+
 function TierDialog({ tier, index, onClose }: { tier?: TierView; index: number; onClose: () => void }) {
   const { t } = useTranslation(['admin', 'common']);
   const queryClient = useQueryClient();
@@ -183,9 +201,21 @@ function TierDialog({ tier, index, onClose }: { tier?: TierView; index: number; 
   const [color, setColor] = useState<string>(tier?.color ?? COLORS[Math.min(index, COLORS.length - 1)] ?? '#CD7F32');
   const [minVisits, setMinVisits] = useState(String(tier?.minVisits ?? ''));
   const [bonus, setBonus] = useState(tier?.bonusStamps ?? 0);
+  const [reachGift, setReachGift] = useState(tier?.reachGift ?? false);
+  const [reachStamps, setReachStamps] = useState(tier?.reachStamps ?? 0);
+  const lang = currentLanguage();
+  const reward = useQuery({ queryKey: REWARD_KEY, queryFn: settingsApi.rewardRule });
+  const rewardName = reward.data ? resolveText(reward.data.rewardName, lang) : '';
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: toLocalized(name) ?? { az: name.az }, color, minVisits: Number(minVisits), bonusStamps: bonus };
+      const body = {
+        name: toLocalized(name) ?? { az: name.az },
+        color,
+        minVisits: Number(minVisits),
+        bonusStamps: bonus,
+        reachGift,
+        reachStamps,
+      };
       return tier?.id ? tiersApi.update(tier.id, body) : tiersApi.create(body);
     },
     onSuccess: (data) => {
@@ -229,15 +259,43 @@ function TierDialog({ tier, index, onClose }: { tier?: TierView; index: number; 
           <Field id="tier-visits" label={t('admin:tiers.form.minVisits')} hint={t('admin:tiers.form.minVisitsHint')}>
             <Input inputMode="numeric" value={minVisits} onChange={(e) => setMinVisits(e.target.value.trim())} required />
           </Field>
-          <Field id="tier-bonus" label={t('admin:tiers.form.bonus')} hint={t('admin:tiers.form.bonusHint')}>
-            <Select value={bonus} onChange={(event) => setBonus(Number(event.target.value))}>
-              {BONUS_OPTIONS.map((value) => (
-                <option key={value} value={value}>
-                  {value === 0 ? t('admin:tiers.badgeOnly') : t('admin:tiers.perk', { count: value })}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <fieldset className="flex flex-col gap-3 rounded-xl border border-border p-3">
+            <legend className="px-1 text-sm font-medium">{t('admin:tiers.form.perks')}</legend>
+            <Field id="tier-bonus" label={t('admin:tiers.form.bonus')} hint={t('admin:tiers.form.bonusHint')}>
+              <Select value={bonus} onChange={(event) => setBonus(Number(event.target.value))}>
+                {BONUS_OPTIONS.map((value) => (
+                  <option key={value} value={value}>
+                    {value === 0 ? t('admin:tiers.form.none') : t('admin:tiers.perk', { count: value })}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={reachGift}
+                disabled={!rewardName && !reachGift}
+                onChange={(event) => setReachGift(event.target.checked)}
+                className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+              />
+              <span>
+                <span className="block font-medium">{t('admin:tiers.form.reachGift')}</span>
+                <span className="block text-muted-foreground">
+                  {rewardName ? t('admin:tiers.form.reachGiftHint', { reward: rewardName }) : t('admin:tiers.form.reachGiftNoReward')}
+                </span>
+              </span>
+            </label>
+            <Field id="tier-reach-stamps" label={t('admin:tiers.form.reachStamps')} hint={t('admin:tiers.form.reachStampsHint')}>
+              <Select value={reachStamps} onChange={(event) => setReachStamps(Number(event.target.value))}>
+                {REACH_STAMP_OPTIONS.map((value) => (
+                  <option key={value} value={value}>
+                    {value === 0 ? t('admin:tiers.form.none') : t('admin:tiers.reachStampsShort', { count: value })}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <p className="text-xs text-muted-foreground">{t('admin:tiers.form.perksNote')}</p>
+          </fieldset>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common:actions.cancel')}

@@ -8,6 +8,7 @@ import java.util.UUID;
 import az.tapstamp.loyalty.reward.GiftCardService.ActiveRule;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.persistence.TenantMapper;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Hədiyyə kartları ({@code rewards}) və onların qaydası ({@code reward_rules}): verilmə, müştərinin siyahısı, işçinin
@@ -17,8 +18,9 @@ import az.tapstamp.shared.persistence.TenantMapper;
 public interface GiftCardMapper {
 
     /** Müştərinin kartı (kod {@code codeNonce}-dan hesablanır, bazada açıq saxlanılmır). */
+    /** {@code source}: CARD — möhür kartı doldu, TIER — səviyyəyə çatdı ({@code tierName} ilə). */
     record GiftCardRow(UUID id, LocalizedText name, String status, Instant earnedAt, Instant expiresAt,
-                       Instant redeemedAt, int codeNonce) {
+                       Instant redeemedAt, int codeNonce, String source, @Nullable LocalizedText tierName) {
     }
 
     /** İşçinin yoxladığı kart: müştəri (telefon maskalı) və təhvil məlumatı ilə. */
@@ -33,7 +35,7 @@ public interface GiftCardMapper {
     Optional<ActiveRule> findRuleFor(UUID customerId);
 
     void insert(UUID id, UUID customerId, UUID ruleId, int stampsRequired, LocalizedText name, Instant earnedAt,
-                Instant expiresAt, int codeNonce, byte[] codeLookup);
+                Instant expiresAt, int codeNonce, byte[] codeLookup, String source, @Nullable LocalizedText tierName);
 
     boolean codeTaken(byte[] codeLookup);
 

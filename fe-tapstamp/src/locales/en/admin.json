@@ -1116,13 +1116,24 @@
       "customColor": "Custom colour",
       "minVisits": "Visits needed",
       "minVisitsHint": "Enter 0 to start every customer in this tier.",
-      "bonus": "Perk",
-      "bonusHint": "Customers in this tier get this many extra stamps with every NFC stamp."
+      "bonus": "Extra on every stamp",
+      "bonusHint": "Customers in this tier get this many extra stamps with every NFC stamp.",
+      "perks": "Perks",
+      "none": "None",
+      "reachGift": "Give a gift on reaching this tier",
+      "reachGiftHint": "On the visit that reaches this tier, the customer gets the current gift: {{reward}}. The gift card shows why it was given.",
+      "reachGiftNoReward": "Set up the gift rule in Settings first.",
+      "reachStamps": "One-time stamps on reaching this tier",
+      "reachStampsHint": "On the visit that reaches this tier, this many stamps are added to the card.",
+      "perksNote": "Reaching perks are given once per customer per tier. Customers already in this tier get them on their next visit."
     },
     "switch": {
       "title": "Tiers are on",
       "hint": "If you switch them off, customers will not see their tier and no tier bonus is given. Tiers and history are kept, so everything works as before when you switch them back on.",
       "off": "Tiers are switched off: customers do not see them and no tier bonus is given."
-    }
+    },
+    "reachGiftShort": "gift on reaching",
+    "reachStampsShort_one": "+{{count}} stamp on reaching",
+    "reachStampsShort_other": "+{{count}} stamps on reaching"
   }
 }

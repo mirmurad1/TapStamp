@@ -82,7 +82,7 @@ function Claim({ token, branch }: { token: string; branch: string }) {
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: customerKeys.me });
       void queryClient.invalidateQueries({ queryKey: customerKeys.giftCards });
-      if (result.giftCardId) {
+      if (result.giftCardId || result.reachedTier) {
         // Böyük təbrik möhür animasiyası bitəndən sonra açılır
         window.setTimeout(() => setCelebrate(true), STAMP_ANIMATION_MS);
       }
@@ -110,6 +110,16 @@ function Claim({ token, branch }: { token: string; branch: string }) {
       <Celebration
         open={celebrate}
         rewardName={rewardName || undefined}
+        cardFull={Boolean(claim.data.giftCardId)}
+        tier={
+          claim.data.reachedTier
+            ? {
+                name: resolveText(claim.data.reachedTier, currentLanguage()),
+                gift: Boolean(claim.data.tierGiftCardId),
+                stamps: claim.data.reachedTierStamps ?? 0,
+              }
+            : undefined
+        }
         onClose={() => {
           setCelebrate(false);
           navigate('/', { replace: true });

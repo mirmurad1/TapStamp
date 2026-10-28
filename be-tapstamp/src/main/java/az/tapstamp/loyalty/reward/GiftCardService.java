@@ -12,6 +12,7 @@ import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,8 +34,9 @@ public class GiftCardService {
         EXPIRED
     }
 
+    /** {@code source}: CARD — möhür kartı doldu, TIER — {@code tierName} səviyyəsinə çatdı. */
     public record GiftCard(UUID id, String code, LocalizedText name, Status status, Instant earnedAt,
-                           Instant expiresAt, Instant redeemedAt) {
+                           Instant expiresAt, Instant redeemedAt, String source, @Nullable LocalizedText tierName) {
         @Override
         public @NonNull String toString() {
             return "GiftCard[id=" + id + ", status=" + status + "]";
@@ -63,11 +65,21 @@ public class GiftCardService {
 
     /** Yeni kart (çağıranın tranzaksiyasında). Kod toqquşması (40 bit) praktiki olaraq mümkün deyil, amma yoxlanılır. */
     public UUID issue(UUID customerId, ActiveRule rule, Instant earnedAt) {
+        return insert(customerId, rule, earnedAt, "CARD", null);
+    }
+
+    /** Səviyyəyə çatdığı üçün hədiyyə: cari qaydanın hədiyyəsi, kartda səbəb kimi səviyyənin adı. */
+    public UUID issueForTier(UUID customerId, ActiveRule rule, LocalizedText tierName, Instant earnedAt) {
+        return insert(customerId, rule, earnedAt, "TIER", tierName);
+    }
+
+    private UUID insert(UUID customerId, ActiveRule rule, Instant earnedAt, String source,
+                        @Nullable LocalizedText tierName) {
         UUID id = Ids.newId();
         CodeSlot code = freeCode(id);
         giftCards.insert(id, customerId, rule.id(), rule.stampsRequired(), rule.name(), earnedAt,
                 rule.validityDays() == null ? null : earnedAt.plus(Duration.ofDays(rule.validityDays())),
-                code.nonce(), code.lookup());
+                code.nonce(), code.lookup(), source, tierName);
         return id;
     }
 
@@ -87,7 +99,7 @@ public class GiftCardService {
             status = Status.EXPIRED;
         }
         return new GiftCard(row.id(), codes.code(tenantId, row.id(), row.codeNonce()), row.name(), status,
-                row.earnedAt(), row.expiresAt(), row.redeemedAt());
+                row.earnedAt(), row.expiresAt(), row.redeemedAt(), row.source(), row.tierName());
     }
 
     /** Kodsuz köhnə kartlar (məs. dev seed) ilk göstərişdə kod alır. */

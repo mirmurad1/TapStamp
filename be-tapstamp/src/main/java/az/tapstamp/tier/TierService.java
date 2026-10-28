@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,7 @@ import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.auth.CustomerPrincipal;
 import az.tapstamp.loyalty.stamp.StampLedger;
+import az.tapstamp.loyalty.reward.GiftCardService;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.plan.Feature;
 import az.tapstamp.plan.PlanService;
@@ -41,11 +43,13 @@ public class TierService {
     public static final int MAX_TIERS = 5;
     private static final Pattern COLOR = Pattern.compile("^#[0-9A-Fa-f]{6}$");
 
-    public record TierInput(LocalizedText name, String color, int minVisits, int bonusStamps) {
+    public record TierInput(LocalizedText name, String color, int minVisits, int bonusStamps, boolean reachGift,
+                            int reachStamps) {
     }
 
     /** Admin üçün: səviyyə və ondakı aktiv müştərilərin sayı. */
-    public record TierView(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps, long customers) {
+    public record TierView(UUID id, LocalizedText name, String color, int minVisits, int bonusStamps,
+                           boolean reachGift, int reachStamps, long customers) {
     }
 
     /** {@code enabled} — proqramın açarı; söndürülübsə müştəriyə göstərilmir və bonus verilmir. */
@@ -59,13 +63,15 @@ public class TierService {
 
     private final TierMapper tiers;
     private final StampLedger ledger;
+    private final GiftCardService giftCards;
     private final CompanySettings company;
     private final PlanService plans;
     private final AuditLogger audit;
     private final Clock clock;
 
-    public TierService(TierMapper tiers, StampLedger ledger, CompanySettings company, PlanService plans,
-                       AuditLogger audit, Clock clock) {
+    public TierService(TierMapper tiers, StampLedger ledger, GiftCardService giftCards, CompanySettings company,
+                       PlanService plans, AuditLogger audit, Clock clock) {
+        this.giftCards = giftCards;
         this.tiers = tiers;
         this.ledger = ledger;
         this.company = company;
@@ -97,28 +103,66 @@ public class TierService {
     // ---------------------------------------------------------------- möhür
 
     /**
-     * NFC möhürü təsdiqlənəndə (hesab kilidlənib, möhür artıq sayılır): müştərinin səviyyəsinin bonusu varsa verir və
-     * kartın yeni vəziyyətini qaytarır; yoxdursa {@code null}.
+     * Toxunuşun səviyyə nəticəsi: {@code card} — bonus möhürlərdən sonra kart (hədiyyə kartı — yalnız kart dolubsa);
+     * {@code reached} — bu ziyarətdə ilk dəfə çatılan səviyyə (çatma imtiyazı verilibsə), {@code giftCardId} — onun
+     * hədiyyəsi, {@code reachStamps} — bir dəfəlik möhürlər.
      */
-    public @Nullable CardState onTapStampConfirmed(UUID customerId, UUID branchId, Instant tapAt, Instant now) {
+    public record TierBonus(@Nullable CardState card, @Nullable Tier reached, @Nullable UUID giftCardId,
+                            int reachStamps) {
+
+        public static final TierBonus NONE = new TierBonus(null, null, null, 0);
+    }
+
+    /**
+     * NFC möhürü təsdiqlənəndə (hesab kilidlənib, möhür artıq sayılır): səviyyəyə ilk dəfə çatıbsa çatma imtiyazları
+     * (cari hədiyyə, bir dəfəlik möhürlər), sonra hər möhürə bonus. Səviyyə hədiyyəsi kartın "doldu" hədiyyəsindən
+     * ayrıdır — müştəriyə öz səbəbi ilə göstərilir.
+     *
+     * <p>Çatma imtiyazı yalnız müştərinin çatdığı <b>ən yüksək</b> səviyyə üçün və hər səviyyə üçün bir dəfə verilir
+     * ({@code tier_reach_grants}): bir ziyarətdə bir neçə pillə keçəndə (hədd endirilibsə) aşağı pillələrin imtiyazı
+     * verilmir, hədd sonradan dəyişsə də təkrar verilmir. İmtiyaz sonradan əlavə olunubsa, artıq həmin səviyyədə olan
+     * müştərilər onu növbəti ziyarətdə alır.
+     */
+    public TierBonus onTapStampConfirmed(UUID customerId, UUID branchId, Instant tapAt, Instant now) {
         if (!active()) {
-            return null;
+            return TierBonus.NONE;
         }
         Tier tier = tierFor(tiers.findAll(), tiers.visits(customerId));
-        if (tier == null || tier.bonusStamps() == 0) {
-            return null;
+        if (tier == null) {
+            return TierBonus.NONE;
         }
         LocalDate day = tapAt.atZone(company.current().timezone()).toLocalDate();
         CardState card = null;
-        UUID giftCardId = null;
+        // Kartın "doldu" hədiyyəsi (bonus möhürlərlə dolubsa) — ilk yaranan
+        UUID cardGiftId = null;
+        Tier reached = null;
+        UUID tierGiftId = null;
+        boolean reachPerk = tier.reachGift() || tier.reachStamps() > 0;
+        if (reachPerk && tiers.insertReachGrant(customerId, tier.id(), now) == 1) {
+            reached = tier;
+            if (tier.reachGift()) {
+                // Şirkətin hazırkı hədiyyəsi; aktiv qayda yoxdursa hədiyyə verilmir (möhürlər yenə verilir)
+                Optional<GiftCardService.ActiveRule> rule = giftCards.activeRule();
+                if (rule.isPresent()) {
+                    tierGiftId = giftCards.issueForTier(customerId, rule.get(), tier.name(), now);
+                    tiers.setReachGrantReward(customerId, tier.id(), tierGiftId);
+                }
+            }
+            for (int i = 0; i < tier.reachStamps(); i++) {
+                UUID stampId = ledger.insertTierStamp(branchId, customerId, tier.id(), tier.name().az(), day, now);
+                card = ledger.applyConfirmed(customerId, stampId, now);
+                cardGiftId = cardGiftId != null ? cardGiftId : card.giftCardId();
+            }
+            audit.tenant("TIER_REACHED", AuditLogger.ActorType.SYSTEM, null, "customer", customerId,
+                    Map.of("tierId", tier.id().toString(), "gift", tierGiftId != null, "stamps", tier.reachStamps()));
+        }
         for (int i = 0; i < tier.bonusStamps(); i++) {
             UUID stampId = ledger.insertTierStamp(branchId, customerId, tier.id(), tier.name().az(), day, now);
             card = ledger.applyConfirmed(customerId, stampId, now);
-            if (giftCardId == null) {
-                giftCardId = card.giftCardId();
-            }
+            cardGiftId = cardGiftId != null ? cardGiftId : card.giftCardId();
         }
-        return new CardState(card.currentStamps(), card.stampsRequired(), giftCardId);
+        CardState state = card == null ? null : new CardState(card.currentStamps(), card.stampsRequired(), cardGiftId);
+        return new TierBonus(state, reached, tierGiftId, reached == null ? 0 : reached.reachStamps());
     }
 
     /** Paketdə imkan var və proqram açıqdır. */
@@ -149,6 +193,7 @@ public class TierService {
         }
         List<TierView> views = tiers.findAll().stream()
                 .map(tier -> new TierView(tier.id(), tier.name(), tier.color(), tier.minVisits(), tier.bonusStamps(),
+                        tier.reachGift(), tier.reachStamps(),
                         counts.getOrDefault(tier.id(), 0L)))
                 .toList();
         return new TierOverview(tiers.enabled(), views, tiers.belowAll());
@@ -172,7 +217,8 @@ public class TierService {
         }
         validate(input, null);
         UUID id = Ids.newId();
-        tiers.insert(id, input.name(), input.color(), input.minVisits(), input.bonusStamps(), principal.userId(),
+        tiers.insert(id, input.name(), input.color(), input.minVisits(), input.bonusStamps(), input.reachGift(),
+                input.reachStamps(), principal.userId(),
                 clock.instant());
         audit.tenant("TIER_CREATED", AuditLogger.ActorType.STAFF, principal.userId(), "tier", id,
                 Map.of("after", input));
@@ -184,7 +230,8 @@ public class TierService {
         AccessPolicy.requireCompanyWide(principal);
         Tier before = tiers.findById(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         validate(input, id);
-        tiers.update(id, input.name(), input.color(), input.minVisits(), input.bonusStamps(), principal.userId(),
+        tiers.update(id, input.name(), input.color(), input.minVisits(), input.bonusStamps(), input.reachGift(),
+                input.reachStamps(), principal.userId(),
                 clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("before", before);
@@ -208,7 +255,8 @@ public class TierService {
 
     private void validate(TierInput input, @Nullable UUID exceptId) {
         if (input.color() == null || !COLOR.matcher(input.color()).matches() || input.minVisits() < 0
-                || input.minVisits() > 10_000 || input.bonusStamps() < 0 || input.bonusStamps() > 3) {
+                || input.minVisits() > 10_000 || input.bonusStamps() < 0 || input.bonusStamps() > 3 || input.reachStamps() < 0
+                || input.reachStamps() > 10) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         if (tiers.minVisitsTaken(input.minVisits(), exceptId)) {

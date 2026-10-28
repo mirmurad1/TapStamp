@@ -12,29 +12,41 @@
     </update>
 
     <select id="findAll" resultType="az.tapstamp.tier.repository.TierMapper$Tier">
-        SELECT id, name, color, min_visits, bonus_stamps FROM loyalty_tiers ORDER BY min_visits
+        SELECT id, name, color, min_visits, bonus_stamps, reach_gift, reach_stamps FROM loyalty_tiers ORDER BY min_visits
     </select>
 
     <select id="findById" resultType="az.tapstamp.tier.repository.TierMapper$Tier">
-        SELECT id, name, color, min_visits, bonus_stamps FROM loyalty_tiers WHERE id = #{id}
+        SELECT id, name, color, min_visits, bonus_stamps, reach_gift, reach_stamps FROM loyalty_tiers WHERE id = #{id}
     </select>
 
     <insert id="insert">
-        INSERT INTO loyalty_tiers (id, name, color, min_visits, bonus_stamps, created_at, updated_at, updated_by)
-        VALUES (#{id}, CAST(#{name} AS jsonb), #{color}, #{minVisits}, #{bonusStamps}, #{now}, #{now}, #{staffId})
+        INSERT INTO loyalty_tiers (id, name, color, min_visits, bonus_stamps, reach_gift, reach_stamps, created_at,
+                                   updated_at, updated_by)
+        VALUES (#{id}, CAST(#{name} AS jsonb), #{color}, #{minVisits}, #{bonusStamps}, #{reachGift}, #{reachStamps}, #{now},
+                #{now}, #{staffId})
     </insert>
 
     <update id="update">
         UPDATE loyalty_tiers
         SET name = CAST(#{name} AS jsonb), color = #{color}, min_visits = #{minVisits}, bonus_stamps = #{bonusStamps},
-            updated_at = #{now}, updated_by = #{staffId}
+            reach_gift = #{reachGift}, reach_stamps = #{reachStamps}, updated_at = #{now}, updated_by = #{staffId}
         WHERE id = #{id}
     </update>
 
     <delete id="deleteUnused">
         DELETE FROM loyalty_tiers t
         WHERE t.id = #{id} AND NOT EXISTS (SELECT 1 FROM stamps s WHERE s.tier_id = t.id)
+          AND NOT EXISTS (SELECT 1 FROM tier_reach_grants g WHERE g.tier_id = t.id)
     </delete>
+
+    <insert id="insertReachGrant">
+        INSERT INTO tier_reach_grants (customer_id, tier_id, granted_at) VALUES (#{customerId}, #{tierId}, #{now})
+        ON CONFLICT (customer_id, tier_id) DO NOTHING
+    </insert>
+
+    <update id="setReachGrantReward">
+        UPDATE tier_reach_grants SET reward_id = #{rewardId} WHERE customer_id = #{customerId} AND tier_id = #{tierId}
+    </update>
 
     <select id="minVisitsTaken" resultType="boolean">
         SELECT EXISTS (SELECT 1 FROM loyalty_tiers WHERE min_visits = #{minVisits}

@@ -41,14 +41,20 @@ public class TapClaimController {
             UUID branchId, LocalizedText branchName, Instant expiresAt, boolean sameBrowser) {
     }
 
-    @Schema(description = "Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı.")
+    @Schema(description = """
+            Möhürün nəticəsi. PENDING — işçi təsdiqi gözlənilir; giftCardId — kart doldu, hədiyyə kartı yarandı; \
+            reachedTier — bu ziyarətdə səviyyəyə çatdı (tierGiftCardId — səviyyə hədiyyəsi, reachedTierStamps — bir \
+            dəfəlik möhürlər).""")
     public record ClaimResponse(
             UUID stampId,
             @Schema(allowableValues = {"PENDING", "CONFIRMED"}) String status,
             int currentStamps,
             int stampsRequired,
             UUID giftCardId,
-            UUID branchId) {
+            UUID branchId,
+            LocalizedText reachedTier,
+            UUID tierGiftCardId,
+            int reachedTierStamps) {
     }
 
     @GetMapping
@@ -71,6 +77,7 @@ public class TapClaimController {
         StampClaimService.ClaimResult result = claims.claim(token, principal.customerId(),
                 browserIds.read(http).orElse(null), ClientInfo.of(http));
         return new ClaimResponse(result.stampId(), result.status().name(), result.currentStamps(),
-                result.stampsRequired(), result.giftCardId(), result.branchId());
+                result.stampsRequired(), result.giftCardId(), result.branchId(), result.reachedTier(),
+                result.tierGiftCardId(), result.reachedTierStamps());
     }
 }

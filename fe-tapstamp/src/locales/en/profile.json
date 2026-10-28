@@ -69,6 +69,10 @@
       "hint": "Scratch the silver area with your finger to see the code.",
       "reveal": "Reveal code",
       "hidden": "The code is hidden. Use the “Reveal code” button to see it."
+    },
+    "reason": {
+      "CARD": "For filling your stamp card",
+      "TIER": "For reaching {{tier}}"
     }
   },
   "celebrate": {
@@ -77,7 +81,14 @@
     "subtitleGeneric": "Your card is complete — the reward is yours!",
     "hint": "The gift card has been added to “Gift cards”.",
     "open": "View gift card",
-    "later": "Later"
+    "later": "Later",
+    "tierSubtitle": "You reached {{tier}}!",
+    "tierGift": "🎁 Tier gift: {{reward}}",
+    "tierGiftGeneric": "🎁 Tier gift",
+    "tierStamps_one": "⭐ +{{count}} stamp added to your card",
+    "tierStamps_other": "⭐ +{{count}} stamps added to your card",
+    "continue": "Continue",
+    "hintMany": "The gift cards have been added to “Gift cards”."
   },
   "tap": {
     "checking": "Checking your tap…",
@@ -251,6 +262,10 @@
     "from_other": "From {{count}} visits",
     "fromStart": "From your first visit",
     "reached": "Reached",
-    "howItWorks": "Every NFC stamp counts as a visit. Your tier goes up automatically."
+    "howItWorks": "Every NFC stamp counts as a visit. Your tier goes up automatically.",
+    "reachGift": "Gift on reaching: {{reward}}",
+    "reachGiftGeneric": "Gift on reaching",
+    "reachStamps_one": "One-time +{{count}} stamp on reaching",
+    "reachStamps_other": "One-time +{{count}} stamps on reaching"
   }
 }

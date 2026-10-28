@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Gift, LoaderCircle, PartyPopper, QrCode as QrIcon } from 'lucide-react';
+import { ChevronRight, Gift, LoaderCircle, Medal, PartyPopper, QrCode as QrIcon, Stamp } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
@@ -177,6 +177,17 @@ function GiftCardTile({ card, onShow }: { card: GiftCard; onShow?: () => void })
         <div className="min-w-0">
           <p className={cn('font-extrabold tracking-tight', active ? 'text-lg' : 'text-base text-foreground')}>
             {resolveText(card.name, lang)}
+          </p>
+          {/* Niyə verilib: möhür kartı doldu və ya səviyyəyə çatdı */}
+          <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold">
+            {card.source === 'TIER' ? (
+              <Medal className="size-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <Stamp className="size-3.5 shrink-0" aria-hidden="true" />
+            )}
+            {card.source === 'TIER'
+              ? t('giftCards.reason.TIER', { tier: resolveText(card.tierName, lang) })
+              : t('giftCards.reason.CARD')}
           </p>
           <p className="mt-0.5 flex flex-col text-xs opacity-90">
             {card.earnedAt ? <span>{t('giftCards.earnedAt', { date: formatDate(card.earnedAt, lang) })}</span> : null}

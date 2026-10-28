@@ -82,14 +82,17 @@ public class StampApprovalService {
             // Bonus qaydası möhürün alındığı (toxunuş) anına görə yoxlanılır
             card = StampClaimService.withBonus(card,
                     bonusRules.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), stamp.createdAt(), now));
-            card = StampClaimService.withBonus(card,
-                    tiers.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), stamp.createdAt(), now));
+            TierService.TierBonus tierBonus =
+                    tiers.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), stamp.createdAt(), now);
+            card = StampClaimService.withBonus(card, tierBonus.card());
             card = StampClaimService.withBonus(card,
                     referrals.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), now));
             audit.tenant("STAMP_CONFIRMED", AuditLogger.ActorType.STAFF, principal.userId(), "stamp", stampId,
                     Map.of("branchId", stamp.branchId().toString()));
             // Müştəri kassadan uzaqlaşmış ola bilər — təsdiq bildirişi (hədiyyə yaranıbsa, hədiyyə bildirişi)
-            if (card.giftCardId() != null) {
+            if (tierBonus.reached() != null) {
+                push.notify(stamp.customerId(), PushService.Kind.TIER_REACHED, tierBonus.reached().name());
+            } else if (card.giftCardId() != null) {
                 push.notify(stamp.customerId(), PushService.Kind.GIFT_READY);
             } else {
                 push.notify(stamp.customerId(), PushService.Kind.STAMP_CONFIRMED, card.currentStamps(), card.stampsRequired());

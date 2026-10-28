@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class TierServiceTest {
 
     private static Tier tier(String name, int minVisits) {
-        return new Tier(UUID.randomUUID(), LocalizedText.of(name, null, null), "#CD7F32", minVisits, 0);
+        return new Tier(UUID.randomUUID(), LocalizedText.of(name, null, null), "#CD7F32", minVisits, 0, false, 0);
     }
 
     private static final List<Tier> TIERS = List.of(tier("Bürünc", 3), tier("Gümüş", 10), tier("Qızıl", 25));
