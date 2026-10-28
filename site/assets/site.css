@@ -23,7 +23,7 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance}
 .btn.ghost{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 0 0 1px var(--night-line)}
 .btn.ghost:hover{background:rgba(255,255,255,.14)}
 
-/* ===== Tünd bloklar (şirkət girişi və TapStamp) ===== */
+/* ===== Tünd bloklar (şirkət girişi və TrendStamp) ===== */
 .dark{background:var(--night);color:#fff;position:relative;overflow:hidden;isolation:isolate}
 .dark::before{content:"";position:absolute;inset:0;z-index:-1;
   background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:28px 28px;
@@ -94,7 +94,7 @@ h2{margin-top:10px;font-weight:800;font-size:clamp(30px,3.9vw,48px);line-height:
 .li b{font-weight:600;font-size:18px}
 .li p{color:var(--ink-2);font-size:16px;margin-top:2px}
 
-/* ===== TapStamp ===== */
+/* ===== TrendStamp ===== */
 .product{border-radius:48px 48px 0 0}
 .product .hero{padding-top:96px;padding-bottom:96px}
 .p-logo{display:flex;align-items:center;gap:10px;margin-top:14px;font:800 24px var(--display);letter-spacing:-.03em}
