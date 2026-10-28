@@ -1025,7 +1025,7 @@
     "allBranches": "All branches",
     "stats": "Last 30 days: {{stamps}} bonus stamps, {{customers}} customers",
     "notified": "Start notification sent: {{date}}",
-    "willNotify": "Customers with notifications on will be told when it starts (10:00–20:00).",
+    "willNotify": "Customers with notifications on will be told as soon as it starts (10:00–20:00).",
     "deleteConfirm": "Delete this rule? If it has already given bonuses, it will be kept for history and switched off.",
     "disabledInstead": "The rule has already given bonuses, so it was switched off instead of deleted.",
     "newTitle": "New bonus rule",
@@ -1063,7 +1063,7 @@
       "datesInvalid": "The end date cannot be before the start date.",
       "branch": "Branch",
       "notify": "Notify customers when it starts",
-      "notifyHint": "A free push is sent once to customers with notifications on (10:00–20:00).",
+      "notifyHint": "A free push is sent once to customers with notifications on: right away if the rule starts today, otherwise on its start day (10:00–20:00).",
       "active": "Active",
       "activeHint": "A switched-off rule gives no bonus and is not shown to customers."
     }

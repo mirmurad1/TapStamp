@@ -5,7 +5,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +17,13 @@ import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.support.AdminClient;
 import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.TapIntegrationTest;
+import az.tapstamp.support.TestPushInbox;
+import az.tapstamp.support.TestPushInbox.Browser;
 import az.tapstamp.tenancy.TenantContext;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Bonus qaydaları: uyğun gələn NFC möhürünə bonus möhür (ən böyük bonus, toplanmır), günə/filiala görə süzgəc, işçi
@@ -157,6 +162,38 @@ class BonusRuleIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$[?(@.id == '" + used + "')].status").value(org.hamcrest.Matchers.contains("OFF")));
         client().get("/api/v1/public/bonus-rules")
                 .andExpect(jsonPath("$[?(@.id == '" + used + "')]").isEmpty());
+    }
+
+    @Autowired
+    private BonusRuleService bonusRules;
+
+    @Autowired
+    private TestPushInbox inbox;
+
+    @Test
+    void startNotificationIsSentRightAwayAndOnlyOnce() throws Exception {
+        CustomerClient customer = signedIn(uniquePhone());
+        Browser browser = inbox.newBrowser();
+        customer.post("/api/v1/me/push-subscriptions", Map.of("endpoint", browser.endpoint(),
+                "keys", Map.of("p256dh", browser.p256dh(), "auth", browser.authKey()))).andExpect(status().isNoContent());
+        // Saatı şirkətin 12:00-na gətirir (bildirişlər 10:00–20:00)
+        LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();
+        if (local.isBefore(LocalTime.of(11, 0)) || !local.isBefore(LocalTime.of(19, 0))) {
+            long minutes = Duration.between(local, LocalTime.of(12, 0)).toMinutes();
+            clock.advance(Duration.ofMinutes(minutes < 0 ? minutes + 24 * 60 : minutes));
+        }
+        // Bu gün başlayan qayda — bildiriş yaradılan kimi, fon işini gözləmədən
+        Map<String, Object> body = rule("Novruz həftəsi", 1, List.of(1, 2, 3, 4, 5, 6, 7), branch(Policy.relaxed()));
+        body.put("notifyOnStart", true);
+        String id = create(body);
+        String title = JsonPath.read(TestPushInbox.decrypt(browser, inbox.await(browser.endpoint(), 1).body()), "$.title");
+        assertThat(title).isEqualTo("Novruz həftəsi başladı 🎉");
+
+        // Fon işi onu təkrar göndərmir
+        TenantContext.callAs(alpha(), bonusRules::notifyStartedForCurrentTenant);
+        Thread.sleep(300);
+        assertThat(inbox.to(browser.endpoint())).hasSize(1);
+        owner().get("/bonus-rules").andExpect(jsonPath("$[?(@.id == '" + id + "')].notifiedAt").isNotEmpty());
     }
 
     @Test

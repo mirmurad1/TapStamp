@@ -75,17 +75,23 @@ public class AdminBonusRuleController {
     @Operation(summary = "Qayda yaratmaq", description = """
             `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); \
             saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün \
-            filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00). Bir neçə \
+            filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00): qayda \
+            bu gün qüvvədədirsə — dərhal, gələcək tarixlidirsə — başladığı gün fon işi ilə. Bir neçə \
             qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.""")
     RuleView create(@AuthenticationPrincipal AdminPrincipal principal, @Valid @RequestBody BonusRuleRequest request) {
-        return bonusRules.create(principal, request.toInput());
+        RuleView created = bonusRules.create(principal, request.toInput());
+        // Tranzaksiya bitib — bu gün başlamış qaydanın bildirişi dərhal (fon işini gözləmədən)
+        bonusRules.notifyStartedForCurrentTenant();
+        return created;
     }
 
     @PutMapping("/{ruleId}")
     @Operation(summary = "Qaydanı dəyişmək")
     RuleView update(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID ruleId,
                     @Valid @RequestBody BonusRuleRequest request) {
-        return bonusRules.update(principal, ruleId, request.toInput());
+        RuleView updated = bonusRules.update(principal, ruleId, request.toInput());
+        bonusRules.notifyStartedForCurrentTenant();
+        return updated;
     }
 
     @DeleteMapping("/{ruleId}")

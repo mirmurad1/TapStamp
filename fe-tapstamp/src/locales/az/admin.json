@@ -1025,7 +1025,7 @@
     "allBranches": "Bütün filiallar",
     "stats": "Son 30 gün: {{stamps}} bonus möhür, {{customers}} müştəri",
     "notified": "Başlanğıc bildirişi göndərilib: {{date}}",
-    "willNotify": "Başlayanda bildirişi açıq müştərilərə xəbər veriləcək (10:00–20:00).",
+    "willNotify": "Başlayan kimi bildirişi açıq müştərilərə xəbər veriləcək (10:00–20:00).",
     "deleteConfirm": "Qayda silinsin? Artıq bonus veribsə, tarixçə üçün saxlanılacaq və söndürüləcək.",
     "disabledInstead": "Qayda artıq bonus verdiyi üçün silinmədi — söndürüldü.",
     "newTitle": "Yeni bonus qaydası",
@@ -1063,7 +1063,7 @@
       "datesInvalid": "Bitmə tarixi başlamadan əvvəl ola bilməz.",
       "branch": "Filial",
       "notify": "Başlayanda müştərilərə bildiriş göndər",
-      "notifyHint": "Bildirişi açıq müştərilərə bir dəfə pulsuz push gedir (10:00–20:00).",
+      "notifyHint": "Bildirişi açıq müştərilərə bir dəfə pulsuz push gedir: qayda bu gün başlayırsa — dərhal, gələcək tarixdədirsə — başladığı gün (10:00–20:00).",
       "active": "Aktivdir",
       "activeHint": "Söndürülən qayda bonus vermir və müştəriyə göstərilmir."
     }
