@@ -23,6 +23,8 @@ interface StampCardProps {
   completed?: boolean;
   /** Kartın alt zolaqları (geri sayım, təsdiq gözləyən möhürlər). */
   footer?: ReactNode;
+  /** Kartın aşağı xəttində, şirkət adının yerində (məs. səviyyə nişanı). */
+  badge?: ReactNode;
 }
 
 /**
@@ -39,6 +41,7 @@ export function StampCard({
   completed,
   showReturnHint = false,
   footer,
+  badge,
 }: StampCardProps) {
   const { t } = useTranslation('profile');
   const shown = completed ? stampsRequired : Math.min(current, stampsRequired);
@@ -97,10 +100,10 @@ export function StampCard({
             );
           })}
         </ol>
-        {rewardName || companyName ? (
+        {rewardName || companyName || badge ? (
           <p className="relative mt-4 flex items-center justify-between gap-3 border-t border-dashed border-white/25 pt-3 text-[13px]">
             <span className="min-w-0 font-semibold">{rewardName ? t('card.reward', { name: rewardName }) : null}</span>
-            <span className="shrink-0 truncate opacity-75">{companyName}</span>
+            {badge ?? <span className="shrink-0 truncate opacity-75">{companyName}</span>}
           </p>
         ) : null}
       </div>

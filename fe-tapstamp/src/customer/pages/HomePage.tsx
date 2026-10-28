@@ -14,7 +14,8 @@ import { useJustSignedIn } from '../auth/justSignedIn';
 import { BonusRulesBanner } from '../components/BonusRulesBanner';
 import { InviteFriendRow } from '../components/InviteFriendCard';
 import { StampCard, StampCardNote } from '../components/StampCard';
-import { TierCard } from '../components/TierCard';
+import { TierChip, TierNote } from '../components/TierCard';
+import { useMyTier } from '../lib/useMyTier';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 import { InstallRow } from '../pwa/InstallCard';
 import { NotificationsRow } from '../pwa/NotificationsCard';
@@ -44,6 +45,7 @@ function Profile({ me }: { me: Me }) {
   const lang = currentLanguage();
   const card = me.card;
   const rewards = me.availableRewards ?? [];
+  const tier = useMyTier();
   return (
     <>
       <section className="pt-2">
@@ -60,6 +62,7 @@ function Profile({ me }: { me: Me }) {
           pending={card.pendingStamps ?? 0}
           showReturnHint={justSignedIn}
           rewardName={resolveText(card.rewardName, lang)}
+          badge={tier?.current ? <TierChip /> : undefined}
           footer={
             <>
               {card.pendingStamps ? (
@@ -68,11 +71,11 @@ function Profile({ me }: { me: Me }) {
                 </StampCardNote>
               ) : null}
               <NextStamp at={card.nextStampAt} />
+              <TierNote />
             </>
           }
         />
       ) : null}
-      <TierCard />
       {rewards.length > 0 ? (
         // Bilet formalı blok: solda hədiyyə ikonu, qırıq xətt və iki yarımdairə kəsik, sağda hazır hədiyyələr
         <Link
