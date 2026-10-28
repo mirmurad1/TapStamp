@@ -54,6 +54,9 @@ public interface StampMapper {
     void insertBonusStamp(UUID id, UUID branchId, UUID customerId, UUID bonusRuleId, String reason, LocalDate day,
                           Instant at);
 
+    /** Səviyyə bonusunun möhürü (mənbə TIER, təsdiqlənmiş); {@code reason} — səviyyənin adı. */
+    void insertTierStamp(UUID id, UUID branchId, UUID customerId, UUID tierId, String reason, LocalDate day, Instant at);
+
     Optional<Stamp> findByTapToken(UUID tapTokenId);
 
     Optional<Stamp> lockStamp(UUID stampId);

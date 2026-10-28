@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Müştəri səviyyələri: ziyarət sayı = təsdiqlənmiş NFC möhürləri -->
+<mapper namespace="az.tapstamp.tier.repository.TierMapper">
+
+    <select id="enabled" resultType="boolean">
+        SELECT enabled FROM tier_settings WHERE id = 1
+    </select>
+
+    <update id="updateEnabled">
+        UPDATE tier_settings SET enabled = #{enabled}, updated_at = #{now}, updated_by = #{staffId} WHERE id = 1
+    </update>
+
+    <select id="findAll" resultType="az.tapstamp.tier.repository.TierMapper$Tier">
+        SELECT id, name, color, min_visits, bonus_stamps FROM loyalty_tiers ORDER BY min_visits
+    </select>
+
+    <select id="findById" resultType="az.tapstamp.tier.repository.TierMapper$Tier">
+        SELECT id, name, color, min_visits, bonus_stamps FROM loyalty_tiers WHERE id = #{id}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO loyalty_tiers (id, name, color, min_visits, bonus_stamps, created_at, updated_at, updated_by)
+        VALUES (#{id}, CAST(#{name} AS jsonb), #{color}, #{minVisits}, #{bonusStamps}, #{now}, #{now}, #{staffId})
+    </insert>
+
+    <update id="update">
+        UPDATE loyalty_tiers
+        SET name = CAST(#{name} AS jsonb), color = #{color}, min_visits = #{minVisits}, bonus_stamps = #{bonusStamps},
+            updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUnused">
+        DELETE FROM loyalty_tiers t
+        WHERE t.id = #{id} AND NOT EXISTS (SELECT 1 FROM stamps s WHERE s.tier_id = t.id)
+    </delete>
+
+    <select id="minVisitsTaken" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM loyalty_tiers WHERE min_visits = #{minVisits}
+                       AND (CAST(#{exceptId} AS uuid) IS NULL OR id &lt;&gt; #{exceptId}))
+    </select>
+
+    <select id="visits" resultType="int">
+        SELECT count(*) FROM stamps
+        WHERE customer_id = #{customerId} AND source = 'NFC_TAP' AND status = 'CONFIRMED'
+    </select>
+
+    <sql id="customerVisits">
+        SELECT c.id, count(s.id) AS visits
+        FROM customers c
+        LEFT JOIN stamps s ON s.customer_id = c.id AND s.source = 'NFC_TAP' AND s.status = 'CONFIRMED'
+        WHERE c.status = 'ACTIVE'
+        GROUP BY c.id
+    </sql>
+
+    <select id="distribution" resultType="az.tapstamp.tier.repository.TierMapper$TierCount">
+        SELECT tier_id, count(*) AS customers
+        FROM (
+            SELECT (SELECT t.id FROM loyalty_tiers t WHERE t.min_visits &lt;= v.visits
+                    ORDER BY t.min_visits DESC LIMIT 1) AS tier_id
+            FROM (<include refid="customerVisits"/>) v
+        ) x
+        WHERE tier_id IS NOT NULL
+        GROUP BY tier_id
+    </select>
+
+    <select id="belowAll" resultType="long">
+        SELECT count(*) FROM (<include refid="customerVisits"/>) v
+        WHERE NOT EXISTS (SELECT 1 FROM loyalty_tiers t WHERE t.min_visits &lt;= v.visits)
+    </select>
+</mapper>

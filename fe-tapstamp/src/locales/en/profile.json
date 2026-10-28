@@ -227,5 +227,17 @@
       "6": "Sat",
       "7": "Sun"
     }
+  },
+  "tier": {
+    "label": "Your tier",
+    "none": "On your way to the first tier",
+    "perk_one": "+{{count}} per stamp",
+    "perk_other": "+{{count}} per stamp",
+    "progress": "Progress to the next tier",
+    "toNext_one": "{{count}} visit to {{name}}.",
+    "toNext_other": "{{count}} visits to {{name}}.",
+    "nextPerk_one": "There you get +{{count}} bonus stamp with every stamp.",
+    "nextPerk_other": "There you get +{{count}} bonus stamps with every stamp.",
+    "top": "You are at the top tier. Thank you!"
   }
 }

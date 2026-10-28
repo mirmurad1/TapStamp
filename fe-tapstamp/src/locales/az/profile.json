@@ -227,5 +227,17 @@
       "6": "Şən.",
       "7": "Baz."
     }
+  },
+  "tier": {
+    "label": "Səviyyəniz",
+    "none": "İlk səviyyəyə yoldasınız",
+    "perk_one": "Hər möhürə +{{count}}",
+    "perk_other": "Hər möhürə +{{count}}",
+    "progress": "Növbəti səviyyəyə irəliləyiş",
+    "toNext_one": "{{name}} səviyyəsinə {{count}} ziyarət qalıb.",
+    "toNext_other": "{{name}} səviyyəsinə {{count}} ziyarət qalıb.",
+    "nextPerk_one": "Orada hər möhürə +{{count}} bonus.",
+    "nextPerk_other": "Orada hər möhürə +{{count}} bonus.",
+    "top": "Ən yüksək səviyyədəsiniz. Təşəkkür edirik!"
   }
 }

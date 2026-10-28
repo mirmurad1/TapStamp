@@ -105,6 +105,14 @@ public class StampLedger {
         return id;
     }
 
+    /** Səviyyə bonusunun möhürü (çağıran tranzaksiyada {@link #lockAccount} etməlidir). */
+    public UUID insertTierStamp(UUID branchId, UUID customerId, UUID tierId, String reason, LocalDate localDate,
+                                Instant at) {
+        UUID id = Ids.newId();
+        stamps.insertTierStamp(id, branchId, customerId, tierId, reason, localDate, at);
+        return id;
+    }
+
     public Optional<Stamp> findByTapToken(UUID tapTokenId) {
         return stamps.findByTapToken(tapTokenId);
     }

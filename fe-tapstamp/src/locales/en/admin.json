@@ -21,7 +21,8 @@
     "stampCampaigns": "Stamp campaign",
     "referrals": "Invite a friend",
     "reminders": "Reminders",
-    "bonusRules": "Bonus campaigns"
+    "bonusRules": "Bonus campaigns",
+    "tiers": "Tiers"
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -653,7 +654,8 @@
         "MANUAL": "Stamp (manual)",
         "CAMPAIGN": "Stamp (campaign)",
         "REFERRAL": "Stamp (friend invite)",
-        "BONUS": "Stamp (bonus rule)"
+        "BONUS": "Stamp (bonus rule)",
+        "TIER": "Stamp (tier bonus)"
       },
       "status": {
         "PENDING": "Awaiting approval",
@@ -1087,6 +1089,40 @@
         "PENDING": "Sending"
       },
       "empty": "No customers match this filter."
+    }
+  },
+  "tiers": {
+    "title": "Tiers",
+    "subtitle": "Customers reach tiers automatically by number of visits (for example Bronze, Silver, Gold). Higher tiers can earn extra stamps on every visit, so loyal customers get their gift sooner.",
+    "add": "New tier",
+    "empty": {
+      "title": "No tiers yet",
+      "hint": "For example: Bronze — 3 visits (badge only), Silver — 10 visits (+1 stamp), Gold — 25 visits (+2 stamps)."
+    },
+    "note": "A visit is a confirmed NFC stamp. Tiers are recalculated every time: if you change a threshold, customers move right away. The tier bonus adds to bonus campaigns. Up to 5 tiers.",
+    "belowAll": "Not in a tier yet",
+    "from_one": "from {{count}} visit",
+    "from_other": "from {{count}} visits",
+    "perk_one": "+{{count}} per stamp",
+    "perk_other": "+{{count}} per stamp",
+    "badgeOnly": "badge only",
+    "deleteConfirm": "Delete this tier? Customers in it will move to the tier below.",
+    "newTitle": "New tier",
+    "editTitle": "Edit tier",
+    "dialogDescription": "Customers see their tier below their card.",
+    "form": {
+      "name": "Name",
+      "color": "Colour",
+      "customColor": "Custom colour",
+      "minVisits": "Visits needed",
+      "minVisitsHint": "Enter 0 to start every customer in this tier.",
+      "bonus": "Perk",
+      "bonusHint": "Customers in this tier get this many extra stamps with every NFC stamp."
+    },
+    "switch": {
+      "title": "Tiers are on",
+      "hint": "If you switch them off, customers will not see their tier and no tier bonus is given. Tiers and history are kept, so everything works as before when you switch them back on.",
+      "off": "Tiers are switched off: customers do not see them and no tier bonus is given."
     }
   }
 }

@@ -249,7 +249,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -614,7 +614,7 @@
     "/api/v1/admin/bonus-rules" : {
       "get" : {
         "description" : "Bütün qaydalar: vəziyyət (`ACTIVE`, `SCHEDULED`, `ENDED`, `OFF`), bu an qüvvədədirmi (`runningNow`) və son 30 gündə verilən bonus möhürlər ilə onları alan müştərilərin sayı.",
-        "operationId" : "list_3",
+        "operationId" : "list_4",
         "responses" : {
           "200" : {
             "content" : {
@@ -635,7 +635,7 @@
       },
       "post" : {
         "description" : "`bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00): qayda bu gün qüvvədədirsə — dərhal, gələcək tarixlidirsə — başladığı gün fon işi ilə. Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.",
-        "operationId" : "create_1",
+        "operationId" : "create_2",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -665,7 +665,7 @@
     "/api/v1/admin/bonus-rules/{ruleId}" : {
       "delete" : {
         "description" : "Bonus möhür verməmiş qayda silinir (`deleted = true`); artıq veribsə, tarixçə üçün saxlanılır və söndürülür (`deleted = false`).",
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "ruleId",
@@ -691,7 +691,7 @@
         "tags" : [ "Admin: bonus qaydaları" ]
       },
       "put" : {
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "ruleId",
@@ -784,7 +784,7 @@
     "/api/v1/admin/campaigns" : {
       "get" : {
         "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "parameters" : [ {
           "in" : "query",
           "name" : "type",
@@ -830,7 +830,7 @@
       },
       "post" : {
         "description" : "Alıcılar və SMS sayı bu an müəyyənləşir; kampaniya platformanın təsdiqini gözləyir (PENDING_APPROVAL). Alıcı yoxdursa `CAMPAIGN_NO_RECIPIENTS`.",
-        "operationId" : "create",
+        "operationId" : "create_1",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -916,7 +916,7 @@
       },
       "put" : {
         "description" : "Yalnız təsdiq gözləyərkən; alıcılar və SMS sayı yenidən hesablanır. Sonra `CAMPAIGN_STATE_CHANGED`.",
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "campaignId",
@@ -1031,7 +1031,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1462,7 +1462,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_6",
+        "operationId" : "update_7",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1647,7 +1647,7 @@
     "/api/v1/admin/referrals" : {
       "get" : {
         "description" : "Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "parameters" : [ {
           "in" : "query",
           "name" : "activity",
@@ -1738,7 +1738,7 @@
     },
     "/api/v1/admin/referrals/settings" : {
       "get" : {
-        "operationId" : "settings_1",
+        "operationId" : "settings_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -1805,7 +1805,7 @@
     },
     "/api/v1/admin/reminders/settings" : {
       "get" : {
-        "operationId" : "settings",
+        "operationId" : "settings_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -2474,7 +2474,7 @@
     "/api/v1/admin/tags" : {
       "get" : {
         "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_8",
+        "operationId" : "list_9",
         "parameters" : [ {
           "in" : "query",
           "name" : "branchId",
@@ -2695,7 +2695,7 @@
     "/api/v1/admin/team/members/{userId}" : {
       "delete" : {
         "description" : "Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.",
-        "operationId" : "delete_2",
+        "operationId" : "delete_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "userId",
@@ -2766,6 +2766,150 @@
         },
         "summary" : "İşçinin bloklanması və ya aktivləşdirilməsi",
         "tags" : [ "Admin: komanda" ]
+      }
+    },
+    "/api/v1/admin/tiers" : {
+      "get" : {
+        "description" : "Həddə görə artan sırada; hər səviyyədəki aktiv müştərilərin sayı və heç bir səviyyəyə çatmayanlar (`belowAll`). Ziyarət — təsdiqlənmiş NFC möhürü.",
+        "operationId" : "list_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TierOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Səviyyələr",
+        "tags" : [ "Admin: səviyyələr" ]
+      },
+      "post" : {
+        "description" : "Ən çox 5 səviyyə. `minVisits` — keçid üçün ziyarət sayı (hər səviyyədə fərqli, yoxsa 409 `TIER_THRESHOLD_TAKEN`); `bonusStamps` — hər NFC möhürünə əlavə möhür (0–3, bonus qaydaları ilə toplanır). Auditə yazılır.",
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TierRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TierOverview"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Səviyyə yaratmaq",
+        "tags" : [ "Admin: səviyyələr" ]
+      }
+    },
+    "/api/v1/admin/tiers/settings" : {
+      "put" : {
+        "description" : "Söndürüləndə müştəri səviyyəni görmür və səviyyə bonusu verilmir; səviyyələr və tarixçə silinmir, \n            yenidən açanda hər şey əvvəlki kimi işləyir (səviyyə ziyarət sayından hesablanır). Auditə yazılır.",
+        "operationId" : "settings",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TierSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TierOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Proqramı açmaq və ya söndürmək",
+        "tags" : [ "Admin: səviyyələr" ]
+      }
+    },
+    "/api/v1/admin/tiers/{tierId}" : {
+      "delete" : {
+        "description" : "Artıq bonus möhür vermiş səviyyə silinmir: 409 `TIER_IN_USE`.",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tierId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TierOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Səviyyəni silmək",
+        "tags" : [ "Admin: səviyyələr" ]
+      },
+      "put" : {
+        "description" : "Müştərilərin səviyyəsi dərhal yeni həddlə hesablanır.",
+        "operationId" : "update_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tierId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TierRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TierOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Səviyyəni dəyişmək",
+        "tags" : [ "Admin: səviyyələr" ]
       }
     },
     "/api/v1/auth/consents" : {
@@ -3012,7 +3156,7 @@
     "/api/v1/me" : {
       "delete" : {
         "description" : "Əvvəlcə SMS kodu ilə təkrar təsdiq lazımdır (`/api/v1/auth/step-up/otp/*`), əks halda `STEP_UP_REQUIRED`. Şəxsi məlumat silinir, bütün sessiyalar bağlanır; anonim statistika qalır.",
-        "operationId" : "delete_1",
+        "operationId" : "delete_2",
         "responses" : {
           "204" : {
             "description" : "No Content"
@@ -3041,7 +3185,7 @@
       },
       "patch" : {
         "description" : "Dil SMS-lərə və bütün cihazlara tətbiq olunur.",
-        "operationId" : "update_5",
+        "operationId" : "update_6",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -3071,7 +3215,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_7",
+        "operationId" : "list_8",
         "responses" : {
           "200" : {
             "content" : {
@@ -3139,7 +3283,7 @@
     "/api/v1/me/referral" : {
       "get" : {
         "description" : "Proqram aktivdirsə: şəxsi kod (ilk dəfə istəniləndə yaranır), bonus möhürlər və dəvətlər üzrə saylar (dəvət olunanlar, bonus qazandıranlar, hələ gəlməyənlər). Söndürülübsə `enabled = false`.",
-        "operationId" : "mine",
+        "operationId" : "mine_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -3218,10 +3362,30 @@
         "tags" : [ "Müştəri: profil" ]
       }
     },
+    "/api/v1/me/tier" : {
+      "get" : {
+        "description" : "Ziyarətlərin sayı, cari səviyyə (hələ yoxdursa boş), növbəti səviyyə və ona qalan ziyarətlər. Şirkətdə səviyyə yoxdursa və ya paketdə imkan yoxdursa `enabled = false`.",
+        "operationId" : "mine",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerTier"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Mənim səviyyəm",
+        "tags" : [ "Müştəri: səviyyə" ]
+      }
+    },
     "/api/v1/platform/audit-logs" : {
       "get" : {
         "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_6",
+        "operationId" : "list_7",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -3480,7 +3644,7 @@
     "/api/v1/platform/campaigns" : {
       "get" : {
         "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_5",
+        "operationId" : "list_6",
         "parameters" : [ {
           "in" : "query",
           "name" : "status",
@@ -3667,7 +3831,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_4",
+        "operationId" : "update_5",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -4596,7 +4760,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}" : {
       "patch" : {
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -4938,7 +5102,7 @@
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
-        "operationId" : "list_4",
+        "operationId" : "list_5",
         "responses" : {
           "200" : {
             "content" : {
@@ -5908,6 +6072,28 @@
           "state" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "REFRESH_REQUIRED", "NONE" ]
+          }
+        }
+      },
+      "CustomerTier" : {
+        "type" : "object",
+        "properties" : {
+          "current" : {
+            "$ref" : "#/components/schemas/Tier"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "next" : {
+            "$ref" : "#/components/schemas/Tier"
+          },
+          "visits" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "visitsToNext" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
@@ -7244,7 +7430,7 @@
             "description" : "Açıq imkanlar (sınaq bitibsə boşdur)",
             "items" : {
               "type" : "string",
-              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS", "BONUS_RULES" ]
+              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS", "BONUS_RULES", "TIERS" ]
             }
           },
           "plan" : {
@@ -8932,6 +9118,108 @@
           }
         },
         "required" : [ "status" ]
+      },
+      "Tier" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "color" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "minVisits" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
+      },
+      "TierOverview" : {
+        "type" : "object",
+        "properties" : {
+          "belowAll" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "tiers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TierView"
+            }
+          }
+        }
+      },
+      "TierRequest" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 3,
+            "minimum" : 0
+          },
+          "color" : {
+            "type" : "string",
+            "pattern" : "^#[0-9A-Fa-f]{6}$"
+          },
+          "minVisits" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 10000,
+            "minimum" : 0
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          }
+        },
+        "required" : [ "bonusStamps", "color", "minVisits", "name" ]
+      },
+      "TierSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "enabled" ]
+      },
+      "TierView" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "color" : {
+            "type" : "string"
+          },
+          "customers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "minVisits" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
       },
       "TimelineItem" : {
         "type" : "object",

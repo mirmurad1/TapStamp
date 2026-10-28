@@ -70,6 +70,12 @@
         VALUES (#{id}, #{branchId}, #{customerId}, 'BONUS', 'CONFIRMED', #{day}, #{reason}, #{bonusRuleId}, #{at}, #{at})
     </insert>
 
+    <insert id="insertTierStamp">
+        INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason, tier_id, confirmed_at,
+                            created_at)
+        VALUES (#{id}, #{branchId}, #{customerId}, 'TIER', 'CONFIRMED', #{day}, #{reason}, #{tierId}, #{at}, #{at})
+    </insert>
+
     <insert id="insertManualStamp">
         INSERT INTO stamps (id, branch_id, customer_id, source, status, local_date, reason, created_by_staff_id,
                             confirmed_at, confirmed_by, created_at)

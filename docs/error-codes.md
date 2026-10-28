@@ -80,6 +80,8 @@ Aşağıdakı cədvəldə mətnlər Azərbaycan dilindədir (`messages_az.proper
 | `CAMPAIGN_STATE_CHANGED` | 409 | Kampaniyanın vəziyyəti dəyişib | Kampaniya artıq təsdiqlənib, rədd edilib və ya ləğv olunub. Səhifəni yeniləyin. |
 | `PLAN_FEATURE_UNAVAILABLE` | 403 | Paketinizdə yoxdur | Bu imkan cari paketinizə daxil deyil. Paketi yüksəltmək üçün bizimlə əlaqə saxlayın. |
 | `PLAN_LIMIT_REACHED` | 409 | Paketin limiti dolub | Paketinizin limiti dolub. Daha çoxu üçün paketi yüksəldin. |
+| `TIER_THRESHOLD_TAKEN` | 409 | Bu hədd artıq var | Bu ziyarət sayı ilə başqa səviyyə artıq var. Fərqli hədd seçin. |
+| `TIER_IN_USE` | 409 | Səviyyə istifadə olunub | Bu səviyyə artıq bonus möhür verib, ona görə silinə bilməz. Adını, həddini və ya bonusunu dəyişə bilərsiniz. |
 | `PLAN_TRIAL_EXPIRED` | 402 | Sınaq müddəti bitib | Pulsuz sınaq müddəti bitib, xidmət dayandırılıb. |
 | `PLAN_TRIAL_ALREADY_USED` | 409 | Sınaq artıq istifadə olunub | Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub. |
 | `SITE_INBOX_UNAVAILABLE` | 503 | Müraciət göndərilmədi | Müraciətiniz hazırda göndərilə bilmədi. Bir azdan yenidən cəhd edin və ya info@trendsolutions.az ünvanına yazın. |

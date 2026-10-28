@@ -538,3 +538,17 @@ export const bonusDeliveriesApi = {
   list: (ruleId: string, query: PageParams & { status?: BonusDeliveryStatus }) =>
     unwrap(api.GET('/api/v1/admin/bonus-rules/{ruleId}/deliveries', { params: { path: { ruleId }, query } })),
 };
+
+export type TierOverview = Schemas['TierOverview'];
+export type TierView = Schemas['TierView'];
+export type TierRequest = Schemas['TierRequest'];
+
+/** Müştəri səviyyələri (şirkət sahibi). */
+export const tiersApi = {
+  list: () => unwrap(api.GET('/api/v1/admin/tiers')),
+  setEnabled: (enabled: boolean) => unwrap(api.PUT('/api/v1/admin/tiers/settings', { body: { enabled } })),
+  create: (body: TierRequest) => unwrap(api.POST('/api/v1/admin/tiers', { body })),
+  update: (tierId: string, body: TierRequest) =>
+    unwrap(api.PUT('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } }, body })),
+  remove: (tierId: string) => unwrap(api.DELETE('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } } })),
+};

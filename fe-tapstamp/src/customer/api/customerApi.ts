@@ -62,6 +62,8 @@ export const referralApi = {
 };
 
 export const meApi = {
+  /** Müştərinin səviyyəsi və növbəti səviyyəyə irəliləyiş. */
+  tier: () => unwrap(api.GET('/api/v1/me/tier')),
   me: () => unwrap(api.GET('/api/v1/me')),
   update: (body: Schemas['UpdateRequest']) => unwrap(api.PATCH('/api/v1/me', { body })),
   deleteAccount: () => unwrap(api.DELETE('/api/v1/me')),

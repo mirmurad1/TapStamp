@@ -21,7 +21,8 @@
     "stampCampaigns": "Möhür kampaniyası",
     "referrals": "Dost dəvəti",
     "reminders": "Xatırlatmalar",
-    "bonusRules": "Bonus kampaniyası"
+    "bonusRules": "Bonus kampaniyası",
+    "tiers": "Səviyyələr"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -653,7 +654,8 @@
         "MANUAL": "Möhür (əl ilə)",
         "CAMPAIGN": "Möhür (kampaniya)",
         "REFERRAL": "Möhür (dost dəvəti)",
-        "BONUS": "Möhür (bonus qaydası)"
+        "BONUS": "Möhür (bonus qaydası)",
+        "TIER": "Möhür (səviyyə bonusu)"
       },
       "status": {
         "PENDING": "Təsdiq gözləyir",
@@ -1087,6 +1089,40 @@
         "PENDING": "Göndərilir"
       },
       "empty": "Bu süzgəcə uyğun müştəri yoxdur."
+    }
+  },
+  "tiers": {
+    "title": "Səviyyələr",
+    "subtitle": "Müştərilər ziyarət sayına görə avtomatik səviyyə qazanır (məsələn Bürünc, Gümüş, Qızıl). Yüksək səviyyədə hər ziyarətə əlavə möhür verə bilərsiniz — sadiq müştərilər daha tez hədiyyə alır.",
+    "add": "Yeni səviyyə",
+    "empty": {
+      "title": "Hələ səviyyə yoxdur",
+      "hint": "Məsələn: Bürünc — 3 ziyarət (yalnız nişan), Gümüş — 10 ziyarət (+1 möhür), Qızıl — 25 ziyarət (+2 möhür)."
+    },
+    "note": "Ziyarət — təsdiqlənmiş NFC möhürü. Səviyyə hər dəfə yenidən hesablanır: həddi dəyişsəniz, müştərilərin səviyyəsi dərhal yenilənir. Səviyyə bonusu bonus kampaniyaları ilə toplanır. Ən çox 5 səviyyə.",
+    "belowAll": "Hələ səviyyəyə çatmayanlar",
+    "from_one": "{{count}} ziyarətdən",
+    "from_other": "{{count}} ziyarətdən",
+    "perk_one": "hər möhürə +{{count}}",
+    "perk_other": "hər möhürə +{{count}}",
+    "badgeOnly": "yalnız nişan",
+    "deleteConfirm": "Səviyyə silinsin? Bu səviyyədəki müştərilər bir aşağı səviyyəyə keçəcək.",
+    "newTitle": "Yeni səviyyə",
+    "editTitle": "Səviyyəni düzəlt",
+    "dialogDescription": "Müştəri səviyyəsini kartının altında görəcək.",
+    "form": {
+      "name": "Adı",
+      "color": "Rəng",
+      "customColor": "Başqa rəng",
+      "minVisits": "Lazım olan ziyarət sayı",
+      "minVisitsHint": "0 yazsanız, bütün müştərilər bu səviyyədən başlayır.",
+      "bonus": "İmtiyaz",
+      "bonusHint": "Bu səviyyədəki müştəri hər NFC möhürü ilə əlavə bu qədər möhür alır."
+    },
+    "switch": {
+      "title": "Səviyyələr aktivdir",
+      "hint": "Söndürsəniz, müştərilər səviyyəni görməyəcək və səviyyə bonusu verilməyəcək. Səviyyələr və tarixçə silinmir — yenidən açanda hər şey əvvəlki kimi işləyəcək.",
+      "off": "Səviyyələr söndürülüb: müştərilər onları görmür və səviyyə bonusu verilmir."
     }
   }
 }

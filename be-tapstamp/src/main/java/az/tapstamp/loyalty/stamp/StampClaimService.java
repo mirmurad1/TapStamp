@@ -33,6 +33,7 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.web.ClientInfo;
+import az.tapstamp.tier.TierService;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -86,14 +87,16 @@ public class StampClaimService {
     private final TransactionTemplate tx;
     private final ReferralService referrals;
     private final BonusRuleService bonusRules;
+    private final TierService tiers;
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerMapper customers, OtpChallengeMapper challenges, CompanySettings companySettings,
                              StampMapper stamps, TapEventMapper tapEvents,
                              PlatformTransactionManager transactionManager, ReferralService referrals,
-                             Clock clock, BonusRuleService bonusRules) {
+                             Clock clock, BonusRuleService bonusRules, TierService tiers) {
         this.bonusRules = bonusRules;
+        this.tiers = tiers;
         this.referrals = referrals;
         this.tokens = tokens;
         this.events = events;
@@ -222,6 +225,7 @@ public class StampClaimService {
                 : ledger.card(customerId);
         if (status == StampStatus.CONFIRMED) {
             card = withBonus(card, bonusRules.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt));
+            card = withBonus(card, tiers.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt));
             card = withBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
         }
         tokens.markConsumed(token.id(), customerId, now);

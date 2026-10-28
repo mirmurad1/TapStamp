@@ -62,5 +62,7 @@
   "PLAN_FEATURE_UNAVAILABLE": "Bu imkan cari paketinizə daxil deyil. Paketi yüksəltmək üçün bizimlə əlaqə saxlayın.",
   "PLAN_LIMIT_REACHED": "Paketinizin limiti dolub. Daha çoxu üçün paketi yüksəldin.",
   "PLAN_TRIAL_EXPIRED": "Pulsuz sınaq müddəti bitib, xidmət dayandırılıb.",
-  "PLAN_TRIAL_ALREADY_USED": "Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub."
+  "PLAN_TRIAL_ALREADY_USED": "Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub.",
+  "TIER_THRESHOLD_TAKEN": "Bu ziyarət sayı ilə başqa səviyyə artıq var. Fərqli hədd seçin.",
+  "TIER_IN_USE": "Bu səviyyə artıq bonus möhür verib, ona görə silinə bilməz. Adını, həddini və ya bonusunu dəyişə bilərsiniz."
 }

@@ -14,6 +14,7 @@ import { useJustSignedIn } from '../auth/justSignedIn';
 import { BonusRulesBanner } from '../components/BonusRulesBanner';
 import { InviteFriendRow } from '../components/InviteFriendCard';
 import { StampCard, StampCardNote } from '../components/StampCard';
+import { TierCard } from '../components/TierCard';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 import { InstallRow } from '../pwa/InstallCard';
 import { NotificationsRow } from '../pwa/NotificationsCard';
@@ -71,6 +72,7 @@ function Profile({ me }: { me: Me }) {
           }
         />
       ) : null}
+      <TierCard />
       {rewards.length > 0 ? (
         // Bilet formalı blok: solda hədiyyə ikonu, qırıq xətt və iki yarımdairə kəsik, sağda hazır hədiyyələr
         <Link

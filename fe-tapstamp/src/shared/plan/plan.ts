@@ -21,6 +21,7 @@ export const FEATURE_PLAN: Record<Feature, PlanName> = {
   BRANCH_COMPARISON: 'PREMIUM',
   REFERRAL_STATS: 'PREMIUM',
   BONUS_RULES: 'STANDARD',
+  TIERS: 'STANDARD',
 };
 
 /**

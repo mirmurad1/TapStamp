@@ -33,6 +33,8 @@ public enum ErrorCode {
     PLAN_FEATURE_UNAVAILABLE(HttpStatus.FORBIDDEN),
     /** Paketin limiti (filial, işçi) dolub. */
     PLAN_LIMIT_REACHED(HttpStatus.CONFLICT),
+    TIER_THRESHOLD_TAKEN(HttpStatus.CONFLICT),
+    TIER_IN_USE(HttpStatus.CONFLICT),
     /** Sınaq müddəti bitib, ödəniş qeyd olunmayıb — şirkətin xidməti dayandırılıb. */
     PLAN_TRIAL_EXPIRED(HttpStatus.PAYMENT_REQUIRED),
     /** Bu paketin sınağı bu şirkət üçün artıq istifadə olunub (hər paket üçün bir dəfə). */

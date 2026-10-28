@@ -80,3 +80,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase11-01-bonus-rules-admin.jpg` | Bonus kampaniyası (admin): "Xoşbəxt saatlar" — vəziyyət, cədvəl, son 30 günün nəticəsi, bildirişin çatdırılması |
 | `phase11-02-bonus-banner-customer.jpg` | Müştəri kartının üstündə banner: "İndi hər möhürə +1 bonus möhür!" |
 | `phase11-03-bonus-deliveries.jpg` | Bonus kampaniyası: başlanğıc bildirişini alanlar — ad, maskalı telefon, "Çatdırıldı / Çatdırılmadı", süzgəc və səhifələmə |
+| `phase11-04-tiers-admin.jpg` | Səviyyələr (admin): proqramın açarı; Bürünc, Gümüş, Qızıl — hədd, imtiyaz və hər səviyyədəki müştərilərin sayı |
+| `phase11-05-tier-customer.jpg` | Müştəri kartının altında səviyyə: nişan və növbəti səviyyəyə irəliləyiş |

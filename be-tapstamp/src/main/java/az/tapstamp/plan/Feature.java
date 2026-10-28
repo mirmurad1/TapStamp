@@ -21,5 +21,7 @@ public enum Feature {
     /** Dəvət statistikası. */
     REFERRAL_STATS,
     /** Bonus qaydaları (xoşbəxt saatlar, tarixli kampaniyalar). */
-    BONUS_RULES
+    BONUS_RULES,
+    /** Müştəri səviyyələri (ziyarət sayına görə, imtiyaz — əlavə möhür). */
+    TIERS
 }

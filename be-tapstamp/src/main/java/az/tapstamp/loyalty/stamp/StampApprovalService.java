@@ -19,6 +19,7 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
+import az.tapstamp.tier.TierService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -44,13 +45,15 @@ public class StampApprovalService {
     private final TransactionTemplate tx;
     private final ReferralService referrals;
     private final BonusRuleService bonusRules;
+    private final TierService tiers;
     private final PushService push;
     private final Clock clock;
 
     public StampApprovalService(StampMapper stamps, StampLedger ledger, AuditLogger audit,
                                 PlatformTransactionManager transactionManager, ReferralService referrals, Clock clock, PushService push,
-                                BonusRuleService bonusRules) {
+                                BonusRuleService bonusRules, TierService tiers) {
         this.bonusRules = bonusRules;
+        this.tiers = tiers;
         this.referrals = referrals;
         this.push = push;
         this.stamps = stamps;
@@ -79,6 +82,8 @@ public class StampApprovalService {
             // Bonus qaydası möhürün alındığı (toxunuş) anına görə yoxlanılır
             card = StampClaimService.withBonus(card,
                     bonusRules.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), stamp.createdAt(), now));
+            card = StampClaimService.withBonus(card,
+                    tiers.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), stamp.createdAt(), now));
             card = StampClaimService.withBonus(card,
                     referrals.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), now));
             audit.tenant("STAMP_CONFIRMED", AuditLogger.ActorType.STAFF, principal.userId(), "stamp", stampId,

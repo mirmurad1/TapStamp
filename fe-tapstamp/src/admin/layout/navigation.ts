@@ -3,6 +3,7 @@ import {
   Building2,
   ClipboardList,
   LayoutDashboard,
+  Medal,
   Megaphone,
   MessageSquareText,
   Nfc,
@@ -31,6 +32,7 @@ export type AdminSection =
   | 'referrals'
   | 'reminders'
   | 'bonusRules'
+  | 'tiers'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -62,6 +64,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS' },
   { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'], feature: 'REMINDERS' },
   { section: 'bonusRules', to: '/bonus-rules', icon: Sparkles, roles: ['COMPANY_OWNER'], feature: 'BONUS_RULES' },
+  { section: 'tiers', to: '/tiers', icon: Medal, roles: ['COMPANY_OWNER'], feature: 'TIERS' },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'], feature: 'AUDIT_LOG' },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
