@@ -42,6 +42,7 @@ az:{
  'form.submit':'Müraciət göndər','form.consent':'Müraciət göndərməklə məlumatlarınızın yalnız sizinlə əlaqə saxlamaq üçün istifadə olunmasına razılıq verirsiniz.',
  'form.doneT':'Müraciətiniz qəbul olundu','form.doneP':'Bir iş günü ərzində sizinlə əlaqə saxlayacağıq.',
  'contact.title':'Sualınız var?','contact.sub':'Bizə yazın və ya zəng edin.','contact.email':'Email','contact.phone':'Telefon',
+ 'clients.kicker':'Müştərilərimiz','clients.title':'TapStamp-dan istifadə edən bizneslər','clients.hezz':'Şirniyyat evi',
  'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.'
 },
 en:{
@@ -86,6 +87,7 @@ en:{
  'form.submit':'Send request','form.consent':'By sending this request, you agree that we use your details only to contact you.',
  'form.doneT':'Request received','form.doneP':'We’ll contact you within one business day.',
  'contact.title':'Have a question?','contact.sub':'Write to us or give us a call.','contact.email':'Email','contact.phone':'Phone',
+ 'clients.kicker':'Our clients','clients.title':'Businesses using TapStamp','clients.hezz':'Pastry shop',
  'footer.copy':'© 2026 Trend Solutions. All rights reserved.'
 },
 ru:{
@@ -130,6 +132,7 @@ ru:{
  'form.submit':'Отправить заявку','form.consent':'Отправляя заявку, вы соглашаетесь, что мы используем ваши данные только для связи с вами.',
  'form.doneT':'Заявка принята','form.doneP':'Мы свяжемся с вами в течение одного рабочего дня.',
  'contact.title':'Есть вопросы?','contact.sub':'Напишите или позвоните нам.','contact.email':'Email','contact.phone':'Телефон',
+ 'clients.kicker':'Наши клиенты','clients.title':'Компании, которые используют TapStamp','clients.hezz':'Кондитерская',
  'footer.copy':'© 2026 Trend Solutions. Все права защищены.'
 }};
 

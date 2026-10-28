@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trend Solutions</title>
 <!-- Brauzer tabının ikonu: loqonun T işarəsi, şəffaf fonda -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Trend Solutions">
+<meta property="og:url" content="https://trendsolutions.az/">
+<meta property="og:title" content="Trend Solutions — biznesiniz üçün proqram təminatı">
+<meta property="og:description" content="Fərdi veb və mobil tətbiqlər, TapStamp NFC sadiqlik proqramı. Azərbaycanda.">
+<meta property="og:image" content="https://trendsolutions.az/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="az_AZ">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -57 380 380%27%3E%3Cpath d=%27M60 8H372V68M6 54H126M168 54V258H232M326 54H214V204%27 fill=%27none%27 stroke=%27%231F9AAA%27 stroke-width=%2730%27/%3E%3C/svg%3E">
 <!-- Maket v3: trendsolutions.az şirkət saytı (AZ/EN/RU). TapStamp ayrıca məhsul bölməsidir. Əlaqə məlumatları yer tutucudur. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -267,6 +277,13 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   .mbar .btn{min-height:36px;padding:0 16px;font-size:14.5px}
   .wa{width:48px;height:48px;right:12px;bottom:12px}
 }
+
+/* Müştərilərimiz */
+.clients{list-style:none;padding:0;margin:32px 0 0;display:flex;flex-wrap:wrap;gap:16px}
+.clients li{display:flex;align-items:center;gap:16px;padding:18px 26px 18px 18px;border-radius:24px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.clients .mono{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(140deg,var(--violet),var(--violet-ink));color:#fff;font:800 19px var(--display);letter-spacing:.02em;flex:none}
+.clients b{display:block;font:700 19px var(--display);letter-spacing:-.01em}
+.clients small{color:var(--muted,#5A6478);font-size:15px}
 </style>
 </head>
 <body>
@@ -401,6 +418,17 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
+<!-- Müştərilərimiz: TapStamp-dan istifadə edən bizneslər -->
+<section id="musteriler" class="flush">
+  <div class="wrap">
+    <p class="kicker" data-t="clients.kicker"></p>
+    <h2 data-t="clients.title"></h2>
+    <ul class="clients">
+      <li><span class="mono" aria-hidden="true">HP</span><span><b>Həzz Point</b><small data-t="clients.hezz"></small></span></li>
+    </ul>
+  </div>
+</section>
+
 <div class="wrap demo-sec" id="demo">
   <div class="demo-box">
     <span class="glow a"></span>
@@ -497,6 +525,7 @@ az:{
  'form.submit':'Müraciət göndər','form.consent':'Müraciət göndərməklə məlumatlarınızın yalnız sizinlə əlaqə saxlamaq üçün istifadə olunmasına razılıq verirsiniz.',
  'form.doneT':'Müraciətiniz qəbul olundu','form.doneP':'Bir iş günü ərzində sizinlə əlaqə saxlayacağıq.',
  'contact.title':'Sualınız var?','contact.sub':'Bizə yazın və ya zəng edin.','contact.email':'Email','contact.phone':'Telefon',
+ 'clients.kicker':'Müştərilərimiz','clients.title':'TapStamp-dan istifadə edən bizneslər','clients.hezz':'Şirniyyat evi',
  'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.'
 },
 en:{
@@ -540,6 +569,7 @@ en:{
  'form.submit':'Send request','form.consent':'By sending this request, you agree that we use your details only to contact you.',
  'form.doneT':'Request received','form.doneP':'We’ll contact you within one business day.',
  'contact.title':'Have a question?','contact.sub':'Write to us or give us a call.','contact.email':'Email','contact.phone':'Phone',
+ 'clients.kicker':'Our clients','clients.title':'Businesses using TapStamp','clients.hezz':'Pastry shop',
  'footer.copy':'© 2026 Trend Solutions. All rights reserved.'
 },
 ru:{
@@ -583,6 +613,7 @@ ru:{
  'form.submit':'Отправить заявку','form.consent':'Отправляя заявку, вы соглашаетесь, что мы используем ваши данные только для связи с вами.',
  'form.doneT':'Заявка принята','form.doneP':'Мы свяжемся с вами в течение одного рабочего дня.',
  'contact.title':'Есть вопросы?','contact.sub':'Напишите или позвоните нам.','contact.email':'Email','contact.phone':'Телефон',
+ 'clients.kicker':'Наши клиенты','clients.title':'Компании, которые используют TapStamp','clients.hezz':'Кондитерская',
  'footer.copy':'© 2026 Trend Solutions. Все права защищены.'
 }};
 
