@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
+import { TimeSelect } from '@/shared/ui/time-select';
 
 import { companyApi, type BranchSettings, type BusinessHours, type Localized } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -179,23 +180,20 @@ function BranchDialog({ branch, onClose }: { branch?: BranchSettings; onClose: (
                     {t(`admin:settings.branches.days.${day}`)}
                   </label>
                   {rows[day].open ? (
-                    <>
-                      <Input
-                        type="time"
-                        className="w-32"
+                    // Açılış və bağlanış bir blokda: dar ekranda birlikdə növbəti sətrə keçir
+                    <span className="flex items-center gap-1.5">
+                      <TimeSelect
                         value={rows[day].from}
-                        onChange={(e) => setRow(day, { from: e.target.value })}
-                        aria-label={t('admin:settings.branches.opens')}
+                        onChange={(from) => setRow(day, { from })}
+                        label={t('admin:settings.branches.opens')}
                       />
                       <span aria-hidden="true">–</span>
-                      <Input
-                        type="time"
-                        className="w-32"
+                      <TimeSelect
                         value={rows[day].to}
-                        onChange={(e) => setRow(day, { to: e.target.value })}
-                        aria-label={t('admin:settings.branches.closes')}
+                        onChange={(to) => setRow(day, { to })}
+                        label={t('admin:settings.branches.closes')}
                       />
-                    </>
+                    </span>
                   ) : (
                     <span className="text-muted-foreground">{t('admin:settings.branches.closedDay')}</span>
                   )}

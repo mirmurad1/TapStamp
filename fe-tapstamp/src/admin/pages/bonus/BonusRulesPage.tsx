@@ -17,6 +17,7 @@ import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 import { Pagination } from '@/shared/ui/pagination';
 import { usePagination } from '@/shared/ui/usePagination';
+import { TimeSelect } from '@/shared/ui/time-select';
 
 import {
   bonusDeliveriesApi,
@@ -288,11 +289,9 @@ function RuleDialog({ rule, onClose }: { rule?: BonusRule; onClose: () => void }
             </label>
             {timed ? (
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <Input type="time" className="w-32" value={startTime} onChange={(e) => setStartTime(e.target.value)}
-                  aria-label={t('admin:bonusRules.form.from')} required />
+                <TimeSelect value={startTime} onChange={setStartTime} label={t('admin:bonusRules.form.from')} />
                 <span aria-hidden="true">–</span>
-                <Input type="time" className="w-32" value={endTime} onChange={(e) => setEndTime(e.target.value)}
-                  aria-label={t('admin:bonusRules.form.to')} required />
+                <TimeSelect value={endTime} onChange={setEndTime} label={t('admin:bonusRules.form.to')} />
               </div>
             ) : null}
             <p className="text-xs text-muted-foreground">{timed ? t('admin:bonusRules.form.timedHint') : t('admin:bonusRules.schedule.allDay')}</p>

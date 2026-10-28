@@ -72,5 +72,9 @@
         "body": "Bu şirkətin loyallıq proqramı hazırda əlçatan deyil. Möhürləriniz və hədiyyələriniz saxlanılır."
       }
     }
+  },
+  "time": {
+    "hours": "saat",
+    "minutes": "dəqiqə"
   }
 }

@@ -72,5 +72,9 @@
         "body": "This company’s loyalty program is not available right now. Your stamps and gifts are kept."
       }
     }
+  },
+  "time": {
+    "hours": "hours",
+    "minutes": "minutes"
   }
 }
