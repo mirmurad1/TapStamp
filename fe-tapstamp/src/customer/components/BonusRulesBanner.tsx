@@ -74,7 +74,7 @@ function RuleRow({ rule, branch }: { rule: PublicRule; branch: string | undefine
     <div
       className={cn(
         'flex items-center gap-3 rounded-2xl p-3.5',
-        running ? 'shine bg-primary text-primary-foreground shadow-md' : 'border border-primary/20 bg-primary/5',
+        running ? 'shine relative overflow-hidden bg-primary text-primary-foreground shadow-md' : 'border border-primary/20 bg-primary/5',
       )}
     >
       <span
