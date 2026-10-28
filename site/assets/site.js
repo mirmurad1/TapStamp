@@ -42,6 +42,7 @@ az:{
  'form.submit':'Müraciət göndər','form.consent':'Müraciət göndərməklə məlumatlarınızın yalnız sizinlə əlaqə saxlamaq üçün istifadə olunmasına razılıq verirsiniz.',
  'form.doneT':'Müraciətiniz qəbul olundu','form.doneP':'Bir iş günü ərzində sizinlə əlaqə saxlayacağıq.',
  'contact.title':'Sualınız var?','contact.sub':'Bizə yazın və ya zəng edin.','contact.email':'Email','contact.phone':'Telefon',
+ 'shots.kicker':'Real ekranlar','shots.title':'Müştəri və işçi nə görür','shots.card':'Müştərinin möhür kartı','shots.wait':'Möhür işçi təsdiqini gözləyir','shots.admin':'Statistika: müştərilər, möhürlər, geri qayıtma','shots.cardAlt':'Telefonda möhür kartı: 5 möhürdən 3-ü toplanıb','shots.waitAlt':'Telefonda möhür kartı: 1 möhür işçi təsdiqini gözləyir','shots.adminAlt':'İdarəetmə panelində göstəricilər səhifəsi',
  'clients.kicker':'Müştərilərimiz','clients.title':'TapStamp-dan istifadə edən bizneslər','clients.hezz':'Şirniyyat evi',
  'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.'
 },
@@ -87,6 +88,7 @@ en:{
  'form.submit':'Send request','form.consent':'By sending this request, you agree that we use your details only to contact you.',
  'form.doneT':'Request received','form.doneP':'We’ll contact you within one business day.',
  'contact.title':'Have a question?','contact.sub':'Write to us or give us a call.','contact.email':'Email','contact.phone':'Phone',
+ 'shots.kicker':'Real screens','shots.title':'What customers and staff see','shots.card':'The customer’s stamp card','shots.wait':'A stamp waiting for staff approval','shots.admin':'Analytics: customers, stamps, return rate','shots.cardAlt':'Stamp card on a phone: 3 of 5 stamps collected','shots.waitAlt':'Stamp card on a phone: 1 stamp waiting for staff approval','shots.adminAlt':'Dashboard page of the admin panel',
  'clients.kicker':'Our clients','clients.title':'Businesses using TapStamp','clients.hezz':'Pastry shop',
  'footer.copy':'© 2026 Trend Solutions. All rights reserved.'
 },
@@ -132,6 +134,7 @@ ru:{
  'form.submit':'Отправить заявку','form.consent':'Отправляя заявку, вы соглашаетесь, что мы используем ваши данные только для связи с вами.',
  'form.doneT':'Заявка принята','form.doneP':'Мы свяжемся с вами в течение одного рабочего дня.',
  'contact.title':'Есть вопросы?','contact.sub':'Напишите или позвоните нам.','contact.email':'Email','contact.phone':'Телефон',
+ 'shots.kicker':'Реальные экраны','shots.title':'Что видят клиент и сотрудник','shots.card':'Карта штампов клиента','shots.wait':'Штамп ждёт подтверждения сотрудника','shots.admin':'Статистика: клиенты, штампы, возвраты','shots.cardAlt':'Карта штампов на телефоне: собрано 3 из 5','shots.waitAlt':'Карта штампов на телефоне: 1 штамп ждёт подтверждения','shots.adminAlt':'Страница показателей в панели управления',
  'clients.kicker':'Наши клиенты','clients.title':'Компании, которые используют TapStamp','clients.hezz':'Кондитерская',
  'footer.copy':'© 2026 Trend Solutions. Все права защищены.'
 }};
@@ -143,6 +146,7 @@ function applyLang(l){
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-t]').forEach(el=>{el.innerHTML=t(el.dataset.t)});
   document.querySelectorAll('[data-t-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.tAria)));
+  document.querySelectorAll('[data-t-alt]').forEach(el=>el.setAttribute('alt',t(el.dataset.tAlt)));
   document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
   label.textContent=t(n>=TOTAL?'card.full':n===start?'card.tap':'card.added');
   try{localStorage.setItem('ts-lang',lang)}catch(e){}
