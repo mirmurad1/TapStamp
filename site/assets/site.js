@@ -183,6 +183,10 @@ applyLang(saved||(navigator.language||'az').slice(0,2));
 
 // ===== Animasiyalar =====
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Telefonda animasiya yüngül olur: başlıqlar sözlərə bölünmür, element ekrana çatmamış görünür və bir dəfə görünəndən
+// sonra yenidən gizlənmir, paralaks yoxdur. Sürətli (inersiyalı) scroll-da ekranın boş və ya yarımçıq qalmasının qarşısını alır.
+const mobile=matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+if(mobile) document.documentElement.classList.add('lite');
 const bar=document.createElement('div'); bar.className='progress'; document.body.prepend(bar);
 
 // Hansı element necə görünür: [selektor, növ, qardaşlar arasında pillə-pillə gecikmə]
@@ -224,12 +228,13 @@ function splitWords(){
 const showIO=new IntersectionObserver(es=>es.forEach(e=>{
   if(!e.isIntersecting || e.target.classList.contains('in')) return;
   e.target.classList.add('in');
+  if(mobile) showIO.unobserve(e.target);
   if(e.target.id==='demoCard') autoTap();
-}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
+}),{threshold:0,rootMargin:mobile?'0px 0px 25% 0px':'0px 0px -12% 0px'});
 const hideIO=new IntersectionObserver(es=>es.forEach(e=>{
   if(!e.isIntersecting) e.target.classList.remove('in');
 }),{threshold:0,rootMargin:'120px 0px 120px 0px'});
-function observeAll(){document.querySelectorAll('.rv,.words').forEach(el=>{showIO.observe(el);hideIO.observe(el)})}
+function observeAll(){document.querySelectorAll('.rv,.words').forEach(el=>{showIO.observe(el);if(!mobile) hideIO.observe(el)})}
 
 // Demo kart görünəndə bir möhür özü düşür
 let autoT; function autoTap(){clearTimeout(autoT); autoT=setTimeout(()=>{if(n<TOTAL) document.getElementById('tap').click()},700)}
@@ -244,7 +249,7 @@ function onScroll(){
   requestAnimationFrame(()=>{
     const y=scrollY, max=document.documentElement.scrollHeight-innerHeight;
     bar.style.transform=`scaleX(${max>0?y/max:0})`;
-    if(!reduce){
+    if(!reduce && !mobile){
       PX.forEach(el=>{
         const r=el.getBoundingClientRect(), c=(r.top+r.height/2-innerHeight/2);
         const k=el.classList.contains('glow')?-.25:el.classList.contains('chip')?-.18:-.08;
@@ -266,11 +271,11 @@ const mbar=document.querySelector('.mbar');
 const onBar=()=>mbar.classList.toggle('show',scrollY>480);
 addEventListener('scroll',onBar,{passive:true}); onBar(); addEventListener('resize',onScroll);
 
-if(!reduce){splitWords(); observeAll();}
+if(!reduce){if(!mobile) splitWords(); observeAll();}
 else document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
 onScroll();
 // Dil dəyişəndə başlıqlar yenidən sözlərə bölünür
-document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{if(!reduce){splitWords();observeAll();}}));
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{if(!reduce && !mobile){splitWords();observeAll();}}));
 
 // Demo müraciəti backend-ə göndərilir, oradan şirkətin poçt qutusuna email kimi çatır
 const form=document.getElementById('demoForm'), formErr=document.getElementById('formErr');
