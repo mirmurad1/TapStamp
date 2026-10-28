@@ -42,7 +42,7 @@ az:{
  'form.submit':'Müraciət göndər','form.consent':'Müraciət göndərməklə məlumatlarınızın yalnız sizinlə əlaqə saxlamaq üçün istifadə olunmasına razılıq verirsiniz.',
  'form.doneT':'Müraciətiniz qəbul olundu','form.doneP':'Bir iş günü ərzində sizinlə əlaqə saxlayacağıq.',
  'contact.title':'Sualınız var?','contact.sub':'Bizə yazın və ya zəng edin.','contact.email':'Email','contact.phone':'Telefon',
- 'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.','footer.login':'TapStamp-a daxil olun'
+ 'footer.copy':'© 2026 Trend Solutions. Bütün hüquqlar qorunur.'
 },
 en:{
  'form.sending':'Sending…','form.errLimit':'Too many requests. Please try again in an hour.','form.errInvalid':'Please check the fields: the phone number may contain only digits, spaces and +.','form.errGeneric':'Your request was not sent. Please try again shortly or write to <a href="mailto:info@trendsolutions.az">info@trendsolutions.az</a>.',
@@ -86,7 +86,7 @@ en:{
  'form.submit':'Send request','form.consent':'By sending this request, you agree that we use your details only to contact you.',
  'form.doneT':'Request received','form.doneP':'We’ll contact you within one business day.',
  'contact.title':'Have a question?','contact.sub':'Write to us or give us a call.','contact.email':'Email','contact.phone':'Phone',
- 'footer.copy':'© 2026 Trend Solutions. All rights reserved.','footer.login':'Sign in to TapStamp'
+ 'footer.copy':'© 2026 Trend Solutions. All rights reserved.'
 },
 ru:{
  'form.sending':'Отправляем…','form.errLimit':'Слишком много заявок. Попробуйте через час.','form.errInvalid':'Проверьте поля: в номере телефона могут быть только цифры, пробелы и +.','form.errGeneric':'Заявка не отправлена. Попробуйте чуть позже или напишите на <a href="mailto:info@trendsolutions.az">info@trendsolutions.az</a>.',
@@ -130,7 +130,7 @@ ru:{
  'form.submit':'Отправить заявку','form.consent':'Отправляя заявку, вы соглашаетесь, что мы используем ваши данные только для связи с вами.',
  'form.doneT':'Заявка принята','form.doneP':'Мы свяжемся с вами в течение одного рабочего дня.',
  'contact.title':'Есть вопросы?','contact.sub':'Напишите или позвоните нам.','contact.email':'Email','contact.phone':'Телефон',
- 'footer.copy':'© 2026 Trend Solutions. Все права защищены.','footer.login':'Войти в TapStamp'
+ 'footer.copy':'© 2026 Trend Solutions. Все права защищены.'
 }};
 
 let lang='az';
