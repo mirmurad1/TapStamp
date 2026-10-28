@@ -208,5 +208,24 @@
     "description": "Bu nömrədən çıxış ediləcək və başqa nömrə ilə daxil ola biləcəksiniz. Möhürləriniz hesabınızda qalır.",
     "confirm": "Çıx və başqa nömrə ilə daxil ol",
     "cancel": "Ləğv et"
+  },
+  "bonus": {
+    "runningNow_one": "İndi hər möhürə +{{count}} bonus möhür!",
+    "runningNow_other": "İndi hər möhürə +{{count}} bonus möhür!",
+    "later_one": "Bu vaxtlarda hər möhürə +{{count}} bonus möhür",
+    "later_other": "Bu vaxtlarda hər möhürə +{{count}} bonus möhür",
+    "everyDay": "Hər gün",
+    "weekdays": "Həftə içi",
+    "weekend": "Həftəsonu",
+    "until": "{{date}} tarixinədək",
+    "days": {
+      "1": "B.e.",
+      "2": "Ç.a.",
+      "3": "Çər.",
+      "4": "C.a.",
+      "5": "Cüm.",
+      "6": "Şən.",
+      "7": "Baz."
+    }
   }
 }

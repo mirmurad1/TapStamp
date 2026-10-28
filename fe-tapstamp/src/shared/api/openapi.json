@@ -249,7 +249,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -611,6 +611,122 @@
         "tags" : [ "Admin: autentifikasiya" ]
       }
     },
+    "/api/v1/admin/bonus-rules" : {
+      "get" : {
+        "description" : "Bütün qaydalar: vəziyyət (`ACTIVE`, `SCHEDULED`, `ENDED`, `OFF`), bu an qüvvədədirmi (`runningNow`) və son 30 gündə verilən bonus möhürlər ilə onları alan müştərilərin sayı.",
+        "operationId" : "list_3",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RuleView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Qaydalar",
+        "tags" : [ "Admin: bonus qaydaları" ]
+      },
+      "post" : {
+        "description" : "`bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00). Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.",
+        "operationId" : "create_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BonusRuleRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RuleView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Qayda yaratmaq",
+        "tags" : [ "Admin: bonus qaydaları" ]
+      }
+    },
+    "/api/v1/admin/bonus-rules/{ruleId}" : {
+      "delete" : {
+        "description" : "Bonus möhür verməmiş qayda silinir (`deleted = true`); artıq veribsə, tarixçə üçün saxlanılır və söndürülür (`deleted = false`).",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "ruleId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Qaydanı silmək",
+        "tags" : [ "Admin: bonus qaydaları" ]
+      },
+      "put" : {
+        "operationId" : "update_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "ruleId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BonusRuleRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RuleView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Qaydanı dəyişmək",
+        "tags" : [ "Admin: bonus qaydaları" ]
+      }
+    },
     "/api/v1/admin/campaigns" : {
       "get" : {
         "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
@@ -861,7 +977,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1292,7 +1408,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_5",
+        "operationId" : "update_6",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1477,7 +1593,7 @@
     "/api/v1/admin/referrals" : {
       "get" : {
         "description" : "Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_8",
+        "operationId" : "list_9",
         "parameters" : [ {
           "in" : "query",
           "name" : "activity",
@@ -2304,7 +2420,7 @@
     "/api/v1/admin/tags" : {
       "get" : {
         "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_7",
+        "operationId" : "list_8",
         "parameters" : [ {
           "in" : "query",
           "name" : "branchId",
@@ -2525,7 +2641,7 @@
     "/api/v1/admin/team/members/{userId}" : {
       "delete" : {
         "description" : "Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.",
-        "operationId" : "delete_1",
+        "operationId" : "delete_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "userId",
@@ -2842,7 +2958,7 @@
     "/api/v1/me" : {
       "delete" : {
         "description" : "Əvvəlcə SMS kodu ilə təkrar təsdiq lazımdır (`/api/v1/auth/step-up/otp/*`), əks halda `STEP_UP_REQUIRED`. Şəxsi məlumat silinir, bütün sessiyalar bağlanır; anonim statistika qalır.",
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "responses" : {
           "204" : {
             "description" : "No Content"
@@ -2871,7 +2987,7 @@
       },
       "patch" : {
         "description" : "Dil SMS-lərə və bütün cihazlara tətbiq olunur.",
-        "operationId" : "update_4",
+        "operationId" : "update_5",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2901,7 +3017,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_6",
+        "operationId" : "list_7",
         "responses" : {
           "200" : {
             "content" : {
@@ -3051,7 +3167,7 @@
     "/api/v1/platform/audit-logs" : {
       "get" : {
         "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_5",
+        "operationId" : "list_6",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -3310,7 +3426,7 @@
     "/api/v1/platform/campaigns" : {
       "get" : {
         "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_4",
+        "operationId" : "list_5",
         "parameters" : [ {
           "in" : "query",
           "name" : "status",
@@ -3497,7 +3613,7 @@
       },
       "patch" : {
         "description" : "Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.",
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -4426,7 +4542,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}" : {
       "patch" : {
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -4672,6 +4788,29 @@
         "tags" : [ "Platforma: NFC çipləri" ]
       }
     },
+    "/api/v1/public/bonus-rules" : {
+      "get" : {
+        "description" : "Bu gün tarix aralığında olan aktiv qaydalar: cədvəl (günlər, saat aralığı), bitmə tarixi, filial və bu an qüvvədədirmi (`runningNow`). Paketdə imkan yoxdursa — boş siyahı.",
+        "operationId" : "current",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PublicRule"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Bu günün bonus qaydaları (giriş tələb etmir)",
+        "tags" : [ "Müştəri: bonus qaydaları" ]
+      }
+    },
     "/api/v1/public/company" : {
       "get" : {
         "description" : "Domenə görə müəyyən olunan kafenin adı, təsviri, aktiv filialları və mükafat qaydası. Autentifikasiya tələb etmir. Platforma domenində 404 qaytarır.",
@@ -4745,7 +4884,7 @@
     "/api/v1/public/legal" : {
       "get" : {
         "description" : "Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.",
-        "operationId" : "list_3",
+        "operationId" : "list_4",
         "responses" : {
           "200" : {
             "content" : {
@@ -5063,6 +5202,57 @@
             "enum" : [ "AUTHENTICATED" ]
           }
         }
+      },
+      "BonusRuleRequest" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "boolean"
+          },
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 5,
+            "minimum" : 1
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "days" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "maximum" : 7,
+              "minimum" : 1
+            },
+            "minItems" : 1
+          },
+          "endTime" : {
+            "type" : "string",
+            "format" : "time-local"
+          },
+          "endsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "notifyOnStart" : {
+            "type" : "boolean"
+          },
+          "startTime" : {
+            "type" : "string",
+            "format" : "time-local"
+          },
+          "startsOn" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "active", "bonusStamps", "days", "name", "notifyOnStart" ]
       },
       "BranchOption" : {
         "type" : "object",
@@ -5686,6 +5876,14 @@
             "items" : {
               "$ref" : "#/components/schemas/TopReferrer"
             }
+          }
+        }
+      },
+      "DeleteResult" : {
+        "type" : "object",
+        "properties" : {
+          "deleted" : {
+            "type" : "boolean"
           }
         }
       },
@@ -6947,7 +7145,7 @@
             "description" : "Açıq imkanlar (sınaq bitibsə boşdur)",
             "items" : {
               "type" : "string",
-              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS" ]
+              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS", "BONUS_RULES" ]
             }
           },
           "plan" : {
@@ -7358,6 +7556,48 @@
           "timezone" : {
             "type" : "string",
             "description" : "IANA saat qurşağı, məs. Asia/Baku"
+          }
+        }
+      },
+      "PublicRule" : {
+        "type" : "object",
+        "properties" : {
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "days" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "endTime" : {
+            "type" : "string",
+            "format" : "time-local"
+          },
+          "endsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "runningNow" : {
+            "type" : "boolean"
+          },
+          "startTime" : {
+            "type" : "string",
+            "format" : "time-local"
           }
         }
       },
@@ -7869,6 +8109,73 @@
           "totalStamps" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "RuleView" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "boolean"
+          },
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bonusStamps30d" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "customers30d" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "days" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "endTime" : {
+            "type" : "string",
+            "format" : "time-local"
+          },
+          "endsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "notifiedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "notifyOnStart" : {
+            "type" : "boolean"
+          },
+          "runningNow" : {
+            "type" : "boolean"
+          },
+          "startTime" : {
+            "type" : "string",
+            "format" : "time-local"
+          },
+          "startsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "status" : {
+            "type" : "string"
           }
         }
       },

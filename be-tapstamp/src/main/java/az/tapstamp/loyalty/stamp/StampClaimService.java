@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import az.tapstamp.bonus.BonusRuleService;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.repository.CustomerMapper;
 import az.tapstamp.customer.repository.OtpChallengeMapper;
@@ -84,13 +85,15 @@ public class StampClaimService {
     private final TapEventMapper tapEvents;
     private final TransactionTemplate tx;
     private final ReferralService referrals;
+    private final BonusRuleService bonusRules;
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerMapper customers, OtpChallengeMapper challenges, CompanySettings companySettings,
                              StampMapper stamps, TapEventMapper tapEvents,
                              PlatformTransactionManager transactionManager, ReferralService referrals,
-                             Clock clock) {
+                             Clock clock, BonusRuleService bonusRules) {
+        this.bonusRules = bonusRules;
         this.referrals = referrals;
         this.tokens = tokens;
         this.events = events;
@@ -218,7 +221,8 @@ public class StampClaimService {
         CardState card = status == StampStatus.CONFIRMED ? ledger.applyConfirmed(customerId, stampId, tapAt)
                 : ledger.card(customerId);
         if (status == StampStatus.CONFIRMED) {
-            card = withReferralBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
+            card = withBonus(card, bonusRules.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt));
+            card = withBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
         }
         tokens.markConsumed(token.id(), customerId, now);
         ledger.touchCustomerVisit(customerId, token.branchId(), tapAt);
@@ -229,8 +233,8 @@ public class StampClaimService {
                 card.giftCardId(), token.branchId()));
     }
 
-    /** Dəvət bonusu verilibsə, kart bonusdan sonrakı vəziyyətdir; hədiyyə kartı — ilk yaranan. */
-    static CardState withReferralBonus(CardState card, @Nullable CardState bonus) {
+    /** Bonus (qayda və ya dəvət) verilibsə, kart bonusdan sonrakı vəziyyətdir; hədiyyə kartı — ilk yaranan. */
+    static CardState withBonus(CardState card, @Nullable CardState bonus) {
         if (bonus == null) {
             return card;
         }

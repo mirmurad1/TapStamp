@@ -11,6 +11,7 @@ import { Button } from '@/shared/ui/button';
 import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
+import { BonusRulesBanner } from '../components/BonusRulesBanner';
 import { InviteFriendRow } from '../components/InviteFriendCard';
 import { StampCard, StampCardNote } from '../components/StampCard';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
@@ -50,6 +51,7 @@ function Profile({ me }: { me: Me }) {
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">{t('intro')}</p>
       </section>
+      <BonusRulesBanner />
       {card ? (
         <StampCard
           stampsRequired={card.stampsRequired ?? 9}
@@ -133,6 +135,7 @@ function Guest() {
         </h1>
         <p className="mt-1.5 text-muted-foreground">{resolveText(company.data?.description, lang) || t('intro')}</p>
       </section>
+      <BonusRulesBanner />
       {rule && required > 0 ? (
         // Qayda boş kartla göstərilir: müştəri nə toplayacağını görür
         <section className="rounded-3xl border border-primary/15 bg-card p-5 shadow-[0_14px_30px_-18px_color-mix(in_srgb,var(--primary)_55%,transparent)]">

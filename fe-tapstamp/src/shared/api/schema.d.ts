@@ -112,7 +112,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -358,6 +358,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/bonus-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Qaydalar
+         * @description Bütün qaydalar: vəziyyət (`ACTIVE`, `SCHEDULED`, `ENDED`, `OFF`), bu an qüvvədədirmi (`runningNow`) və son 30 gündə verilən bonus möhürlər ilə onları alan müştərilərin sayı.
+         */
+        get: operations["list_3"];
+        put?: never;
+        /**
+         * Qayda yaratmaq
+         * @description `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00). Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.
+         */
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/bonus-rules/{ruleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Qaydanı dəyişmək */
+        put: operations["update_2"];
+        post?: never;
+        /**
+         * Qaydanı silmək
+         * @description Bonus möhür verməmiş qayda silinir (`deleted = true`); artıq veribsə, tarixçə üçün saxlanılır və söndürülür (`deleted = false`).
+         */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/campaigns": {
         parameters: {
             query?: never;
@@ -474,7 +519,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).
          */
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -638,7 +683,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_5"];
+        patch: operations["update_6"];
         trace?: never;
     };
     "/api/v1/admin/me/mfa/pause": {
@@ -786,7 +831,7 @@ export interface paths {
          * Dəvətlər
          * @description Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1204,7 +1249,7 @@ export interface paths {
          * Çiplərin siyahısı
          * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_7"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1308,7 +1353,7 @@ export interface paths {
          * İşçinin silinməsi
          * @description Yumşaq silinmə (soft delete): hesab bazada tarixçə üçün qalır, amma girişi və sessiyaları dərhal bağlanır, komanda siyahısında görünmür, email yenidən dəvət oluna bilər. Özünü və sonuncu aktiv sahibi silmək olmaz.
          */
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1589,14 +1634,14 @@ export interface paths {
          * Hesabın silinməsi
          * @description Əvvəlcə SMS kodu ilə təkrar təsdiq lazımdır (`/api/v1/auth/step-up/otp/*`), əks halda `STEP_UP_REQUIRED`. Şəxsi məlumat silinir, bütün sessiyalar bağlanır; anonim statistika qalır.
          */
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         /**
          * Ad və dilin dəyişdirilməsi
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
-        patch: operations["update_4"];
+        patch: operations["update_5"];
         trace?: never;
     };
     "/api/v1/me/gift-cards": {
@@ -1610,7 +1655,7 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_6"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1738,7 +1783,7 @@ export interface paths {
          * Platforma audit jurnalı
          * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_5"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1938,7 +1983,7 @@ export interface paths {
          * Kampaniyalar
          * @description `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_4"];
+        get: operations["list_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2028,7 +2073,7 @@ export interface paths {
          * Profilin yenilənməsi
          * @description Ad və interfeys dili; dil dərhal bütün cihazlarda tətbiq olunur.
          */
-        patch: operations["update_3"];
+        patch: operations["update_4"];
         trace?: never;
     };
     "/api/v1/platform/me/mfa/pause": {
@@ -2510,7 +2555,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** Etiket və ya filialın dəyişdirilməsi */
-        patch: operations["update_2"];
+        patch: operations["update_3"];
         trace?: never;
     };
     "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable": {
@@ -2610,6 +2655,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/bonus-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bu günün bonus qaydaları (giriş tələb etmir)
+         * @description Bu gün tarix aralığında olan aktiv qaydalar: cədvəl (günlər, saat aralığı), bitmə tarixi, filial və bu an qüvvədədirmi (`runningNow`). Paketdə imkan yoxdursa — boş siyahı.
+         */
+        get: operations["current"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/company": {
         parameters: {
             query?: never;
@@ -2681,7 +2746,7 @@ export interface paths {
          * Cari hüquqi sənədlər
          * @description Qeydiyyatda razılıq verilməli sənədlərin növləri və versiyaları.
          */
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2764,6 +2829,26 @@ export interface paths {
         get: operations["program"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/demo-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * TapStamp demo müraciəti
+         * @description Müraciət saxlanılmır: məzmunu şirkətin poçt qutusuna (`app.site.inbox`) email kimi göndərilir. Autentifikasiya tələb etmir; IP və ümumi gündəlik limit var. `website` sahəsi botlar üçün tələdir (honeypot — insan görmədiyi gizli sahə): doludursa müraciət səssizcə atılır.
+         */
+        post: operations["submit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2880,6 +2965,24 @@ export interface components {
         AuthStatusResponse: {
             /** @enum {string} */
             status?: "AUTHENTICATED";
+        };
+        BonusRuleRequest: {
+            active: boolean;
+            /** Format: int32 */
+            bonusStamps: number;
+            /** Format: uuid */
+            branchId?: string;
+            days: number[];
+            /** Format: time-local */
+            endTime?: string;
+            /** Format: date */
+            endsOn?: string;
+            name: components["schemas"]["LocalizedText"];
+            notifyOnStart: boolean;
+            /** Format: time-local */
+            startTime?: string;
+            /** Format: date */
+            startsOn?: string;
         };
         BranchOption: {
             /** Format: uuid */
@@ -3144,6 +3247,19 @@ export interface components {
             /** Format: date */
             to?: string;
             topReferrers?: components["schemas"]["TopReferrer"][];
+        };
+        DeleteResult: {
+            deleted?: boolean;
+        };
+        DemoRequestBody: {
+            branches: string;
+            businessType: string;
+            company: string;
+            language?: string;
+            name: string;
+            note?: string;
+            phone: string;
+            website?: string;
         };
         DeviceResponse: {
             /** Format: date-time */
@@ -3625,7 +3741,7 @@ export interface components {
             /** @description Sınaq bitib — şirkətin xidməti dayandırılıb */
             expired?: boolean;
             /** @description Açıq imkanlar (sınaq bitibsə boşdur) */
-            features?: ("PUSH" | "REFERRALS" | "CSV_EXPORT" | "FULL_ANALYTICS" | "STAMP_CAMPAIGNS" | "REMINDERS" | "AUDIT_LOG" | "BRANCH_COMPARISON" | "REFERRAL_STATS")[];
+            features?: ("PUSH" | "REFERRALS" | "CSV_EXPORT" | "FULL_ANALYTICS" | "STAMP_CAMPAIGNS" | "REMINDERS" | "AUDIT_LOG" | "BRANCH_COMPARISON" | "REFERRAL_STATS" | "BONUS_RULES")[];
             /** @description BASIC, STANDARD və ya PREMIUM */
             plan?: string;
             /**
@@ -3803,6 +3919,23 @@ export interface components {
             stampRules?: components["schemas"]["StampRulesResponse"];
             /** @description IANA saat qurşağı, məs. Asia/Baku */
             timezone?: string;
+        };
+        PublicRule: {
+            /** Format: int32 */
+            bonusStamps?: number;
+            /** Format: uuid */
+            branchId?: string;
+            days?: number[];
+            /** Format: time-local */
+            endTime?: string;
+            /** Format: date */
+            endsOn?: string;
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
+            runningNow?: boolean;
+            /** Format: time-local */
+            startTime?: string;
         };
         /** @description Bərpa kodları yalnız bir dəfə göstərilir; hər biri bir dəfə istifadə oluna bilər */
         RecoveryCodesResponse: {
@@ -4029,6 +4162,34 @@ export interface components {
             status?: string;
             /** Format: int32 */
             totalStamps?: number;
+        };
+        RuleView: {
+            active?: boolean;
+            /** Format: int32 */
+            bonusStamps?: number;
+            /** Format: int64 */
+            bonusStamps30d?: number;
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: int64 */
+            customers30d?: number;
+            days?: number[];
+            /** Format: time-local */
+            endTime?: string;
+            /** Format: date */
+            endsOn?: string;
+            /** Format: uuid */
+            id?: string;
+            name?: components["schemas"]["LocalizedText"];
+            /** Format: date-time */
+            notifiedAt?: string;
+            notifyOnStart?: boolean;
+            runningNow?: boolean;
+            /** Format: time-local */
+            startTime?: string;
+            /** Format: date */
+            startsOn?: string;
+            status?: string;
         };
         SeriesPoint: {
             /** Format: date */
@@ -4478,7 +4639,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: {
                 action?: string;
@@ -4769,6 +4930,98 @@ export interface operations {
             };
         };
     };
+    list_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RuleView"][];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BonusRuleRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RuleView"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BonusRuleRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RuleView"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeleteResult"];
+                };
+            };
+        };
+    };
     list_2: {
         parameters: {
             query?: {
@@ -4936,7 +5189,7 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    list_10: {
         parameters: {
             query?: {
                 q?: string;
@@ -5163,7 +5416,7 @@ export interface operations {
             };
         };
     };
-    update_5: {
+    update_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -5335,7 +5588,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: {
                 activity?: string;
@@ -5990,7 +6243,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_8: {
         parameters: {
             query?: {
                 branchId?: string;
@@ -6129,7 +6382,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -6445,7 +6698,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6463,7 +6716,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -6487,7 +6740,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -6631,7 +6884,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_6: {
         parameters: {
             query?: {
                 action?: string;
@@ -6851,7 +7104,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_5: {
         parameters: {
             query?: {
                 status?: string;
@@ -6968,7 +7221,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -7635,7 +7888,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -7780,6 +8033,26 @@ export interface operations {
             };
         };
     };
+    current: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicRule"][];
+                };
+            };
+        };
+    };
     company_1: {
         parameters: {
             query?: never;
@@ -7842,7 +8115,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -7941,6 +8214,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ProgramInfo"];
                 };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoRequestBody"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

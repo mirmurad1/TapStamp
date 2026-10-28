@@ -97,6 +97,14 @@ public class StampLedger {
         return id;
     }
 
+    /** Bonus qaydasının möhürü (çağıran tranzaksiyada {@link #lockAccount} etməlidir). */
+    public UUID insertBonusStamp(UUID branchId, UUID customerId, UUID bonusRuleId, String reason, LocalDate localDate,
+                                 Instant at) {
+        UUID id = Ids.newId();
+        stamps.insertBonusStamp(id, branchId, customerId, bonusRuleId, reason, localDate, at);
+        return id;
+    }
+
     public Optional<Stamp> findByTapToken(UUID tapTokenId) {
         return stamps.findByTapToken(tapTokenId);
     }

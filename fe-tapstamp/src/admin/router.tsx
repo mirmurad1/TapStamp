@@ -21,6 +21,7 @@ import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
 import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
 import { ReferralsPage } from './pages/referrals/ReferralsPage';
+import { BonusRulesPage } from './pages/bonus/BonusRulesPage';
 import { RemindersPage } from './pages/reminders/RemindersPage';
 import { SmsUsagePage } from './pages/platform/SmsUsagePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
@@ -86,6 +87,7 @@ export const adminRouter = createBrowserRouter(
                         },
                         { path: 'referrals', element: <RequireFeature feature="REFERRALS"><ReferralsPage /></RequireFeature> },
                         { path: 'reminders', element: <RequireFeature feature="REMINDERS"><RemindersPage /></RequireFeature> },
+                        { path: 'bonus-rules', element: <RequireFeature feature="BONUS_RULES"><BonusRulesPage /></RequireFeature> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

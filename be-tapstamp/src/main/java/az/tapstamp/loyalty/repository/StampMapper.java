@@ -50,6 +50,10 @@ public interface StampMapper {
 
     void insertReferralStamp(UUID id, UUID branchId, UUID customerId, UUID referralId, LocalDate day, Instant at);
 
+    /** Bonus qaydasının möhürü (mənbə BONUS, təsdiqlənmiş); {@code reason} — qaydanın adı. */
+    void insertBonusStamp(UUID id, UUID branchId, UUID customerId, UUID bonusRuleId, String reason, LocalDate day,
+                          Instant at);
+
     Optional<Stamp> findByTapToken(UUID tapTokenId);
 
     Optional<Stamp> lockStamp(UUID stampId);

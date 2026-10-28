@@ -9,7 +9,8 @@ import java.util.Set;
  */
 public enum Plan {
     BASIC(1, 3, EnumSet.noneOf(Feature.class)),
-    STANDARD(3, 10, EnumSet.of(Feature.PUSH, Feature.REFERRALS, Feature.CSV_EXPORT, Feature.FULL_ANALYTICS)),
+    STANDARD(3, 10, EnumSet.of(Feature.PUSH, Feature.REFERRALS, Feature.CSV_EXPORT, Feature.FULL_ANALYTICS,
+            Feature.BONUS_RULES)),
     PREMIUM(5, null, EnumSet.allOf(Feature.class));
 
     /** Sınaq müddəti (gün). */

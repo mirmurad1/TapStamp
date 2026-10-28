@@ -20,6 +20,7 @@ export const FEATURE_PLAN: Record<Feature, PlanName> = {
   AUDIT_LOG: 'PREMIUM',
   BRANCH_COMPARISON: 'PREMIUM',
   REFERRAL_STATS: 'PREMIUM',
+  BONUS_RULES: 'STANDARD',
 };
 
 /**

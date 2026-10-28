@@ -20,7 +20,8 @@
     "campaigns": "Kampaniyalar",
     "stampCampaigns": "Möhür kampaniyası",
     "referrals": "Dost dəvəti",
-    "reminders": "Xatırlatmalar"
+    "reminders": "Xatırlatmalar",
+    "bonusRules": "Bonus qaydaları"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -651,7 +652,8 @@
         "NFC_TAP": "Möhür (NFC)",
         "MANUAL": "Möhür (əl ilə)",
         "CAMPAIGN": "Möhür (kampaniya)",
-        "REFERRAL": "Möhür (dost dəvəti)"
+        "REFERRAL": "Möhür (dost dəvəti)",
+        "BONUS": "Möhür (bonus qaydası)"
       },
       "status": {
         "PENDING": "Təsdiq gözləyir",
@@ -998,6 +1000,72 @@
       "trialEnds_other": "Pulsuz sınaq {{date}} tarixində bitir ({{count}} gün qalıb). Sonra xidmət dayandırılacaq.",
       "limits": "Filial limiti: {{branches}} · İşçi limiti: {{staff}}",
       "unlimited": "limitsiz"
+    }
+  },
+  "bonusRules": {
+    "title": "Bonus qaydaları",
+    "subtitle": "Xoşbəxt saatlar və tarixli kampaniyalar: şərt ödənəndə müştəri hər NFC möhürü ilə əlavə bonus möhür qazanır. Sakit saatlara müştəri çəkmək və bayram kampaniyaları üçün.",
+    "add": "Yeni qayda",
+    "empty": {
+      "title": "Hələ bonus qaydası yoxdur",
+      "hint": "Məsələn, həftə içi 14:00–17:00 arası \"ikiqat möhür\" və ya Novruz həftəsində hər ziyarətə +1 möhür."
+    },
+    "note": "Bir anda bir neçə qayda uyğun gəlirsə, yalnız ən böyük bonus verilir. Şərt müştərinin möhür aldığı ana görə yoxlanılır — işçi sonradan təsdiqləsə də.",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "SCHEDULED": "Planlaşdırılıb",
+      "ENDED": "Bitib",
+      "OFF": "Söndürülüb"
+    },
+    "runningNow": "İndi qüvvədədir",
+    "bonus_one": "+{{count}} bonus möhür",
+    "bonus_other": "+{{count}} bonus möhür",
+    "bonusOption_one": "+{{count}} (ikiqat möhür)",
+    "bonusOption_other": "+{{count}} bonus möhür",
+    "allBranches": "Bütün filiallar",
+    "stats": "Son 30 gün: {{stamps}} bonus möhür, {{customers}} müştəri",
+    "notified": "Başlanğıc bildirişi göndərilib: {{date}}",
+    "willNotify": "Başlayanda bildirişi açıq müştərilərə xəbər veriləcək (10:00–20:00).",
+    "deleteConfirm": "Qayda silinsin? Artıq bonus veribsə, tarixçə üçün saxlanılacaq və söndürüləcək.",
+    "disabledInstead": "Qayda artıq bonus verdiyi üçün silinmədi — söndürüldü.",
+    "newTitle": "Yeni bonus qaydası",
+    "editTitle": "Bonus qaydasını düzəlt",
+    "dialogDescription": "Qayda müştərinin kartında banner kimi görünəcək.",
+    "days": {
+      "1": "B.e.",
+      "2": "Ç.a.",
+      "3": "Çər.",
+      "4": "C.a.",
+      "5": "Cüm.",
+      "6": "Şən.",
+      "7": "Baz."
+    },
+    "schedule": {
+      "everyDay": "Hər gün",
+      "weekdays": "Həftə içi",
+      "weekend": "Həftəsonu",
+      "allDay": "Bütün gün"
+    },
+    "form": {
+      "name": "Adı (müştəri görəcək)",
+      "bonus": "Hər möhürə əlavə",
+      "bonusHint": "Müştəri NFC ilə 1 möhür alır, üstəlik bu qədər bonus.",
+      "days": "Həftənin günləri",
+      "timed": "Yalnız müəyyən saatlarda",
+      "timedHint": "Şirkətin yerli vaxtı ilə; bitmə saatı daxil deyil.",
+      "from": "Başlama saatı",
+      "to": "Bitmə saatı",
+      "timesInvalid": "Bitmə saatı başlamadan sonra olmalıdır.",
+      "dated": "Müəyyən tarixlərdə (kampaniya)",
+      "datedHint": "Boş qalsa, qayda müddətsiz işləyir. Tarixlər daxil olmaqla.",
+      "startsOn": "Başlama tarixi",
+      "endsOn": "Bitmə tarixi",
+      "datesInvalid": "Bitmə tarixi başlamadan əvvəl ola bilməz.",
+      "branch": "Filial",
+      "notify": "Başlayanda müştərilərə bildiriş göndər",
+      "notifyHint": "Bildirişi açıq müştərilərə bir dəfə pulsuz push gedir (10:00–20:00).",
+      "active": "Aktivdir",
+      "activeHint": "Söndürülən qayda bonus vermir və müştəriyə göstərilmir."
     }
   }
 }

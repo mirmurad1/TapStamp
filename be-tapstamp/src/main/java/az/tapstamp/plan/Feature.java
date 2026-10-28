@@ -19,5 +19,7 @@ public enum Feature {
     /** Göstəricilərin filiallar üzrə müqayisəsi. */
     BRANCH_COMPARISON,
     /** Dəvət statistikası. */
-    REFERRAL_STATS
+    REFERRAL_STATS,
+    /** Bonus qaydaları (xoşbəxt saatlar, tarixli kampaniyalar). */
+    BONUS_RULES
 }

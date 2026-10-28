@@ -15,6 +15,7 @@ import az.tapstamp.plan.PlanService;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
+import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.web.DeviceLabels;
 import az.tapstamp.tenancy.TenantContext;
@@ -48,7 +49,9 @@ public class PushService {
         REMINDER_NEAR_REWARD("/"),
         REMINDER_WINBACK("/"),
         REMINDER_WINBACK_EMPTY("/"),
-        REMINDER_UNUSED_GIFT("/gift-cards");
+        REMINDER_UNUSED_GIFT("/gift-cards"),
+        /** Bonus qaydası başladı (qərar #59); arqumentlər: qaydanın adı ({@link LocalizedText}), bonus möhür. */
+        BONUS_RULE_STARTED("/");
 
         private final String url;
 
@@ -154,10 +157,11 @@ public class PushService {
             if (language == null) {
                 return;
             }
+            Object[] localized = localize(args, language);
             String key = "push." + kind.name().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
             Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("title", messages.getMessage(key + ".title", args, language.locale()));
-            payload.put("body", messages.getMessage(key + ".body", args, language.locale()));
+            payload.put("title", messages.getMessage(key + ".title", localized, language.locale()));
+            payload.put("body", messages.getMessage(key + ".body", localized, language.locale()));
             payload.put("url", kind.url);
             payload.put("tag", kind.name());
             byte[] body = json.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8);
@@ -173,6 +177,17 @@ public class PushService {
         } catch (RuntimeException e) {
             log.warn("Push notification {} failed: {}", kind, e.getClass().getSimpleName());
         }
+    }
+
+    /** Admin tərəfindən daxil edilən 3 dilli mətnlər müştərinin dilində. */
+    private static Object[] localize(Object[] args, Language language) {
+        Object[] result = args.clone();
+        for (int i = 0; i < result.length; i++) {
+            if (result[i] instanceof LocalizedText text) {
+                result[i] = text.resolve(language);
+            }
+        }
+        return result;
     }
 
     private static int decodedLength(String value) {

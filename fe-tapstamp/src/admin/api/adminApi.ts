@@ -518,3 +518,15 @@ export const platformPlanApi = {
   update: (tenantId: string, body: Schemas['TenantPlanRequest']) =>
     unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } }, body })),
 };
+
+export type BonusRule = Schemas['RuleView'];
+export type BonusRuleRequest = Schemas['BonusRuleRequest'];
+
+/** Bonus qaydaları (şirkət sahibi): xoşbəxt saatlar və tarixli kampaniyalar. */
+export const bonusRulesApi = {
+  list: () => unwrap(api.GET('/api/v1/admin/bonus-rules')),
+  create: (body: BonusRuleRequest) => unwrap(api.POST('/api/v1/admin/bonus-rules', { body })),
+  update: (ruleId: string, body: BonusRuleRequest) =>
+    unwrap(api.PUT('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } }, body })),
+  remove: (ruleId: string) => unwrap(api.DELETE('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } } })),
+};

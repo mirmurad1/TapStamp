@@ -28,6 +28,8 @@ export const publicApi = {
   company: () => unwrap(api.GET('/api/v1/public/company')),
   legalDocuments: () => unwrap(api.GET('/api/v1/public/legal')),
   legalDocument: (slug: string) => unwrap(api.GET('/api/v1/public/legal/{slug}', { params: { path: { slug } } })),
+  /** Bu günün bonus qaydaları (xoşbəxt saatlar, kampaniyalar) — kartın üstündəki banner. */
+  bonusRules: () => unwrap(api.GET('/api/v1/public/bonus-rules')),
 };
 
 export const customerAuthApi = {

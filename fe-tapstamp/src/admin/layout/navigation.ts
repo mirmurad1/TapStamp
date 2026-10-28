@@ -7,6 +7,7 @@ import {
   MessageSquareText,
   Nfc,
   Settings,
+  Sparkles,
   ShieldCheck,
   Stamp,
   UserPlus,
@@ -29,6 +30,7 @@ export type AdminSection =
   | 'stampCampaigns'
   | 'referrals'
   | 'reminders'
+  | 'bonusRules'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -59,6 +61,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'], feature: 'STAMP_CAMPAIGNS' },
   { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS' },
   { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'], feature: 'REMINDERS' },
+  { section: 'bonusRules', to: '/bonus-rules', icon: Sparkles, roles: ['COMPANY_OWNER'], feature: 'BONUS_RULES' },
   { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
   { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'], feature: 'AUDIT_LOG' },
   { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
