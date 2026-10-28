@@ -22,8 +22,9 @@ public class CustomerTierController {
 
     @GetMapping("/api/v1/me/tier")
     @Operation(summary = "Mənim səviyyəm", description = """
-            Ziyarətlərin sayı, cari səviyyə (hələ yoxdursa boş), növbəti səviyyə və ona qalan ziyarətlər. Şirkətdə \
-            səviyyə yoxdursa və ya paketdə imkan yoxdursa `enabled = false`.""")
+            Ziyarətlərin sayı, cari səviyyə (hələ yoxdursa boş), növbəti səviyyə, ona qalan ziyarətlər və bütün \
+            səviyyələr (`tiers` — həddə görə, imtiyazları ilə). Şirkətdə səviyyə yoxdursa, proqram söndürülübsə və ya \
+            paketdə imkan yoxdursa `enabled = false`.""")
     CustomerTier mine(@AuthenticationPrincipal CustomerPrincipal principal) {
         return tiers.forCustomer(principal);
     }

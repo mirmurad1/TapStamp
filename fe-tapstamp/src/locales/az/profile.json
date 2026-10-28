@@ -238,6 +238,19 @@
     "toNext_other": "{{name}} səviyyəsinə {{count}} ziyarət qalıb.",
     "nextPerk_one": "Orada hər möhürə +{{count}} bonus.",
     "nextPerk_other": "Orada hər möhürə +{{count}} bonus.",
-    "top": "Ən yüksək səviyyədəsiniz. Təşəkkür edirik!"
+    "top": "Ən yüksək səviyyədəsiniz. Təşəkkür edirik!",
+    "openAll": "Səviyyəniz: {{name}}. Bütün səviyyələrə baxın",
+    "allTitle": "Səviyyələr",
+    "visits_one": "Ziyarətləriniz: {{count}}",
+    "visits_other": "Ziyarətləriniz: {{count}}",
+    "youAreHere": "Siz buradasınız",
+    "benefit_one": "Hər möhürə +{{count}} bonus möhür",
+    "benefit_other": "Hər möhürə +{{count}} bonus möhür",
+    "badgeOnly": "Xüsusi nişan",
+    "from_one": "{{count}} ziyarətdən",
+    "from_other": "{{count}} ziyarətdən",
+    "fromStart": "İlk ziyarətdən",
+    "reached": "Keçilib",
+    "howItWorks": "Hər NFC möhürü bir ziyarət sayılır. Səviyyə avtomatik yüksəlir."
   }
 }

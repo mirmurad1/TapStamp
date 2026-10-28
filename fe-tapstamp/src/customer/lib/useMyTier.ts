@@ -16,5 +16,5 @@ export function useMyTier() {
   const from = current?.minVisits ?? 0;
   const to = next?.minVisits ?? from;
   const progress = next ? Math.min(1, Math.max(0, (visits - from) / Math.max(1, to - from))) : 1;
-  return { current, next, visitsToNext: data.visitsToNext ?? 0, progress };
+  return { current, next, visits, visitsToNext: data.visitsToNext ?? 0, progress, tiers: data.tiers ?? [] };
 }

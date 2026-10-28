@@ -3364,7 +3364,7 @@
     },
     "/api/v1/me/tier" : {
       "get" : {
-        "description" : "Ziyarətlərin sayı, cari səviyyə (hələ yoxdursa boş), növbəti səviyyə və ona qalan ziyarətlər. Şirkətdə səviyyə yoxdursa və ya paketdə imkan yoxdursa `enabled = false`.",
+        "description" : "Ziyarətlərin sayı, cari səviyyə (hələ yoxdursa boş), növbəti səviyyə, ona qalan ziyarətlər və bütün səviyyələr (`tiers` — həddə görə, imtiyazları ilə). Şirkətdə səviyyə yoxdursa, proqram söndürülübsə və ya paketdə imkan yoxdursa `enabled = false`.",
         "operationId" : "mine",
         "responses" : {
           "200" : {
@@ -6086,6 +6086,12 @@
           },
           "next" : {
             "$ref" : "#/components/schemas/Tier"
+          },
+          "tiers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Tier"
+            }
           },
           "visits" : {
             "type" : "integer",

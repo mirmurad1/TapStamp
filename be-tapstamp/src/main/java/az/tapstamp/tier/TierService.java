@@ -52,9 +52,9 @@ public class TierService {
     public record TierOverview(boolean enabled, List<TierView> tiers, long belowAll) {
     }
 
-    /** Müştərinin səviyyəsi: cari (yoxdursa null), növbəti və ona qalan ziyarətlər. */
+    /** Müştərinin səviyyəsi: cari (yoxdursa null), növbəti və ona qalan ziyarətlər; {@code tiers} — bütün səviyyələr həddə görə. */
     public record CustomerTier(boolean enabled, int visits, @Nullable Tier current, @Nullable Tier next,
-                               int visitsToNext) {
+                               int visitsToNext, List<Tier> tiers) {
     }
 
     private final TierMapper tiers;
@@ -131,12 +131,12 @@ public class TierService {
     public CustomerTier forCustomer(CustomerPrincipal principal) {
         List<Tier> all = active() ? tiers.findAll() : List.of();
         if (all.isEmpty()) {
-            return new CustomerTier(false, 0, null, null, 0);
+            return new CustomerTier(false, 0, null, null, 0, List.of());
         }
         int visits = tiers.visits(principal.customerId());
         Tier next = nextAfter(all, visits);
         return new CustomerTier(true, visits, tierFor(all, visits), next,
-                next == null ? 0 : next.minVisits() - visits);
+                next == null ? 0 : next.minVisits() - visits, all);
     }
 
     // ---------------------------------------------------------------- admin (şirkət sahibi)

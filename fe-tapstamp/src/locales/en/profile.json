@@ -238,6 +238,19 @@
     "toNext_other": "{{count}} visits to {{name}}.",
     "nextPerk_one": "There you get +{{count}} bonus stamp with every stamp.",
     "nextPerk_other": "There you get +{{count}} bonus stamps with every stamp.",
-    "top": "You are at the top tier. Thank you!"
+    "top": "You are at the top tier. Thank you!",
+    "openAll": "Your tier: {{name}}. See all tiers",
+    "allTitle": "Tiers",
+    "visits_one": "Your visits: {{count}}",
+    "visits_other": "Your visits: {{count}}",
+    "youAreHere": "You are here",
+    "benefit_one": "+{{count}} bonus stamp with every stamp",
+    "benefit_other": "+{{count}} bonus stamps with every stamp",
+    "badgeOnly": "Special badge",
+    "from_one": "From {{count}} visit",
+    "from_other": "From {{count}} visits",
+    "fromStart": "From your first visit",
+    "reached": "Reached",
+    "howItWorks": "Every NFC stamp counts as a visit. Your tier goes up automatically."
   }
 }

@@ -63,7 +63,8 @@ class TierIT extends TapIntegrationTest {
                 .andExpect(jsonPath("$.visits").value(0))
                 .andExpect(jsonPath("$.current").doesNotExist())
                 .andExpect(jsonPath("$.next.name.az").value("Bürünc"))
-                .andExpect(jsonPath("$.visitsToNext").value(1));
+                .andExpect(jsonPath("$.visitsToNext").value(1))
+                .andExpect(jsonPath("$.tiers[*].name.az").value(org.hamcrest.Matchers.contains("Bürünc", "Gümüş")));
 
         // 1-ci ziyarət: Bürünc (bonussuz)
         claim(customer, tag, 1);

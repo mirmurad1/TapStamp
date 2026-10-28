@@ -82,3 +82,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase11-03-bonus-deliveries.jpg` | Bonus kampaniyası: başlanğıc bildirişini alanlar — ad, maskalı telefon, "Çatdırıldı / Çatdırılmadı", süzgəc və səhifələmə |
 | `phase11-04-tiers-admin.jpg` | Səviyyələr (admin): proqramın açarı; Bürünc, Gümüş, Qızıl — hədd, imtiyaz və hər səviyyədəki müştərilərin sayı |
 | `phase11-05-tier-customer.jpg` | Səviyyə möhür kartının içində: nişan kartın aşağı xəttində, növbəti səviyyəyə irəliləyiş kartın alt zolağında |
+| `phase11-06-first-login-with-tier.jpg` | İlk girişdən sonra: səviyyə zolağı və "Nömrənizi bir daha soruşmayacağıq" izahı kartın alt hissəsində |
+| `phase11-07-tier-sheet.jpg` | Səviyyə nişanına toxunanda: bütün səviyyələr medal, imtiyaz və hədd ilə; cari səviyyə vurğulanıb |
