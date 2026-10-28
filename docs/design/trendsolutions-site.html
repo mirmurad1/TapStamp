@@ -299,6 +299,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (max-width:960px){.shots{grid-template-columns:1fr 1fr}.shot-admin{grid-column:1/-1}}
 @media (max-width:600px){.shots{gap:16px}.shot-phone img{border-radius:20px;box-shadow:0 0 0 5px var(--night),0 20px 40px -20px rgba(14,24,48,.45)}.shots figcaption{font-size:14px}}
 
+/* Müştəri loqosu: kvadrat fayldan ortadakı yazı zolağı göstərilir */
+.clients .logo{width:128px;height:64px;object-fit:cover;object-position:center;border-radius:14px;flex:none}
+
 </style>
 </head>
 <body>
@@ -452,7 +455,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <p class="kicker" data-t="clients.kicker"></p>
     <h2 data-t="clients.title"></h2>
     <ul class="clients">
-      <li><span class="mono" aria-hidden="true">HP</span><span><b>Həzz Point</b><small data-t="clients.hezz"></small></span></li>
+      <li><img class="logo" src="../../site/assets/img/hezz-point-logo.jpg" width="128" height="64" alt="" loading="lazy"><span><b>Həzz Point</b><small data-t="clients.hezz"></small></span></li>
     </ul>
   </div>
 </section>
