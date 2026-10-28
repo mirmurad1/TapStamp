@@ -58,4 +58,25 @@ public interface BonusRuleMapper {
 
     /** Bildirişləri açıq aktiv müştərilər. */
     List<UUID> pushAudience(int limit, long offset);
+
+    // --- Başlanğıc bildirişinin çatdırılması ---
+
+    /** Qaydanın bildirişləri: hamısı, çatdırılan, alınmayan (növbədə olanlar — fərq). */
+    record DeliveryCounts(UUID ruleId, long total, long delivered, long failed) {
+    }
+
+    /** Bildiriş alan müştəri: ad (yoxdursa boş), maskalı telefon və nəticə. */
+    record DeliveryRow(UUID customerId, @Nullable String name, String phoneMasked, String status, Instant updatedAt) {
+    }
+
+    void insertDelivery(UUID ruleId, UUID customerId, Instant now);
+
+    void markDelivery(UUID ruleId, UUID customerId, String status, Instant now);
+
+    List<DeliveryCounts> deliveryCounts();
+
+    /** {@code status} boşdursa — hamısı; ad üzrə sıralı. */
+    List<DeliveryRow> deliveries(UUID ruleId, @Nullable String status, int limit, long offset);
+
+    long countDeliveries(UUID ruleId, @Nullable String status);
 }

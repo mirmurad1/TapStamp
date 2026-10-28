@@ -194,6 +194,20 @@ class BonusRuleIT extends TapIntegrationTest {
         Thread.sleep(300);
         assertThat(inbox.to(browser.endpoint())).hasSize(1);
         owner().get("/bonus-rules").andExpect(jsonPath("$[?(@.id == '" + id + "')].notifiedAt").isNotEmpty());
+
+        // Çatdırılma hesabatı: nəticə arxa planda yazılır
+        String customerId = JsonPath.read(customer.get("/api/v1/me").andReturn().getResponse()
+                .getContentAsString(StandardCharsets.UTF_8), "$.id");
+        String deliveries = "";
+        for (int i = 0; i < 50 && !deliveries.contains("DELIVERED"); i++) {
+            Thread.sleep(100);
+            deliveries = owner().get("/bonus-rules/" + id + "/deliveries?status=DELIVERED&size=50").andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        }
+        assertThat(JsonPath.<java.util.List<String>>read(deliveries, "$.items[*].customerId")).contains(customerId);
+        owner().get("/bonus-rules").andExpect(jsonPath("$[?(@.id == '" + id + "')].notifyDelivered")
+                .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.greaterThanOrEqualTo(1))));
+        owner().get("/bonus-rules/" + id + "/deliveries?status=WRONG").andExpect(status().isBadRequest());
     }
 
     @Test

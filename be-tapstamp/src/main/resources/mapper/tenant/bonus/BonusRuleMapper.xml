@@ -66,4 +66,38 @@
         ORDER BY c.id
         LIMIT #{limit} OFFSET #{offset}
     </select>
+
+    <insert id="insertDelivery">
+        INSERT INTO bonus_rule_deliveries (rule_id, customer_id, status, created_at, updated_at)
+        VALUES (#{ruleId}, #{customerId}, 'PENDING', #{now}, #{now})
+        ON CONFLICT (rule_id, customer_id) DO NOTHING
+    </insert>
+
+    <update id="markDelivery">
+        UPDATE bonus_rule_deliveries SET status = #{status}, updated_at = #{now}
+        WHERE rule_id = #{ruleId} AND customer_id = #{customerId}
+    </update>
+
+    <select id="deliveryCounts" resultType="az.tapstamp.bonus.repository.BonusRuleMapper$DeliveryCounts">
+        SELECT rule_id, count(*) AS total, count(*) FILTER (WHERE status = 'DELIVERED') AS delivered,
+               count(*) FILTER (WHERE status = 'FAILED') AS failed
+        FROM bonus_rule_deliveries GROUP BY rule_id
+    </select>
+
+    <sql id="deliveryFilter">
+        WHERE d.rule_id = #{ruleId}
+        <if test="status != null">AND d.status = #{status}</if>
+    </sql>
+
+    <select id="deliveries" resultType="az.tapstamp.bonus.repository.BonusRuleMapper$DeliveryRow">
+        SELECT d.customer_id, c.name, c.phone_masked, d.status, d.updated_at
+        FROM bonus_rule_deliveries d JOIN customers c ON c.id = d.customer_id
+        <include refid="deliveryFilter"/>
+        ORDER BY c.name NULLS LAST, c.phone_masked, d.customer_id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countDeliveries" resultType="long">
+        SELECT count(*) FROM bonus_rule_deliveries d <include refid="deliveryFilter"/>
+    </select>
 </mapper>

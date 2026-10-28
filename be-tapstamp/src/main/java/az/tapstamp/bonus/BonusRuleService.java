@@ -18,6 +18,8 @@ import java.util.UUID;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.bonus.repository.BonusRuleMapper;
 import az.tapstamp.bonus.repository.BonusRuleMapper.BonusRule;
+import az.tapstamp.bonus.repository.BonusRuleMapper.DeliveryCounts;
+import az.tapstamp.bonus.repository.BonusRuleMapper.DeliveryRow;
 import az.tapstamp.bonus.repository.BonusRuleMapper.RuleStats;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.loyalty.stamp.StampLedger;
@@ -31,6 +33,8 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
 import az.tapstamp.tenancy.registry.TenantDirectory;
@@ -70,7 +74,7 @@ public class BonusRuleService {
                            @Nullable LocalTime startTime, @Nullable LocalTime endTime, @Nullable LocalDate startsOn,
                            @Nullable LocalDate endsOn, @Nullable UUID branchId, boolean active, boolean notifyOnStart,
                            @Nullable Instant notifiedAt, String status, boolean runningNow, long bonusStamps30d,
-                           long customers30d) {
+                           long customers30d, long notifyTotal, long notifyDelivered, long notifyFailed) {
     }
 
     /** Müştəri üçün qayda (kartın üstündəki banner): {@code runningNow} — bu an möhür alsa bonus qazanır. */
@@ -196,7 +200,13 @@ public class BonusRuleService {
         for (RuleStats row : rules.stats(now.minus(Duration.ofDays(30)))) {
             stats.put(row.ruleId(), row);
         }
-        return rules.findAll().stream().map(rule -> view(rule, local, stats.get(rule.id()))).toList();
+        Map<UUID, DeliveryCounts> deliveries = new HashMap<>();
+        for (DeliveryCounts row : rules.deliveryCounts()) {
+            deliveries.put(row.ruleId(), row);
+        }
+        return rules.findAll().stream()
+                .map(rule -> view(rule, local, stats.get(rule.id()), deliveries.get(rule.id())))
+                .toList();
     }
 
     @Transactional
@@ -246,9 +256,21 @@ public class BonusRuleService {
         return deleted;
     }
 
+    public static final List<String> DELIVERY_STATUSES = List.of("PENDING", "DELIVERED", "FAILED");
+
+    /** Başlanğıc bildirişini alan müştərilər nəticə ilə, səhifə-səhifə; {@code status} boşdursa — hamısı. */
+    public PageResult<DeliveryRow> deliveries(AdminPrincipal principal, UUID id, @Nullable String status, PageQuery page) {
+        AccessPolicy.requireCompanyWide(principal);
+        if (status != null && !DELIVERY_STATUSES.contains(status)) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+        rules.findById(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        return page.result(rules.deliveries(id, status, page.limit(), page.offset()), rules.countDeliveries(id, status));
+    }
+
     private RuleView find(UUID id) {
         BonusRule rule = rules.findById(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-        return view(rule, clock.instant().atZone(company.current().timezone()), null);
+        return view(rule, clock.instant().atZone(company.current().timezone()), null, null);
     }
 
     private int validate(RuleInput input) {
@@ -268,7 +290,8 @@ public class BonusRuleService {
         return mask;
     }
 
-    private static RuleView view(BonusRule rule, ZonedDateTime now, @Nullable RuleStats stats) {
+    private static RuleView view(BonusRule rule, ZonedDateTime now, @Nullable RuleStats stats,
+                                 @Nullable DeliveryCounts deliveries) {
         LocalDate today = now.toLocalDate();
         String status;
         if (!rule.active()) {
@@ -284,7 +307,8 @@ public class BonusRuleService {
         return new RuleView(rule.id(), rule.name(), rule.bonusStamps(), fromMask(rule.daysMask()), rule.startTime(),
                 rule.endTime(), rule.startsOn(), rule.endsOn(), rule.branchId(), rule.active(), rule.notifyOnStart(),
                 rule.notifiedAt(), status, running, stats == null ? 0 : stats.bonusStamps(),
-                stats == null ? 0 : stats.customers());
+                stats == null ? 0 : stats.customers(), deliveries == null ? 0 : deliveries.total(),
+                deliveries == null ? 0 : deliveries.delivered(), deliveries == null ? 0 : deliveries.failed());
     }
 
     // ---------------------------------------------------------------- başlanğıc bildirişi
@@ -326,7 +350,12 @@ public class BonusRuleService {
             for (long offset = 0; ; offset += PUSH_BATCH) {
                 List<UUID> audience = rules.pushAudience(PUSH_BATCH, offset);
                 for (UUID customerId : audience) {
-                    push.notify(customerId, PushService.Kind.BONUS_RULE_STARTED, rule.name(), rule.bonusStamps());
+                    // Kimə göndərildiyi və nəticə admin üçün saxlanılır
+                    rules.insertDelivery(rule.id(), customerId, now);
+                    push.notifyTracked(customerId, PushService.Kind.BONUS_RULE_STARTED,
+                            delivered -> rules.markDelivery(rule.id(), customerId, delivered ? "DELIVERED" : "FAILED",
+                                    clock.instant()),
+                            rule.name(), rule.bonusStamps());
                 }
                 if (audience.size() < PUSH_BATCH) {
                     break;

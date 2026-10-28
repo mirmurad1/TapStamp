@@ -21,7 +21,7 @@
     "stampCampaigns": "Stamp campaign",
     "referrals": "Invite a friend",
     "reminders": "Reminders",
-    "bonusRules": "Bonus rules"
+    "bonusRules": "Bonus campaigns"
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -1003,14 +1003,14 @@
     }
   },
   "bonusRules": {
-    "title": "Bonus rules",
+    "title": "Bonus campaigns",
     "subtitle": "Happy hours and dated campaigns: when the conditions match, customers earn extra bonus stamps with every NFC stamp. Use them to fill quiet hours and for holiday promotions.",
-    "add": "New rule",
+    "add": "New campaign",
     "empty": {
-      "title": "No bonus rules yet",
+      "title": "No bonus campaigns yet",
       "hint": "For example, \"double stamps\" on weekdays 14:00–17:00, or +1 stamp per visit during a holiday week."
     },
-    "note": "If several rules match at once, only the largest bonus is given. Conditions are checked at the moment the customer took the stamp, even if staff approve it later.",
+    "note": "If several campaigns match at once, only the largest bonus is given. Conditions are checked at the moment the customer took the stamp, even if staff approve it later.",
     "status": {
       "ACTIVE": "Active",
       "SCHEDULED": "Scheduled",
@@ -1026,11 +1026,11 @@
     "stats": "Last 30 days: {{stamps}} bonus stamps, {{customers}} customers",
     "notified": "Start notification sent: {{date}}",
     "willNotify": "Customers with notifications on will be told as soon as it starts (10:00–20:00).",
-    "deleteConfirm": "Delete this rule? If it has already given bonuses, it will be kept for history and switched off.",
-    "disabledInstead": "The rule has already given bonuses, so it was switched off instead of deleted.",
-    "newTitle": "New bonus rule",
-    "editTitle": "Edit bonus rule",
-    "dialogDescription": "The rule is shown to customers as a banner on their card.",
+    "deleteConfirm": "Delete this campaign? If it has already given bonuses, it will be kept for history and switched off.",
+    "disabledInstead": "The campaign has already given bonuses, so it was switched off instead of deleted.",
+    "newTitle": "New bonus campaign",
+    "editTitle": "Edit bonus campaign",
+    "dialogDescription": "The campaign is shown to customers as a banner on their card.",
     "days": {
       "1": "Mon",
       "2": "Tue",
@@ -1066,6 +1066,27 @@
       "notifyHint": "A free push is sent once to customers with notifications on: right away if the rule starts today, otherwise on its start day (10:00–20:00).",
       "active": "Active",
       "activeHint": "A switched-off rule gives no bonus and is not shown to customers."
+    },
+    "deliveries": {
+      "sent_one": "Notification sent to {{value}} customer",
+      "sent_other": "Notification sent to {{value}} customers",
+      "delivered": "Delivered: {{value}}",
+      "failed": "Failed: {{value}}",
+      "title": "Notification recipients",
+      "note": "\"Delivered\" means Google or Apple accepted it; it does not mean it was read.",
+      "filter": "Filter by result",
+      "filters": {
+        "ALL": "All",
+        "DELIVERED": "Delivered",
+        "FAILED": "Not delivered",
+        "PENDING": "Sending"
+      },
+      "status": {
+        "DELIVERED": "Delivered",
+        "FAILED": "Not delivered",
+        "PENDING": "Sending"
+      },
+      "empty": "No customers match this filter."
     }
   }
 }

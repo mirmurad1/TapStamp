@@ -727,6 +727,60 @@
         "tags" : [ "Admin: bonus qaydaları" ]
       }
     },
+    "/api/v1/admin/bonus-rules/{ruleId}/deliveries" : {
+      "get" : {
+        "description" : "Bildiriş göndərilən müştərilər (ad, maskalı telefon) və nəticə: `PENDING` — növbədədir, `DELIVERED` — push \n            xidməti (Google, Apple) qəbul edib, `FAILED` — cihaz yoxdur və ya alınmadı. `status` ilə süzgəc; \n            səhifə-səhifə. \"Çatdırıldı\" bildirişin oxunduğu demək deyil.",
+        "operationId" : "deliveries",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "ruleId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultDeliveryRow"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Başlanğıc bildirişini alanlar",
+        "tags" : [ "Admin: bonus qaydaları" ]
+      }
+    },
     "/api/v1/admin/campaigns" : {
       "get" : {
         "description" : "Növə görə (SMS və ya STAMPS), yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
@@ -5887,6 +5941,28 @@
           }
         }
       },
+      "DeliveryRow" : {
+        "type" : "object",
+        "properties" : {
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "phoneMasked" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "DemoRequestBody" : {
         "type" : "object",
         "properties" : {
@@ -6757,6 +6833,29 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/CampaignView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "PageResultDeliveryRow" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DeliveryRow"
             }
           },
           "page" : {
@@ -8160,8 +8259,20 @@
             "type" : "string",
             "format" : "date-time"
           },
+          "notifyDelivered" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "notifyFailed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "notifyOnStart" : {
             "type" : "boolean"
+          },
+          "notifyTotal" : {
+            "type" : "integer",
+            "format" : "int64"
           },
           "runningNow" : {
             "type" : "boolean"

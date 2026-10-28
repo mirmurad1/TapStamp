@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import az.tapstamp.notification.push.repository.PushSubscriptionMapper;
 import az.tapstamp.notification.push.repository.PushSubscriptionMapper.Subscription;
@@ -130,11 +131,33 @@ public class PushService {
      * söndürülübsə heç nə etmir.
      */
     public void notify(UUID customerId, Kind kind, Object... args) {
+        enqueue(customerId, kind, args, null);
+    }
+
+    /**
+     * {@link #notify} kimi, üstəlik nəticə bildirilir (arxa plan axınında, şirkətin kontekstində): {@code true} — ən azı
+     * bir cihaza push xidməti qəbul etdi; {@code false} — cihaz yoxdur və ya hamısı alınmadı. Push söndürülübsə —
+     * {@code false} dərhal.
+     */
+    public void notifyTracked(UUID customerId, Kind kind, Consumer<Boolean> onResult, Object... args) {
+        if (!available()) {
+            onResult.accept(false);
+            return;
+        }
+        enqueue(customerId, kind, args, onResult);
+    }
+
+    private void enqueue(UUID customerId, Kind kind, Object[] args, @Nullable Consumer<Boolean> onResult) {
         if (!available()) {
             return;
         }
         TenantInfo tenant = TenantContext.require();
-        Runnable task = () -> executor.execute(() -> TenantContext.runAs(tenant, () -> deliver(customerId, kind, args)));
+        Runnable task = () -> executor.execute(() -> TenantContext.runAs(tenant, () -> {
+            boolean delivered = deliver(customerId, kind, args);
+            if (onResult != null) {
+                onResult.accept(delivered);
+            }
+        }));
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -147,16 +170,18 @@ public class PushService {
         }
     }
 
-    private void deliver(UUID customerId, Kind kind, Object[] args) {
+    /** Ən azı bir cihaza çatdırılıbsa (push xidməti qəbul edib) — {@code true}. */
+    private boolean deliver(UUID customerId, Kind kind, Object[] args) {
         try {
             List<Subscription> devices = subscriptions.forCustomer(customerId);
             if (devices.isEmpty()) {
-                return;
+                return false;
             }
             Language language = subscriptions.activeCustomerLanguage(customerId).flatMap(Language::fromTag).orElse(null);
             if (language == null) {
-                return;
+                return false;
             }
+            boolean delivered = false;
             Object[] localized = localize(args, language);
             String key = "push." + kind.name().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
             Map<String, Object> payload = new LinkedHashMap<>();
@@ -169,13 +194,18 @@ public class PushService {
                 WebPushSender.Result result = sender.send(device.endpoint(), B64.decode(device.p256dh()),
                         B64.decode(device.auth()), body, TTL_SECONDS);
                 switch (result) {
-                    case SENT -> subscriptions.markSent(device.id(), clock.instant());
+                    case SENT -> {
+                        subscriptions.markSent(device.id(), clock.instant());
+                        delivered = true;
+                    }
                     case GONE -> subscriptions.deleteById(device.id());
                     case FAILED -> { }
                 }
             }
+            return delivered;
         } catch (RuntimeException e) {
             log.warn("Push notification {} failed: {}", kind, e.getClass().getSimpleName());
+            return false;
         }
     }
 

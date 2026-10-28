@@ -373,7 +373,7 @@ export interface paths {
         put?: never;
         /**
          * Qayda yaratmaq
-         * @description `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00). Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.
+         * @description `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00): qayda bu gün qüvvədədirsə — dərhal, gələcək tarixlidirsə — başladığı gün fon işi ilə. Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.
          */
         post: operations["create_1"];
         delete?: never;
@@ -398,6 +398,28 @@ export interface paths {
          * @description Bonus möhür verməmiş qayda silinir (`deleted = true`); artıq veribsə, tarixçə üçün saxlanılır və söndürülür (`deleted = false`).
          */
         delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/bonus-rules/{ruleId}/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Başlanğıc bildirişini alanlar
+         * @description Bildiriş göndərilən müştərilər (ad, maskalı telefon) və nəticə: `PENDING` — növbədədir, `DELIVERED` — push
+         *                 xidməti (Google, Apple) qəbul edib, `FAILED` — cihaz yoxdur və ya alınmadı. `status` ilə süzgəc;
+         *                 səhifə-səhifə. "Çatdırıldı" bildirişin oxunduğu demək deyil.
+         */
+        get: operations["deliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3251,6 +3273,15 @@ export interface components {
         DeleteResult: {
             deleted?: boolean;
         };
+        DeliveryRow: {
+            /** Format: uuid */
+            customerId?: string;
+            name?: string;
+            phoneMasked?: string;
+            status?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         DemoRequestBody: {
             branches: string;
             businessType: string;
@@ -3590,6 +3621,15 @@ export interface components {
         };
         PageResultCampaignView: {
             items?: components["schemas"]["CampaignView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageResultDeliveryRow: {
+            items?: components["schemas"]["DeliveryRow"][];
             /** Format: int32 */
             page?: number;
             /** Format: int32 */
@@ -4183,7 +4223,13 @@ export interface components {
             name?: components["schemas"]["LocalizedText"];
             /** Format: date-time */
             notifiedAt?: string;
+            /** Format: int64 */
+            notifyDelivered?: number;
+            /** Format: int64 */
+            notifyFailed?: number;
             notifyOnStart?: boolean;
+            /** Format: int64 */
+            notifyTotal?: number;
             runningNow?: boolean;
             /** Format: time-local */
             startTime?: string;
@@ -5018,6 +5064,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DeleteResult"];
+                };
+            };
+        };
+    };
+    deliveries: {
+        parameters: {
+            query?: {
+                status?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResultDeliveryRow"];
                 };
             };
         };

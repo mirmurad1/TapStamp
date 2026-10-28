@@ -530,3 +530,11 @@ export const bonusRulesApi = {
     unwrap(api.PUT('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } }, body })),
   remove: (ruleId: string) => unwrap(api.DELETE('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } } })),
 };
+
+export type BonusDeliveryStatus = 'PENDING' | 'DELIVERED' | 'FAILED';
+
+/** Bonus kampaniyasının başlanğıc bildirişini alanlar (nəticə ilə, səhifə-səhifə). */
+export const bonusDeliveriesApi = {
+  list: (ruleId: string, query: PageParams & { status?: BonusDeliveryStatus }) =>
+    unwrap(api.GET('/api/v1/admin/bonus-rules/{ruleId}/deliveries', { params: { path: { ruleId }, query } })),
+};

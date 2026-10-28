@@ -8,10 +8,13 @@ import java.util.UUID;
 import az.tapstamp.bonus.BonusRuleService;
 import az.tapstamp.bonus.BonusRuleService.RuleInput;
 import az.tapstamp.bonus.BonusRuleService.RuleView;
+import az.tapstamp.bonus.repository.BonusRuleMapper.DeliveryRow;
 import az.tapstamp.plan.Feature;
 import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.security.admin.AdminPrincipal;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -92,6 +96,16 @@ public class AdminBonusRuleController {
         RuleView updated = bonusRules.update(principal, ruleId, request.toInput());
         bonusRules.notifyStartedForCurrentTenant();
         return updated;
+    }
+
+    @GetMapping("/{ruleId}/deliveries")
+    @Operation(summary = "Başlanğıc bildirişini alanlar", description = """
+            Bildiriş göndərilən müştərilər (ad, maskalı telefon) və nəticə: `PENDING` — növbədədir, `DELIVERED` — push \n            xidməti (Google, Apple) qəbul edib, `FAILED` — cihaz yoxdur və ya alınmadı. `status` ilə süzgəc; \n            səhifə-səhifə. "Çatdırıldı" bildirişin oxunduğu demək deyil.""")
+    PageResult<DeliveryRow> deliveries(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID ruleId,
+                                       @RequestParam(required = false) @Nullable String status,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return bonusRules.deliveries(principal, ruleId, status, PageQuery.of(page, size));
     }
 
     @DeleteMapping("/{ruleId}")

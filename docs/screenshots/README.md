@@ -77,5 +77,6 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase10-owner-tags-readonly.png` | Şirkət sahibi: çiplər yalnız baxış üçün, "Pulsuz/Pullu" nişanı |
 | `phase10-reward-threshold-dialog.png` | Hədiyyə həddi dəyişəndə: yarımçıq kartlar köhnə qayda ilə bitsin və ya yeni qayda hamıya dərhal |
 | `phase10-reward-apply-now-password.png` | "Hamıya dərhal" seçiləndə kimliyin təsdiqi (2FA yoxdursa şifrə) |
-| `phase11-01-bonus-rules-admin.jpg` | Bonus qaydaları (admin): "Xoşbəxt saatlar" qaydası — vəziyyət, cədvəl, son 30 günün nəticəsi |
+| `phase11-01-bonus-rules-admin.jpg` | Bonus kampaniyası (admin): "Xoşbəxt saatlar" — vəziyyət, cədvəl, son 30 günün nəticəsi, bildirişin çatdırılması |
 | `phase11-02-bonus-banner-customer.jpg` | Müştəri kartının üstündə banner: "İndi hər möhürə +1 bonus möhür!" |
+| `phase11-03-bonus-deliveries.jpg` | Bonus kampaniyası: başlanğıc bildirişini alanlar — ad, maskalı telefon, "Çatdırıldı / Çatdırılmadı", süzgəc və səhifələmə |

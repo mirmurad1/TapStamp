@@ -21,7 +21,7 @@
     "stampCampaigns": "Möhür kampaniyası",
     "referrals": "Dost dəvəti",
     "reminders": "Xatırlatmalar",
-    "bonusRules": "Bonus qaydaları"
+    "bonusRules": "Bonus kampaniyası"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -1003,14 +1003,14 @@
     }
   },
   "bonusRules": {
-    "title": "Bonus qaydaları",
+    "title": "Bonus kampaniyası",
     "subtitle": "Xoşbəxt saatlar və tarixli kampaniyalar: şərt ödənəndə müştəri hər NFC möhürü ilə əlavə bonus möhür qazanır. Sakit saatlara müştəri çəkmək və bayram kampaniyaları üçün.",
-    "add": "Yeni qayda",
+    "add": "Yeni kampaniya",
     "empty": {
-      "title": "Hələ bonus qaydası yoxdur",
+      "title": "Hələ bonus kampaniyası yoxdur",
       "hint": "Məsələn, həftə içi 14:00–17:00 arası \"ikiqat möhür\" və ya Novruz həftəsində hər ziyarətə +1 möhür."
     },
-    "note": "Bir anda bir neçə qayda uyğun gəlirsə, yalnız ən böyük bonus verilir. Şərt müştərinin möhür aldığı ana görə yoxlanılır — işçi sonradan təsdiqləsə də.",
+    "note": "Bir anda bir neçə kampaniya uyğun gəlirsə, yalnız ən böyük bonus verilir. Şərt müştərinin möhür aldığı ana görə yoxlanılır — işçi sonradan təsdiqləsə də.",
     "status": {
       "ACTIVE": "Aktiv",
       "SCHEDULED": "Planlaşdırılıb",
@@ -1026,11 +1026,11 @@
     "stats": "Son 30 gün: {{stamps}} bonus möhür, {{customers}} müştəri",
     "notified": "Başlanğıc bildirişi göndərilib: {{date}}",
     "willNotify": "Başlayan kimi bildirişi açıq müştərilərə xəbər veriləcək (10:00–20:00).",
-    "deleteConfirm": "Qayda silinsin? Artıq bonus veribsə, tarixçə üçün saxlanılacaq və söndürüləcək.",
-    "disabledInstead": "Qayda artıq bonus verdiyi üçün silinmədi — söndürüldü.",
-    "newTitle": "Yeni bonus qaydası",
-    "editTitle": "Bonus qaydasını düzəlt",
-    "dialogDescription": "Qayda müştərinin kartında banner kimi görünəcək.",
+    "deleteConfirm": "Kampaniya silinsin? Artıq bonus veribsə, tarixçə üçün saxlanılacaq və söndürüləcək.",
+    "disabledInstead": "Kampaniya artıq bonus verdiyi üçün silinmədi — söndürüldü.",
+    "newTitle": "Yeni bonus kampaniyası",
+    "editTitle": "Bonus kampaniyasını düzəlt",
+    "dialogDescription": "Kampaniya müştərinin kartında banner kimi görünəcək.",
     "days": {
       "1": "B.e.",
       "2": "Ç.a.",
@@ -1066,6 +1066,27 @@
       "notifyHint": "Bildirişi açıq müştərilərə bir dəfə pulsuz push gedir: qayda bu gün başlayırsa — dərhal, gələcək tarixdədirsə — başladığı gün (10:00–20:00).",
       "active": "Aktivdir",
       "activeHint": "Söndürülən qayda bonus vermir və müştəriyə göstərilmir."
+    },
+    "deliveries": {
+      "sent_one": "Bildiriş {{value}} nəfərə göndərildi",
+      "sent_other": "Bildiriş {{value}} nəfərə göndərildi",
+      "delivered": "Çatdı: {{value}}",
+      "failed": "Alınmadı: {{value}}",
+      "title": "Bildirişi alanlar",
+      "note": "\"Çatdırıldı\" — Google və ya Apple bildirişi qəbul edib; oxunduğu demək deyil.",
+      "filter": "Nəticəyə görə süzgəc",
+      "filters": {
+        "ALL": "Hamısı",
+        "DELIVERED": "Çatdırıldı",
+        "FAILED": "Çatdırılmadı",
+        "PENDING": "Göndərilir"
+      },
+      "status": {
+        "DELIVERED": "Çatdırıldı",
+        "FAILED": "Çatdırılmadı",
+        "PENDING": "Göndərilir"
+      },
+      "empty": "Bu süzgəcə uyğun müştəri yoxdur."
     }
   }
 }

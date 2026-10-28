@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BellRing, ChevronRight, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Link } from 'react-router';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,8 +15,18 @@ import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { Pagination } from '@/shared/ui/pagination';
+import { usePagination } from '@/shared/ui/usePagination';
 
-import { bonusRulesApi, companyApi, type BonusRule, type BonusRuleRequest, type Localized } from '../../api/adminApi';
+import {
+  bonusDeliveriesApi,
+  bonusRulesApi,
+  companyApi,
+  type BonusDeliveryStatus,
+  type BonusRule,
+  type BonusRuleRequest,
+  type Localized,
+} from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { toLocalized } from '../../lib/localized';
@@ -172,6 +183,7 @@ function RuleCard({ rule, onEdit }: { rule: BonusRule; onEdit: () => void }) {
             {rule.notifiedAt ? t('admin:bonusRules.notified', { date: formatDate(rule.notifiedAt, lang) }) : t('admin:bonusRules.willNotify')}
           </p>
         ) : null}
+        {rule.notifyTotal ? <DeliverySummary rule={rule} /> : null}
       </CardContent>
     </Card>
   );
@@ -337,6 +349,116 @@ function RuleDialog({ rule, onClose }: { rule?: BonusRule; onClose: () => void }
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const DELIVERY_FILTERS = ['ALL', 'DELIVERED', 'FAILED', 'PENDING'] as const;
+type DeliveryFilter = (typeof DELIVERY_FILTERS)[number];
+const DELIVERY_TONE: Record<BonusDeliveryStatus, 'success' | 'danger' | 'neutral'> = {
+  DELIVERED: 'success',
+  FAILED: 'danger',
+  PENDING: 'neutral',
+};
+
+function deliveryStatus(value: string | undefined): BonusDeliveryStatus {
+  return value === 'DELIVERED' || value === 'FAILED' ? value : 'PENDING';
+}
+
+/** Başlanğıc bildirişinin xülasəsi: neçə nəfərə getdi, çatdı, alınmadı; klikləyəndə siyahı açılır. */
+function DeliverySummary({ rule }: { rule: BonusRule }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const [open, setOpen] = useState(false);
+  const total = rule.notifyTotal ?? 0;
+  const delivered = rule.notifyDelivered ?? 0;
+  const failed = rule.notifyFailed ?? 0;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <BellRing className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="flex flex-1 flex-wrap gap-x-4 gap-y-1">
+          <span>{t('bonusRules.deliveries.sent', { count: total, value: formatNumber(total, lang) })}</span>
+          <span className="text-[var(--success-ink)]">{t('bonusRules.deliveries.delivered', { value: formatNumber(delivered, lang) })}</span>
+          <span className={failed ? 'text-[var(--destructive-ink)]' : 'text-muted-foreground'}>
+            {t('bonusRules.deliveries.failed', { value: formatNumber(failed, lang) })}
+          </span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </button>
+      {open ? <DeliveriesDialog rule={rule} onClose={() => setOpen(false)} /> : null}
+    </>
+  );
+}
+
+/** Bildirişi alanların siyahısı: ad, telefon və nəticə; süzgəc və səhifələmə serverdədir. */
+function DeliveriesDialog({ rule, onClose }: { rule: BonusRule; onClose: () => void }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const [filter, setFilter] = useState<DeliveryFilter>('ALL');
+  const paging = usePagination(filter);
+  const ruleId = rule.id ?? '';
+  const deliveries = useQuery({
+    queryKey: ['bonus-deliveries', ruleId, filter, paging.page, paging.size],
+    queryFn: () =>
+      bonusDeliveriesApi.list(ruleId, {
+        page: paging.page,
+        size: paging.size,
+        status: filter === 'ALL' ? undefined : filter,
+      }),
+    placeholderData: keepPreviousData,
+    // Göndəriş hələ gedirsə, nəticələr yenilənir
+    refetchInterval: (query) => (query.state.data?.items?.some((item) => item.status === 'PENDING') ? 3000 : false),
+  });
+  const items = deliveries.data?.items ?? [];
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t('bonusRules.deliveries.title')}</DialogTitle>
+          <DialogDescription>
+            {resolveText(rule.name, lang)}
+            {' · '}
+            {t('bonusRules.deliveries.note')}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t('bonusRules.deliveries.filter')}>
+          {DELIVERY_FILTERS.map((value) => (
+            <Button key={value} type="button" size="sm" variant={filter === value ? 'default' : 'outline'}
+              aria-pressed={filter === value} onClick={() => setFilter(value)}>
+              {t(`bonusRules.deliveries.filters.${value}`)}
+            </Button>
+          ))}
+        </div>
+        <ApiErrorAlert error={deliveries.error} />
+        {deliveries.isPending ? <InlineLoading /> : null}
+        {deliveries.data && items.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('bonusRules.deliveries.empty')}</p>
+        ) : null}
+        {items.length > 0 ? (
+          <ul className="divide-y divide-border rounded-xl border border-border">
+            {items.map((item) => {
+              const status = deliveryStatus(item.status);
+              return (
+                <li key={item.customerId} className="flex items-center gap-3 px-3 py-2.5 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <Link to={`/customers/${item.customerId ?? ''}`} className="block truncate font-medium underline-offset-4 hover:underline">
+                      {item.name || t('customers.noName')}
+                    </Link>
+                    <span className="block text-xs text-muted-foreground tabular-nums">{item.phoneMasked}</span>
+                  </span>
+                  <Badge tone={DELIVERY_TONE[status]}>{t(`bonusRules.deliveries.status.${status}`)}</Badge>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+        <Pagination state={paging} total={deliveries.data?.total ?? 0} />
       </DialogContent>
     </Dialog>
   );
