@@ -172,16 +172,15 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void startNotificationIsSentRightAwayAndOnlyOnce() throws Exception {
+        // Saatı şirkətin 23:00-na gətirir: kampaniya bildirişi saatdan asılı olmayaraq gedir (gecə də).
+        // Girişdən əvvəl — əks halda sessiyanın vaxtı keçər
+        LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();
+        long minutes = Duration.between(local, LocalTime.of(23, 0)).toMinutes();
+        clock.advance(Duration.ofMinutes(minutes < 0 ? minutes + 24 * 60 : minutes));
         CustomerClient customer = signedIn(uniquePhone());
         Browser browser = inbox.newBrowser();
         customer.post("/api/v1/me/push-subscriptions", Map.of("endpoint", browser.endpoint(),
                 "keys", Map.of("p256dh", browser.p256dh(), "auth", browser.authKey()))).andExpect(status().isNoContent());
-        // Saatı şirkətin 12:00-na gətirir (bildirişlər 10:00–20:00)
-        LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();
-        if (local.isBefore(LocalTime.of(11, 0)) || !local.isBefore(LocalTime.of(19, 0))) {
-            long minutes = Duration.between(local, LocalTime.of(12, 0)).toMinutes();
-            clock.advance(Duration.ofMinutes(minutes < 0 ? minutes + 24 * 60 : minutes));
-        }
         // Bu gün başlayan qayda — bildiriş yaradılan kimi, fon işini gözləmədən
         Map<String, Object> body = rule("Novruz həftəsi", 1, List.of(1, 2, 3, 4, 5, 6, 7), branch(Policy.relaxed()));
         body.put("notifyOnStart", true);

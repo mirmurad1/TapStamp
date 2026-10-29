@@ -373,7 +373,7 @@ export interface paths {
         put?: never;
         /**
          * Qayda yaratmaq
-         * @description `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (10:00–20:00): qayda bu gün qüvvədədirsə — dərhal, gələcək tarixlidirsə — başladığı gün fon işi ilə. Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.
+         * @description `bonusStamps` — hər NFC möhürünə əlavə bonus (1 = ikiqat möhür); `days` — ISO günləri (1 = bazar ertəsi); saat aralığı (şirkətin saatı ilə) və tarix aralığı istəyə bağlıdır; `branchId` boşdursa — bütün filiallar. `notifyOnStart` — başlayanda bildirişi açıq müştərilərə bir dəfə push (saatdan asılı deyil): qayda bu gün qüvvədədirsə — dərhal, gələcək tarixlidirsə — başladığı gün fon işi ilə. Bir neçə qayda uyğun gəlirsə, ən böyük bonus tətbiq olunur. Auditə yazılır.
          */
         post: operations["create_2"];
         delete?: never;
