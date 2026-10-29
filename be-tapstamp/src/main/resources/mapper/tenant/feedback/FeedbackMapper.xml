@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Ziyarətdən sonra rəy: sorğular (push ilə) və cavablar -->
+<mapper namespace="az.tapstamp.feedback.repository.FeedbackMapper">
+
+    <select id="settings" resultType="az.tapstamp.feedback.repository.FeedbackMapper$FeedbackSettings">
+        SELECT enabled, frequency_days FROM feedback_settings WHERE id = 1
+    </select>
+
+    <update id="updateSettings">
+        UPDATE feedback_settings
+        SET enabled = #{enabled}, frequency_days = #{frequencyDays}, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = 1
+    </update>
+
+    <select id="requestedSince" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM feedback_requests WHERE customer_id = #{customerId} AND created_at &gt; #{since})
+    </select>
+
+    <insert id="insertRequest">
+        INSERT INTO feedback_requests (id, customer_id, branch_id, visit_at, due_at, expires_at, created_at)
+        VALUES (#{id}, #{customerId}, #{branchId}, #{visitAt}, #{dueAt}, #{expiresAt}, #{now})
+    </insert>
+
+    <select id="markDueSent" resultType="java.util.UUID">
+        UPDATE feedback_requests SET sent_at = #{now}
+        WHERE id IN (SELECT id FROM feedback_requests
+                     WHERE sent_at IS NULL AND due_at &lt;= #{now} AND expires_at &gt; #{now}
+                     ORDER BY due_at LIMIT #{limit} FOR UPDATE SKIP LOCKED)
+        RETURNING customer_id
+    </select>
+
+    <select id="openRequest" resultType="az.tapstamp.feedback.repository.FeedbackMapper$OpenRequest">
+        SELECT r.id, r.branch_id, b.name AS branch_name, r.visit_at
+        FROM feedback_requests r JOIN branches b ON b.id = r.branch_id
+        WHERE r.customer_id = #{customerId} AND r.sent_at IS NOT NULL AND r.expires_at &gt; #{now}
+          AND NOT EXISTS (SELECT 1 FROM feedback f WHERE f.request_id = r.id)
+        ORDER BY r.visit_at DESC
+        LIMIT 1
+    </select>
+
+    <insert id="answer">
+        INSERT INTO feedback (id, request_id, customer_id, branch_id, rating, reasons, comment, created_at)
+        SELECT #{id}, r.id, r.customer_id, r.branch_id, #{rating}, #{reasons}, #{comment}, #{now}
+        FROM feedback_requests r
+        WHERE r.id = #{requestId} AND r.customer_id = #{customerId} AND r.expires_at &gt; #{now}
+          AND r.sent_at IS NOT NULL
+        ON CONFLICT (request_id) DO NOTHING
+    </insert>
+
+    <sql id="filter">
+        <where>
+            <if test="rating != null">f.rating = #{rating}</if>
+            <if test="unresolvedOnly">AND f.resolved_at IS NULL</if>
+            <if test="branchId != null">AND f.branch_id = #{branchId}</if>
+        </where>
+    </sql>
+
+    <select id="list" resultType="az.tapstamp.feedback.repository.FeedbackMapper$Row">
+        SELECT f.id, f.customer_id, c.name AS customer_name, c.phone_enc, f.branch_id, b.name AS branch_name, f.rating,
+               f.reasons, f.comment, f.created_at, f.resolved_at, f.resolution_note
+        FROM feedback f
+        JOIN customers c ON c.id = f.customer_id
+        JOIN branches b ON b.id = f.branch_id
+        <include refid="filter"/>
+        ORDER BY f.created_at DESC, f.id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM feedback f <include refid="filter"/>
+    </select>
+
+    <select id="summary" resultType="az.tapstamp.feedback.repository.FeedbackMapper$SummaryRow">
+        SELECT
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'GOOD'
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS good,
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'OK'
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS ok,
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'BAD'
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS bad,
+            (SELECT count(*) FROM feedback_requests r WHERE r.sent_at &gt;= #{since}
+                <if test="branchId != null">AND r.branch_id = #{branchId}</if>) AS sent,
+            (SELECT count(*) FROM feedback f WHERE f.rating = 'BAD' AND f.resolved_at IS NULL
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS unresolved_bad
+    </select>
+
+    <update id="resolve">
+        UPDATE feedback SET resolved_at = #{now}, resolved_by = #{staffId}, resolution_note = #{note}
+        WHERE id = #{id} AND resolved_at IS NULL
+    </update>
+</mapper>

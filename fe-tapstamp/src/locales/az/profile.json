@@ -267,5 +267,32 @@
     "reachGiftGeneric": "Çatanda hədiyyə",
     "reachStamps_one": "Çatanda bir dəfəlik +{{count}} möhür",
     "reachStamps_other": "Çatanda bir dəfəlik +{{count}} möhür"
+  },
+  "feedback": {
+    "rowTitle": "Bizi qiymətləndirin 🙂",
+    "rowHint": "Son ziyarətiniz necə keçdi? Cəmi bir toxunuş",
+    "title": "Xidmətimizi yaxşılaşdırmaq üçün bizi qiymətləndirin 🙂",
+    "rating": {
+      "GOOD": "Əla",
+      "OK": "Normal",
+      "BAD": "Pis"
+    },
+    "whatToImprove": "Nəyi yaxşılaşdıraq?",
+    "reasons": {
+      "SERVICE": "Xidmət",
+      "WAIT": "Gözləmə",
+      "QUALITY": "Keyfiyyət",
+      "CLEANLINESS": "Təmizlik",
+      "PRICE": "Qiymət",
+      "OTHER": "Digər"
+    },
+    "commentPlaceholder": "Şərhiniz (istəyə bağlı)",
+    "send": "Göndər",
+    "thanks": "Təşəkkür edirik!",
+    "thanksGood": "Sizi yenidən görməyə şad olarıq.",
+    "thanksOther": "Rəyiniz rəhbərliyə çatdı. Daha yaxşı olmağa çalışacağıq.",
+    "close": "Bağla",
+    "error": "Göndərmək alınmadı. Bir azdan yenidən cəhd edin.",
+    "privacy": "Rəyinizi şirkət adınız və nömrənizlə birlikdə görür ki, lazım olsa sizinlə əlaqə saxlasın."
   }
 }

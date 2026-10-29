@@ -22,7 +22,8 @@
     "referrals": "Invite a friend",
     "reminders": "Reminders",
     "bonusRules": "Bonus campaigns",
-    "tiers": "Tiers"
+    "tiers": "Tiers",
+    "feedback": "Feedback"
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -1135,5 +1136,57 @@
     "reachGiftShort": "gift on reaching",
     "reachStampsShort_one": "+{{count}} stamp on reaching",
     "reachStampsShort_other": "+{{count}} stamps on reaching"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "15 minutes after an NFC stamp, the customer gets a short question asking them to rate the visit. Bad ratings appear here as alerts.",
+    "settings": {
+      "title": "Settings",
+      "enabled": "Feedback requests are on",
+      "enabledHint": "Customers with notifications on get a push; others see the question in the app.",
+      "frequency": "Ask each customer at most",
+      "freq": {
+        "1": "once a day",
+        "7": "once a week",
+        "14": "once every two weeks",
+        "30": "once a month"
+      }
+    },
+    "summary": {
+      "title": "Last 30 days",
+      "satisfaction": "Satisfaction",
+      "responses": "Responses",
+      "responseRate": "Response rate",
+      "none": "—"
+    },
+    "unresolvedAlert_one": "{{count}} bad rating needs a response",
+    "unresolvedAlert_other": "{{count}} bad ratings need a response",
+    "filters": {
+      "ALL": "All",
+      "UNRESOLVED": "Unresolved",
+      "GOOD": "Great",
+      "OK": "Okay",
+      "BAD": "Bad"
+    },
+    "rating": {
+      "GOOD": "Great",
+      "OK": "Okay",
+      "BAD": "Bad"
+    },
+    "reasons": {
+      "SERVICE": "Service",
+      "WAIT": "Waiting",
+      "QUALITY": "Quality",
+      "CLEANLINESS": "Cleanliness",
+      "PRICE": "Price",
+      "OTHER": "Other"
+    },
+    "empty": "No feedback matches this filter.",
+    "resolve": "Mark resolved",
+    "resolved": "Resolved",
+    "resolveTitle": "Feedback resolved",
+    "resolveNote": "Note (optional)",
+    "resolveNotePlaceholder": "For example: called the customer and apologised",
+    "resolvedMark": "✓"
   }
 }

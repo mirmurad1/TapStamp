@@ -12,6 +12,7 @@ import { publicApi, type Me } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 import { useJustSignedIn } from '../auth/justSignedIn';
 import { BonusRulesBanner } from '../components/BonusRulesBanner';
+import { FeedbackRow } from '../components/FeedbackPrompt';
 import { InviteFriendRow } from '../components/InviteFriendCard';
 import { StampCard, StampCardNote } from '../components/StampCard';
 import { TierChip, TierNote } from '../components/TierCard';
@@ -103,6 +104,7 @@ function Profile({ me }: { me: Me }) {
       ) : null}
       {/* Təkliflər bir siyahıdadır; heç biri göstərilmirsə siyahı da görünmür */}
       <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card empty:hidden">
+        <FeedbackRow />
         <InviteFriendRow />
         <NotificationsRow />
         <InstallRow />

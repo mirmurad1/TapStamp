@@ -86,3 +86,5 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase11-07-tier-sheet.jpg` | Səviyyə nişanına toxunanda: bütün səviyyələr medal, imtiyaz və hədd ilə; cari səviyyə vurğulanıb |
 | `phase11-08-tier-reached-celebration.jpg` | Səviyyəyə çatanda təbrik: səviyyə hədiyyəsi, bir dəfəlik möhürlər (eyni ziyarətdə kart da dolub) |
 | `phase11-09-gift-card-reason.jpg` | Hədiyyə kartlarında səbəb: "Bürünc səviyyəsinə çatdığınız üçün" və "Möhür kartını doldurduğunuz üçün" |
+| `phase11-10-feedback-customer.jpg` | Ziyarətdən 15 dəqiqə sonra rəy sorğusu (push linki ilə açılır) |
+| `phase11-11-feedback-admin.jpg` | Rəylər (admin): parametrlər, son 30 gün, menyuda pis rəy sayğacı, tam telefon |

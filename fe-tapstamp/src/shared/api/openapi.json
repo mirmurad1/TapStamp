@@ -249,7 +249,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_12",
+        "operationId" : "list_13",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -1031,7 +1031,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1212,7 +1212,7 @@
     "/api/v1/admin/customers/fraud-flags/{flagId}/resolve" : {
       "post" : {
         "description" : "Qeyd məcburidir; auditə yazılır.",
-        "operationId" : "resolve",
+        "operationId" : "resolve_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "flagId",
@@ -1439,6 +1439,176 @@
         },
         "summary" : "Möhür və hədiyyə tarixçəsi",
         "tags" : [ "Admin: müştərilər" ]
+      }
+    },
+    "/api/v1/admin/feedback" : {
+      "get" : {
+        "description" : "Ən yenisi birinci, səhifə-səhifə; `rating` və `unresolved` (yalnız həll olunmamış) süzgəcləri. Müştərinin adı və tam telefon nömrəsi ilə.",
+        "operationId" : "list_11",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "rating",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "unresolved",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultFeedbackView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Rəylər",
+        "tags" : [ "Admin: rəylər" ]
+      }
+    },
+    "/api/v1/admin/feedback/settings" : {
+      "get" : {
+        "operationId" : "settings_3",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeedbackSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Parametrlər",
+        "tags" : [ "Admin: rəylər" ]
+      },
+      "put" : {
+        "description" : "`frequencyDays` — müştəridən ən çox neçə gündə bir soruşulsun: 1, 7, 14, 30. Sorğu NFC möhüründən 15 dəqiqə sonra push ilə gedir (saat məhdudiyyəti yoxdur). Auditə yazılır.",
+        "operationId" : "updateSettings_2",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FeedbackSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeedbackSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Parametrləri dəyişmək",
+        "tags" : [ "Admin: rəylər" ]
+      }
+    },
+    "/api/v1/admin/feedback/summary" : {
+      "get" : {
+        "description" : "Son 30 gün: qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı; həll olunmamış pis rəylər — hamısı (admin panelindəki bildiriş sayğacı).",
+        "operationId" : "summary_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeedbackSummary"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Xülasə",
+        "tags" : [ "Admin: rəylər" ]
+      }
+    },
+    "/api/v1/admin/feedback/{feedbackId}/resolve" : {
+      "post" : {
+        "description" : "İstəyə bağlı qeydlə. Auditə yazılır.",
+        "operationId" : "resolve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "feedbackId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FeedbackResolveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "Həll olundu",
+        "tags" : [ "Admin: rəylər" ]
       }
     },
     "/api/v1/admin/me" : {
@@ -3210,6 +3380,58 @@
         },
         "summary" : "Ad və dilin dəyişdirilməsi",
         "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/feedback-request" : {
+      "get" : {
+        "description" : "Ən son ziyarət üçün göndərilmiş və hələ cavablanmamış sorğu (3 gün etibarlıdır); yoxdursa 204.",
+        "operationId" : "open",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeedbackPrompt"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cavab gözləyən rəy sorğusu",
+        "tags" : [ "Müştəri: rəy" ]
+      }
+    },
+    "/api/v1/me/feedback-request/{requestId}" : {
+      "post" : {
+        "description" : "`rating`: GOOD, OK, BAD; `reasons` (OK/BAD üçün): SERVICE, WAIT, QUALITY, CLEANLINESS, PRICE, OTHER; `comment` istəyə bağlıdır. Hər sorğuya bir cavab; sorğu tapılmırsa və ya vaxtı keçibsə 404.",
+        "operationId" : "answer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "requestId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FeedbackAnswerRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "Rəy vermək",
+        "tags" : [ "Müştəri: rəy" ]
       }
     },
     "/api/v1/me/gift-cards" : {
@@ -6352,6 +6574,169 @@
           }
         }
       },
+      "FeedbackAnswerRequest" : {
+        "type" : "object",
+        "properties" : {
+          "comment" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "rating" : {
+            "type" : "string"
+          },
+          "reasons" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "maxItems" : 6,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "rating" ]
+      },
+      "FeedbackPrompt" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "branchName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "visitAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "FeedbackResolveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "note" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        }
+      },
+      "FeedbackSettings" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "frequencyDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "FeedbackSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "frequencyDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "enabled", "frequencyDays" ]
+      },
+      "FeedbackSummary" : {
+        "type" : "object",
+        "properties" : {
+          "answered" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "bad" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "good" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "ok" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "responseRate" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "satisfaction" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "sent" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "unresolvedBad" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "FeedbackView" : {
+        "type" : "object",
+        "properties" : {
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "branchName" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "comment" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "customerId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "customerName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "rating" : {
+            "type" : "string"
+          },
+          "reasons" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "resolutionNote" : {
+            "type" : "string"
+          },
+          "resolvedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "FraudFlag" : {
         "type" : "object",
         "properties" : {
@@ -7107,6 +7492,29 @@
           }
         }
       },
+      "PageResultFeedbackView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FeedbackView"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "PageResultFraudFlag" : {
         "type" : "object",
         "properties" : {
@@ -7456,7 +7864,7 @@
             "description" : "Açıq imkanlar (sınaq bitibsə boşdur)",
             "items" : {
               "type" : "string",
-              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS", "BONUS_RULES", "TIERS" ]
+              "enum" : [ "PUSH", "REFERRALS", "CSV_EXPORT", "FULL_ANALYTICS", "STAMP_CAMPAIGNS", "REMINDERS", "AUDIT_LOG", "BRANCH_COMPARISON", "REFERRAL_STATS", "BONUS_RULES", "TIERS", "FEEDBACK" ]
             }
           },
           "plan" : {

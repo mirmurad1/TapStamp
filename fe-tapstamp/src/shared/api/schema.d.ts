@@ -112,7 +112,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_12"];
+        get: operations["list_13"];
         put?: never;
         post?: never;
         delete?: never;
@@ -541,7 +541,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).
          */
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
         post?: never;
         delete?: never;
@@ -583,7 +583,7 @@ export interface paths {
          * Fırıldaq işarəsini bağlamaq
          * @description Qeyd məcburidir; auditə yazılır.
          */
-        post: operations["resolve"];
+        post: operations["resolve_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -678,6 +678,87 @@ export interface paths {
         get: operations["timeline"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Rəylər
+         * @description Ən yenisi birinci, səhifə-səhifə; `rating` və `unresolved` (yalnız həll olunmamış) süzgəcləri. Müştərinin adı və tam telefon nömrəsi ilə.
+         */
+        get: operations["list_11"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/feedback/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parametrlər */
+        get: operations["settings_3"];
+        /**
+         * Parametrləri dəyişmək
+         * @description `frequencyDays` — müştəridən ən çox neçə gündə bir soruşulsun: 1, 7, 14, 30. Sorğu NFC möhüründən 15 dəqiqə sonra push ilə gedir (saat məhdudiyyəti yoxdur). Auditə yazılır.
+         */
+        put: operations["updateSettings_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/feedback/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Xülasə
+         * @description Son 30 gün: qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı; həll olunmamış pis rəylər — hamısı (admin panelindəki bildiriş sayğacı).
+         */
+        get: operations["summary_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/feedback/{feedbackId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Həll olundu
+         * @description İstəyə bağlı qeydlə. Auditə yazılır.
+         */
+        post: operations["resolve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1733,6 +1814,46 @@ export interface paths {
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
         patch: operations["update_6"];
+        trace?: never;
+    };
+    "/api/v1/me/feedback-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cavab gözləyən rəy sorğusu
+         * @description Ən son ziyarət üçün göndərilmiş və hələ cavablanmamış sorğu (3 gün etibarlıdır); yoxdursa 204.
+         */
+        get: operations["open"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/feedback-request/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rəy vermək
+         * @description `rating`: GOOD, OK, BAD; `reasons` (OK/BAD üçün): SERVICE, WAIT, QUALITY, CLEANLINESS, PRICE, OTHER; `comment` istəyə bağlıdır. Hər sorğuya bir cavab; sorğu tapılmırsa və ya vaxtı keçibsə 404.
+         */
+        post: operations["answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/me/gift-cards": {
@@ -3451,6 +3572,70 @@ export interface components {
             /** @description Dev alətləri (simulyator, outbox) — yalnız dev mühitində */
             devTools?: boolean;
         };
+        FeedbackAnswerRequest: {
+            comment?: string;
+            rating: string;
+            reasons?: string[];
+        };
+        FeedbackPrompt: {
+            /** Format: uuid */
+            branchId?: string;
+            branchName?: components["schemas"]["LocalizedText"];
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            visitAt?: string;
+        };
+        FeedbackResolveRequest: {
+            note?: string;
+        };
+        FeedbackSettings: {
+            enabled?: boolean;
+            /** Format: int32 */
+            frequencyDays?: number;
+        };
+        FeedbackSettingsRequest: {
+            enabled: boolean;
+            /** Format: int32 */
+            frequencyDays: number;
+        };
+        FeedbackSummary: {
+            /** Format: int64 */
+            answered?: number;
+            /** Format: int64 */
+            bad?: number;
+            /** Format: int64 */
+            good?: number;
+            /** Format: int64 */
+            ok?: number;
+            /** Format: double */
+            responseRate?: number;
+            /** Format: double */
+            satisfaction?: number;
+            /** Format: int64 */
+            sent?: number;
+            /** Format: int64 */
+            unresolvedBad?: number;
+        };
+        FeedbackView: {
+            /** Format: uuid */
+            branchId?: string;
+            branchName?: components["schemas"]["LocalizedText"];
+            comment?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            customerId?: string;
+            customerName?: string;
+            /** Format: uuid */
+            id?: string;
+            phone?: string;
+            rating?: string;
+            reasons?: string[];
+            resolutionNote?: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+        };
         FraudFlag: {
             /** Format: date-time */
             createdAt?: string;
@@ -3757,6 +3942,15 @@ export interface components {
             /** Format: int64 */
             total?: number;
         };
+        PageResultFeedbackView: {
+            items?: components["schemas"]["FeedbackView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
         PageResultFraudFlag: {
             items?: components["schemas"]["FraudFlag"][];
             /** Format: int32 */
@@ -3892,7 +4086,7 @@ export interface components {
             /** @description Sınaq bitib — şirkətin xidməti dayandırılıb */
             expired?: boolean;
             /** @description Açıq imkanlar (sınaq bitibsə boşdur) */
-            features?: ("PUSH" | "REFERRALS" | "CSV_EXPORT" | "FULL_ANALYTICS" | "STAMP_CAMPAIGNS" | "REMINDERS" | "AUDIT_LOG" | "BRANCH_COMPARISON" | "REFERRAL_STATS" | "BONUS_RULES" | "TIERS")[];
+            features?: ("PUSH" | "REFERRALS" | "CSV_EXPORT" | "FULL_ANALYTICS" | "STAMP_CAMPAIGNS" | "REMINDERS" | "AUDIT_LOG" | "BRANCH_COMPARISON" | "REFERRAL_STATS" | "BONUS_RULES" | "TIERS" | "FEEDBACK")[];
             /** @description BASIC, STANDARD və ya PREMIUM */
             plan?: string;
             /**
@@ -4844,7 +5038,7 @@ export interface operations {
             };
         };
     };
-    list_12: {
+    list_13: {
         parameters: {
             query?: {
                 action?: string;
@@ -5420,7 +5614,7 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    list_12: {
         parameters: {
             query?: {
                 q?: string;
@@ -5478,7 +5672,7 @@ export interface operations {
             };
         };
     };
-    resolve: {
+    resolve_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -5624,6 +5818,122 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["PageResultTimelineItem"];
                 };
+            };
+        };
+    };
+    list_11: {
+        parameters: {
+            query?: {
+                rating?: string;
+                unresolved?: boolean;
+                branchId?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResultFeedbackView"];
+                };
+            };
+        };
+    };
+    settings_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FeedbackSettings"];
+                };
+            };
+        };
+    };
+    updateSettings_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FeedbackSettings"];
+                };
+            };
+        };
+    };
+    summary_1: {
+        parameters: {
+            query?: {
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FeedbackSummary"];
+                };
+            };
+        };
+    };
+    resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedbackId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -7084,6 +7394,50 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["CustomerMeResponse"];
                 };
+            };
+        };
+    };
+    open: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FeedbackPrompt"];
+                };
+            };
+        };
+    };
+    answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackAnswerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

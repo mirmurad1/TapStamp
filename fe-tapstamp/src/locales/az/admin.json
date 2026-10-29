@@ -22,7 +22,8 @@
     "referrals": "Dost dəvəti",
     "reminders": "Xatırlatmalar",
     "bonusRules": "Bonus kampaniyası",
-    "tiers": "Səviyyələr"
+    "tiers": "Səviyyələr",
+    "feedback": "Rəylər"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -1135,5 +1136,57 @@
     "reachGiftShort": "çatanda hədiyyə",
     "reachStampsShort_one": "çatanda +{{count}} möhür",
     "reachStampsShort_other": "çatanda +{{count}} möhür"
+  },
+  "feedback": {
+    "title": "Rəylər",
+    "subtitle": "Müştəri NFC ilə möhür alandan 15 dəqiqə sonra ona qısa sual gedir: ziyarətini qiymətləndirsin. Pis rəylər burada bildiriş kimi görünür.",
+    "settings": {
+      "title": "Parametrlər",
+      "enabled": "Rəy sorğusu aktivdir",
+      "enabledHint": "Bildirişi açıq müştərilərə push gedir; qalanları sualı tətbiqdə görür.",
+      "frequency": "Bir müştəridən ən çox",
+      "freq": {
+        "1": "gündə bir",
+        "7": "həftədə bir",
+        "14": "iki həftədə bir",
+        "30": "ayda bir"
+      }
+    },
+    "summary": {
+      "title": "Son 30 gün",
+      "satisfaction": "Məmnuniyyət",
+      "responses": "Cavablar",
+      "responseRate": "Cavab payı",
+      "none": "—"
+    },
+    "unresolvedAlert_one": "{{count}} pis rəy cavab gözləyir",
+    "unresolvedAlert_other": "{{count}} pis rəy cavab gözləyir",
+    "filters": {
+      "ALL": "Hamısı",
+      "UNRESOLVED": "Həll olunmamış",
+      "GOOD": "Əla",
+      "OK": "Normal",
+      "BAD": "Pis"
+    },
+    "rating": {
+      "GOOD": "Əla",
+      "OK": "Normal",
+      "BAD": "Pis"
+    },
+    "reasons": {
+      "SERVICE": "Xidmət",
+      "WAIT": "Gözləmə",
+      "QUALITY": "Keyfiyyət",
+      "CLEANLINESS": "Təmizlik",
+      "PRICE": "Qiymət",
+      "OTHER": "Digər"
+    },
+    "empty": "Bu süzgəcə uyğun rəy yoxdur.",
+    "resolve": "Həll olundu",
+    "resolved": "Həll olunub",
+    "resolveTitle": "Rəy həll olundu",
+    "resolveNote": "Qeyd (istəyə bağlı)",
+    "resolveNotePlaceholder": "Məsələn: müştəriyə zəng etdik, üzr istədik",
+    "resolvedMark": "✓"
   }
 }

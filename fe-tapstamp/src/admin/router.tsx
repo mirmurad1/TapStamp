@@ -23,6 +23,7 @@ import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
 import { ReferralsPage } from './pages/referrals/ReferralsPage';
 import { BonusRulesPage } from './pages/bonus/BonusRulesPage';
 import { TiersPage } from './pages/tiers/TiersPage';
+import { FeedbackPage } from './pages/feedback/FeedbackPage';
 import { RemindersPage } from './pages/reminders/RemindersPage';
 import { SmsUsagePage } from './pages/platform/SmsUsagePage';
 import { ProvisionTenantPage } from './pages/platform/ProvisionTenantPage';
@@ -90,6 +91,7 @@ export const adminRouter = createBrowserRouter(
                         { path: 'reminders', element: <RequireFeature feature="REMINDERS"><RemindersPage /></RequireFeature> },
                         { path: 'bonus-rules', element: <RequireFeature feature="BONUS_RULES"><BonusRulesPage /></RequireFeature> },
                         { path: 'tiers', element: <RequireFeature feature="TIERS"><TiersPage /></RequireFeature> },
+                        { path: 'feedback', element: <RequireFeature feature="FEEDBACK"><FeedbackPage /></RequireFeature> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

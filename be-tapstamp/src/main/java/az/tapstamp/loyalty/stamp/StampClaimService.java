@@ -14,6 +14,7 @@ import java.util.UUID;
 import az.tapstamp.bonus.BonusRuleService;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.customer.repository.CustomerMapper;
+import az.tapstamp.feedback.FeedbackService;
 import az.tapstamp.customer.repository.OtpChallengeMapper;
 import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
@@ -93,13 +94,16 @@ public class StampClaimService {
     private final ReferralService referrals;
     private final BonusRuleService bonusRules;
     private final TierService tiers;
+    private final FeedbackService feedback;
     private final Clock clock;
 
     public StampClaimService(TapTokenMapper tokens, TapEventLog events, FraudFlags fraudFlags, StampLedger ledger,
                              CustomerMapper customers, OtpChallengeMapper challenges, CompanySettings companySettings,
                              StampMapper stamps, TapEventMapper tapEvents,
                              PlatformTransactionManager transactionManager, ReferralService referrals,
-                             Clock clock, BonusRuleService bonusRules, TierService tiers) {
+                             Clock clock, BonusRuleService bonusRules, TierService tiers,
+                             FeedbackService feedback) {
+        this.feedback = feedback;
         this.bonusRules = bonusRules;
         this.tiers = tiers;
         this.referrals = referrals;
@@ -234,6 +238,7 @@ public class StampClaimService {
             tierBonus = tiers.onTapStampConfirmed(customerId, token.branchId(), tapAt, tapAt);
             card = withBonus(card, tierBonus.card());
             card = withBonus(card, referrals.onTapStampConfirmed(customerId, token.branchId(), tapAt));
+            feedback.onVisit(customerId, token.branchId(), tapAt);
         }
         tokens.markConsumed(token.id(), customerId, now);
         ledger.touchCustomerVisit(customerId, token.branchId(), tapAt);

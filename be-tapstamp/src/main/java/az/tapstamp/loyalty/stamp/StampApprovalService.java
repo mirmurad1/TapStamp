@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.bonus.BonusRuleService;
+import az.tapstamp.feedback.FeedbackService;
 import az.tapstamp.loyalty.repository.StampMapper;
 import az.tapstamp.loyalty.stamp.StampLedger.CardState;
 import az.tapstamp.loyalty.stamp.StampLedger.StampStatus;
@@ -46,12 +47,15 @@ public class StampApprovalService {
     private final ReferralService referrals;
     private final BonusRuleService bonusRules;
     private final TierService tiers;
+    private final FeedbackService feedback;
     private final PushService push;
     private final Clock clock;
 
     public StampApprovalService(StampMapper stamps, StampLedger ledger, AuditLogger audit,
                                 PlatformTransactionManager transactionManager, ReferralService referrals, Clock clock, PushService push,
-                                BonusRuleService bonusRules, TierService tiers) {
+                                BonusRuleService bonusRules, TierService tiers,
+                                FeedbackService feedback) {
+        this.feedback = feedback;
         this.bonusRules = bonusRules;
         this.tiers = tiers;
         this.referrals = referrals;
@@ -87,6 +91,8 @@ public class StampApprovalService {
             card = StampClaimService.withBonus(card, tierBonus.card());
             card = StampClaimService.withBonus(card,
                     referrals.onTapStampConfirmed(stamp.customerId(), stamp.branchId(), now));
+            // Rəy sorğusu təsdiq anından 15 dəqiqə sonra (müştəri kassadan yeni ayrılıb)
+            feedback.onVisit(stamp.customerId(), stamp.branchId(), now);
             audit.tenant("STAMP_CONFIRMED", AuditLogger.ActorType.STAFF, principal.userId(), "stamp", stampId,
                     Map.of("branchId", stamp.branchId().toString()));
             // Müştəri kassadan uzaqlaşmış ola bilər — təsdiq bildirişi (hədiyyə yaranıbsa, hədiyyə bildirişi)

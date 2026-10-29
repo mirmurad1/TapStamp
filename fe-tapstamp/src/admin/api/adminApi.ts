@@ -552,3 +552,18 @@ export const tiersApi = {
     unwrap(api.PUT('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } }, body })),
   remove: (tierId: string) => unwrap(api.DELETE('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } } })),
 };
+
+export type FeedbackView = Schemas['FeedbackView'];
+export type FeedbackRating = 'GOOD' | 'OK' | 'BAD';
+export const FEEDBACK_SUMMARY_KEY = ['feedback-summary'] as const;
+
+/** Ziyarətdən sonra rəy (şirkət sahibi): parametrlər, xülasə, rəylər və həll. */
+export const feedbackApi = {
+  settings: () => unwrap(api.GET('/api/v1/admin/feedback/settings')),
+  updateSettings: (body: Schemas['FeedbackSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/feedback/settings', { body })),
+  summary: () => unwrap(api.GET('/api/v1/admin/feedback/summary')),
+  list: (query: PageParams & { rating?: FeedbackRating; unresolved?: boolean }) =>
+    unwrap(api.GET('/api/v1/admin/feedback', { params: { query } })),
+  resolve: (feedbackId: string, note?: string) =>
+    unwrap(api.POST('/api/v1/admin/feedback/{feedbackId}/resolve', { params: { path: { feedbackId } }, body: { note } })),
+};

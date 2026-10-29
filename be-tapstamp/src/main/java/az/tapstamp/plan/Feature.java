@@ -23,5 +23,7 @@ public enum Feature {
     /** Bonus qaydaları (xoşbəxt saatlar, tarixli kampaniyalar). */
     BONUS_RULES,
     /** Müştəri səviyyələri (ziyarət sayına görə, imtiyaz — əlavə möhür). */
-    TIERS
+    TIERS,
+    /** Ziyarətdən sonra rəy. */
+    FEEDBACK
 }

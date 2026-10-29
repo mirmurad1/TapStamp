@@ -82,3 +82,12 @@ export const tapApi = {
 export const giftCardApi = {
   list: () => unwrap(api.GET('/api/v1/me/gift-cards')),
 };
+
+export type FeedbackRating = 'GOOD' | 'OK' | 'BAD';
+
+/** Ziyarətdən sonra rəy: cavab gözləyən sorğu (yoxdursa boş) və cavab. */
+export const feedbackApi = {
+  open: async () => (await unwrap(api.GET('/api/v1/me/feedback-request'))) ?? null,
+  answer: (requestId: string, body: Schemas['FeedbackAnswerRequest']) =>
+    unwrap(api.POST('/api/v1/me/feedback-request/{requestId}', { params: { path: { requestId } }, body })),
+};

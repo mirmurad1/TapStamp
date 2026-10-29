@@ -17,6 +17,7 @@ Qərar: `architecture-plan.md` §18, #57.
 | Müştərilərin CSV ixracı (`CSV_EXPORT`) | — | ✓ | ✓ |
 | Bonus qaydaları — xoşbəxt saatlar, tarixli kampaniyalar (`BONUS_RULES`) | — | ✓ | ✓ |
 | Müştəri səviyyələri — ziyarət sayına görə, imtiyaz əlavə möhür (`TIERS`) | — | ✓ | ✓ |
+| Ziyarətdən sonra rəy (`FEEDBACK`) | — | — | ✓ |
 | Möhür kampaniyası (`STAMP_CAMPAIGNS`) | — | — | ✓ |
 | Avtomatik xatırlatmalar (`REMINDERS`) | — | — | ✓ |
 | Audit jurnalı (`AUDIT_LOG`) | — | — | ✓ |

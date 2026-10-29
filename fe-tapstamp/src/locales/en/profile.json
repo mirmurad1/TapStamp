@@ -267,5 +267,32 @@
     "reachGiftGeneric": "Gift on reaching",
     "reachStamps_one": "One-time +{{count}} stamp on reaching",
     "reachStamps_other": "One-time +{{count}} stamps on reaching"
+  },
+  "feedback": {
+    "rowTitle": "Rate us 🙂",
+    "rowHint": "How was your last visit? Just one tap",
+    "title": "Help us improve: rate your visit 🙂",
+    "rating": {
+      "GOOD": "Great",
+      "OK": "Okay",
+      "BAD": "Bad"
+    },
+    "whatToImprove": "What should we improve?",
+    "reasons": {
+      "SERVICE": "Service",
+      "WAIT": "Waiting",
+      "QUALITY": "Quality",
+      "CLEANLINESS": "Cleanliness",
+      "PRICE": "Price",
+      "OTHER": "Other"
+    },
+    "commentPlaceholder": "Your comment (optional)",
+    "send": "Send",
+    "thanks": "Thank you!",
+    "thanksGood": "We look forward to seeing you again.",
+    "thanksOther": "Your feedback has reached the team. We will do better.",
+    "close": "Close",
+    "error": "Could not send. Please try again in a moment.",
+    "privacy": "The company sees your feedback with your name and number so it can contact you if needed."
   }
 }

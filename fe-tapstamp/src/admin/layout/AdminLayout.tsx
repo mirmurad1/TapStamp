@@ -10,11 +10,11 @@ import { usePlan } from '@/shared/plan/plan';
 import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
-import { accountApi, simulatorApi } from '../api/adminApi';
+import { accountApi, FEEDBACK_SUMMARY_KEY, feedbackApi, simulatorApi } from '../api/adminApi';
 import { useAdminAuth, useMe } from '../auth/AdminAuthProvider';
 import { sessionKeys } from '../auth/session';
 import { StepUpProvider } from '../auth/StepUpProvider';
-import { navigationFor } from './navigation';
+import { hasAnyRole, navigationFor } from './navigation';
 import { UserMenu } from './UserMenu';
 import { SIMULATOR_TAGS_KEY } from '../pages/dev/simulatorKeys';
 
@@ -34,6 +34,14 @@ export function AdminLayout() {
   });
   const plan = usePlan(scope === 'TENANT');
   const features = plan.data?.features;
+  // Həll olunmamış pis rəylərin sayı — menyuda bildiriş sayğacı (yalnız sahib və imkan varsa)
+  const feedbackAlerts = useQuery({
+    queryKey: FEEDBACK_SUMMARY_KEY,
+    queryFn: () => feedbackApi.summary(),
+    enabled: scope === 'TENANT' && Boolean(features?.includes('FEEDBACK')) && hasAnyRole(me, ['COMPANY_OWNER']),
+    refetchInterval: 60_000,
+  });
+  const unresolvedBad = feedbackAlerts.data?.unresolvedBad ?? 0;
   const items = [
     ...navigationFor(scope, me),
     ...(simulator.isSuccess ? [{ section: 'simulator' as const, to: '/dev/simulator', icon: Nfc, roles: [] }] : []),
@@ -77,6 +85,14 @@ export function AdminLayout() {
               >
                 <ItemIcon className="size-4 shrink-0" aria-hidden="true" />
                 <span>{t(`nav.${section}`)}</span>
+                {section === 'feedback' && unresolvedBad > 0 ? (
+                  <span
+                    className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-white"
+                    aria-label={t('feedback.unresolvedAlert', { count: unresolvedBad })}
+                  >
+                    {unresolvedBad}
+                  </span>
+                ) : null}
                 {feature && features && !features.includes(feature) ? (
                   <Lock className="ml-auto size-3.5 shrink-0" aria-label={t('plan.locked')} />
                 ) : null}

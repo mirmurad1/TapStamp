@@ -54,7 +54,9 @@ public class PushService {
         /** Bonus qaydası başladı (qərar #59); arqumentlər: qaydanın adı ({@link LocalizedText}), bonus möhür. */
         BONUS_RULE_STARTED("/"),
         /** Səviyyəyə çatdı (çatma imtiyazı ilə); arqument: səviyyənin adı ({@link LocalizedText}). */
-        TIER_REACHED("/gift-cards");
+        TIER_REACHED("/gift-cards"),
+        /** Ziyarətdən 15 dəqiqə sonra rəy sorğusu (qərar #61). */
+        FEEDBACK_REQUEST("/?feedback=1");
 
         private final String url;
 
