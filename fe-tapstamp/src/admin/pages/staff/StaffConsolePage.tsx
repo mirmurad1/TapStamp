@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Hourglass, X } from 'lucide-react';
+import { Check, CheckCheck, Hourglass, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -102,7 +102,16 @@ function PendingStamps({ branchId }: { branchId: string }) {
         {notice ? <Alert tone="success">{notice}</Alert> : null}
         <ApiErrorAlert error={pending.error ?? confirm.error} />
         {pending.isPending ? <InlineLoading /> : null}
-        {pending.data?.items?.length === 0 ? <p className="text-muted-foreground">{t('staffConsole.pending.empty')}</p> : null}
+        {pending.data?.items?.length === 0 ? (
+          // Boş vəziyyət: kart yarımçıq görünməsin — ikon və nə gözlənildiyi
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <span className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+              <CheckCheck className="size-6" aria-hidden="true" />
+            </span>
+            <p className="font-medium">{t('staffConsole.pending.empty')}</p>
+            <p className="max-w-xs text-sm text-muted-foreground">{t('staffConsole.pending.emptyHint')}</p>
+          </div>
+        ) : null}
         <ul className="flex flex-col divide-y divide-border">
           {(pending.data?.items ?? []).map((stamp) => (
             <li key={stamp.id} className="flex flex-wrap items-center justify-between gap-3 py-3">

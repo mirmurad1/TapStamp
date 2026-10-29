@@ -242,7 +242,7 @@ function ReferralList() {
         {items.length > 0 ? (
           <div className="-mx-5 overflow-x-auto sm:-mx-6">
             <table className="w-full min-w-[48rem] text-left text-sm">
-              <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="border-b border-border text-xs text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('referrals.list.referrer')}</th>
                   <th scope="col" className="px-3 py-2 font-medium">{t('referrals.list.friend')}</th>

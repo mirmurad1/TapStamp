@@ -9,9 +9,7 @@ import {
   MessageSquareText,
   Nfc,
   Settings,
-  Sparkles,
   ShieldCheck,
-  Stamp,
   UserPlus,
   UserCog,
   Users,
@@ -53,32 +51,35 @@ export interface NavItem {
   roles: readonly Role[];
   /** Bölmə yalnız bu imkan şirkətin paketində olanda açıqdır (menyuda kilid nişanı ilə görünür). */
   feature?: Feature;
+  /** Menyuda qrup: əsas iş, marketinq, idarəetmə. */
+  group: NavGroup;
 }
 
+export const NAV_GROUPS = ["main", "growth", "manage"] as const;
+export type NavGroup = (typeof NAV_GROUPS)[number];
+
 const TENANT_ITEMS: readonly NavItem[] = [
-  { section: 'dashboard', to: '/', icon: LayoutDashboard, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
-  { section: 'customers', to: '/customers', icon: Users, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
-  { section: 'staffConsole', to: '/staff-console', icon: ClipboardList, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
-  { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
-  { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'] },
-  { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'] },
-  { section: 'stampCampaigns', to: '/stamp-campaigns', icon: Stamp, roles: ['COMPANY_OWNER'], feature: 'STAMP_CAMPAIGNS' },
-  { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS' },
-  { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'], feature: 'REMINDERS' },
-  { section: 'bonusRules', to: '/bonus-rules', icon: Sparkles, roles: ['COMPANY_OWNER'], feature: 'BONUS_RULES' },
-  { section: 'feedback', to: '/feedback', icon: MessageSquareHeart, roles: ['COMPANY_OWNER'], feature: 'FEEDBACK' },
-  { section: 'tiers', to: '/tiers', icon: Medal, roles: ['COMPANY_OWNER'], feature: 'TIERS' },
-  { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'] },
-  { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'], feature: 'AUDIT_LOG' },
-  { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'] },
+  { section: 'dashboard', to: '/', icon: LayoutDashboard, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'], group: 'main' },
+  { section: 'customers', to: '/customers', icon: Users, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'], group: 'main' },
+  { section: 'staffConsole', to: '/staff-console', icon: ClipboardList, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'], group: 'main' },
+  { section: 'feedback', to: '/feedback', icon: MessageSquareHeart, roles: ['COMPANY_OWNER'], feature: 'FEEDBACK', group: 'main' },
+  { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'], group: 'growth' },
+  { section: 'tiers', to: '/tiers', icon: Medal, roles: ['COMPANY_OWNER'], feature: 'TIERS', group: 'growth' },
+  { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS', group: 'growth' },
+  { section: 'reminders', to: '/reminders', icon: BellRing, roles: ['COMPANY_OWNER'], feature: 'REMINDERS', group: 'growth' },
+  { section: 'team', to: '/team', icon: UsersRound, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'], group: 'manage' },
+  { section: 'tags', to: '/tags', icon: Nfc, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'], group: 'manage' },
+  { section: 'settings', to: '/settings', icon: Settings, roles: ['COMPANY_OWNER'], group: 'manage' },
+  { section: 'audit', to: '/audit', icon: ShieldCheck, roles: ['COMPANY_OWNER'], feature: 'AUDIT_LOG', group: 'manage' },
+  { section: 'account', to: '/account', icon: UserCog, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'], group: 'manage' },
 ];
 
 const PLATFORM_ITEMS: readonly NavItem[] = [
-  { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'] },
-  { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'] },
-  { section: 'campaigns', to: '/platform-campaigns', icon: Megaphone, roles: ['SUPER_ADMIN'] },
-  { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
-  { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'] },
+  { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'], group: 'main' },
+  { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'], group: 'main' },
+  { section: 'campaigns', to: '/platform-campaigns', icon: Megaphone, roles: ['SUPER_ADMIN'], group: 'main' },
+  { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'], group: 'main' },
+  { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'], group: 'main' },
 ];
 
 export function hasAnyRole(me: Me, roles: readonly string[]): boolean {

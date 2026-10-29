@@ -271,13 +271,13 @@ function RuleDialog({ rule, onClose }: { rule?: BonusRule; onClose: () => void }
               ))}
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setDays([1, 2, 3, 4, 5, 6, 7])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDays([1, 2, 3, 4, 5, 6, 7])}>
                 {t('admin:bonusRules.schedule.everyDay')}
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setDays([1, 2, 3, 4, 5])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDays([1, 2, 3, 4, 5])}>
                 {t('admin:bonusRules.schedule.weekdays')}
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setDays([6, 7])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDays([6, 7])}>
                 {t('admin:bonusRules.schedule.weekend')}
               </Button>
             </div>

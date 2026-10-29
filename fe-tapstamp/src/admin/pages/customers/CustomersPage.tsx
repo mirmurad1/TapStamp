@@ -16,7 +16,7 @@ import { Input, Select } from '@/shared/ui/input';
 import { Pagination } from '@/shared/ui/pagination';
 import { usePagination } from '@/shared/ui/usePagination';
 
-import { customersApi, type CustomerFilter, type CustomerSort } from '../../api/adminApi';
+import { contextApi, customersApi, type CustomerFilter, type CustomerSort } from '../../api/adminApi';
 import { useMe } from '../../auth/AdminAuthProvider';
 import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
@@ -40,6 +40,9 @@ export function CustomersPage() {
   const { t } = useTranslation(['admin', 'common']);
   const me = useMe();
   const lang = currentLanguage();
+  // Hədiyyə üçün lazım olan möhür sayı (aktiv qayda) — kartdakı möhürlərin zolağı üçün
+  const company = useQuery({ queryKey: ['public-company'], queryFn: contextApi.company, staleTime: 5 * 60_000 });
+  const required = company.data?.rewardRule?.stampsRequired ?? 0;
   const withStepUp = useStepUp();
   const { branches } = useBranchNames();
   const isOwner = hasAnyRole(me, ['COMPANY_OWNER']);
@@ -82,7 +85,7 @@ export function CustomersPage() {
 
   const sortHeader = (field: CustomerSort, label: string, className: string) => (
     <th key={field} scope="col" className={className} aria-sort={sort === field ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button type="button" className="inline-flex items-center gap-1 font-medium uppercase hover:text-foreground" onClick={() => toggleSort(field)}>
+      <button type="button" className="inline-flex items-center gap-1 font-medium hover:text-foreground" onClick={() => toggleSort(field)}>
         {label}
         {sort === field ? (
           direction === 'asc' ? <ArrowUp className="size-3" aria-hidden="true" /> : <ArrowDown className="size-3" aria-hidden="true" />
@@ -182,13 +185,13 @@ export function CustomersPage() {
           {data && (data.items?.length ?? 0) > 0 ? (
             <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[52rem] text-left text-sm">
-                <thead className="border-b border-border text-xs tracking-wide text-muted-foreground">
+                <thead className="border-b border-border text-xs text-muted-foreground">
                   <tr>
                     {HEADERS.map((header) =>
                       header.field ? (
                         sortHeader(header.field, t(header.label), header.className)
                       ) : (
-                        <th key={header.label} scope="col" className={cn(header.className, 'font-medium uppercase')}>
+                        <th key={header.label} scope="col" className={cn(header.className, 'font-medium')}>
                           {t(header.label)}
                         </th>
                       ),
@@ -199,10 +202,10 @@ export function CustomersPage() {
                   {data.items?.map((customer) => (
                     <tr key={customer.id} className="hover:bg-muted/50">
                       <td className="px-5 py-3 sm:px-6">
-                        <Link to={`/customers/${customer.id}`} className="font-medium text-primary hover:underline">
+                        <Link to={`/customers/${customer.id}`} className="font-semibold text-foreground underline-offset-4 hover:underline">
                           {customer.name || t('admin:customers.noName')}
                         </Link>
-                        <p className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                        <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <span className="tabular-nums">{customer.phone}</span>
                           {customer.status === 'BLOCKED' ? <Badge tone="danger">{t('admin:customers.status.BLOCKED')}</Badge> : null}
                           {(customer.openFraudFlags ?? 0) > 0 ? (
@@ -215,7 +218,19 @@ export function CustomersPage() {
                       </td>
                       <td className="px-3 py-3 uppercase text-muted-foreground">{customer.language}</td>
                       <td className="px-3 py-3 tabular-nums">
-                        {t('admin:customers.stampsValue', { current: customer.currentStamps ?? 0, total: customer.totalStamps ?? 0 })}
+                        {/* Kartdakı möhürlər zolaqla (hədiyyəyə qədər), altında ümumi say */}
+                        <span className="flex items-center gap-2">
+                          <span className="font-medium">{customer.currentStamps ?? 0}/{required || '–'}</span>
+                          {required ? (
+                            <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+                              <span className="block h-full rounded-full bg-primary"
+                                style={{ width: `${Math.min(100, ((customer.currentStamps ?? 0) / required) * 100)}%` }} />
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {t('admin:customers.stampsTotal', { total: formatNumber(customer.totalStamps ?? 0, lang) })}
+                        </span>
                       </td>
                       <td className="px-3 py-3 tabular-nums">
                         {formatNumber(customer.rewardsRedeemed ?? 0, lang)} / {formatNumber(customer.rewardsEarned ?? 0, lang)}

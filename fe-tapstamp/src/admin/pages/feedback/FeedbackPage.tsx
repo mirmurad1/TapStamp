@@ -194,7 +194,7 @@ function FeedbackList({ branchId }: { branchId?: string }) {
   const items = list.data?.items ?? [];
   return (
     <Card>
-      <CardContent className="flex flex-col gap-4 pt-5">
+      <CardContent className="flex flex-col gap-4 pt-5 sm:pt-6">
         <div className="flex flex-wrap gap-2" role="group" aria-label={t('feedback.title')}>
           {FILTERS.map((value) => (
             <Button key={value} size="sm" variant={filter === value ? 'default' : 'outline'} aria-pressed={filter === value}

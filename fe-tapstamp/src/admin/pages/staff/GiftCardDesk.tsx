@@ -185,7 +185,7 @@ function GiftCardResult({ card, justRedeemed, redeeming, onRedeem, onReset }: Re
 function Item({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className={cn('mt-0.5', strong ? 'text-xl font-bold' : 'font-medium')}>{value}</dd>
     </div>
   );

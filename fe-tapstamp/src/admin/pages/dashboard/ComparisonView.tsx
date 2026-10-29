@@ -173,7 +173,7 @@ function BranchTable({ rows }: { rows: BranchComparison[] }) {
       ]),
     ]);
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle>{t('dashboard.comparison.branchesTitle')}</CardTitle>
@@ -184,11 +184,12 @@ function BranchTable({ rows }: { rows: BranchComparison[] }) {
           {t('dashboard.comparison.csv')}
         </Button>
       </CardHeader>
-      <CardContent className="-mx-5 overflow-x-auto px-0 sm:-mx-6">
+      <CardContent className="p-0 sm:p-0">
+        <div className="overflow-x-auto border-t border-border [scrollbar-width:thin]">
         <table className="w-full min-w-[64rem] text-left text-sm">
           <thead className="border-b border-border text-xs text-muted-foreground">
             <tr>
-              <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('dashboard.comparison.branch')}</th>
+              <th scope="col" className="sticky left-0 z-10 bg-card px-5 py-2 font-medium sm:px-6">{t('dashboard.comparison.branch')}</th>
               {BRANCH_COLUMNS.map((column) => (
                 <SortHeader key={column.key} label={t(`dashboard.comparison.columns.${column.key as 'visits'}`)}
                   active={sort.key === column.key} desc={sort.desc} onClick={() => toggle(column.key)} className="text-right" />
@@ -198,7 +199,7 @@ function BranchTable({ rows }: { rows: BranchComparison[] }) {
           <tbody className="divide-y divide-border">
             {sorted.map((row) => (
               <tr key={row.current?.branchId}>
-                <th scope="row" className="px-5 py-2 font-medium sm:px-6">{resolveText(row.current?.name, lang)}</th>
+                <th scope="row" className="sticky left-0 z-10 bg-card px-5 py-2 font-medium sm:px-6">{resolveText(row.current?.name, lang)}</th>
                 {BRANCH_COLUMNS.map((column) => {
                   const value = column.value(row);
                   const { best, worst } = extremes(rows, column);
@@ -215,6 +216,7 @@ function BranchTable({ rows }: { rows: BranchComparison[] }) {
             ))}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   );
@@ -234,7 +236,7 @@ function StaffTable({ rows }: { rows: StaffComparison[] }) {
       ...sorted.map((row) => [row.name ?? '', branchesOf(row), ...STAFF_COLUMNS.map((c) => c.value(row) ?? 0)]),
     ]);
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle>{t('dashboard.comparison.staffTitle')}</CardTitle>
@@ -245,11 +247,12 @@ function StaffTable({ rows }: { rows: StaffComparison[] }) {
           {t('dashboard.comparison.csv')}
         </Button>
       </CardHeader>
-      <CardContent className="-mx-5 overflow-x-auto px-0 sm:-mx-6">
-        <table className="w-full min-w-[40rem] text-left text-sm">
+      <CardContent className="p-0 sm:p-0">
+        <div className="overflow-x-auto border-t border-border [scrollbar-width:thin]">
+        <table className="w-full min-w-[44rem] text-left text-sm">
           <thead className="border-b border-border text-xs text-muted-foreground">
             <tr>
-              <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('dashboard.comparison.staff')}</th>
+              <th scope="col" className="sticky left-0 z-10 bg-card px-5 py-2 font-medium sm:px-6">{t('dashboard.comparison.staff')}</th>
               <th scope="col" className="px-3 py-2 font-medium">{t('dashboard.comparison.branch')}</th>
               {STAFF_COLUMNS.map((column) => (
                 <SortHeader key={column.key} label={t(`dashboard.comparison.staffColumns.${column.key as 'confirmed'}`)}
@@ -260,8 +263,8 @@ function StaffTable({ rows }: { rows: StaffComparison[] }) {
           <tbody className="divide-y divide-border">
             {sorted.map((row) => (
               <tr key={row.staffId}>
-                <th scope="row" className="px-5 py-2 font-medium sm:px-6">{row.name}</th>
-                <td className="px-3 py-2 text-muted-foreground">{branchesOf(row)}</td>
+                <th scope="row" className="sticky left-0 z-10 bg-card px-5 py-2 font-medium whitespace-nowrap sm:px-6">{row.name}</th>
+                <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">{branchesOf(row)}</td>
                 {STAFF_COLUMNS.map((column) => (
                   <td key={column.key} className="px-3 py-2 text-right tabular-nums">{formatNumber(column.value(row) ?? 0, lang)}</td>
                 ))}
@@ -269,6 +272,7 @@ function StaffTable({ rows }: { rows: StaffComparison[] }) {
             ))}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   );

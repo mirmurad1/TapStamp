@@ -3,7 +3,8 @@
     "title": "Management",
     "mainNav": "Main navigation",
     "openMenu": "Open menu",
-    "platformTitle": "Platform"
+    "platformTitle": "Platform",
+    "closeMenu": "Close menu"
   },
   "nav": {
     "dashboard": "Insights dashboard",
@@ -23,7 +24,12 @@
     "reminders": "Reminders",
     "bonusRules": "Bonus campaigns",
     "tiers": "Tiers",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "groups": {
+      "main": "Main",
+      "growth": "Growth",
+      "manage": "Manage"
+    }
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -41,15 +47,15 @@
     },
     "kpi": {
       "customers": "Customers",
-      "active": "Active: 7 days — {{d7}}, 30 days — {{d30}}, 90 days — {{d90}}",
-      "newCustomers": "New customers (period)",
-      "newDetail": "This week — {{week}}, this month — {{month}}",
-      "stamps": "Stamps (period)",
+      "active": "Active in last 30 days: {{d30}}",
+      "newCustomers": "New customers",
+      "newDetail": "This week {{week}}, this month {{month}}",
+      "stamps": "Stamps",
       "stampsDetail": "Confirmed stamps only",
-      "rewards": "Rewards handed over",
-      "rewardsDetail": "Earned — {{earned}}, redemption rate — {{rate}}",
+      "rewards": "Gifts given",
+      "rewardsDetail": "{{earned}} earned, {{rate}} redeemed",
       "retention": "Retention",
-      "retentionDetail": "{{returned}} of {{cohort}} new customers came back within 30 days"
+      "retentionDetail": "{{returned}} of {{cohort}} new customers came back"
     },
     "series": {
       "title": "Stamps and rewards",
@@ -453,7 +459,7 @@
     "branch": "Location",
     "pending": {
       "title": "Stamps awaiting approval",
-      "empty": "No pending stamps.",
+      "empty": "No stamps waiting",
       "customer": "Customer",
       "anonymous": "Unnamed customer",
       "waiting": "{{time}} ago",
@@ -464,7 +470,8 @@
       "rejected": "Stamp rejected.",
       "rejectTitle": "Reject stamp",
       "rejectReason": "Reason",
-      "rejectHint": "E.g. the customer did not order. The reason is written to the audit log."
+      "rejectHint": "E.g. the customer did not order. The reason is written to the audit log.",
+      "emptyHint": "When a customer taps and the stamp needs approval, it appears here."
     }
   },
   "simulator": {
@@ -594,6 +601,12 @@
         "sat": "Saturday",
         "sun": "Sunday"
       }
+    },
+    "tabs": {
+      "loyalty": "Loyalty rules",
+      "company": "Company",
+      "branches": "Branches",
+      "plan": "Plan"
     }
   },
   "giftDesk": {
@@ -716,7 +729,8 @@
       "RAPID_MULTI_ACCOUNT": "Many accounts from one device",
       "COOLDOWN_HAMMERING": "Many attempts during cooldown",
       "BINDING_MISMATCH": "Link opened on another device"
-    }
+    },
+    "stampsTotal": "{{total}} in total"
   },
   "tags": {
     "title": "NFC tags",
@@ -1226,5 +1240,12 @@
     "resolvedMark": "✓",
     "branch": "Branch",
     "allBranches": "All branches"
+  },
+  "campaignHub": {
+    "tabs": {
+      "bonus": "Bonus campaigns",
+      "sms": "SMS campaigns",
+      "stamp": "Stamp campaign"
+    }
   }
 }

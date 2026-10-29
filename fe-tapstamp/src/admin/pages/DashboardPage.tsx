@@ -9,6 +9,7 @@ import { currentLanguage } from '@/shared/i18n/setup';
 import { DEFAULT_TIME_ZONE, formatDate, formatNumber, formatPercent } from '@/shared/lib/format';
 import { useFeature } from '@/shared/plan/plan';
 import { Button } from '@/shared/ui/button';
+import { Tabs } from '@/shared/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Select } from '@/shared/ui/input';
 
@@ -121,14 +122,8 @@ function Analytics() {
   return (
     <>
       {branchComparison ? (
-        <div className="flex gap-2" role="tablist" aria-label={t('admin:dashboard.comparison.views')}>
-          {VIEWS.map((value) => (
-            <Button key={value} size="sm" role="tab" aria-selected={view === value}
-              variant={view === value ? 'default' : 'outline'} onClick={() => setView(value)}>
-              {t(`admin:dashboard.comparison.tabs.${value}`)}
-            </Button>
-          ))}
-        </div>
+        <Tabs value={view} onChange={setView} label={t('admin:dashboard.comparison.views')}
+          options={VIEWS.map((value) => ({ value, label: t(`admin:dashboard.comparison.tabs.${value}`) }))} />
       ) : null}
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -163,9 +158,9 @@ function Analytics() {
       <>
       <ApiErrorAlert error={error} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
         <Kpi icon={<Users />} label={t('admin:dashboard.kpi.customers')} value={n(o?.totalCustomers)} loading={!o}>
-          {t('admin:dashboard.kpi.active', { d7: n(o?.active7), d30: n(o?.active30), d90: n(o?.active90) })}
+          {t('admin:dashboard.kpi.active', { d30: n(o?.active30) })}
         </Kpi>
         <Kpi icon={<UserPlus />} label={t('admin:dashboard.kpi.newCustomers')} value={n(o?.newCustomersInPeriod)} loading={!o}>
           {t('admin:dashboard.kpi.newDetail', { week: n(o?.newThisWeek), month: n(o?.newThisMonth) })}
@@ -244,20 +239,21 @@ function Kpi({
   children: ReactNode;
 }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-4 pt-5 sm:pt-6">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary [&>svg]:size-5" aria-hidden="true">
-          {icon}
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{label}</p>
+    // Yığcam, şaquli kart: başlıq və kiçik ikon, böyük rəqəm, bir sətirlik izah — beşi bir sıraya sığır
+    <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span className="truncate">{label}</span>
+          <span className="shrink-0 text-primary [&>svg]:size-4" aria-hidden="true">
+            {icon}
+          </span>
+        </div>
+        <div>
           <p className="font-display text-3xl font-semibold tabular-nums" aria-busy={loading}>
             {loading ? '…' : value}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{loading ? ' ' : children}</p>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
 

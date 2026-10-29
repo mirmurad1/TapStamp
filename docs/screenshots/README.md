@@ -89,3 +89,6 @@ Skript: `node scripts/screenshots/gift-card-redemption.cjs` (sahib vaxt limitini
 | `phase11-10-feedback-customer.jpg` | Ziyarətdən 15 dəqiqə sonra rəy sorğusu (push linki ilə açılır) |
 | `phase11-11-feedback-admin.jpg` | Rəylər (admin): parametrlər, son 30 gün, menyuda pis rəy sayğacı, tam telefon |
 | `phase11-12-comparison.jpg` | Göstəricilər paneli → Müqayisə: filiallar (əvvəlki dövrlə fərq, ən yaxşı/zəif) və işçilər |
+| `phase11-13-admin-dashboard.jpg` | Admin: şirkətin loqosu və rəngi, qruplu menyu, yığcam KPI kartları, tablar |
+| `phase11-14-admin-customers.jpg` | Müştərilər: sadə başlıqlar, kartdakı möhürlər zolaqla |
+| `phase11-15-admin-mobile-menu.jpg` | Telefonda admin menyusu soldan açılır |

@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
+import { Tabs } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 
 import { settingsApi, type ExistingCards, type RewardImpact, type RewardSettings, type StampPolicy } from '../../api/adminApi';
@@ -21,28 +22,36 @@ import { PlanCard } from './PlanCard';
 const POLICY_KEY = ['settings-stamp-policy'] as const;
 const REWARD_KEY = ['settings-reward-rule'] as const;
 
+const SETTINGS_TABS = ['loyalty', 'company', 'branches', 'plan'] as const;
+
 /** Sahibin parametrləri: möhür qaydası, hədiyyə, şirkətin məzmunu (3 dildə) və filiallar. */
 export function SettingsPage() {
   const { t } = useTranslation('admin');
   const policy = useQuery({ queryKey: POLICY_KEY, queryFn: settingsApi.stampPolicy });
   const reward = useQuery({ queryKey: REWARD_KEY, queryFn: settingsApi.rewardRule });
+  // Bölmələr ayrı tablarda — uzun səhifə əvəzinə
+  const [tab, setTab] = useState<(typeof SETTINGS_TABS)[number]>('loyalty');
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-display text-2xl font-bold">{t('settings.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
-      <PlanCard />
-      <ApiErrorAlert error={policy.error ?? reward.error} />
-      {policy.isPending || reward.isPending ? <InlineLoading /> : null}
-      <div className="grid gap-6 xl:grid-cols-2">
-        {policy.data ? <StampPolicyForm initial={policy.data} /> : null}
-        {reward.isSuccess ? <RewardForm initial={reward.data ?? undefined} /> : null}
-      </div>
-      <div className="grid gap-6 xl:grid-cols-2">
-        <CompanyCard />
-        <BranchesCard />
-      </div>
+      <Tabs value={tab} onChange={setTab} label={t('settings.title')}
+        options={SETTINGS_TABS.map((value) => ({ value, label: t(`settings.tabs.${value}`) }))} />
+      {tab === 'loyalty' ? (
+        <>
+          <ApiErrorAlert error={policy.error ?? reward.error} />
+          {policy.isPending || reward.isPending ? <InlineLoading /> : null}
+          <div className="grid gap-6 xl:grid-cols-2">
+            {reward.isSuccess ? <RewardForm initial={reward.data ?? undefined} /> : null}
+            {policy.data ? <StampPolicyForm initial={policy.data} /> : null}
+          </div>
+        </>
+      ) : null}
+      {tab === 'company' ? <CompanyCard /> : null}
+      {tab === 'branches' ? <BranchesCard /> : null}
+      {tab === 'plan' ? <PlanCard /> : null}
     </div>
   );
 }

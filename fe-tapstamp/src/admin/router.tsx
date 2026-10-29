@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 
 import { RequireActive, RequireState } from './auth/guards';
 import { RequireFeature } from './components/PlanLocked';
@@ -6,7 +6,7 @@ import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
 import { AuditPage } from './pages/audit/AuditPage';
-import { CampaignsPage, StampCampaignsPage } from './pages/campaigns/CampaignsPage';
+import { CampaignHubPage } from './pages/campaigns/CampaignHubPage';
 import { CustomerDetailPage } from './pages/customers/CustomerDetailPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -21,7 +21,6 @@ import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
 import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
 import { ReferralsPage } from './pages/referrals/ReferralsPage';
-import { BonusRulesPage } from './pages/bonus/BonusRulesPage';
 import { TiersPage } from './pages/tiers/TiersPage';
 import { FeedbackPage } from './pages/feedback/FeedbackPage';
 import { RemindersPage } from './pages/reminders/RemindersPage';
@@ -82,14 +81,12 @@ export const adminRouter = createBrowserRouter(
                       children: [
                         { path: 'settings/*', element: <SettingsPage /> },
                         { path: 'audit', element: <RequireFeature feature="AUDIT_LOG"><AuditPage /></RequireFeature> },
-                        { path: 'campaigns', element: <CampaignsPage /> },
-                        {
-                          path: 'stamp-campaigns',
-                          element: <RequireFeature feature="STAMP_CAMPAIGNS"><StampCampaignsPage /></RequireFeature>,
-                        },
+                        // Bonus, SMS və möhür kampaniyaları bir bölmədə (tablar); köhnə ünvanlar ora yönləndirilir
+                        { path: 'campaigns', element: <CampaignHubPage /> },
+                        { path: 'stamp-campaigns', element: <Navigate to="/campaigns?tab=stamp" replace /> },
                         { path: 'referrals', element: <RequireFeature feature="REFERRALS"><ReferralsPage /></RequireFeature> },
                         { path: 'reminders', element: <RequireFeature feature="REMINDERS"><RemindersPage /></RequireFeature> },
-                        { path: 'bonus-rules', element: <RequireFeature feature="BONUS_RULES"><BonusRulesPage /></RequireFeature> },
+                        { path: 'bonus-rules', element: <Navigate to="/campaigns?tab=bonus" replace /> },
                         { path: 'tiers', element: <RequireFeature feature="TIERS"><TiersPage /></RequireFeature> },
                         { path: 'feedback', element: <RequireFeature feature="FEEDBACK"><FeedbackPage /></RequireFeature> },
                       ],

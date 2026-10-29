@@ -3,7 +3,8 @@
     "title": "İdarəetmə",
     "mainNav": "Əsas menyu",
     "openMenu": "Menyunu aç",
-    "platformTitle": "Platforma"
+    "platformTitle": "Platforma",
+    "closeMenu": "Menyunu bağla"
   },
   "nav": {
     "dashboard": "Göstəricilər paneli",
@@ -23,7 +24,12 @@
     "reminders": "Xatırlatmalar",
     "bonusRules": "Bonus kampaniyası",
     "tiers": "Səviyyələr",
-    "feedback": "Rəylər"
+    "feedback": "Rəylər",
+    "groups": {
+      "main": "Əsas",
+      "growth": "Müştəri cəlbi",
+      "manage": "İdarəetmə"
+    }
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -41,15 +47,15 @@
     },
     "kpi": {
       "customers": "Müştərilər",
-      "active": "Aktiv: 7 gün — {{d7}}, 30 gün — {{d30}}, 90 gün — {{d90}}",
-      "newCustomers": "Yeni müştərilər (dövrdə)",
-      "newDetail": "Bu həftə — {{week}}, bu ay — {{month}}",
-      "stamps": "Möhürlər (dövrdə)",
+      "active": "Son 30 gündə aktiv: {{d30}}",
+      "newCustomers": "Yeni müştərilər",
+      "newDetail": "Bu həftə {{week}}, bu ay {{month}}",
+      "stamps": "Möhürlər",
       "stampsDetail": "Yalnız təsdiqlənmiş möhürlər",
-      "rewards": "Təhvil verilən hədiyyələr",
-      "rewardsDetail": "Qazanılan — {{earned}}, istifadə faizi — {{rate}}",
+      "rewards": "Verilən hədiyyələr",
+      "rewardsDetail": "{{earned}} qazanılıb, {{rate}} istifadə olunub",
       "retention": "Geri qayıtma",
-      "retentionDetail": "{{cohort}} yeni müştəridən {{returned}} nəfəri 30 gün ərzində yenidən gəlib"
+      "retentionDetail": "{{cohort}} yeni müştəridən {{returned}} nəfəri qayıdıb"
     },
     "series": {
       "title": "Möhürlər və hədiyyələr",
@@ -453,7 +459,7 @@
     "branch": "Filial",
     "pending": {
       "title": "Təsdiq gözləyən möhürlər",
-      "empty": "Gözləyən möhür yoxdur.",
+      "empty": "Gözləyən möhür yoxdur",
       "customer": "Müştəri",
       "anonymous": "Adsız müştəri",
       "waiting": "{{time}} əvvəl",
@@ -464,7 +470,8 @@
       "rejected": "Möhür rədd edildi.",
       "rejectTitle": "Möhürü rədd et",
       "rejectReason": "Səbəb",
-      "rejectHint": "Məs. müştəri sifariş etməyib. Səbəb audit jurnalına yazılır."
+      "rejectHint": "Məs. müştəri sifariş etməyib. Səbəb audit jurnalına yazılır.",
+      "emptyHint": "Müştəri NFC ilə möhür alanda və təsdiq lazım olanda burada görünəcək."
     }
   },
   "simulator": {
@@ -594,6 +601,12 @@
         "sat": "Şənbə",
         "sun": "Bazar"
       }
+    },
+    "tabs": {
+      "loyalty": "Loyallıq qaydası",
+      "company": "Şirkət",
+      "branches": "Filiallar",
+      "plan": "Paket"
     }
   },
   "giftDesk": {
@@ -716,7 +729,8 @@
       "RAPID_MULTI_ACCOUNT": "Bir cihazdan çoxlu hesab",
       "COOLDOWN_HAMMERING": "Gözləmə müddətində çoxlu cəhd",
       "BINDING_MISMATCH": "Link başqa cihazda açılıb"
-    }
+    },
+    "stampsTotal": "cəmi {{total}}"
   },
   "tags": {
     "title": "NFC çipləri",
@@ -1226,5 +1240,12 @@
     "resolvedMark": "✓",
     "branch": "Filial",
     "allBranches": "Bütün filiallar"
+  },
+  "campaignHub": {
+    "tabs": {
+      "bonus": "Bonus kampaniyası",
+      "sms": "SMS kampaniyaları",
+      "stamp": "Möhür kampaniyası"
+    }
   }
 }

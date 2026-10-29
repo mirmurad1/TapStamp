@@ -51,7 +51,7 @@ export function TenantsPage() {
           {items.length > 0 ? (
             <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
               <table className="w-full min-w-[44rem] text-left text-sm">
-                <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+                <thead className="border-b border-border text-xs text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('platform.columns.name')}</th>
                     <th scope="col" className="px-3 py-2 font-medium">{t('platform.columns.domain')}</th>
