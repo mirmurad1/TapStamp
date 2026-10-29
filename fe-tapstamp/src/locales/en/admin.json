@@ -76,7 +76,43 @@
     "languages": {
       "title": "Customer languages"
     },
-    "empty": "No data for this period."
+    "empty": "No data for this period.",
+    "comparison": {
+      "views": "Dashboard view",
+      "tabs": {
+        "overview": "Overview",
+        "comparison": "Comparison"
+      },
+      "branchesTitle": "Branches",
+      "branchesHint": "Selected period; the arrow shows the change from the previous period of the same length. Best result in green, weakest in red.",
+      "staffTitle": "Staff",
+      "staffHint": "Each staff member’s actions in the selected period. Unusual numbers (e.g. many manual stamps) may need a closer look.",
+      "branch": "Branch",
+      "staff": "Staff member",
+      "allBranches": "All branches",
+      "columns": {
+        "visits": "Visits",
+        "customers": "Customers",
+        "newCustomers": "New",
+        "returning": "Returning",
+        "rewardsEarned": "Gifts earned",
+        "rewardsRedeemed": "Gifts given",
+        "bonusStamps": "Bonus stamps",
+        "satisfaction": "Satisfaction"
+      },
+      "staffColumns": {
+        "confirmed": "Stamps approved",
+        "rejected": "Rejected",
+        "manual": "Manual stamps",
+        "redeemed": "Gifts given"
+      },
+      "points_one": "{{count}} percentage point",
+      "points_other": "{{count}} percentage points",
+      "csv": "Download CSV",
+      "branchesFile": "branches.csv",
+      "staffFile": "staff.csv",
+      "note": "A visit is a confirmed NFC stamp. New customer: first visit was at this branch in this period. Returning: came to this branch on 2+ different days in the period. Satisfaction: share of “Great” ratings."
+    }
   },
   "userMenu": {
     "label": "User menu",
@@ -928,7 +964,7 @@
       "ALL": "All",
       "NONE": "Not visited",
       "ONCE": "Visited once",
-      "RETURNED": "Returned (2+ days)"
+      "RETURNED": "Visited again (2+ days)"
     },
     "dashboard": {
       "title": "Invite a friend",
@@ -938,7 +974,7 @@
       "invitedHint": "friends who signed up with a link",
       "came": "Visited",
       "ofInvited": "{{rate}} of invited",
-      "returned": "Returned",
+      "returned": "Visited again",
       "ofCame": "{{rate}} of those who visited (2+ different days)",
       "visits": "Visits",
       "visitsHint": "friends’ NFC stamps (bonuses excluded)",
@@ -1187,6 +1223,8 @@
     "resolveTitle": "Feedback resolved",
     "resolveNote": "Note (optional)",
     "resolveNotePlaceholder": "For example: called the customer and apologised",
-    "resolvedMark": "✓"
+    "resolvedMark": "✓",
+    "branch": "Branch",
+    "allBranches": "All branches"
   }
 }

@@ -115,4 +115,73 @@
         WHERE c.status &lt;&gt; 'DELETED' <include refid="customerInScope"/>
         GROUP BY 1
     </select>
+    <!-- Dövrün sərhədləri şirkətin saat qurşağında (timestamptz sütunları üçün) -->
+    <sql id="periodStart">(#{q.from}::date)::timestamp AT TIME ZONE #{q.timezone}</sql>
+    <sql id="periodEnd">(#{q.to}::date + 1)::timestamp AT TIME ZONE #{q.timezone}</sql>
+
+    <!-- Filialların müqayisəsi: ziyarət — təsdiqlənmiş NFC möhürü; yeni müştəri — ilk ziyarəti bu filialda və
+         dövrdə; geri qayıdan — dövrdə bu filiala 2+ fərqli gündə gələn -->
+    <select id="branchComparison" resultType="az.tapstamp.analytics.repository.AnalyticsMapper$BranchRow">
+        WITH visits AS (
+            SELECT s.branch_id, s.customer_id, s.local_date
+            FROM stamps s
+            WHERE s.source = 'NFC_TAP' AND s.status = 'CONFIRMED' AND s.local_date BETWEEN #{q.from} AND #{q.to}
+        ),
+        first_visit AS (
+            SELECT DISTINCT ON (s.customer_id) s.customer_id, s.branch_id, s.local_date
+            FROM stamps s
+            WHERE s.source = 'NFC_TAP' AND s.status = 'CONFIRMED'
+            ORDER BY s.customer_id, s.created_at
+        ),
+        per_customer AS (
+            SELECT branch_id, customer_id, count(DISTINCT local_date) AS days FROM visits GROUP BY branch_id, customer_id
+        )
+        SELECT b.id AS branch_id, b.name,
+            (SELECT count(*) FROM visits v WHERE v.branch_id = b.id) AS visits,
+            (SELECT count(*) FROM per_customer p WHERE p.branch_id = b.id) AS customers,
+            (SELECT count(*) FROM first_visit f WHERE f.branch_id = b.id AND f.local_date BETWEEN #{q.from} AND #{q.to})
+                AS new_customers,
+            (SELECT count(*) FROM per_customer p WHERE p.branch_id = b.id AND p.days &gt;= 2) AS returning,
+            (SELECT count(*) FROM stamps s WHERE s.branch_id = b.id AND s.reward_id IS NOT NULL
+                AND s.local_date BETWEEN #{q.from} AND #{q.to}) AS rewards_earned,
+            (SELECT count(*) FROM rewards r WHERE r.redeemed_branch_id = b.id AND r.status = 'REDEEMED'
+                AND r.redeemed_at &gt;= <include refid="periodStart"/> AND r.redeemed_at &lt; <include refid="periodEnd"/>)
+                AS rewards_redeemed,
+            (SELECT count(*) FROM stamps s WHERE s.branch_id = b.id AND s.source IN ('BONUS', 'TIER')
+                AND s.status = 'CONFIRMED' AND s.local_date BETWEEN #{q.from} AND #{q.to}) AS bonus_stamps,
+            (SELECT count(*) FROM feedback f WHERE f.branch_id = b.id AND f.rating = 'GOOD'
+                AND f.created_at &gt;= <include refid="periodStart"/> AND f.created_at &lt; <include refid="periodEnd"/>) AS good,
+            (SELECT count(*) FROM feedback f WHERE f.branch_id = b.id AND f.rating = 'OK'
+                AND f.created_at &gt;= <include refid="periodStart"/> AND f.created_at &lt; <include refid="periodEnd"/>) AS ok,
+            (SELECT count(*) FROM feedback f WHERE f.branch_id = b.id AND f.rating = 'BAD'
+                AND f.created_at &gt;= <include refid="periodStart"/> AND f.created_at &lt; <include refid="periodEnd"/>) AS bad
+        FROM branches b
+        WHERE b.status = 'ACTIVE'
+        <if test="!q.all">AND b.id IN <include refid="branchList"/></if>
+        ORDER BY b.created_at, b.id
+    </select>
+
+    <!-- İşçilərin müqayisəsi: təsdiqlədiyi və rədd etdiyi möhürlər, əl ilə verdiyi möhürlər, təhvil verdiyi hədiyyələr -->
+    <select id="staffComparison" resultType="az.tapstamp.analytics.repository.AnalyticsMapper$StaffRow">
+        SELECT u.id AS staff_id, u.display_name AS name, u.email,
+            (SELECT string_agg(DISTINCT r.branch_id::text, ',') FROM staff_roles r
+                WHERE r.staff_user_id = u.id AND r.branch_id IS NOT NULL) AS branch_ids,
+            (SELECT count(*) FROM stamps s WHERE s.confirmed_by = u.id AND s.source = 'NFC_TAP'
+                AND s.confirmed_at &gt;= <include refid="periodStart"/> AND s.confirmed_at &lt; <include refid="periodEnd"/>)
+                AS confirmed,
+            (SELECT count(*) FROM stamps s WHERE s.revoked_by = u.id AND s.status = 'REJECTED'
+                AND s.revoked_at &gt;= <include refid="periodStart"/> AND s.revoked_at &lt; <include refid="periodEnd"/>)
+                AS rejected,
+            (SELECT count(*) FROM stamps s WHERE s.created_by_staff_id = u.id AND s.source = 'MANUAL'
+                AND s.created_at &gt;= <include refid="periodStart"/> AND s.created_at &lt; <include refid="periodEnd"/>)
+                AS manual,
+            (SELECT count(*) FROM rewards r WHERE r.redeemed_by = u.id AND r.status = 'REDEEMED'
+                AND r.redeemed_at &gt;= <include refid="periodStart"/> AND r.redeemed_at &lt; <include refid="periodEnd"/>)
+                AS redeemed
+        FROM staff_users u
+        WHERE u.status &lt;&gt; 'INVITED'
+          AND EXISTS (SELECT 1 FROM staff_roles r WHERE r.staff_user_id = u.id
+                      <if test="!q.all">AND r.branch_id IN <include refid="branchList"/></if>)
+        ORDER BY u.display_name NULLS LAST, u.email
+    </select>
 </mapper>

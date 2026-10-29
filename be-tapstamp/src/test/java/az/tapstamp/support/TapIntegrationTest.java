@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.TenantInfo;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.web.servlet.MvcResult;
@@ -64,9 +67,20 @@ public abstract class TapIntegrationTest extends CustomerIntegrationTest {
         return directory.findByHost(HOST).orElseThrow();
     }
 
+    /** Bu testdə yaradılan filiallar — test bitəndə bağlanır ki, paketin filial limitini doldurmasın. */
+    private final List<UUID> createdBranches = new ArrayList<>();
+
+    @AfterEach
+    void closeCreatedBranches() {
+        TenantContext.runAs(alpha(), () -> createdBranches.forEach(id -> tenantJdbc
+                .sql("UPDATE branches SET status = 'CLOSED' WHERE id = :id").param("id", id).update()));
+        createdBranches.clear();
+    }
+
     /** Yeni filial + onun qaydası (çip üzrə toxunuş limiti testlər üçün yüksəkdir). */
     protected UUID newBranch(Policy policy) {
         UUID branchId = Ids.newId();
+        createdBranches.add(branchId);
         TenantContext.runAs(alpha(), () -> {
             tenantJdbc.sql("""
                             INSERT INTO branches (id, name, business_hours, status, created_at, updated_at)

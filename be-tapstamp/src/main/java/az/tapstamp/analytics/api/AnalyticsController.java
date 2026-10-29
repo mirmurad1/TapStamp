@@ -41,6 +41,19 @@ public class AnalyticsController {
         this.analytics = analytics;
     }
 
+    @RequiresFeature(Feature.BRANCH_COMPARISON)
+    @GetMapping("/comparison")
+    @Operation(summary = "Filialların və işçilərin müqayisəsi", description = """
+            Filiallar: ziyarətlər (NFC möhürləri), müştərilər, yeni (ilk ziyarəti bu filialda) və geri qayıdan (2+ gün) \
+            müştərilər, verilən və təhvil verilən hədiyyələr, bonus möhürlər (kampaniya və səviyyə), rəylər — cari və \
+            əvvəlki eyni uzunluqlu dövr. İşçilər: təsdiqlədiyi və rədd etdiyi möhürlər, əl ilə verdiyi möhürlər, təhvil \
+            verdiyi hədiyyələr. Menecer yalnız öz filiallarını görür.""")
+    AnalyticsService.Comparison comparison(@AuthenticationPrincipal AdminPrincipal principal,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return analytics.comparison(analytics.query(principal, from, to, null));
+    }
+
     @GetMapping("/overview")
     @Operation(summary = "Əsas göstəricilər", description = """
             Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil \

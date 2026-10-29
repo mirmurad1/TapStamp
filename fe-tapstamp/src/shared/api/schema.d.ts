@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/admin/analytics/comparison": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filialların və işçilərin müqayisəsi
+         * @description Filiallar: ziyarətlər (NFC möhürləri), müştərilər, yeni (ilk ziyarəti bu filialda) və geri qayıdan (2+ gün) müştərilər, verilən və təhvil verilən hədiyyələr, bonus möhürlər (kampaniya və səviyyə), rəylər — cari və əvvəlki eyni uzunluqlu dövr. İşçilər: təsdiqlədiyi və rədd etdiyi möhürlər, əl ilə verdiyi möhürlər, təhvil verdiyi hədiyyələr. Menecer yalnız öz filiallarını görür.
+         */
+        get: operations["comparison"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/analytics/heatmap": {
         parameters: {
             query?: never;
@@ -3216,6 +3236,10 @@ export interface components {
             /** Format: date */
             startsOn?: string;
         };
+        BranchComparison: {
+            current?: components["schemas"]["BranchRow"];
+            previous?: components["schemas"]["BranchRow"];
+        };
         BranchOption: {
             /** Format: uuid */
             id?: string;
@@ -3259,6 +3283,31 @@ export interface components {
             /** Format: uuid */
             id?: string;
             name?: components["schemas"]["LocalizedText"];
+        };
+        BranchRow: {
+            /** Format: int64 */
+            bad?: number;
+            /** Format: int64 */
+            bonusStamps?: number;
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: int64 */
+            customers?: number;
+            /** Format: int64 */
+            good?: number;
+            name?: components["schemas"]["LocalizedText"];
+            /** Format: int64 */
+            newCustomers?: number;
+            /** Format: int64 */
+            ok?: number;
+            /** Format: int64 */
+            returning?: number;
+            /** Format: int64 */
+            rewardsEarned?: number;
+            /** Format: int64 */
+            rewardsRedeemed?: number;
+            /** Format: int64 */
+            visits?: number;
         };
         BranchView: {
             address?: components["schemas"]["LocalizedText"];
@@ -3426,6 +3475,18 @@ export interface components {
             /** @description SMS-də görünən ad (məcburi): "<ad> OTP: <kod>"; latın hərfləri, rəqəm, boşluq, 11 simvola qədər */
             smsSenderName: string;
             timezone: string;
+        };
+        Comparison: {
+            branches?: components["schemas"]["BranchComparison"][];
+            /** Format: date */
+            from?: string;
+            /** Format: date */
+            previousFrom?: string;
+            /** Format: date */
+            previousTo?: string;
+            staff?: components["schemas"]["StaffComparison"][];
+            /** Format: date */
+            to?: string;
         };
         Config: {
             enabled?: boolean;
@@ -4627,6 +4688,20 @@ export interface components {
             /** Format: uuid */
             tenantId?: string;
         };
+        StaffComparison: {
+            branchIds?: string[];
+            /** Format: int64 */
+            confirmed?: number;
+            /** Format: int64 */
+            manual?: number;
+            name?: string;
+            /** Format: int64 */
+            redeemed?: number;
+            /** Format: int64 */
+            rejected?: number;
+            /** Format: uuid */
+            staffId?: string;
+        };
         StampDecisionResponse: {
             /** Format: uuid */
             stampId?: string;
@@ -4918,6 +4993,29 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    comparison: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Comparison"];
+                };
+            };
+        };
+    };
     heatmap: {
         parameters: {
             query?: {

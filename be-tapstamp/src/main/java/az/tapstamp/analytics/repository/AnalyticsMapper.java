@@ -6,7 +6,9 @@ import java.util.UUID;
 
 import az.tapstamp.analytics.AnalyticsService.HeatCell;
 import az.tapstamp.analytics.AnalyticsService.SeriesPoint;
+import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.persistence.TenantMapper;
+import org.jspecify.annotations.Nullable;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -43,4 +45,19 @@ public interface AnalyticsMapper {
     RetentionCounts retention(@Param("q") Scope q);
 
     List<LanguageCount> languages(@Param("q") Scope q);
+
+    /** Filial üzrə dövrün göstəriciləri (müqayisə cədvəli). */
+    record BranchRow(UUID branchId, LocalizedText name, long visits, long customers, long newCustomers,
+                     long returning, long rewardsEarned, long rewardsRedeemed, long bonusStamps, long good, long ok,
+                     long bad) {
+    }
+
+    /** İşçi üzrə dövrün əməliyyatları; {@code branchIds} — vergüllə ayrılmış filiallar (sahibdə boş). */
+    record StaffRow(UUID staffId, @Nullable String name, String email, @Nullable String branchIds, long confirmed,
+                    long rejected, long manual, long redeemed) {
+    }
+
+    List<BranchRow> branchComparison(@Param("q") Scope q);
+
+    List<StaffRow> staffComparison(@Param("q") Scope q);
 }

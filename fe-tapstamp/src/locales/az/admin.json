@@ -76,7 +76,43 @@
     "languages": {
       "title": "Müştərilərin dili"
     },
-    "empty": "Bu dövr üçün məlumat yoxdur."
+    "empty": "Bu dövr üçün məlumat yoxdur.",
+    "comparison": {
+      "views": "Göstəricilərin görünüşü",
+      "tabs": {
+        "overview": "Ümumi",
+        "comparison": "Müqayisə"
+      },
+      "branchesTitle": "Filiallar",
+      "branchesHint": "Seçilmiş dövr; altdakı ox əvvəlki eyni uzunluqlu dövrlə fərqdir. Ən yaxşı nəticə yaşıl, ən zəif qırmızıdır.",
+      "staffTitle": "İşçilər",
+      "staffHint": "Seçilmiş dövrdə hər işçinin əməliyyatları. Qeyri-adi rəqəmlər (məs. çoxlu əl ilə möhür) diqqət tələb edə bilər.",
+      "branch": "Filial",
+      "staff": "İşçi",
+      "allBranches": "Bütün filiallar",
+      "columns": {
+        "visits": "Ziyarətlər",
+        "customers": "Müştərilər",
+        "newCustomers": "Yeni",
+        "returning": "Geri qayıdan",
+        "rewardsEarned": "Qazanılan hədiyyə",
+        "rewardsRedeemed": "Verilən hədiyyə",
+        "bonusStamps": "Bonus möhür",
+        "satisfaction": "Məmnuniyyət"
+      },
+      "staffColumns": {
+        "confirmed": "Təsdiqlədiyi möhür",
+        "rejected": "Rədd etdiyi",
+        "manual": "Əl ilə verdiyi",
+        "redeemed": "Verdiyi hədiyyə"
+      },
+      "points_one": "{{count}} faiz bəndi",
+      "points_other": "{{count}} faiz bəndi",
+      "csv": "CSV yüklə",
+      "branchesFile": "filiallar.csv",
+      "staffFile": "isciler.csv",
+      "note": "Ziyarət — təsdiqlənmiş NFC möhürü. Yeni müştəri — ilk ziyarəti bu filialda və bu dövrdə olan. Geri qayıdan — dövrdə bu filiala 2+ fərqli gündə gələn. Məmnuniyyət — \"Əla\" rəylərin payı."
+    }
   },
   "userMenu": {
     "label": "İstifadəçi menyusu",
@@ -928,7 +964,7 @@
       "ALL": "Hamısı",
       "NONE": "Gəlməyib",
       "ONCE": "Bir dəfə gəlib",
-      "RETURNED": "Qayıdıb (2+ gün)"
+      "RETURNED": "Yenidən ziyarət edib (2+ gün)"
     },
     "dashboard": {
       "title": "Dost dəvəti",
@@ -938,7 +974,7 @@
       "invitedHint": "linklə qeydiyyatdan keçən dostlar",
       "came": "Gəlib",
       "ofInvited": "dəvət olunanların {{rate}}-i",
-      "returned": "Qayıdıb",
+      "returned": "Yenidən ziyarət edib",
       "ofCame": "gələnlərin {{rate}}-i (2+ fərqli gün)",
       "visits": "Gəlişlər",
       "visitsHint": "dostların NFC möhürləri (bonuslar daxil deyil)",
@@ -1187,6 +1223,8 @@
     "resolveTitle": "Rəy həll olundu",
     "resolveNote": "Qeyd (istəyə bağlı)",
     "resolveNotePlaceholder": "Məsələn: müştəriyə zəng etdik, üzr istədik",
-    "resolvedMark": "✓"
+    "resolvedMark": "✓",
+    "branch": "Filial",
+    "allBranches": "Bütün filiallar"
   }
 }

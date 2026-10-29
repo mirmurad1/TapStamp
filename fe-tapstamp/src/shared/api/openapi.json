@@ -19,6 +19,43 @@
     "name" : "Şirkət saytı"
   } ],
   "paths" : {
+    "/api/v1/admin/analytics/comparison" : {
+      "get" : {
+        "description" : "Filiallar: ziyarətlər (NFC möhürləri), müştərilər, yeni (ilk ziyarəti bu filialda) və geri qayıdan (2+ gün) müştərilər, verilən və təhvil verilən hədiyyələr, bonus möhürlər (kampaniya və səviyyə), rəylər — cari və əvvəlki eyni uzunluqlu dövr. İşçilər: təsdiqlədiyi və rədd etdiyi möhürlər, əl ilə verdiyi möhürlər, təhvil verdiyi hədiyyələr. Menecer yalnız öz filiallarını görür.",
+        "operationId" : "comparison",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Comparison"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Filialların və işçilərin müqayisəsi",
+        "tags" : [ "Admin: analitika" ]
+      }
+    },
     "/api/v1/admin/analytics/heatmap" : {
       "get" : {
         "description" : "Gün ISO nömrəsi ilə (1 — bazar ertəsi).",
@@ -5694,6 +5731,17 @@
         },
         "required" : [ "active", "bonusStamps", "days", "name", "notifyOnStart" ]
       },
+      "BranchComparison" : {
+        "type" : "object",
+        "properties" : {
+          "current" : {
+            "$ref" : "#/components/schemas/BranchRow"
+          },
+          "previous" : {
+            "$ref" : "#/components/schemas/BranchRow"
+          }
+        }
+      },
       "BranchOption" : {
         "type" : "object",
         "properties" : {
@@ -5809,6 +5857,58 @@
           },
           "name" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          }
+        }
+      },
+      "BranchRow" : {
+        "type" : "object",
+        "properties" : {
+          "bad" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "bonusStamps" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "customers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "good" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "newCustomers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "ok" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "returning" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rewardsEarned" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rewardsRedeemed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "visits" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
@@ -6179,6 +6279,39 @@
           }
         },
         "required" : [ "brandColor", "defaultLanguage", "name", "smsSenderName", "timezone" ]
+      },
+      "Comparison" : {
+        "type" : "object",
+        "properties" : {
+          "branches" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BranchComparison"
+            }
+          },
+          "from" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "previousFrom" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "previousTo" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "staff" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffComparison"
+            }
+          },
+          "to" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
       },
       "Config" : {
         "type" : "object",
@@ -9094,6 +9227,41 @@
             "type" : "string"
           },
           "tenantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "StaffComparison" : {
+        "type" : "object",
+        "properties" : {
+          "branchIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "confirmed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "manual" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "redeemed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rejected" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "staffId" : {
             "type" : "string",
             "format" : "uuid"
           }

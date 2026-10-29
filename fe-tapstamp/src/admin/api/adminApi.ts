@@ -285,7 +285,11 @@ export const analyticsApi = {
   retention: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/retention', { params: { query } })),
   languages: (query: AnalyticsFilter) =>
     unwrap(api.GET('/api/v1/admin/analytics/languages', { params: { query: { branchId: query.branchId } } })),
+  comparison: (query: { from: string; to: string }) => unwrap(api.GET('/api/v1/admin/analytics/comparison', { params: { query } })),
 };
+
+export type BranchComparison = Schemas['BranchComparison'];
+export type StaffComparison = Schemas['StaffComparison'];
 
 export type CustomerRow = Schemas['Row'];
 export type CustomerPage = Schemas['Page'];
@@ -561,8 +565,8 @@ export const FEEDBACK_SUMMARY_KEY = ['feedback-summary'] as const;
 export const feedbackApi = {
   settings: () => unwrap(api.GET('/api/v1/admin/feedback/settings')),
   updateSettings: (body: Schemas['FeedbackSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/feedback/settings', { body })),
-  summary: () => unwrap(api.GET('/api/v1/admin/feedback/summary')),
-  list: (query: PageParams & { rating?: FeedbackRating; unresolved?: boolean }) =>
+  summary: (branchId?: string) => unwrap(api.GET('/api/v1/admin/feedback/summary', { params: { query: { branchId } } })),
+  list: (query: PageParams & { rating?: FeedbackRating; unresolved?: boolean; branchId?: string }) =>
     unwrap(api.GET('/api/v1/admin/feedback', { params: { query } })),
   resolve: (feedbackId: string, note?: string) =>
     unwrap(api.POST('/api/v1/admin/feedback/{feedbackId}/resolve', { params: { path: { feedbackId } }, body: { note } })),

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import az.tapstamp.analytics.repository.AnalyticsMapper.OverviewCounts;
 import az.tapstamp.analytics.repository.AnalyticsMapper.RetentionCounts;
 import az.tapstamp.analytics.repository.AnalyticsMapper.Scope;
 import az.tapstamp.analytics.repository.AnalyticsMapper;
+import az.tapstamp.analytics.repository.AnalyticsMapper.BranchRow;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.plan.Feature;
 import az.tapstamp.plan.PlanService;
@@ -129,6 +132,39 @@ public class AnalyticsService {
         List<LanguageShare> result = new ArrayList<>();
         counts.forEach((lang, n) -> result.add(new LanguageShare(lang, n)));
         return result;
+    }
+
+    /** Filialın göstəriciləri: cari dövr və ondan əvvəlki eyni uzunluqlu dövr (fərq üçün). */
+    public record BranchComparison(BranchRow current, BranchRow previous) {
+    }
+
+    /** İşçi: əməliyyatları və filialları. */
+    public record StaffComparison(UUID staffId, String name, List<UUID> branchIds, long confirmed, long rejected,
+                                  long manual, long redeemed) {
+    }
+
+    public record Comparison(LocalDate from, LocalDate to, LocalDate previousFrom, LocalDate previousTo,
+                             List<BranchComparison> branches, List<StaffComparison> staff) {
+    }
+
+    /** Filialların və işçilərin müqayisəsi; əvvəlki dövr — seçilmişdən dərhal əvvəlki eyni sayda gün. */
+    public Comparison comparison(Query q) {
+        long days = ChronoUnit.DAYS.between(q.from(), q.to()) + 1;
+        Query previous = new Query(q.from().minusDays(days), q.from().minusDays(1), q.scope(), q.zone());
+        Map<UUID, BranchRow> before = new HashMap<>();
+        for (BranchRow row : analytics.branchComparison(scope(previous))) {
+            before.put(row.branchId(), row);
+        }
+        List<BranchComparison> branches = analytics.branchComparison(scope(q)).stream()
+                .map(row -> new BranchComparison(row, before.get(row.branchId())))
+                .toList();
+        List<StaffComparison> staff = analytics.staffComparison(scope(q)).stream()
+                .map(row -> new StaffComparison(row.staffId(), row.name() == null ? row.email() : row.name(),
+                        row.branchIds() == null ? List.of()
+                                : Arrays.stream(row.branchIds().split(",")).map(UUID::fromString).toList(),
+                        row.confirmed(), row.rejected(), row.manual(), row.redeemed()))
+                .toList();
+        return new Comparison(q.from(), q.to(), previous.from(), previous.to(), branches, staff);
     }
 
     private static Scope scope(Query q) {

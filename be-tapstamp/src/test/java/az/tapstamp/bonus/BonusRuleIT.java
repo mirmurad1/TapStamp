@@ -21,7 +21,6 @@ import az.tapstamp.support.TestPushInbox;
 import az.tapstamp.support.TestPushInbox.Browser;
 import az.tapstamp.tenancy.TenantContext;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,22 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * filialına bağlı qaydalar yaradır — başqa testlərin möhürlərinə təsir etmir.
  */
 class BonusRuleIT extends TapIntegrationTest {
-
-    private final List<UUID> branches = new java.util.ArrayList<>();
-
-    /** Test filialı; testdən sonra bağlanır ki, paketin filial limitini başqa testlər üçün doldurmasın. */
-    private UUID branch(Policy policy) {
-        UUID id = newBranch(policy);
-        branches.add(id);
-        return id;
-    }
-
-    @AfterEach
-    void closeBranches() {
-        TenantContext.runAs(alpha(), () -> branches.forEach(id -> tenantJdbc
-                .sql("UPDATE branches SET status = 'CLOSED' WHERE id = :id").param("id", id).update()));
-        branches.clear();
-    }
 
     private AdminClient owner() throws Exception {
         return signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
@@ -86,13 +69,13 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void matchingRuleAddsTheLargestBonusOnly() throws Exception {
-        UUID branchId = branch(Policy.relaxed());
+        UUID branchId = newBranch(Policy.relaxed());
         TestTag tag = newTag(branchId);
         List<Integer> everyDay = List.of(1, 2, 3, 4, 5, 6, 7);
         create(rule("İkiqat möhür", 1, everyDay, branchId));
         String bigger = create(rule("Üçqat möhür", 2, everyDay, branchId));
         // Başqa filialın qaydası tətbiq olunmur
-        create(rule("Başqa filial", 5, everyDay, branch(Policy.relaxed())));
+        create(rule("Başqa filial", 5, everyDay, newBranch(Policy.relaxed())));
 
         CustomerClient customer = signedIn(uniquePhone());
         claim(customer, tag, 1);
@@ -114,7 +97,7 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void ruleForOtherDaysOrFutureDatesGivesNoBonus() throws Exception {
-        UUID branchId = branch(Policy.relaxed());
+        UUID branchId = newBranch(Policy.relaxed());
         TestTag tag = newTag(branchId);
         int other = today() % 7 + 1;
         create(rule("Başqa gün", 1, List.of(other), branchId));
@@ -133,7 +116,7 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void inApprovalModeBonusIsGrantedWhenStaffConfirms() throws Exception {
-        UUID branchId = branch(new Policy(0, 50, true, 30, false, null));
+        UUID branchId = newBranch(new Policy(0, 50, true, 30, false, null));
         TestTag tag = newTag(branchId);
         create(rule("İkiqat möhür", 1, List.of(today()), branchId));
 
@@ -150,7 +133,7 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void usedRuleIsDisabledInsteadOfDeleted() throws Exception {
-        UUID branchId = branch(Policy.relaxed());
+        UUID branchId = newBranch(Policy.relaxed());
         TestTag tag = newTag(branchId);
         String unused = create(rule("İstifadəsiz", 1, List.of(today() % 7 + 1), branchId));
         String used = create(rule("İstifadə olunub", 1, List.of(today()), branchId));
@@ -182,7 +165,7 @@ class BonusRuleIT extends TapIntegrationTest {
         customer.post("/api/v1/me/push-subscriptions", Map.of("endpoint", browser.endpoint(),
                 "keys", Map.of("p256dh", browser.p256dh(), "auth", browser.authKey()))).andExpect(status().isNoContent());
         // Bu gün başlayan qayda — bildiriş yaradılan kimi, fon işini gözləmədən
-        Map<String, Object> body = rule("Novruz həftəsi", 1, List.of(1, 2, 3, 4, 5, 6, 7), branch(Policy.relaxed()));
+        Map<String, Object> body = rule("Novruz həftəsi", 1, List.of(1, 2, 3, 4, 5, 6, 7), newBranch(Policy.relaxed()));
         body.put("notifyOnStart", true);
         String id = create(body);
         String title = JsonPath.read(TestPushInbox.decrypt(browser, inbox.await(browser.endpoint(), 1).body()), "$.title");
@@ -211,7 +194,7 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void rulesAreValidatedAndOnlyForOwner() throws Exception {
-        UUID branchId = branch(Policy.relaxed());
+        UUID branchId = newBranch(Policy.relaxed());
         Map<String, Object> tooBig = rule("Çox", 6, List.of(1), branchId);
         owner().post("/bonus-rules", tooBig).andExpect(status().isBadRequest());
         Map<String, Object> noDays = rule("Günsüz", 1, List.of(), branchId);

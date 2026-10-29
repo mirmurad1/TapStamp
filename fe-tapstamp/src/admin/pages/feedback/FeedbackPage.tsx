@@ -17,7 +17,7 @@ import { Select } from '@/shared/ui/input';
 import { Pagination } from '@/shared/ui/pagination';
 import { usePagination } from '@/shared/ui/usePagination';
 
-import { FEEDBACK_SUMMARY_KEY, feedbackApi, type FeedbackRating, type FeedbackView } from '../../api/adminApi';
+import { companyApi, FEEDBACK_SUMMARY_KEY, feedbackApi, type FeedbackRating, type FeedbackView } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 
@@ -41,17 +41,35 @@ function rating(value: string | undefined): FeedbackRating {
 /** Ziyarətdən sonra rəy (yalnız sahib): parametrlər, son 30 günün xülasəsi və rəylər. */
 export function FeedbackPage() {
   const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const branches = useQuery({ queryKey: ['settings-branches'], queryFn: companyApi.branches });
+  // Filial süzgəci həm xülasəyə, həm siyahıya aiddir; boşdursa — bütün filiallar
+  const [branchId, setBranchId] = useState('');
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-display text-2xl font-semibold">{t('feedback.title')}</h1>
         <p className="mt-1 max-w-2xl text-muted-foreground">{t('feedback.subtitle')}</p>
       </div>
+      {(branches.data ?? []).length > 1 ? (
+        <div className="sm:max-w-xs">
+          <Field id="feedback-branch" label={t('feedback.branch')}>
+            <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
+              <option value="">{t('feedback.allBranches')}</option>
+              {(branches.data ?? []).map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {resolveText(branch.name, lang)}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <SettingsCard />
-        <SummaryCard />
+        <SummaryCard branchId={branchId || undefined} />
       </div>
-      <FeedbackList />
+      <FeedbackList branchId={branchId || undefined} />
     </div>
   );
 }
@@ -109,10 +127,10 @@ function SettingsCard() {
   );
 }
 
-function SummaryCard() {
+function SummaryCard({ branchId }: { branchId?: string }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
-  const summary = useQuery({ queryKey: FEEDBACK_SUMMARY_KEY, queryFn: () => feedbackApi.summary() });
+  const summary = useQuery({ queryKey: [...FEEDBACK_SUMMARY_KEY, branchId ?? ''], queryFn: () => feedbackApi.summary(branchId) });
   const s = summary.data;
   const tile = (label: string, value: string) => (
     <div className="rounded-xl border border-border p-3">
@@ -157,18 +175,19 @@ function SummaryCard() {
   );
 }
 
-function FeedbackList() {
+function FeedbackList({ branchId }: { branchId?: string }) {
   const { t } = useTranslation('admin');
   const [filter, setFilter] = useState<Filter>('ALL');
-  const paging = usePagination(filter);
+  const paging = usePagination([filter, branchId]);
   const list = useQuery({
-    queryKey: ['feedback', filter, paging.page, paging.size],
+    queryKey: ['feedback', filter, branchId ?? '', paging.page, paging.size],
     queryFn: () =>
       feedbackApi.list({
         page: paging.page,
         size: paging.size,
         rating: filter === 'GOOD' || filter === 'OK' || filter === 'BAD' ? filter : undefined,
         unresolved: filter === 'UNRESOLVED' ? true : undefined,
+        branchId,
       }),
     placeholderData: keepPreviousData,
   });

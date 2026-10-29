@@ -25,9 +25,11 @@ import { InlineLoading } from '../components/FullPageState';
 import { PlanLockedNotice } from '../components/PlanLocked';
 import { hasAnyRole } from '../layout/navigation';
 import { useBranchNames } from '../lib/branches';
+import { ComparisonView } from './dashboard/ComparisonView';
 import { ReferralDashboard } from './referrals/ReferralDashboard';
 
 const PERIODS = [7, 30, 90, 365] as const;
+const VIEWS = ['overview', 'comparison'] as const;
 
 /** Şirkətin "bu gün"ü (YYYY-MM-DD) — analitika tarixləri şirkətin saat qurşağındadır. */
 function companyToday(): string {
@@ -95,6 +97,8 @@ function Analytics() {
   const branchOptions = isOwner ? branches : branches.filter((branch) => ownBranches.has(branch.id));
 
   const [days, setDays] = useState<(typeof PERIODS)[number]>(30);
+  // Görünüş: ümumi göstəricilər və ya filialların və işçilərin müqayisəsi
+  const [view, setView] = useState<(typeof VIEWS)[number]>('overview');
   const [branchId, setBranchId] = useState('');
   const to = companyToday();
   const filter: AnalyticsFilter = { from: shiftDays(to, -(days - 1)), to, branchId: branchId || undefined };
@@ -116,6 +120,16 @@ function Analytics() {
 
   return (
     <>
+      {branchComparison ? (
+        <div className="flex gap-2" role="tablist" aria-label={t('admin:dashboard.comparison.views')}>
+          {VIEWS.map((value) => (
+            <Button key={value} size="sm" role="tab" aria-selected={view === value}
+              variant={view === value ? 'default' : 'outline'} onClick={() => setView(value)}>
+              {t(`admin:dashboard.comparison.tabs.${value}`)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm font-medium">
           {t('admin:dashboard.filters.period')}
@@ -127,7 +141,7 @@ function Analytics() {
             ))}
           </Select>
         </label>
-        {(isOwner ? branchComparison : branchOptions.length > 1) ? (
+        {view === 'overview' && (isOwner ? branchComparison : branchOptions.length > 1) ? (
           <label className="flex flex-col gap-1 text-sm font-medium">
             {t('admin:dashboard.filters.branch')}
             <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
@@ -145,6 +159,8 @@ function Analytics() {
         </p>
       </div>
 
+      {view === 'comparison' ? <ComparisonView from={filter.from ?? to} to={to} /> : (
+      <>
       <ApiErrorAlert error={error} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -208,6 +224,8 @@ function Analytics() {
       )}
 
       {isOwner && referralStats ? <ReferralDashboard filter={filter} /> : null}
+      </>
+      )}
     </>
   );
 }
