@@ -15,11 +15,11 @@ Qərar: `architecture-plan.md` §18, #57.
 | Telefona bildirişlər — web push (`PUSH`) | — | ✓ | ✓ |
 | Dost dəvəti (`REFERRALS`) | — | ✓ | ✓ |
 | Müştərilərin CSV ixracı (`CSV_EXPORT`) | — | ✓ | ✓ |
-| Bonus qaydaları — xoşbəxt saatlar, tarixli kampaniyalar (`BONUS_RULES`) | — | ✓ | ✓ |
+| Bonus kampaniyası — xoşbəxt saatlar, tarixli kampaniyalar (`BONUS_RULES`) | — | — | ✓ |
 | Müştəri səviyyələri — ziyarət sayına görə, imtiyaz əlavə möhür (`TIERS`) | — | ✓ | ✓ |
 | Ziyarətdən sonra rəy (`FEEDBACK`) | — | — | ✓ |
 | Möhür kampaniyası (`STAMP_CAMPAIGNS`) | — | — | ✓ |
-| Avtomatik xatırlatmalar (`REMINDERS`) | — | — | ✓ |
+| Avtomatik xatırlatmalar (`REMINDERS`) | — | ✓ | ✓ |
 | Audit jurnalı (`AUDIT_LOG`) | — | — | ✓ |
 | Filiallar üzrə müqayisə — sahibin filial seçməsi (`BRANCH_COMPARISON`) | — | — | ✓ |
 | Dəvət statistikası Göstəricilər panelində (`REFERRAL_STATS`) | — | — | ✓ |
