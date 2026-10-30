@@ -147,6 +147,7 @@ function GiftSlot({ filled, completed, lastOne }: { filled: boolean; completed: 
   const { t } = useTranslation('profile');
   return (
     <span className="relative">
+      {/* İkonun ortasında; mətnlər qısa saxlanılır ki, kartın kənarından çıxmasın */}
       {lastOne ? (
         <span className="absolute -top-5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-1.5 py-0.5 text-[10px] leading-tight font-bold text-background">
           {t('card.lastOne')}
