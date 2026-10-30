@@ -54,6 +54,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BonusRuleService {
 
+    /** Bildirişlər yalnız bu saatlarda göndərilir (xatırlatmalarla eyni). */
+    static final LocalTime PUSH_WINDOW_START = LocalTime.of(10, 0);
+    static final LocalTime PUSH_WINDOW_END = LocalTime.of(20, 0);
     private static final int PUSH_BATCH = 500;
     private static final Logger log = LoggerFactory.getLogger(BonusRuleService.class);
 
@@ -327,14 +330,15 @@ public class BonusRuleService {
 
     /**
      * Cari şirkət: bu gün başlamış (tarix aralığında olan), bildirişi açıq və hələ elan olunmamış qaydalar haqqında
-     * bildirişləri açıq müştərilərə bir dəfə push göndərilir — saatdan asılı olmayaraq (sahibin seçimi: kampaniya
-     * yaradılan kimi elan olunsun). Göndərilən qaydaların sayı.
+     * bildirişləri açıq müştərilərə bir dəfə push göndərilir. Göndərilən qaydaların sayı.
      */
     public int notifyStartedForCurrentTenant() {
         TenantInfo tenant = TenantContext.require();
         Instant now = clock.instant();
         ZonedDateTime local = now.atZone(tenant.timezone());
-        if (!plans.has(Feature.BONUS_RULES) || !push.config().enabled()) {
+        LocalTime time = local.toLocalTime();
+        if (time.isBefore(PUSH_WINDOW_START) || !time.isBefore(PUSH_WINDOW_END) || !plans.has(Feature.BONUS_RULES)
+                || !push.config().enabled()) {
             return 0;
         }
         int announced = 0;

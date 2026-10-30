@@ -155,11 +155,12 @@ class BonusRuleIT extends TapIntegrationTest {
 
     @Test
     void startNotificationIsSentRightAwayAndOnlyOnce() throws Exception {
-        // Saatı şirkətin 23:00-na gətirir: kampaniya bildirişi saatdan asılı olmayaraq gedir (gecə də).
-        // Girişdən əvvəl — əks halda sessiyanın vaxtı keçər
+        // Saatı şirkətin 12:00-na gətirir (bildirişlər 10:00–20:00); müştəri sonra daxil olur ki, sessiyası köhnəlməsin
         LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();
-        long minutes = Duration.between(local, LocalTime.of(23, 0)).toMinutes();
-        clock.advance(Duration.ofMinutes(minutes < 0 ? minutes + 24 * 60 : minutes));
+        if (local.isBefore(LocalTime.of(11, 0)) || !local.isBefore(LocalTime.of(19, 0))) {
+            long minutes = Duration.between(local, LocalTime.of(12, 0)).toMinutes();
+            clock.advance(Duration.ofMinutes(minutes < 0 ? minutes + 24 * 60 : minutes));
+        }
         CustomerClient customer = signedIn(uniquePhone());
         Browser browser = inbox.newBrowser();
         customer.post("/api/v1/me/push-subscriptions", Map.of("endpoint", browser.endpoint(),
