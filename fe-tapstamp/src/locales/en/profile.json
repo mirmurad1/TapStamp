@@ -237,7 +237,14 @@
       "5": "Fri",
       "6": "Sat",
       "7": "Sun"
-    }
+    },
+    "startsToday": "Starts today at {{time}}",
+    "startsTomorrow": "Starts tomorrow",
+    "startsTomorrowAt": "Starts tomorrow at {{time}}",
+    "startsOnDay": "Starts {{day}}",
+    "startsOnDayAt": "Starts {{day}} at {{time}}",
+    "endsIn": "Ends in {{hours}} h {{minutes}} min",
+    "endsInMinutes": "Ends in {{minutes}} min"
   },
   "tier": {
     "label": "Your tier",
