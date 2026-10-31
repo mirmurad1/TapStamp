@@ -62,6 +62,8 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Səhifənin sonundan o yana dartanda (overscroll) görünən fon da səhifənin fonu olsun */
+    background-color: var(--background);
   }
 
   body {

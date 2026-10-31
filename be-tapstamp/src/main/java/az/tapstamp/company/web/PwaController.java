@@ -30,6 +30,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.jspecify.annotations.Nullable;
+import org.springframework.context.MessageSource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,43 +55,54 @@ public class PwaController {
     private static final List<Integer> SIZES = List.of(180, 192, 512);
     private static final CacheControl ICON_CACHE = CacheControl.maxAge(Duration.ofDays(1)).cachePublic();
 
+    /** İdarəetmə panelinin başlığı ağdır (--card) — telefonun status zolağı da onunla eyni olur. */
+    private static final String ADMIN_THEME_COLOR = "#FFFFFF";
+
     private final CompanyQueryService company;
     private final CompanyLogoService logos;
+    private final MessageSource messages;
     private final Cache<String, byte[]> icons = Caffeine.newBuilder().maximumSize(500).build();
 
-    public PwaController(CompanyQueryService company, CompanyLogoService logos) {
+    public PwaController(CompanyQueryService company, CompanyLogoService logos, MessageSource messages) {
         this.company = company;
         this.logos = logos;
+        this.messages = messages;
     }
 
     @GetMapping(value = "/manifest.webmanifest", produces = "application/manifest+json")
     @Operation(summary = "Şirkətin PWA manifesti", description = "Ad şirkətin standart dilində, rəng — brend rəngi.")
     ResponseEntity<Map<String, Object>> manifest() {
-        return manifest("/", "portrait");
-    }
-
-    /**
-     * İdarəetmə panelinin manifesti: eyni ad və ikon (şirkətin loqosu), amma ana ekrandan {@code /admin/} açılır və
-     * müştəri tətbiqindən ayrı tətbiq kimi quraşdırılır. Planşetdə üfüqi rejim də lazımdır — istiqamət sərbəstdir.
-     */
-    @GetMapping(value = "/api/v1/public/admin.webmanifest", produces = "application/manifest+json")
-    @Operation(summary = "İdarəetmə panelinin PWA manifesti", description = "Şirkətin adı və ikonu; /admin/ ünvanında açılır.")
-    ResponseEntity<Map<String, Object>> adminManifest() {
-        return manifest("/admin/", null);
-    }
-
-    private ResponseEntity<Map<String, Object>> manifest(String start, String orientation) {
         PublicCompanyResponse info = company.publicCompany();
         Language language = Language.fromTag(info.defaultLanguage()).orElse(Language.DEFAULT);
         String name = info.name().resolve(language);
-        String color = info.brandColor();
+        String description = info.description() == null ? null : info.description().resolve(language);
+        return manifest(info, language, "/", "portrait", name, description, info.brandColor());
+    }
+
+    /**
+     * İdarəetmə panelinin manifesti: şirkətin ikonu (loqosu), amma ad "İdarəetmə" (şirkətin dilində; telefonda
+     * istəyən dəyişə bilər) və ana ekrandan {@code /admin/} açılır — müştəri tətbiqindən ayrı tətbiq kimi quraşdırılır.
+     * Telefonun status zolağı panelin ağ başlığı ilə eyni rəngdədir (brend rəngi yox). Planşetdə üfüqi rejim də
+     * lazımdır — istiqamət sərbəstdir.
+     */
+    @GetMapping(value = "/api/v1/public/admin.webmanifest", produces = "application/manifest+json")
+    @Operation(summary = "İdarəetmə panelinin PWA manifesti", description = "Ad — \"İdarəetmə\", ikon — şirkətin ikonu; /admin/ ünvanında açılır.")
+    ResponseEntity<Map<String, Object>> adminManifest() {
+        PublicCompanyResponse info = company.publicCompany();
+        Language language = Language.fromTag(info.defaultLanguage()).orElse(Language.DEFAULT);
+        String name = messages.getMessage("pwa.admin.name", null, language.locale());
+        return manifest(info, language, "/admin/", null, name, null, ADMIN_THEME_COLOR);
+    }
+
+    private ResponseEntity<Map<String, Object>> manifest(PublicCompanyResponse info, Language language, String start,
+            @Nullable String orientation, String name, @Nullable String description, String themeColor) {
         String version = iconVersion(info);
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("id", start);
         manifest.put("name", name);
         manifest.put("short_name", name.length() > 12 ? name.substring(0, 12).strip() : name);
-        if (info.description() != null) {
-            manifest.put("description", info.description().resolve(language));
+        if (description != null) {
+            manifest.put("description", description);
         }
         manifest.put("lang", language.tag());
         manifest.put("start_url", start);
@@ -98,7 +111,7 @@ public class PwaController {
         if (orientation != null) {
             manifest.put("orientation", orientation);
         }
-        manifest.put("theme_color", color);
+        manifest.put("theme_color", themeColor);
         manifest.put("background_color", "#F6F7FB");
         manifest.put("icons", List.of(
                 icon("/api/v1/public/icons/192.png?v=" + version, "192x192", "any"),

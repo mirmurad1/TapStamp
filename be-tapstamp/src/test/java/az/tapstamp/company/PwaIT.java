@@ -62,6 +62,8 @@ class PwaIT extends AdminIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/manifest+json"))
                 .andExpect(jsonPath("$.id").value("/admin/"))
+                .andExpect(jsonPath("$.name").value("İdarəetmə"))
+                .andExpect(jsonPath("$.theme_color").value("#FFFFFF"))
                 .andExpect(jsonPath("$.start_url").value("/admin/"))
                 .andExpect(jsonPath("$.scope").value("/admin/"))
                 .andExpect(jsonPath("$.display").value("standalone"))
