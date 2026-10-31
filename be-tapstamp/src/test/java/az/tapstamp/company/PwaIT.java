@@ -55,4 +55,18 @@ class PwaIT extends AdminIntegrationTest {
         on(TestTenants.ALPHA_HOST, "/api/v1/public/icons/abc.png").andExpect(status().isNotFound());
         on("platform.localhost", "/manifest.webmanifest").andExpect(status().isNotFound());
     }
+
+    @Test
+    void adminPanelHasItsOwnManifestWithTheSameIcons() throws Exception {
+        on(TestTenants.ALPHA_HOST, "/api/v1/public/admin.webmanifest")
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/manifest+json"))
+                .andExpect(jsonPath("$.id").value("/admin/"))
+                .andExpect(jsonPath("$.start_url").value("/admin/"))
+                .andExpect(jsonPath("$.scope").value("/admin/"))
+                .andExpect(jsonPath("$.display").value("standalone"))
+                .andExpect(jsonPath("$.orientation").doesNotExist())
+                .andExpect(jsonPath("$.icons[0].src").value(org.hamcrest.Matchers.startsWith("/api/v1/public/icons/192.png")));
+        on("platform.localhost", "/api/v1/public/admin.webmanifest").andExpect(status().isNotFound());
+    }
 }

@@ -65,23 +65,39 @@ public class PwaController {
     @GetMapping(value = "/manifest.webmanifest", produces = "application/manifest+json")
     @Operation(summary = "Şirkətin PWA manifesti", description = "Ad şirkətin standart dilində, rəng — brend rəngi.")
     ResponseEntity<Map<String, Object>> manifest() {
+        return manifest("/", "portrait");
+    }
+
+    /**
+     * İdarəetmə panelinin manifesti: eyni ad və ikon (şirkətin loqosu), amma ana ekrandan {@code /admin/} açılır və
+     * müştəri tətbiqindən ayrı tətbiq kimi quraşdırılır. Planşetdə üfüqi rejim də lazımdır — istiqamət sərbəstdir.
+     */
+    @GetMapping(value = "/api/v1/public/admin.webmanifest", produces = "application/manifest+json")
+    @Operation(summary = "İdarəetmə panelinin PWA manifesti", description = "Şirkətin adı və ikonu; /admin/ ünvanında açılır.")
+    ResponseEntity<Map<String, Object>> adminManifest() {
+        return manifest("/admin/", null);
+    }
+
+    private ResponseEntity<Map<String, Object>> manifest(String start, String orientation) {
         PublicCompanyResponse info = company.publicCompany();
         Language language = Language.fromTag(info.defaultLanguage()).orElse(Language.DEFAULT);
         String name = info.name().resolve(language);
         String color = info.brandColor();
         String version = iconVersion(info);
         Map<String, Object> manifest = new LinkedHashMap<>();
-        manifest.put("id", "/");
+        manifest.put("id", start);
         manifest.put("name", name);
         manifest.put("short_name", name.length() > 12 ? name.substring(0, 12).strip() : name);
         if (info.description() != null) {
             manifest.put("description", info.description().resolve(language));
         }
         manifest.put("lang", language.tag());
-        manifest.put("start_url", "/");
-        manifest.put("scope", "/");
+        manifest.put("start_url", start);
+        manifest.put("scope", start);
         manifest.put("display", "standalone");
-        manifest.put("orientation", "portrait");
+        if (orientation != null) {
+            manifest.put("orientation", orientation);
+        }
         manifest.put("theme_color", color);
         manifest.put("background_color", "#F6F7FB");
         manifest.put("icons", List.of(

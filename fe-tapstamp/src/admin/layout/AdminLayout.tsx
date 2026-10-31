@@ -7,7 +7,7 @@ import { NavLink, Outlet, useLocation } from 'react-router';
 import type { Language } from '@/shared/i18n/languages';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { applyBrandColor } from '@/shared/lib/brand';
+import { applyBrandColor, applyIconVersion } from '@/shared/lib/brand';
 import { cn } from '@/shared/lib/cn';
 import { usePlan } from '@/shared/plan/plan';
 import { Footer } from '@/shared/ui/Footer';
@@ -68,6 +68,9 @@ export function AdminLayout() {
   const company = useQuery({ queryKey: ['public-company'], queryFn: contextApi.company, enabled: scope === 'TENANT' });
   const brandColor = company.data?.brandColor;
   useEffect(() => applyBrandColor(brandColor), [brandColor]);
+  // Ana ekran ikonu (iPhone): loqo və ya rəng dəyişəndə telefon köhnə ikonu keşdən götürməsin
+  const logoVersionUrl = company.data?.logoUrl;
+  useEffect(() => applyIconVersion(brandColor, logoVersionUrl), [brandColor, logoVersionUrl]);
 
   // Telefonda menyu: səhifə dəyişəndə bağlanır
   const [menuOpen, setMenuOpen] = useState(false);
