@@ -148,37 +148,37 @@ function RuleRow({ rule, branch, now }: { rule: PublicRule; branch: string | und
   }
   const running = Boolean(rule.runningNow);
   const timing = useTiming(rule, now, running);
+  const count = rule.bonusStamps ?? 1;
   return (
     <div
       className={cn(
         // Rəng keçidi hamar olsun: vəziyyət dəyişəndə fon birdən deyil, yavaş-yavaş dəyişir
-        'flex items-center gap-3 rounded-2xl border p-3.5 transition-[background-color,color,border-color,box-shadow] duration-700 motion-reduce:transition-none',
+        'rounded-2xl border px-4 pt-3 pb-3.5 transition-[background-color,color,border-color,box-shadow] duration-700 motion-reduce:transition-none',
         running
           ? 'shine relative overflow-hidden border-transparent bg-primary text-primary-foreground shadow-md'
           : 'border-primary/20 bg-primary/5',
       )}
     >
-      <span
-        className={cn(
-          'grid size-11 shrink-0 place-items-center rounded-xl text-lg font-extrabold transition-colors duration-700 motion-reduce:transition-none',
-          running ? 'bg-white/20' : 'bg-primary/10 text-primary',
-        )}
-      >
-        +{rule.bonusStamps}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 text-sm font-bold">
-          <Sparkles className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">{resolveText(rule.name, lang)}</span>
+      {/* Yuxarı sətir: vəziyyət (geri sayım və ya başlama vaxtı) və bonusun ölçüsü — adın uzunluğundan asılı deyil */}
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className={cn(
+            'inline-flex min-w-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors duration-700 motion-reduce:transition-none',
+            running ? 'bg-white/20' : 'bg-primary/10 text-primary',
+          )}
+        >
+          <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{timing ?? t(running ? 'bonus.liveNow' : 'bonus.soon')}</span>
         </span>
-        <span className={cn('block text-sm', running ? 'opacity-90' : 'text-muted-foreground')}>
-          {running ? t('bonus.runningNow', { count: rule.bonusStamps ?? 1 }) : t('bonus.later', { count: rule.bonusStamps ?? 1 })}
+        <span className={cn('shrink-0 text-2xl leading-none font-extrabold tabular-nums', running ? '' : 'text-primary')}>
+          +{count}
         </span>
-        {timing && (
-          <span className={cn('mt-0.5 block text-xs font-semibold', running ? '' : 'text-primary')}>{timing}</span>
-        )}
-        <span className={cn('block text-xs', running ? 'opacity-80' : 'text-muted-foreground')}>{parts.join(' · ')}</span>
-      </span>
+      </div>
+      {/* Kampaniyanın adı — kartın başlığı: qısa olanda bir sətir, uzun olanda balanslı sətirlərə bölünür */}
+      <p className="mt-2 text-[15px] leading-snug font-bold text-balance break-words">{resolveText(rule.name, lang)}</p>
+      <p className={cn('mt-1 text-xs leading-relaxed', running ? 'opacity-85' : 'text-muted-foreground')}>
+        {[t('bonus.perStamp', { count }), ...parts].join(' · ')}
+      </p>
     </div>
   );
 }

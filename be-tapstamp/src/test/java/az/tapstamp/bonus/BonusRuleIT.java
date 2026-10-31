@@ -169,8 +169,10 @@ class BonusRuleIT extends TapIntegrationTest {
         Map<String, Object> body = rule("Novruz həftəsi", 1, List.of(1, 2, 3, 4, 5, 6, 7), newBranch(Policy.relaxed()));
         body.put("notifyOnStart", true);
         String id = create(body);
-        String title = JsonPath.read(TestPushInbox.decrypt(browser, inbox.await(browser.endpoint(), 1).body()), "$.title");
-        assertThat(title).isEqualTo("Novruz həftəsi başladı 🎉");
+        // Başlıq qısadır (telefonda bir sətir), kampaniyanın adı gövdədədir — uzun ad kəsilmir
+        String payload = TestPushInbox.decrypt(browser, inbox.await(browser.endpoint(), 1).body());
+        assertThat(JsonPath.<String>read(payload, "$.title")).isEqualTo("Yeni kampaniya başladı 🎉");
+        assertThat(JsonPath.<String>read(payload, "$.body")).startsWith("Novruz həftəsi\n");
 
         // Fon işi onu təkrar göndərmir
         TenantContext.callAs(alpha(), bonusRules::notifyStartedForCurrentTenant);

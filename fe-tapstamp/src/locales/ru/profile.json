@@ -249,14 +249,6 @@
     "cancel": "Отмена"
   },
   "bonus": {
-    "runningNow_one": "Сейчас к каждому штампу +{{count}} бонусный!",
-    "runningNow_few": "Сейчас к каждому штампу +{{count}} бонусных!",
-    "runningNow_many": "Сейчас к каждому штампу +{{count}} бонусных!",
-    "runningNow_other": "Сейчас к каждому штампу +{{count}} бонусных!",
-    "later_one": "В это время к каждому штампу +{{count}} бонусный",
-    "later_few": "В это время к каждому штампу +{{count}} бонусных",
-    "later_many": "В это время к каждому штампу +{{count}} бонусных",
-    "later_other": "В это время к каждому штампу +{{count}} бонусных",
     "everyDay": "Каждый день",
     "weekdays": "По будням",
     "weekend": "По выходным",
@@ -276,7 +268,13 @@
     "startsOnDay": "Начнётся: {{day}}",
     "startsOnDayAt": "Начнётся: {{day}}, {{time}}",
     "endsIn": "До конца {{hours}} ч {{minutes}} мин",
-    "endsInMinutes": "До конца {{minutes}} мин"
+    "endsInMinutes": "До конца {{minutes}} мин",
+    "liveNow": "Действует сейчас",
+    "soon": "Скоро",
+    "perStamp_one": "+{{count}} бонусный к каждому штампу",
+    "perStamp_few": "+{{count}} бонусных к каждому штампу",
+    "perStamp_many": "+{{count}} бонусных к каждому штампу",
+    "perStamp_other": "+{{count}} бонусных к каждому штампу"
   },
   "tier": {
     "label": "Ваш уровень",

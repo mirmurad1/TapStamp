@@ -221,10 +221,6 @@
     "cancel": "Ləğv et"
   },
   "bonus": {
-    "runningNow_one": "İndi hər möhürə +{{count}} bonus möhür!",
-    "runningNow_other": "İndi hər möhürə +{{count}} bonus möhür!",
-    "later_one": "Bu vaxtlarda hər möhürə +{{count}} bonus möhür",
-    "later_other": "Bu vaxtlarda hər möhürə +{{count}} bonus möhür",
     "everyDay": "Hər gün",
     "weekdays": "Həftə içi",
     "weekend": "Həftəsonu",
@@ -244,7 +240,11 @@
     "startsOnDay": "{{day}} başlayır",
     "startsOnDayAt": "{{day}} {{time}}-da başlayır",
     "endsIn": "Bitməsinə {{hours}} saat {{minutes}} dəq",
-    "endsInMinutes": "Bitməsinə {{minutes}} dəq qalıb"
+    "endsInMinutes": "Bitməsinə {{minutes}} dəq qalıb",
+    "liveNow": "İndi qüvvədədir",
+    "soon": "Tezliklə",
+    "perStamp_one": "Hər möhürə +{{count}} bonus",
+    "perStamp_other": "Hər möhürə +{{count}} bonus"
   },
   "tier": {
     "label": "Səviyyəniz",

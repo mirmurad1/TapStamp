@@ -221,10 +221,6 @@
     "cancel": "Cancel"
   },
   "bonus": {
-    "runningNow_one": "Right now: +{{count}} bonus stamp with every stamp!",
-    "runningNow_other": "Right now: +{{count}} bonus stamps with every stamp!",
-    "later_one": "+{{count}} bonus stamp with every stamp at these times",
-    "later_other": "+{{count}} bonus stamps with every stamp at these times",
     "everyDay": "Every day",
     "weekdays": "Weekdays",
     "weekend": "Weekend",
@@ -244,7 +240,11 @@
     "startsOnDay": "Starts {{day}}",
     "startsOnDayAt": "Starts {{day}} at {{time}}",
     "endsIn": "Ends in {{hours}} h {{minutes}} min",
-    "endsInMinutes": "Ends in {{minutes}} min"
+    "endsInMinutes": "Ends in {{minutes}} min",
+    "liveNow": "On now",
+    "soon": "Coming up",
+    "perStamp_one": "+{{count}} bonus stamp with every stamp",
+    "perStamp_other": "+{{count}} bonus stamps with every stamp"
   },
   "tier": {
     "label": "Your tier",
