@@ -45,7 +45,11 @@
       "lastDays_many": "Последние {{count}} дней",
       "lastDays_other": "Последние {{count}} дня",
       "branch": "Филиал",
-      "allBranches": "Все филиалы"
+      "allBranches": "Все филиалы",
+      "custom": "Диапазон дат",
+      "from": "С",
+      "to": "По",
+      "invalidRange": "Дата начала не может быть позже даты окончания, а диапазон — не больше 366 дней."
     },
     "kpi": {
       "customers": "Клиенты",
@@ -57,7 +61,10 @@
       "rewards": "Выдано подарков",
       "rewardsDetail": "Получено {{earned}}, использовано {{rate}}",
       "retention": "Возвращаемость",
-      "retentionDetail": "Вернулись {{returned}} из {{cohort}} новых клиентов"
+      "retentionDetail": "Вернулись {{returned}} из {{cohort}} новых клиентов",
+      "feedback": "Отзывы",
+      "feedbackDetail": "Ответов: {{answered}} из {{sent}}",
+      "feedbackRatings": "😊 {{good}} · 😐 {{ok}} · 🙁 {{bad}}"
     },
     "series": {
       "title": "Штампы и подарки",

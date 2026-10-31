@@ -1,5 +1,6 @@
 package az.tapstamp.feedback.api;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import az.tapstamp.feedback.FeedbackService;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -66,11 +68,14 @@ public class AdminFeedbackController {
 
     @GetMapping("/summary")
     @Operation(summary = "Xülasə", description = """
-            Son 30 gün: qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı; həll olunmamış pis rəylər — \
-            hamısı (admin panelindəki bildiriş sayğacı).""")
+            Dövr üzrə (`from`/`to` verilməyibsə — son 30 gün): qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab \
+            payı (cavablar / göndərilən sorğular); həll olunmamış pis rəylər — dövrdən asılı olmayaraq hamısı (admin \
+            panelindəki bildiriş sayğacı). Dövr ən çox 366 gün.""")
     FeedbackSummary summary(@AuthenticationPrincipal AdminPrincipal principal,
-                        @RequestParam(required = false) @Nullable UUID branchId) {
-        return feedback.summary(principal, branchId);
+                        @RequestParam(required = false) @Nullable UUID branchId,
+                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Nullable LocalDate from,
+                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Nullable LocalDate to) {
+        return feedback.summary(principal, branchId, from, to);
     }
 
     @GetMapping

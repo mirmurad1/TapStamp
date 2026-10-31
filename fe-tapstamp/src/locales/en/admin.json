@@ -43,7 +43,11 @@
       "lastDays_one": "Last {{count}} day",
       "lastDays_other": "Last {{count}} days",
       "branch": "Branch",
-      "allBranches": "All branches"
+      "allBranches": "All branches",
+      "custom": "Date range",
+      "from": "From",
+      "to": "To",
+      "invalidRange": "The start date can’t be after the end date, and the range can be at most 366 days."
     },
     "kpi": {
       "customers": "Customers",
@@ -55,7 +59,10 @@
       "rewards": "Gifts given",
       "rewardsDetail": "{{earned}} earned, {{rate}} redeemed",
       "retention": "Retention",
-      "retentionDetail": "{{returned}} of {{cohort}} new customers came back"
+      "retentionDetail": "{{returned}} of {{cohort}} new customers came back",
+      "feedback": "Feedback",
+      "feedbackDetail": "{{answered}} replies to {{sent}} requests",
+      "feedbackRatings": "😊 {{good}} · 😐 {{ok}} · 🙁 {{bad}}"
     },
     "series": {
       "title": "Stamps and rewards",

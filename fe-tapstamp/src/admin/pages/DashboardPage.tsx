@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Gift, Repeat, Stamp, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, Gift, MessageSquareHeart, Repeat, Stamp, UserPlus, Users } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -11,10 +11,12 @@ import { useFeature } from '@/shared/plan/plan';
 import { Button } from '@/shared/ui/button';
 import { Tabs } from '@/shared/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Select } from '@/shared/ui/input';
+import { Input, Select } from '@/shared/ui/input';
 
 import {
   analyticsApi,
+  FEEDBACK_SUMMARY_KEY,
+  feedbackApi,
   type AnalyticsFilter,
   type HeatCell,
   type LanguageShare,
@@ -30,7 +32,15 @@ import { ComparisonView } from './dashboard/ComparisonView';
 import { ReferralDashboard } from './referrals/ReferralDashboard';
 
 const PERIODS = [7, 30, 90, 365] as const;
+type Period = (typeof PERIODS)[number] | 'custom';
 const VIEWS = ['overview', 'comparison'] as const;
+/** Backend-in qəbul etdiyi ən uzun dövr (AnalyticsService.MAX_PERIOD_DAYS). */
+const MAX_RANGE_DAYS = 366;
+
+/** İki tarix arasındakı gün fərqi (YYYY-MM-DD). */
+function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
 
 /** Şirkətin "bu gün"ü (YYYY-MM-DD) — analitika tarixləri şirkətin saat qurşağındadır. */
 function companyToday(): string {
@@ -97,22 +107,35 @@ function Analytics() {
   const ownBranches = new Set((me.roles ?? []).map((grant) => grant.branchId).filter(Boolean));
   const branchOptions = isOwner ? branches : branches.filter((branch) => ownBranches.has(branch.id));
 
-  const [days, setDays] = useState<(typeof PERIODS)[number]>(30);
+  const today = companyToday();
+  // Dövr: hazır "son N gün" və ya admin özü seçdiyi tarix aralığı (ən çox MAX_RANGE_DAYS gün — backend-in həddi)
+  const [period, setPeriod] = useState<Period>(30);
+  const [custom, setCustom] = useState({ from: shiftDays(today, -29), to: today });
   // Görünüş: ümumi göstəricilər və ya filialların və işçilərin müqayisəsi
   const [view, setView] = useState<(typeof VIEWS)[number]>('overview');
   const [branchId, setBranchId] = useState('');
-  const to = companyToday();
-  const filter: AnalyticsFilter = { from: shiftDays(to, -(days - 1)), to, branchId: branchId || undefined };
+  const range = period === 'custom' ? custom : { from: shiftDays(today, -(period - 1)), to: today };
+  const days = range.from && range.to ? daysBetween(range.from, range.to) + 1 : 0;
+  const valid = days >= 1 && days <= MAX_RANGE_DAYS && range.to <= today;
+  const { from, to } = range;
+  const filter: AnalyticsFilter = { from, to, branchId: branchId || undefined };
   const granularity = days > 90 ? 'WEEK' : 'DAY';
 
-  const overview = useQuery({ queryKey: ['analytics', 'overview', filter], queryFn: () => analyticsApi.overview(filter) });
+  const overview = useQuery({ queryKey: ['analytics', 'overview', filter], queryFn: () => analyticsApi.overview(filter), enabled: valid });
   const series = useQuery({
     queryKey: ['analytics', 'series', filter, granularity],
     queryFn: () => analyticsApi.series({ ...filter, granularity }),
-    enabled: fullAnalytics,
+    enabled: fullAnalytics && valid,
   });
-  const heatmap = useQuery({ queryKey: ['analytics', 'heatmap', filter], queryFn: () => analyticsApi.heatmap(filter), enabled: fullAnalytics });
-  const retention = useQuery({ queryKey: ['analytics', 'retention', filter], queryFn: () => analyticsApi.retention(filter), enabled: fullAnalytics });
+  const heatmap = useQuery({ queryKey: ['analytics', 'heatmap', filter], queryFn: () => analyticsApi.heatmap(filter), enabled: fullAnalytics && valid });
+  const retention = useQuery({ queryKey: ['analytics', 'retention', filter], queryFn: () => analyticsApi.retention(filter), enabled: fullAnalytics && valid });
+  // Rəy: sorğu göndərilənlərin neçəsi cavab verdi (yalnız sahib, rəy imkanı olan paketdə)
+  const feedbackEnabled = useFeature('FEEDBACK') === true && isOwner;
+  const feedback = useQuery({
+    queryKey: [...FEEDBACK_SUMMARY_KEY, 'dashboard', filter],
+    queryFn: () => feedbackApi.summary(filter.branchId, { from, to }),
+    enabled: feedbackEnabled && valid,
+  });
   const languages = useQuery({ queryKey: ['analytics', 'languages', filter.branchId], queryFn: () => analyticsApi.languages(filter), enabled: fullAnalytics });
 
   const o = overview.data;
@@ -128,14 +151,38 @@ function Analytics() {
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm font-medium">
           {t('admin:dashboard.filters.period')}
-          <Select value={days} onChange={(event) => setDays(Number(event.target.value) as (typeof PERIODS)[number])}>
+          <Select value={period} onChange={(event) => {
+            const value = event.target.value;
+            if (value === 'custom') {
+              // Aralıq seçiminə keçəndə indiki dövrdən başlanır — admin yalnız lazım olanı dəyişir
+              setCustom(range);
+              setPeriod('custom');
+            } else {
+              setPeriod(Number(value) as (typeof PERIODS)[number]);
+            }
+          }}>
             {PERIODS.map((value) => (
               <option key={value} value={value}>
                 {t('admin:dashboard.filters.lastDays', { count: value })}
               </option>
             ))}
+            <option value="custom">{t('admin:dashboard.filters.custom')}</option>
           </Select>
         </label>
+        {period === 'custom' ? (
+          <>
+            <label className="flex flex-col gap-1 text-sm font-medium">
+              {t('admin:dashboard.filters.from')}
+              <Input type="date" value={custom.from} max={custom.to || today}
+                onChange={(event) => setCustom({ ...custom, from: event.target.value })} />
+            </label>
+            <label className="flex flex-col gap-1 text-sm font-medium">
+              {t('admin:dashboard.filters.to')}
+              <Input type="date" value={custom.to} min={custom.from} max={today}
+                onChange={(event) => setCustom({ ...custom, to: event.target.value })} />
+            </label>
+          </>
+        ) : null}
         {view === 'overview' && (isOwner ? branchComparison : branchOptions.length > 1) ? (
           <label className="flex flex-col gap-1 text-sm font-medium">
             {t('admin:dashboard.filters.branch')}
@@ -149,12 +196,15 @@ function Analytics() {
             </Select>
           </label>
         ) : null}
-        <p className="pb-2 text-sm text-muted-foreground">
-          {formatDate(filter.from ?? to, lang)} — {formatDate(to, lang)}
-        </p>
+        {period !== 'custom' ? (
+          <p className="pb-2 text-sm text-muted-foreground">
+            {formatDate(from, lang)} — {formatDate(to, lang)}
+          </p>
+        ) : null}
       </div>
+      {!valid ? <p className="text-sm text-destructive">{t('admin:dashboard.filters.invalidRange')}</p> : null}
 
-      {view === 'comparison' ? <ComparisonView from={filter.from ?? to} to={to} /> : (
+      {!valid ? null : view === 'comparison' ? <ComparisonView from={from} to={to} /> : (
       <>
       <ApiErrorAlert error={error} />
 
@@ -182,6 +232,19 @@ function Analytics() {
             loading={!retention.data}
           >
             {t('admin:dashboard.kpi.retentionDetail', { returned: n(retention.data?.returned), cohort: n(retention.data?.cohort) })}
+          </Kpi>
+        ) : null}
+        {feedbackEnabled ? (
+          <Kpi
+            icon={<MessageSquareHeart />}
+            label={t('admin:dashboard.kpi.feedback')}
+            value={feedback.data?.responseRate == null ? '—' : formatPercent(feedback.data.responseRate, lang)}
+            loading={!feedback.data}
+          >
+            {t('admin:dashboard.kpi.feedbackDetail', { answered: n(feedback.data?.answered), sent: n(feedback.data?.sent) })}
+            <span className="mt-0.5 block tabular-nums">
+              {t('admin:dashboard.kpi.feedbackRatings', { good: n(feedback.data?.good), ok: n(feedback.data?.ok), bad: n(feedback.data?.bad) })}
+            </span>
           </Kpi>
         ) : null}
       </div>

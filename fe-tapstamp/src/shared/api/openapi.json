@@ -1589,7 +1589,7 @@
     },
     "/api/v1/admin/feedback/summary" : {
       "get" : {
-        "description" : "Son 30 gün: qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı; həll olunmamış pis rəylər — hamısı (admin panelindəki bildiriş sayğacı).",
+        "description" : "Dövr üzrə (`from`/`to` verilməyibsə — son 30 gün): qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı (cavablar / göndərilən sorğular); həll olunmamış pis rəylər — dövrdən asılı olmayaraq hamısı (admin panelindəki bildiriş sayğacı). Dövr ən çox 366 gün.",
         "operationId" : "summary_1",
         "parameters" : [ {
           "in" : "query",
@@ -1598,6 +1598,22 @@
           "schema" : {
             "type" : "string",
             "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
           }
         } ],
         "responses" : {
@@ -5263,6 +5279,27 @@
         },
         "summary" : "Provisioning paketi",
         "tags" : [ "Platforma: NFC çipləri" ]
+      }
+    },
+    "/api/v1/public/admin.webmanifest" : {
+      "get" : {
+        "description" : "Ad — \"İdarəetmə\", ikon — şirkətin ikonu; /admin/ ünvanında açılır.",
+        "operationId" : "adminManifest",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/manifest+json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : { }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "İdarəetmə panelinin PWA manifesti",
+        "tags" : [ "İctimai: PWA" ]
       }
     },
     "/api/v1/public/bonus-rules" : {

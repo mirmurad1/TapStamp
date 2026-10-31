@@ -3,6 +3,9 @@ package az.tapstamp.feedback;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +49,8 @@ public class FeedbackService {
     static final Duration DELAY = Duration.ofMinutes(15);
     static final Duration ANSWER_WINDOW = Duration.ofDays(3);
     public static final List<Integer> FREQUENCIES = List.of(1, 7, 14, 30);
+    /** Xülasənin ən uzun dövrü — göstəricilər panelindəki həddlə eyni. */
+    static final int MAX_PERIOD_DAYS = 366;
     public static final Set<String> RATINGS = Set.of("GOOD", "OK", "BAD");
     public static final Set<String> REASONS = Set.of("SERVICE", "WAIT", "QUALITY", "CLEANLINESS", "PRICE", "OTHER");
     private static final int BATCH = 500;
@@ -187,9 +192,27 @@ public class FeedbackService {
                         row.createdAt(), row.resolvedAt(), row.resolutionNote()));
     }
 
-    public FeedbackSummary summary(AdminPrincipal principal, @Nullable UUID branchId) {
+    /**
+     * Dövr verilməyibsə — son 30 gün (indiyədək). Verilibsə — şirkətin saat qurşağında {@code from} gününün
+     * başlanğıcından {@code to} gününün sonunadək (göstəricilər panelinin dövrü ilə eyni, ən çox 366 gün).
+     */
+    public FeedbackSummary summary(AdminPrincipal principal, @Nullable UUID branchId, @Nullable LocalDate from,
+                                   @Nullable LocalDate to) {
         AccessPolicy.requireCompanyWide(principal);
-        SummaryRow s = feedback.summary(clock.instant().minus(Duration.ofDays(30)), branchId);
+        Instant now = clock.instant();
+        Instant since = now.minus(Duration.ofDays(30));
+        Instant until = now;
+        if (from != null || to != null) {
+            ZoneId zone = TenantContext.require().timezone();
+            LocalDate end = to == null ? LocalDate.now(clock.withZone(zone)) : to;
+            LocalDate start = from == null ? end.minusDays(29) : from;
+            if (start.isAfter(end) || ChronoUnit.DAYS.between(start, end) >= MAX_PERIOD_DAYS) {
+                throw new ApiException(ErrorCode.VALIDATION_FAILED);
+            }
+            since = start.atStartOfDay(zone).toInstant();
+            until = end.plusDays(1).atStartOfDay(zone).toInstant();
+        }
+        SummaryRow s = feedback.summary(since, until, branchId);
         long answered = s.good() + s.ok() + s.bad();
         return new FeedbackSummary(s.good(), s.ok(), s.bad(), answered, s.sent(),
                 answered == 0 ? null : (double) s.good() / answered,

@@ -97,6 +97,15 @@ class FeedbackIT extends TapIntegrationTest {
         List<String> ids = JsonPath.read(list, "$.items[?(@.customerId == '" + customerId + "')].id");
         owner.get("/feedback/summary").andExpect(jsonPath("$.unresolvedBad")
                 .value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+        // Dövr üzrə (göstəricilər paneli): bu günün rəyi bu günə düşür, keçən ilə düşmür; səhv dövr — 400
+        java.time.LocalDate today = clock.instant().atZone(alpha().timezone()).toLocalDate();
+        owner.get("/feedback/summary?from=" + today + "&to=" + today).andExpect(status().isOk())
+                .andExpect(jsonPath("$.bad").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.sent").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+        java.time.LocalDate lastYear = today.minusYears(1);
+        owner.get("/feedback/summary?from=" + lastYear + "&to=" + lastYear.plusDays(6))
+                .andExpect(jsonPath("$.answered").value(0)).andExpect(jsonPath("$.sent").value(0));
+        owner.get("/feedback/summary?from=" + today + "&to=" + today.minusDays(1)).andExpect(status().isBadRequest());
 
         owner.post("/feedback/" + ids.get(0) + "/resolve", Map.of("note", "Zəng etdik")).andExpect(status().isNoContent());
         owner.get("/feedback?unresolved=true&size=50")

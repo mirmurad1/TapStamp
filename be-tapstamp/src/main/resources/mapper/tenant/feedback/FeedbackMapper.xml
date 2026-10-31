@@ -73,13 +73,13 @@
 
     <select id="summary" resultType="az.tapstamp.feedback.repository.FeedbackMapper$SummaryRow">
         SELECT
-            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'GOOD'
-                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS good,
-            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'OK'
-                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS ok,
-            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.rating = 'BAD'
-                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS bad,
-            (SELECT count(*) FROM feedback_requests r WHERE r.sent_at &gt;= #{since}
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.created_at &lt; #{until}
+                AND f.rating = 'GOOD' <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS good,
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.created_at &lt; #{until}
+                AND f.rating = 'OK' <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS ok,
+            (SELECT count(*) FROM feedback f WHERE f.created_at &gt;= #{since} AND f.created_at &lt; #{until}
+                AND f.rating = 'BAD' <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS bad,
+            (SELECT count(*) FROM feedback_requests r WHERE r.sent_at &gt;= #{since} AND r.sent_at &lt; #{until}
                 <if test="branchId != null">AND r.branch_id = #{branchId}</if>) AS sent,
             (SELECT count(*) FROM feedback f WHERE f.rating = 'BAD' AND f.resolved_at IS NULL
                 <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS unresolved_bad

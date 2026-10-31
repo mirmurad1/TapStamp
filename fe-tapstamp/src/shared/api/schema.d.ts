@@ -754,7 +754,7 @@ export interface paths {
         };
         /**
          * Xülasə
-         * @description Son 30 gün: qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı; həll olunmamış pis rəylər — hamısı (admin panelindəki bildiriş sayğacı).
+         * @description Dövr üzrə (`from`/`to` verilməyibsə — son 30 gün): qiymətlər, məmnuniyyət (əla qiymətlərin payı), cavab payı (cavablar / göndərilən sorğular); həll olunmamış pis rəylər — dövrdən asılı olmayaraq hamısı (admin panelindəki bildiriş sayğacı). Dövr ən çox 366 gün.
          */
         get: operations["summary_1"];
         put?: never;
@@ -2901,6 +2901,26 @@ export interface paths {
          * @description Çipin proqramlaşdırılması üçün URL şablonu, SDM ofsetləri və açarlar. Step-up tələb edir; PENDING açarlar yalnız bir dəfə göstərilir (təkrar — PROVISIONING_ALREADY_EXPORTED), auditə yazılır.
          */
         post: operations["provisioningPackage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/admin.webmanifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * İdarəetmə panelinin PWA manifesti
+         * @description Ad — "İdarəetmə", ikon — şirkətin ikonu; /admin/ ünvanında açılır.
+         */
+        get: operations["adminManifest"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5993,6 +6013,8 @@ export interface operations {
         parameters: {
             query?: {
                 branchId?: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -8848,6 +8870,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ProvisioningPackage"];
+                };
+            };
+        };
+    };
+    adminManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/manifest+json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

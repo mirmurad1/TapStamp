@@ -565,7 +565,9 @@ export const FEEDBACK_SUMMARY_KEY = ['feedback-summary'] as const;
 export const feedbackApi = {
   settings: () => unwrap(api.GET('/api/v1/admin/feedback/settings')),
   updateSettings: (body: Schemas['FeedbackSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/feedback/settings', { body })),
-  summary: (branchId?: string) => unwrap(api.GET('/api/v1/admin/feedback/summary', { params: { query: { branchId } } })),
+  /** Dövr verilməyibsə — son 30 gün; göstəricilər paneli seçilmiş dövrü ötürür. */
+  summary: (branchId?: string, period?: { from?: string; to?: string }) =>
+    unwrap(api.GET('/api/v1/admin/feedback/summary', { params: { query: { branchId, ...period } } })),
   list: (query: PageParams & { rating?: FeedbackRating; unresolved?: boolean; branchId?: string }) =>
     unwrap(api.GET('/api/v1/admin/feedback', { params: { query } })),
   resolve: (feedbackId: string, note?: string) =>

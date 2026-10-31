@@ -43,7 +43,11 @@
       "lastDays_one": "Son {{count}} gün",
       "lastDays_other": "Son {{count}} gün",
       "branch": "Filial",
-      "allBranches": "Bütün filiallar"
+      "allBranches": "Bütün filiallar",
+      "custom": "Tarix aralığı",
+      "from": "Başlanğıc",
+      "to": "Son",
+      "invalidRange": "Başlanğıc tarixi son tarixdən sonra ola bilməz, aralıq ən çox 366 gün ola bilər."
     },
     "kpi": {
       "customers": "Müştərilər",
@@ -55,7 +59,10 @@
       "rewards": "Verilən hədiyyələr",
       "rewardsDetail": "{{earned}} qazanılıb, {{rate}} istifadə olunub",
       "retention": "Geri qayıtma",
-      "retentionDetail": "{{cohort}} yeni müştəridən {{returned}} nəfəri qayıdıb"
+      "retentionDetail": "{{cohort}} yeni müştəridən {{returned}} nəfəri qayıdıb",
+      "feedback": "Rəy",
+      "feedbackDetail": "{{sent}} sorğudan {{answered}} cavab",
+      "feedbackRatings": "😊 {{good}} · 😐 {{ok}} · 🙁 {{bad}}"
     },
     "series": {
       "title": "Möhürlər və hədiyyələr",

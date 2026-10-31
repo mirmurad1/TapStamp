@@ -53,7 +53,7 @@ public interface FeedbackMapper {
 
     long count(@Nullable String rating, boolean unresolvedOnly, @Nullable UUID branchId);
 
-    SummaryRow summary(Instant since, @Nullable UUID branchId);
+    SummaryRow summary(Instant since, Instant until, @Nullable UUID branchId);
 
     int resolve(UUID id, @Nullable String note, UUID staffId, Instant now);
 }
