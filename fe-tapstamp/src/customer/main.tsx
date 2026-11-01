@@ -6,6 +6,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { setSessionRefresher } from '@/shared/api/client';
+import { applyCachedBrandColor } from '@/shared/lib/brand';
 
 import { App } from './App';
 import { createCustomerQueryClient } from './auth/queryClient';
@@ -17,6 +18,9 @@ setSessionRefresher(refreshSession);
 
 const queryClient = createCustomerQueryClient();
 registerServiceWorker();
+
+// Son brend rəngi dərhal — şirkətin rəngi serverdən gələnə qədər standart rəng görünməsin
+applyCachedBrandColor();
 
 const root = document.getElementById('root');
 if (!root) {

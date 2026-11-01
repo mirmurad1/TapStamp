@@ -64,6 +64,38 @@ export function applyBrandColor(hex: string | undefined, root: HTMLElement = doc
   if (!hex || !HEX.test(hex)) {
     return;
   }
+  rememberBrandColor(hex);
+  setBrandVariables(hex, root);
+}
+
+/** Brauzerdə (bu domen üçün) saxlanılan son brend rəngi — növbəti açılışda dərhal tətbiq olunur. */
+const BRAND_STORAGE_KEY = 'tapstamp.brandColor';
+
+function rememberBrandColor(hex: string): void {
+  try {
+    window.localStorage.setItem(BRAND_STORAGE_KEY, hex);
+  } catch {
+    // Məxfi rejim və ya bağlı yaddaş: növbəti açılışda rəng serverdən gələnə qədər standart qalır
+  }
+}
+
+/**
+ * Tətbiq açılanda (React-dan əvvəl) son brend rəngini tətbiq edir: şirkətin rəngi serverdən gələnə qədər standart
+ * (bənövşəyi) rəng bir anlıq görünməsin. localStorage hər domen üçün ayrıdır — hər şirkətin öz rəngi.
+ */
+export function applyCachedBrandColor(root: HTMLElement = document.documentElement): void {
+  let hex: string | null;
+  try {
+    hex = window.localStorage.getItem(BRAND_STORAGE_KEY);
+  } catch {
+    return;
+  }
+  if (hex && HEX.test(hex)) {
+    setBrandVariables(hex, root);
+  }
+}
+
+function setBrandVariables(hex: string, root: HTMLElement): void {
   const light = readableOn(hex, LIGHT_SURFACES, '#000000');
   root.style.setProperty('--brand-light', light);
   root.style.setProperty('--brand-light-foreground', readableForeground(light));

@@ -54,3 +54,24 @@ describe('brend rəngi', () => {
     expect(formatCountdown(3725)).toBe('1:02:05');
   });
 });
+
+describe('brend rənginin yadda saxlanması', () => {
+  it('son rəng növbəti açılışda React-dan əvvəl tətbiq olunur', async () => {
+    const { applyCachedBrandColor } = await import('./brand');
+    window.localStorage.clear();
+    const first = document.createElement('div');
+    applyCachedBrandColor(first);
+    expect(first.style.getPropertyValue('--brand-light')).toBe('');
+
+    applyBrandColor('#806840', document.createElement('div'));
+    const next = document.createElement('div');
+    applyCachedBrandColor(next);
+    expect(next.style.getPropertyValue('--brand-light')).toBe('#806840');
+
+    // Yanlış dəyər nəzərə alınmır
+    window.localStorage.setItem('tapstamp.brandColor', 'red;}');
+    const broken = document.createElement('div');
+    applyCachedBrandColor(broken);
+    expect(broken.style.getPropertyValue('--brand-light')).toBe('');
+  });
+});
