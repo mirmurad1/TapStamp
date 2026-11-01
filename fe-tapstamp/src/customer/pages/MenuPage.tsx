@@ -137,7 +137,8 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
             onClick={() => go(category.id)}
             aria-current={active === category.id ? 'true' : undefined}
             className={cn(
-              'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              // Rəng keçidi yoxdur: brend rəngi yüklənəndə standart rəngdən animasiya ilə keçib "yanıb-sönməsin"
+              'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               active === category.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:bg-muted',
             )}
           >
