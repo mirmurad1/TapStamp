@@ -37,6 +37,12 @@ const VIEWS = ['overview', 'comparison'] as const;
 /** Backend-in qəbul etdiyi ən uzun dövr (AnalyticsService.MAX_PERIOD_DAYS). */
 const MAX_RANGE_DAYS = 366;
 
+/**
+ * Tarix sahəsi: iPhone Safari onu öz ölçüsündə kiçik "kapsul" kimi çəkir — sahə sütunun tam enini tutsun, mətn
+ * sola düzülsün (digər sahələrlə eyni görünsün).
+ */
+const DATE_INPUT = 'min-w-0 appearance-none [&::-webkit-date-and-time-value]:text-left';
+
 /** İki tarix arasındakı gün fərqi (YYYY-MM-DD). */
 function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
@@ -148,8 +154,9 @@ function Analytics() {
         <Tabs value={view} onChange={setView} label={t('admin:dashboard.comparison.views')}
           options={VIEWS.map((value) => ({ value, label: t(`admin:dashboard.comparison.tabs.${value}`) }))} />
       ) : null}
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm font-medium">
+      {/* Telefonda iki bərabər sütun: "Dövr" və "Filial" yuxarıda, tarix aralığı altında; geniş ekranda bir sətir */}
+      <div className="grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap">
+        <label className="flex min-w-0 flex-col gap-1 text-sm font-medium">
           {t('admin:dashboard.filters.period')}
           <Select value={period} onChange={(event) => {
             const value = event.target.value;
@@ -171,20 +178,20 @@ function Analytics() {
         </label>
         {period === 'custom' ? (
           <>
-            <label className="flex flex-col gap-1 text-sm font-medium">
+            <label className="order-last flex min-w-0 flex-col gap-1 text-sm font-medium sm:order-none">
               {t('admin:dashboard.filters.from')}
-              <Input type="date" value={custom.from} max={custom.to || today}
+              <Input type="date" value={custom.from} max={custom.to || today} className={DATE_INPUT}
                 onChange={(event) => setCustom({ ...custom, from: event.target.value })} />
             </label>
-            <label className="flex flex-col gap-1 text-sm font-medium">
+            <label className="order-last flex min-w-0 flex-col gap-1 text-sm font-medium sm:order-none">
               {t('admin:dashboard.filters.to')}
-              <Input type="date" value={custom.to} min={custom.from} max={today}
+              <Input type="date" value={custom.to} min={custom.from} max={today} className={DATE_INPUT}
                 onChange={(event) => setCustom({ ...custom, to: event.target.value })} />
             </label>
           </>
         ) : null}
         {view === 'overview' && (isOwner ? branchComparison : branchOptions.length > 1) ? (
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-1 text-sm font-medium">
             {t('admin:dashboard.filters.branch')}
             <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
               <option value="">{t('admin:dashboard.filters.allBranches')}</option>
@@ -197,7 +204,7 @@ function Analytics() {
           </label>
         ) : null}
         {period !== 'custom' ? (
-          <p className="pb-2 text-sm text-muted-foreground">
+          <p className="col-span-2 text-sm text-muted-foreground sm:pb-2">
             {formatDate(from, lang)} — {formatDate(to, lang)}
           </p>
         ) : null}
