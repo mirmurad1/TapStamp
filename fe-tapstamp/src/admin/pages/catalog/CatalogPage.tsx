@@ -1,6 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, BookOpen, EyeOff, ImageIcon, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import {
+  ArrowDown,
+  ArrowUp,
+  BookOpen,
+  Download,
+  ExternalLink,
+  EyeOff,
+  ImageIcon,
+  Pencil,
+  Plus,
+  QrCode as QrCodeIcon,
+  Trash2,
+} from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
@@ -14,6 +26,7 @@ import { useConfirm } from '@/shared/ui/ConfirmProvider';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
+import { QrCode } from '@/shared/ui/QrCode';
 
 import {
   CATALOG_KEY,
@@ -125,9 +138,11 @@ function SettingsCard({ data }: { data: CatalogView }) {
     catalogApi.settings(enabled, title));
   const enabled = data.enabled ?? true;
   const title = (data.title ?? 'MENU') as CatalogTitle;
+  const [qrOpen, setQrOpen] = useState(false);
   return (
     <Card>
-      <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+      <CardContent className="flex flex-col gap-4 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <label className="flex items-start gap-3 text-sm">
           <input
             type="checkbox"
@@ -152,9 +167,84 @@ function SettingsCard({ data }: { data: CatalogView }) {
             ))}
           </Select>
         </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+          <Button variant="outline" size="sm" onClick={() => setQrOpen(true)}>
+            <QrCodeIcon className="size-4" aria-hidden="true" />
+            {t('catalog.qr.open')}
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <a href="/menu" target="_blank" rel="noopener">
+              <ExternalLink className="size-4" aria-hidden="true" />
+              {t('catalog.qr.preview')}
+            </a>
+          </Button>
+        </div>
       </CardContent>
       <ApiErrorAlert error={save.error} />
+      {qrOpen ? <MenuQrDialog onClose={() => setQrOpen(false)} /> : null}
     </Card>
+  );
+}
+
+/**
+ * Stol üçün QR kod: müştəri telefonla skan edib menyunu açır (giriş tələb etmir). Filial seçilərsə, menyu yalnız o
+ * filialın məhsulları ilə açılır. SVG yüklənir — çapda keyfiyyət itmir.
+ */
+function MenuQrDialog({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation(['admin', 'common']);
+  const { branches } = useBranchNames();
+  const [branchId, setBranchId] = useState('');
+  const url = `${window.location.origin}/menu${branchId ? `?branch=${branchId}` : ''}`;
+  const qrRef = useRef<HTMLDivElement>(null);
+  const download = () => {
+    const svg = qrRef.current?.querySelector('svg');
+    if (!svg) {
+      return;
+    }
+    const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'menu-qr.svg';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t('admin:catalog.qr.title')}</DialogTitle>
+          <DialogDescription>{t('admin:catalog.qr.hint')}</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col items-center gap-3">
+          {branches.length > 1 ? (
+            <Field id="qr-branch" label={t('admin:catalog.form.branch')} className="w-full">
+              <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
+                <option value="">{t('admin:catalog.form.allBranches')}</option>
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
+          <div ref={qrRef} className="w-56 rounded-xl border border-border p-2">
+            <QrCode value={url} label={t('admin:catalog.qr.title')} className="block size-full" />
+          </div>
+          <p className="w-full text-center text-xs break-all text-muted-foreground">{url}</p>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>
+            {t('common:actions.close')}
+          </Button>
+          <Button type="button" onClick={download}>
+            <Download className="size-4" aria-hidden="true" />
+            {t('admin:catalog.qr.download')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

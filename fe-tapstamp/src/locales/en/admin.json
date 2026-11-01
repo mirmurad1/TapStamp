@@ -1331,6 +1331,13 @@
       "imageInvalid": "PNG or JPEG only, up to 2 MB.",
       "soldOut": "Sold out",
       "soldOutHint": "Shown faded to customers, not deleted."
+    },
+    "qr": {
+      "open": "Table QR code",
+      "preview": "View customer page",
+      "title": "Menu QR code",
+      "hint": "Print it and put it on the table: customers scan it with their phone to open the menu, no sign-in needed.",
+      "download": "Download (SVG)"
     }
   }
 }

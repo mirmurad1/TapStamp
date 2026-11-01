@@ -30,7 +30,12 @@ export const publicApi = {
   legalDocument: (slug: string) => unwrap(api.GET('/api/v1/public/legal/{slug}', { params: { path: { slug } } })),
   /** Bu günün bonus qaydaları (xoşbəxt saatlar, kampaniyalar) — kartın üstündəki banner. */
   bonusRules: () => unwrap(api.GET('/api/v1/public/bonus-rules')),
+  /** Menyu və ya xidmətlər (əlavə CATALOG); {@code branchId} — stol QR-ı filiala bağlıdırsa. */
+  catalog: (branchId?: string) => unwrap(api.GET('/api/v1/public/catalog', { params: { query: { branchId } } })),
 };
+
+export type PublicCatalog = Awaited<ReturnType<typeof publicApi.catalog>>;
+export const CATALOG_KEY = ['public-catalog'] as const;
 
 export const customerAuthApi = {
   session: async (): Promise<CustomerSessionState> =>

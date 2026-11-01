@@ -1331,6 +1331,13 @@
       "imageInvalid": "Yalnız PNG və ya JPEG, 2 MB-a qədər.",
       "soldOut": "Hazırda yoxdur",
       "soldOutHint": "Müştəriyə solğun göstərilir, silinmir."
+    },
+    "qr": {
+      "open": "Stol üçün QR kod",
+      "preview": "Müştəri səhifəsinə bax",
+      "title": "Menyu QR kodu",
+      "hint": "Çap edib stolun üstünə qoyun: müştəri telefonla skan edib menyunu açır, giriş tələb etmir.",
+      "download": "Yüklə (SVG)"
     }
   }
 }

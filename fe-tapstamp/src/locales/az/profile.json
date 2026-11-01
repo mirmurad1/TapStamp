@@ -301,5 +301,29 @@
     "close": "Bağla",
     "error": "Göndərmək alınmadı. Bir azdan yenidən cəhd edin.",
     "privacy": "Rəyinizi şirkət adınız və nömrənizlə birlikdə görür ki, lazım olsa sizinlə əlaqə saxlasın."
+  },
+  "menu": {
+    "titles": {
+      "MENU": "Menyu",
+      "SERVICES": "Xidmətlər",
+      "PRICES": "Qiymətlər"
+    },
+    "rowHint": {
+      "MENU": "Menyuya və qiymətlərə baxın",
+      "SERVICES": "Xidmətlərə və qiymətlərə baxın",
+      "PRICES": "Qiymətlərə baxın"
+    },
+    "loading": "Yüklənir…",
+    "unavailable": "Menyu hazırda göstərilmir",
+    "backHome": "Ana səhifəyə qayıt",
+    "categories": "Kateqoriyalar",
+    "soldOut": "Hazırda yoxdur",
+    "reward": "Möhür kartının hədiyyəsi",
+    "minutes_one": "{{count}} dəq",
+    "minutes_other": "{{count}} dəq",
+    "joinTitle": "Möhür kartına qoşulun",
+    "joinHint": "Hər ziyarətdə möhür toplayın, hədiyyə qazanın",
+    "cardTitle": "Kartınızda {{current}}/{{total}} möhür",
+    "cardHint": "Möhür kartınıza keçin"
   }
 }

@@ -301,5 +301,29 @@
     "close": "Close",
     "error": "Could not send. Please try again in a moment.",
     "privacy": "The company sees your feedback with your name and number so it can contact you if needed."
+  },
+  "menu": {
+    "titles": {
+      "MENU": "Menu",
+      "SERVICES": "Services",
+      "PRICES": "Prices"
+    },
+    "rowHint": {
+      "MENU": "See the menu and prices",
+      "SERVICES": "See services and prices",
+      "PRICES": "See prices"
+    },
+    "loading": "Loading…",
+    "unavailable": "The menu isn’t available right now",
+    "backHome": "Back to home",
+    "categories": "Categories",
+    "soldOut": "Sold out",
+    "reward": "Stamp card reward",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "joinTitle": "Join the stamp card",
+    "joinHint": "Collect a stamp on every visit and earn a reward",
+    "cardTitle": "{{current}}/{{total}} stamps on your card",
+    "cardHint": "Go to your stamp card"
   }
 }

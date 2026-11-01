@@ -15,6 +15,7 @@ import { BonusRulesBanner } from '../components/BonusRulesBanner';
 import { FeedbackRow } from '../components/FeedbackPrompt';
 import { InviteFriendRow } from '../components/InviteFriendCard';
 import { StampCard, StampCardNote } from '../components/StampCard';
+import { MenuRow } from './MenuPage';
 import { TierChip, TierNote } from '../components/TierCard';
 import { useMyTier } from '../lib/useMyTier';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
@@ -104,6 +105,7 @@ function Profile({ me }: { me: Me }) {
       ) : null}
       {/* Təkliflər bir siyahıdadır; heç biri göstərilmirsə siyahı da görünmür */}
       <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card empty:hidden">
+        <MenuRow />
         <FeedbackRow />
         <InviteFriendRow />
         <NotificationsRow />
@@ -172,6 +174,9 @@ function Guest() {
       <Button asChild size="lg">
         <Link to="/login">{t('guest.cta')}</Link>
       </Button>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card empty:hidden">
+        <MenuRow />
+      </div>
       {branches.length > 0 ? (
         <section className="flex flex-col gap-2">
           <h2 className="px-0.5 text-sm font-bold text-muted-foreground">{t('guest.branches')}</h2>
