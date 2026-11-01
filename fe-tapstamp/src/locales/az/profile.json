@@ -321,9 +321,12 @@
     "reward": "Möhür kartının hədiyyəsi",
     "minutes_one": "{{count}} dəq",
     "minutes_other": "{{count}} dəq",
-    "joinTitle": "Möhür kartına qoşulun",
-    "joinHint": "Hər ziyarətdə möhür toplayın, hədiyyə qazanın",
+    "joinTitle": "Möhür toplayın, hədiyyə qazanın",
+    "joinHint": "Hər ziyarətdə möhür toplayın",
     "cardTitle": "Kartınızda {{current}}/{{total}} möhür",
-    "cardHint": "Möhür kartınıza keçin"
+    "cardHint": "Möhür toplamağa davam edin",
+    "joinReward": "Hədiyyə: {{reward}}",
+    "stubCard": "Kartım",
+    "stubJoin": "Qoşul"
   }
 }

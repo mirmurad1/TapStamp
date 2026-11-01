@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ChevronRight, Gift, Stamp } from 'lucide-react';
+import { BookOpen, ChevronRight, Gift } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
@@ -12,7 +12,6 @@ import { Button } from '@/shared/ui/button';
 
 import { CATALOG_KEY, publicApi, type PublicCatalog } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
-import { BonusRulesBanner } from '../components/BonusRulesBanner';
 
 type Category = NonNullable<PublicCatalog['categories']>[number];
 type Item = NonNullable<Category['items']>[number];
@@ -72,19 +71,21 @@ export function MenuPage() {
   return (
     <>
       <h1 className="pt-2 font-display text-3xl font-extrabold leading-tight tracking-tight">{title}</h1>
-      <BonusRulesBanner />
+      <LoyaltyBanner />
       <CategoryTabs categories={categories} />
       {categories.map((category) => (
-        <section key={category.id} id={`c-${category.id}`} className="flex scroll-mt-32 flex-col gap-2" aria-labelledby={`h-${category.id}`}>
-          <h2 id={`h-${category.id}`} className="px-0.5 pt-2 text-lg font-bold">{resolveText(category.name, lang)}</h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        <section key={category.id} id={`c-${category.id}`} className="flex scroll-mt-32 flex-col gap-3" aria-labelledby={`h-${category.id}`}>
+          <h2 id={`h-${category.id}`} className="flex items-baseline gap-2 px-0.5 pt-3">
+            <span className="text-xl font-extrabold tracking-tight">{resolveText(category.name, lang)}</span>
+            <span className="text-sm font-medium text-muted-foreground tabular-nums">{category.items?.length ?? 0}</span>
+          </h2>
+          <ul className="divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.12)]">
             {(category.items ?? []).map((item) => (
               <ItemCard key={item.id} item={item} reward={isReward(item)} />
             ))}
           </ul>
         </section>
       ))}
-      <JoinLoyalty />
     </>
   );
 }
@@ -127,8 +128,9 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
     }
   };
   return (
-    <nav className="sticky top-16 z-[5] -mx-4 bg-background px-4 py-2" aria-label={t('menu.categories')}>
-      <div ref={strip} className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    // Alt xətli tablar: aktiv olan tünd mətn və brend rəngli qalın xətt; zolağın altında incə ayırıcı
+    <nav className="sticky top-16 z-[5] -mx-4 border-b border-border bg-background px-4" aria-label={t('menu.categories')}>
+      <div ref={strip} className="flex gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {categories.map((category) => (
           <button
             key={category.id}
@@ -137,9 +139,9 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
             onClick={() => go(category.id)}
             aria-current={active === category.id ? 'true' : undefined}
             className={cn(
-              // Rəng keçidi yoxdur: brend rəngi yüklənəndə standart rəngdən animasiya ilə keçib "yanıb-sönməsin"
-              'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              active === category.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:bg-muted',
+              'relative shrink-0 py-3.5 text-[15px] font-semibold whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'after:absolute after:inset-x-0 after:-bottom-px after:h-[3px] after:rounded-full',
+              active === category.id ? 'text-foreground after:bg-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {resolveText(category.name, lang)}
@@ -155,14 +157,16 @@ function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
   const lang = currentLanguage();
   const soldOut = item.available === false;
   return (
-    <li className={cn('flex gap-3 p-4', soldOut && 'opacity-55')}>
+    <li className={cn('flex gap-4 px-4 py-4', soldOut && 'opacity-55')}>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold leading-snug break-words">{resolveText(item.name, lang)}</p>
+        <p className="text-[16px] font-semibold leading-snug break-words">{resolveText(item.name, lang)}</p>
         {item.description ? (
-          <p className="mt-0.5 line-clamp-3 text-sm text-muted-foreground">{resolveText(item.description, lang)}</p>
+          <p className="mt-1 line-clamp-2 text-sm leading-snug text-muted-foreground">{resolveText(item.description, lang)}</p>
         ) : null}
-        <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-          {item.price != null ? <span className="font-bold tabular-nums">{formatCurrency(Number(item.price), lang)}</span> : null}
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          {item.price != null ? (
+            <span className="text-[15px] font-extrabold text-primary tabular-nums">{formatCurrency(Number(item.price), lang)}</span>
+          ) : null}
           {item.durationMinutes ? <span className="text-muted-foreground">{t('menu.minutes', { count: item.durationMinutes })}</span> : null}
           {soldOut ? (
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">{t('menu.soldOut')}</span>
@@ -176,7 +180,7 @@ function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
         </p>
       </div>
       {item.imageUrl ? (
-        <img src={item.imageUrl} alt="" loading="lazy" className="size-24 shrink-0 rounded-xl object-cover" />
+        <img src={item.imageUrl} alt="" loading="lazy" className="size-[88px] shrink-0 self-center rounded-2xl object-cover" />
       ) : null}
     </li>
   );
@@ -213,27 +217,67 @@ export function MenuRow({ className }: { className?: string }) {
   );
 }
 
-/** Menyunun sonunda: qonağa — möhür kartına qoşulmaq, daxil olmuş müştəriyə — kartına keçid. */
-function JoinLoyalty() {
+/**
+ * Menyunun başında loyallıq banneri: açıq kart, solda irəliləyiş halqası (müştəriyə — möhürləri "4/5", qonağa —
+ * hədiyyə ikonu), ortada qalan möhürlər və hədiyyə, sağda düymə. Rəng yalnız halqada və düymədədir — menyu sakit qalır.
+ * Qeydiyyatdan keçmiş müştəri toxunanda möhür kartına, qonaq qeydiyyata keçir.
+ */
+function LoyaltyBanner() {
   const { t } = useTranslation('profile');
+  const lang = currentLanguage();
   const { status, me } = useCustomerSession();
+  const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
+  if (status === 'loading') {
+    return null;
+  }
   const card = me?.card;
-  const signedIn = status === 'signedIn' && card;
+  const signedIn = status === 'signedIn' && Boolean(card);
+  const required = (signedIn ? card?.stampsRequired : company.data?.rewardRule?.stampsRequired) ?? 0;
+  const current = signedIn ? Math.min(card?.currentStamps ?? 0, required) : 0;
+  const reward = resolveText(signedIn ? card?.rewardName : company.data?.rewardRule?.rewardName, lang);
   return (
     <Link
       to={signedIn ? '/' : '/login'}
-      className="mt-2 flex items-center gap-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex items-center gap-3.5 rounded-3xl border border-primary/15 bg-[color-mix(in_srgb,var(--primary)_7%,var(--card))] p-3.5 pr-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/20">
-        <Stamp className="size-6" aria-hidden="true" />
-      </span>
+      <ProgressRing value={current} total={required} signedIn={signedIn} />
       <span className="min-w-0 flex-1">
-        <span className="block font-bold">
-          {signedIn ? t('menu.cardTitle', { current: card.currentStamps ?? 0, total: card.stampsRequired ?? 0 }) : t('menu.joinTitle')}
+        <span className="block font-bold leading-snug">
+          {signedIn ? t('card.progress', { count: Math.max(required - current, 0) }) : t('menu.joinTitle')}
         </span>
-        <span className="block text-sm opacity-90">{signedIn ? t('menu.cardHint') : t('menu.joinHint')}</span>
+        {reward ? (
+          <span className="mt-0.5 line-clamp-2 text-sm leading-snug text-muted-foreground">{t('menu.joinReward', { reward })}</span>
+        ) : null}
       </span>
-      <ChevronRight className="size-5 shrink-0" aria-hidden="true" />
+      <span className="shrink-0 rounded-full bg-primary px-3.5 py-2 text-sm font-bold text-primary-foreground">
+        {signedIn ? t('menu.stubCard') : t('menu.stubJoin')}
+      </span>
     </Link>
+  );
+}
+
+/** İrəliləyiş halqası: brend rəngli qövs möhürlərin payı qədər; ortada "4/5" və ya (qonağa) hədiyyə ikonu. */
+function ProgressRing({ value, total, signedIn }: { value: number; total: number; signedIn: boolean }) {
+  const radius = 23;
+  const circumference = 2 * Math.PI * radius;
+  const share = total > 0 ? value / total : 0;
+  return (
+    <span className="relative grid size-14 shrink-0 place-items-center" aria-hidden="true">
+      <svg viewBox="0 0 56 56" className="absolute inset-0 size-full -rotate-90">
+        <circle cx="28" cy="28" r={radius} fill="none" strokeWidth="5" className="stroke-primary/15" />
+        {share > 0 ? (
+          <circle cx="28" cy="28" r={radius} fill="none" strokeWidth="5" strokeLinecap="round" className="stroke-primary"
+            strokeDasharray={circumference} strokeDashoffset={circumference * (1 - share)} />
+        ) : null}
+      </svg>
+      {signedIn ? (
+        <span className="text-base leading-none font-extrabold tabular-nums">
+          {value}
+          <span className="text-[11px] font-bold text-muted-foreground">/{total}</span>
+        </span>
+      ) : (
+        <Gift className="size-5 text-primary" />
+      )}
+    </span>
   );
 }

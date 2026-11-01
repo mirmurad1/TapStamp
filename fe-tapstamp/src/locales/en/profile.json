@@ -321,9 +321,12 @@
     "reward": "Stamp card reward",
     "minutes_one": "{{count}} min",
     "minutes_other": "{{count}} min",
-    "joinTitle": "Join the stamp card",
-    "joinHint": "Collect a stamp on every visit and earn a reward",
+    "joinTitle": "Collect stamps, earn a reward",
+    "joinHint": "Collect a stamp on every visit",
     "cardTitle": "{{current}}/{{total}} stamps on your card",
-    "cardHint": "Go to your stamp card"
+    "cardHint": "Keep collecting stamps",
+    "joinReward": "Reward: {{reward}}",
+    "stubCard": "My card",
+    "stubJoin": "Join"
   }
 }

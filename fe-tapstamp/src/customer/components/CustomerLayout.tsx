@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gift, Settings, Stamp } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,9 @@ import { Button } from '@/shared/ui/button';
 import { Footer } from '@/shared/ui/Footer';
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher';
 
-import { publicApi } from '../api/customerApi';
+import { meApi, publicApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
+import { customerKeys } from '../auth/queryClient';
 import { ConsentPage } from '../pages/ConsentPage';
 
 /** Müştəri tətbiqinin çərçivəsi: mobil üçün dar sütun; header-də şirkət, hədiyyə kartları və parametrlər. */
@@ -34,8 +35,28 @@ export function CustomerLayout() {
   const logoUrl = company.data?.logoUrl;
   useEffect(() => applyIconVersion(brandColor, logoUrl), [brandColor, logoUrl]);
 
-  // Menyu səhifəsi tabın adını özü qoyur ("Şirkət · Menyu")
-  const ownTitle = location.pathname === '/menu';
+  // Menyu səhifəsi tabın adını özü qoyur ("Şirkət · Menyu"); başlıqda yalnız şirkət görünür
+  const menu = location.pathname === '/menu';
+  // Profil dili interfeysə tətbiq olunur — menyuda seçilən dil də profilə yazılmalıdır, yoxsa geri qayıdır
+  const queryClient = useQueryClient();
+  const saveLanguage = useMutation({
+    mutationFn: (lang: string) => meApi.update({ preferredLanguage: lang }),
+    onSuccess: (updated) => queryClient.setQueryData(customerKeys.me, updated),
+  });
+  const ownTitle = menu;
+  // Şirkət loqosu yükləyibsə onun şəkli, əks halda standart möhür ikonu; yanında ad
+  const brand = (
+    <>
+      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground">
+        {company.data?.logoUrl ? (
+          <img src={company.data.logoUrl} alt="" className="size-full object-cover" />
+        ) : (
+          <Stamp className="size-5" aria-hidden="true" />
+        )}
+      </span>
+      {companyName ? <span className="line-clamp-2 break-words font-display leading-tight font-bold">{companyName}</span> : null}
+    </>
+  );
   useEffect(() => {
     if (ownTitle) {
       return;
@@ -54,25 +75,25 @@ export function CustomerLayout() {
       {/* Başlıq tam rəngli və öz təbəqəsindədir: iOS Safari-də sticky + backdrop-blur geri qayıdanda başlığı
           scroll edilənə qədər çəkmir */}
       <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 bg-background px-4 py-3 [transform:translateZ(0)]">
-        <Link
-          to="/"
-          className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={t('profile:nav.home')}
-        >
-          {/* Şirkət loqosu yükləyibsə onun şəkli, əks halda standart möhür ikonu */}
-          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground">
-            {company.data?.logoUrl ? (
-              <img src={company.data.logoUrl} alt="" className="size-full object-cover" />
-            ) : (
-              <Stamp className="size-5" aria-hidden="true" />
-            )}
-          </span>
-          {companyName ? <span className="line-clamp-2 break-words font-display leading-tight font-bold">{companyName}</span> : null}
-        </Link>
+        {/* Menyuda şirkət adı keçid deyil (menyu ayrıca səhifədir, möhür kartına aparmır) */}
+        {menu ? (
+          <span className="flex min-h-11 min-w-0 items-center gap-2 pr-2">{brand}</span>
+        ) : (
+          <Link
+            to="/"
+            className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={t('profile:nav.home')}
+          >
+            {brand}
+          </Link>
+        )}
         <div className="flex shrink-0 items-center gap-1">
           {/* Dil yalnız qonaqda (daxil olmuş müştəri Parametrlərdə dəyişir); sessiya yoxlanılarkən heç nə göstərilmir */}
+          {/* Menyuda dil hamıya görünür (parametr düyməsi yoxdur): daxil olmuş müştərinin seçimi profilə yazılır */}
           {status === 'guest' ? <LanguageSwitcher /> : null}
-          {status === 'signedIn' ? (
+          {status === 'signedIn' && menu ? <LanguageSwitcher onSelect={(lang) => saveLanguage.mutate(lang)} /> : null}
+          {/* Hədiyyələr və parametrlər möhür kartına aiddir — menyuda göstərilmir */}
+          {status === 'signedIn' && !menu ? (
             <Button asChild variant="ghost" size="icon" className="relative rounded-full [&_svg]:size-5">
               <Link
                 to="/gift-cards"
@@ -94,7 +115,7 @@ export function CustomerLayout() {
               </Link>
             </Button>
           ) : null}
-          {status === 'signedIn' ? (
+          {status === 'signedIn' && !menu ? (
             <Button asChild variant="ghost" size="icon" className="rounded-full [&_svg]:size-5">
               <Link to="/settings" aria-label={t('profile:nav.settings')}>
                 <Settings aria-hidden="true" />
