@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Şirkətlərin açıq əlavələri (add-on) -->
+<mapper namespace="az.tapstamp.plan.repository.AddonMapper">
+
+    <select id="find" resultType="java.lang.String">
+        SELECT addon FROM tenant_addons WHERE tenant_id = #{tenantId} ORDER BY addon
+    </select>
+
+    <insert id="enable">
+        INSERT INTO tenant_addons (tenant_id, addon, enabled_at, enabled_by)
+        VALUES (#{tenantId}, #{addon}, #{now}, #{by})
+        ON CONFLICT DO NOTHING
+    </insert>
+
+    <delete id="disable">
+        DELETE FROM tenant_addons WHERE tenant_id = #{tenantId} AND addon = #{addon}
+    </delete>
+</mapper>

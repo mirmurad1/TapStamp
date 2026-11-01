@@ -2705,6 +2705,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/plan/addons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin əlavələri
+         * @description Paketdən asılı olmayan, ayrıca satılan bölmələr (məs. CATALOG).
+         */
+        get: operations["addons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/plan/addons/{addon}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Əlavəni açmaq və ya bağlamaq
+         * @description Bağlanan əlavənin məlumatları silinmir — yenidən açılanda qayıdır. Dəyişiklik platforma audit jurnalına yazılır.
+         */
+        put: operations["setAddon"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/sms-limit": {
         parameters: {
             query?: never;
@@ -4162,6 +4202,8 @@ export interface components {
             phoneMasked?: string;
         };
         PlanResponse: {
+            /** @description Açıq əlavələr (ayrıca satılır; sınaq bitibsə boşdur) */
+            addons?: "CATALOG"[];
             /** Format: int32 */
             branchLimit?: number;
             /** @description Sınaq bitib — şirkətin xidməti dayandırılıb */
@@ -4852,6 +4894,13 @@ export interface components {
             defaultLanguage?: string;
             slug?: string;
             timezone?: string;
+        };
+        TenantAddonRequest: {
+            enabled: boolean;
+        };
+        TenantAddonsResponse: {
+            /** @description Şirkətdə açıq əlavələr */
+            addons?: "CATALOG"[];
         };
         TenantPlanRequest: {
             /**
@@ -8578,6 +8627,55 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TenantPlanResponse"];
+                };
+            };
+        };
+    };
+    addons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantAddonsResponse"];
+                };
+            };
+        };
+    };
+    setAddon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                addon: "CATALOG";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TenantAddonRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TenantAddonsResponse"];
                 };
             };
         };

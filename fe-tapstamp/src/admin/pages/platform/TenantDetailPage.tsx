@@ -26,6 +26,7 @@ import { InlineLoading } from '../../components/FullPageState';
 import { emailField, useValidationMessage } from '../../lib/forms';
 import { DomainsCard } from './DomainsCard';
 import { TenantSmsLimitCard } from './SmsLimitCards';
+import { TenantAddonsCard } from './TenantAddonsCard';
 import { TenantPlanCard } from './TenantPlanCard';
 import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
@@ -54,6 +55,7 @@ export function TenantDetailPage() {
           <TenantHeader tenant={tenant.data} onNotice={setNotice} />
           {notice ? <Alert tone="success">{notice}</Alert> : null}
           <TenantPlanCard tenantId={tenantId} />
+          <TenantAddonsCard tenantId={tenantId} />
           {active ? (
             <>
               <StatsCard tenantId={tenantId} />

@@ -1,6 +1,7 @@
 package az.tapstamp.plan.web;
 
 import az.tapstamp.plan.PlanService;
+import az.tapstamp.plan.RequiresAddon;
 import az.tapstamp.plan.RequiresFeature;
 import az.tapstamp.tenancy.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/** {@link RequiresFeature} annotasiyasının yoxlanması: imkan şirkətin paketində yoxdursa, sorğu controller-ə çatmır. */
+/**
+ * {@link RequiresFeature} və {@link RequiresAddon} annotasiyalarının yoxlanması: imkan şirkətin paketində (əlavə —
+ * şirkətdə) yoxdursa, sorğu controller-ə çatmır.
+ */
 @Configuration
 public class PlanWebConfig implements WebMvcConfigurer {
 
@@ -35,6 +39,13 @@ public class PlanWebConfig implements WebMvcConfigurer {
                     }
                     if (required != null) {
                         plans.require(required.value());
+                    }
+                    RequiresAddon addon = method.getMethodAnnotation(RequiresAddon.class);
+                    if (addon == null) {
+                        addon = method.getBeanType().getAnnotation(RequiresAddon.class);
+                    }
+                    if (addon != null) {
+                        plans.require(addon.value());
                     }
                 }
                 return true;

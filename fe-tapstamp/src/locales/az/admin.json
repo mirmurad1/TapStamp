@@ -458,6 +458,20 @@
       "extraBranches": "Əlavə filiallar",
       "extraBranchesHint": "Premium-a daxil olan 5 filialdan əlavə.",
       "trialUsed": "Bu paketin pulsuz sınağı bu şirkət üçün artıq istifadə olunub."
+    },
+    "addons": {
+      "title": "Əlavələr",
+      "description": "Paketdən asılı olmayan, ayrıca satılan bölmələr. Bağlananda şirkətin məlumatları silinmir — yenidən açılanda qayıdır.",
+      "on": "Açıq",
+      "off": "Bağlı",
+      "enable": "Aç",
+      "disable": "Bağla",
+      "names": {
+        "CATALOG": "Menyu və xidmətlər"
+      },
+      "hints": {
+        "CATALOG": "Restoran üçün menyu, digər sahələr üçün xidmətlər və qiymətlər — müştəriyə ayrıca səhifə."
+      }
     }
   },
   "staffConsole": {

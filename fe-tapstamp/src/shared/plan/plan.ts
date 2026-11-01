@@ -40,6 +40,14 @@ export function usePlan(enabled = true) {
   });
 }
 
+export type Addon = NonNullable<PlanInfo['addons']>[number];
+
+/** Əlavə (ayrıca satılır) şirkətdə açıqdırmı; paket hələ yüklənməyibsə {@code undefined}. */
+export function useAddon(addon: Addon): boolean | undefined {
+  const plan = usePlan();
+  return plan.data ? (plan.data.addons ?? []).includes(addon) : undefined;
+}
+
 /** Paket hələ yüklənməyibsə {@code undefined} — bölmə nə açıq, nə bağlı göstərilmir. */
 export function useFeature(feature: Feature): boolean | undefined {
   const plan = usePlan();

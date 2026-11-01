@@ -521,7 +521,18 @@ export const platformPlanApi = {
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } } })),
   update: (tenantId: string, body: Schemas['TenantPlanRequest']) =>
     unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } }, body })),
+  addons: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/plan/addons', { params: { path: { tenantId } } })),
+  setAddon: (tenantId: string, addon: AddonName, enabled: boolean) =>
+    unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan/addons/{addon}', {
+      params: { path: { tenantId, addon } },
+      body: { enabled },
+    })),
 };
+
+export type AddonName = NonNullable<Schemas['TenantAddonsResponse']['addons']>[number];
+/** Satılan əlavələrin hamısı (platforma panelində sıra ilə). */
+export const ADDONS: readonly AddonName[] = ['CATALOG'];
 
 export type BonusRule = Schemas['RuleView'];
 export type BonusRuleRequest = Schemas['BonusRuleRequest'];

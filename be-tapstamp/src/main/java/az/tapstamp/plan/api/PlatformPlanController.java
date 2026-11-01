@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import az.tapstamp.plan.Addon;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.plan.Subscription;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Platforma paneli: şirkətin paketi və sınaq müddəti. */
+/** Platforma paneli: şirkətin paketi, sınaq müddəti və əlavələri. */
 @RestController
 @RequestMapping("/api/v1/platform/tenants/{tenantId}/plan")
 @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -64,6 +65,30 @@ public class PlatformPlanController {
     @Operation(summary = "Şirkətin paketi")
     TenantPlanResponse get(@PathVariable UUID tenantId) {
         return TenantPlanResponse.from(plans.view(tenantId));
+    }
+
+    public record TenantAddonsResponse(@Schema(description = "Şirkətdə açıq əlavələr") List<Addon> addons) {
+    }
+
+    public record TenantAddonRequest(@NotNull Boolean enabled) {
+    }
+
+    @GetMapping("/addons")
+    @Operation(summary = "Şirkətin əlavələri", description = "Paketdən asılı olmayan, ayrıca satılan bölmələr (məs. CATALOG).")
+    TenantAddonsResponse addons(@PathVariable UUID tenantId) {
+        plans.view(tenantId);
+        return new TenantAddonsResponse(plans.addons(tenantId).stream().sorted().toList());
+    }
+
+    @PutMapping("/addons/{addon}")
+    @Operation(summary = "Əlavəni açmaq və ya bağlamaq", description = """
+            Bağlanan əlavənin məlumatları silinmir — yenidən açılanda qayıdır. Dəyişiklik platforma audit jurnalına \
+            yazılır.""")
+    TenantAddonsResponse setAddon(@PathVariable UUID tenantId, @PathVariable Addon addon,
+                                  @Valid @RequestBody TenantAddonRequest request,
+                                  @AuthenticationPrincipal AdminPrincipal principal) {
+        return new TenantAddonsResponse(plans.setAddon(principal, tenantId, addon, request.enabled()).stream()
+                .sorted().toList());
     }
 
     @PutMapping

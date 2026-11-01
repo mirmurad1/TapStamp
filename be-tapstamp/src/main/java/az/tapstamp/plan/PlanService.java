@@ -3,12 +3,16 @@ package az.tapstamp.plan;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import az.tapstamp.plan.repository.AddonMapper;
 import az.tapstamp.plan.repository.SubscriptionMapper;
 import az.tapstamp.plan.repository.SubscriptionMapper.SubscriptionRow;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -36,6 +40,7 @@ public class PlanService {
     }
 
     private final SubscriptionMapper subscriptions;
+    private final AddonMapper addonRows;
     private final TenantDirectory directory;
     private final AdminRealms realms;
     private final Clock clock;
@@ -43,9 +48,15 @@ public class PlanService {
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofSeconds(30))
             .build();
+    private final Cache<UUID, Set<Addon>> addonCache = Caffeine.newBuilder()
+            .maximumSize(10_000)
+            .expireAfterWrite(Duration.ofSeconds(30))
+            .build();
 
-    public PlanService(SubscriptionMapper subscriptions, TenantDirectory directory, AdminRealms realms, Clock clock) {
+    public PlanService(SubscriptionMapper subscriptions, AddonMapper addonRows, TenantDirectory directory,
+                       AdminRealms realms, Clock clock) {
         this.subscriptions = subscriptions;
+        this.addonRows = addonRows;
         this.directory = directory;
         this.realms = realms;
         this.clock = clock;
@@ -78,6 +89,31 @@ public class PlanService {
         }
     }
 
+    /** Şirkətdə açılmış əlavələr (sınaq müddətindən asılı olmayaraq — platforma paneli üçün). */
+    public Set<Addon> addons(UUID tenantId) {
+        return addonCache.get(tenantId, id -> {
+            EnumSet<Addon> set = EnumSet.noneOf(Addon.class);
+            addonRows.find(id).forEach(name -> set.add(Addon.valueOf(name)));
+            return Collections.unmodifiableSet(set);
+        });
+    }
+
+    /** Cari şirkətdə istifadə oluna bilən əlavələr (sınaq bitibsə — heç biri). */
+    public Set<Addon> activeAddons() {
+        UUID tenantId = TenantContext.require().id();
+        return subscription(tenantId).expired(clock.instant()) ? Set.of() : addons(tenantId);
+    }
+
+    public boolean has(Addon addon) {
+        return activeAddons().contains(addon);
+    }
+
+    public void require(Addon addon) {
+        if (!has(addon)) {
+            throw new ApiException(ErrorCode.PLAN_FEATURE_UNAVAILABLE);
+        }
+    }
+
     /** Yeni (və ya yenidən açılan) filial: aktiv filialların sayı paketin limitindən az olmalıdır. */
     public void requireBranchCapacity(long activeBranches) {
         if (activeBranches >= current().branchLimit()) {
@@ -96,6 +132,24 @@ public class PlanService {
     /** Paket bazada birbaşa dəyişəndə (testlər). */
     public void evictCaches() {
         cache.invalidateAll();
+        addonCache.invalidateAll();
+    }
+
+    /**
+     * Əlavəni açmaq və ya bağlamaq (platforma paneli). Dəyişiklik olmayanda heç nə yazılmır; olanda platforma
+     * auditinə yazılır. Bağlanan əlavənin məlumatları (məs. kataloq) silinmir — yenidən açılanda qayıdır.
+     */
+    public Set<Addon> setAddon(AdminPrincipal principal, UUID tenantId, Addon addon, boolean enabled) {
+        requireTenant(tenantId);
+        int changed = enabled
+                ? addonRows.enable(tenantId, addon.name(), clock.instant(), principal.userId())
+                : addonRows.disable(tenantId, addon.name());
+        addonCache.invalidate(tenantId);
+        if (changed > 0) {
+            realms.audit(AdminRealm.PLATFORM, enabled ? "TENANT_ADDON_ENABLED" : "TENANT_ADDON_DISABLED",
+                    principal.userId(), "tenant", tenantId, Map.of("addon", addon.name()));
+        }
+        return addons(tenantId);
     }
 
     // --- Platforma paneli ---

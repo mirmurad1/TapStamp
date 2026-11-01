@@ -458,6 +458,20 @@
       "extraBranches": "Extra branches",
       "extraBranchesHint": "On top of the 5 branches included in Premium.",
       "trialUsed": "This company has already used the free trial of this plan."
+    },
+    "addons": {
+      "title": "Add-ons",
+      "description": "Sections sold separately from the plan. Turning one off keeps the company’s data — it comes back when turned on again.",
+      "on": "On",
+      "off": "Off",
+      "enable": "Turn on",
+      "disable": "Turn off",
+      "names": {
+        "CATALOG": "Menu and services"
+      },
+      "hints": {
+        "CATALOG": "A menu for restaurants, services and prices for other businesses — a separate page for customers."
+      }
     }
   },
   "staffConsole": {

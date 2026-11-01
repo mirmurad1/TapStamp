@@ -35,7 +35,40 @@ class PlanIT extends TapIntegrationTest {
     void restoreLegacyPlan() {
         platformJdbc.sql("DELETE FROM tenant_subscriptions WHERE tenant_id = :id").param("id", alpha().id()).update();
         platformJdbc.sql("DELETE FROM tenant_plan_trials WHERE tenant_id = :id").param("id", alpha().id()).update();
+        platformJdbc.sql("DELETE FROM tenant_addons WHERE tenant_id = :id").param("id", alpha().id()).update();
         plans.evictCaches();
+    }
+
+    @Test
+    void addonsAreSoldSeparatelyFromThePlanAndCloseWithAnExpiredTrial() throws Exception {
+        AdminClient admin = signedInPlatformAdmin();
+        String addons = planPath() + "/addons";
+        admin.get(addons).andExpect(status().isOk()).andExpect(jsonPath("$.addons").isEmpty());
+        client().get("/api/v1/public/plan").andExpect(jsonPath("$.addons").isEmpty());
+
+        // Basic paketdə də açıla bilər (paketdən asılı deyil); təkrar açmaq audit yazmır
+        setPlan(admin, "BASIC", "TRIAL", 0);
+        admin.put(addons + "/CATALOG", Map.of("enabled", true)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.addons[0]").value("CATALOG"));
+        admin.put(addons + "/CATALOG", Map.of("enabled", true)).andExpect(status().isOk());
+        client().get("/api/v1/public/plan").andExpect(jsonPath("$.addons[0]").value("CATALOG"));
+        assertThat(platformJdbc.sql("SELECT count(*) FROM platform_audit_logs WHERE action = 'TENANT_ADDON_ENABLED' AND target_id = :id")
+                .param("id", alpha().id().toString()).query(Integer.class).single()).isEqualTo(1);
+        admin.put(addons + "/UNKNOWN", Map.of("enabled", true)).andExpect(status().isBadRequest());
+
+        // Sınaq bitəndə əlavələr də bağlanır (platforma panelində isə qalır)
+        clock.advance(Duration.ofDays(14));
+        plans.evictCaches();
+        client().get("/api/v1/public/plan").andExpect(jsonPath("$.expired").value(true))
+                .andExpect(jsonPath("$.addons").isEmpty());
+        // 14 gün sonra platforma adminin sessiyası da bitib
+        admin = signedInPlatformAdmin();
+        admin.get(addons).andExpect(jsonPath("$.addons[0]").value("CATALOG"));
+
+        setPlan(admin, "BASIC", "ACTIVE", 0);
+        admin.put(addons + "/CATALOG", Map.of("enabled", false)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.addons").isEmpty());
+        client().get("/api/v1/public/plan").andExpect(jsonPath("$.addons").isEmpty());
     }
 
     private String planPath() {

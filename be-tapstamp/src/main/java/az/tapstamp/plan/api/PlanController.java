@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
+import az.tapstamp.plan.Addon;
 import az.tapstamp.plan.Feature;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.plan.Subscription;
@@ -33,7 +34,8 @@ public class PlanController {
             @Schema(description = "Sınaq bitib — şirkətin xidməti dayandırılıb") boolean expired,
             @Schema(description = "Açıq imkanlar (sınaq bitibsə boşdur)") List<Feature> features,
             int branchLimit,
-            @Schema(description = "Sahiblərdən başqa işçilərin limiti; null — limitsiz") Integer staffLimit) {
+            @Schema(description = "Sahiblərdən başqa işçilərin limiti; null — limitsiz") Integer staffLimit,
+            @Schema(description = "Açıq əlavələr (ayrıca satılır; sınaq bitibsə boşdur)") List<Addon> addons) {
     }
 
     @GetMapping("/api/v1/public/plan")
@@ -46,6 +48,7 @@ public class PlanController {
         List<Feature> features = expired ? List.of()
                 : subscription.plan().features().stream().sorted().toList();
         return new PlanResponse(subscription.plan().name(), subscription.status().name(), subscription.trialEndsAt(),
-                expired, features, subscription.branchLimit(), subscription.plan().staffLimit());
+                expired, features, subscription.branchLimit(), subscription.plan().staffLimit(),
+                plans.activeAddons().stream().sorted().toList());
     }
 }
