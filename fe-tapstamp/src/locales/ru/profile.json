@@ -373,6 +373,13 @@
     "cardHint": "Продолжайте собирать штампы",
     "joinReward": "Подарок: {{reward}}",
     "stubCard": "Карта",
-    "stubJoin": "Войти"
+    "stubJoin": "Войти",
+    "searchClear": "Очистить поиск",
+    "searchEmpty": "По запросу «{{query}}» ничего не найдено",
+    "searchIn": {
+      "MENU": "Поиск по меню",
+      "SERVICES": "Поиск по услугам",
+      "PRICES": "Поиск по ценам"
+    }
   }
 }

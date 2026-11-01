@@ -327,6 +327,13 @@
     "cardHint": "Keep collecting stamps",
     "joinReward": "Reward: {{reward}}",
     "stubCard": "My card",
-    "stubJoin": "Join"
+    "stubJoin": "Join",
+    "searchClear": "Clear search",
+    "searchEmpty": "Nothing found for \"{{query}}\"",
+    "searchIn": {
+      "MENU": "Search the menu",
+      "SERVICES": "Search services",
+      "PRICES": "Search prices"
+    }
   }
 }

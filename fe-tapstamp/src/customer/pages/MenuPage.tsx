@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ChevronRight, Gift } from 'lucide-react';
+import { BookOpen, ChevronRight, Gift, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
@@ -41,7 +41,9 @@ export function MenuPage() {
   });
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const categories = catalog.data?.categories ?? [];
-  const title = t(`menu.titles.${(catalog.data?.title ?? 'MENU') as 'MENU' | 'SERVICES' | 'PRICES'}`);
+  const [query, setQuery] = useState('');
+  const titleKey = (catalog.data?.title ?? 'MENU') as 'MENU' | 'SERVICES' | 'PRICES';
+  const title = t(`menu.titles.${titleKey}`);
   // Hədiyyə: məhsulun adı möhür kartının hədiyyəsinin adı ilə eynidirsə (istənilən dildə)
   const rewardNames = new Set(Object.values(company.data?.rewardRule?.rewardName ?? {}).map(normalized).filter(Boolean));
   const isReward = (item: Item) => Object.values(item.name ?? {}).some((name) => rewardNames.has(normalized(name)));
@@ -68,12 +70,25 @@ export function MenuPage() {
       </section>
     );
   }
+  // Axtarış: ad və izah üzrə, hər üç dildə (müştəri başqa dildə yazsa da tapılsın)
+  const needle = normalized(query);
+  const matches = (item: Item) =>
+    [...Object.values(item.name ?? {}), ...Object.values(item.description ?? {})].some((text) => normalized(text).includes(needle));
+  const shown = needle
+    ? categories
+        .map((category) => ({ ...category, items: (category.items ?? []).filter(matches) }))
+        .filter((category) => category.items.length > 0)
+    : categories;
   return (
     <>
       <h1 className="pt-2 font-display text-3xl font-extrabold leading-tight tracking-tight">{title}</h1>
       <LoyaltyBanner />
-      <CategoryTabs categories={categories} />
-      {categories.map((category) => (
+      <SearchField value={query} onChange={setQuery} placeholder={t(`menu.searchIn.${titleKey}`)} />
+      {needle ? null : <CategoryTabs categories={categories} />}
+      {needle && shown.length === 0 ? (
+        <p className="py-10 text-center text-muted-foreground" role="status">{t('menu.searchEmpty', { query: query.trim() })}</p>
+      ) : null}
+      {shown.map((category) => (
         <section key={category.id} id={`c-${category.id}`} className="flex scroll-mt-32 flex-col gap-3" aria-labelledby={`h-${category.id}`}>
           <h2 id={`h-${category.id}`} className="flex items-baseline gap-2 px-0.5 pt-3">
             <span className="text-xl font-extrabold tracking-tight">{resolveText(category.name, lang)}</span>
@@ -90,14 +105,52 @@ export function MenuPage() {
   );
 }
 
+/** Axtarış sahəsi: solda ikon, yazı olanda sağda təmizləmə düyməsi. */
+function SearchField({ value, onChange, placeholder }: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder: string;
+}) {
+  const { t } = useTranslation('profile');
+  return (
+    <div className="relative">
+      <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+      <input
+        type="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        enterKeyHint="search"
+        className="h-12 w-full appearance-none rounded-full border border-border bg-card pr-12 pl-12 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+      />
+      {value ? (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          aria-label={t('menu.searchClear')}
+          className="absolute top-1/2 right-2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 /** Kateqoriya düymələri: üfüqi sürüşür; toxunanda həmin hissəyə keçir, aktiv olan scroll-a görə dəyişir. */
 function CategoryTabs({ categories }: { categories: Category[] }) {
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
   const [active, setActive] = useState(categories[0]?.id);
   const strip = useRef<HTMLDivElement>(null);
+  // Tab basılandan sonra səhifə sürüşərkən (və ya səhifə qısadır, sürüşə bilmir) seçim scroll-a görə dəyişməsin
+  const pinnedUntil = useRef(0);
   useEffect(() => {
     const onScroll = () => {
+      if (Date.now() < pinnedUntil.current) {
+        return;
+      }
       let current = categories[0]?.id;
       for (const category of categories) {
         const section = document.getElementById(`c-${category.id}`);
@@ -105,23 +158,41 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
           current = category.id;
         }
       }
-      // Səhifənin sonunda — sonuncu kateqoriya (qısa bölmə yuxarıya çata bilmir)
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+      // Səhifənin sonunda — sonuncu kateqoriya (qısa bölmə yuxarıya çata bilmir); səhifə sürüşmürsə yox
+      const root = document.documentElement;
+      if (window.scrollY > 0 && root.scrollHeight > window.innerHeight + 4
+          && window.innerHeight + window.scrollY >= root.scrollHeight - 4) {
         current = categories[categories.length - 1]?.id;
       }
       setActive(current);
     };
+    // İstifadəçi özü sürüşdürəndə tabın "bərkidilməsi" dərhal götürülür
+    const release = () => {
+      pinnedUntil.current = 0;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('touchstart', release, { passive: true });
+    window.addEventListener('wheel', release, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('touchstart', release);
+      window.removeEventListener('wheel', release);
+    };
   }, [categories]);
-  // Aktiv düymə zolaqda görünsün
+  // Aktiv tab zolaqda ortaya gəlsin — yalnız zolaq üfüqi sürüşür (scrollIntoView bütün səhifəni də tərpədir)
   useEffect(() => {
-    strip.current?.querySelector<HTMLElement>(`[data-id="${active}"]`)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+    const container = strip.current;
+    const tab = container?.querySelector<HTMLElement>(`[data-id="${active}"]`);
+    if (container && tab) {
+      container.scrollTo({ left: tab.offsetLeft - (container.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth' });
+    }
   }, [active]);
   if (categories.length < 2) {
     return null;
   }
   const go = (id: string | undefined) => {
+    setActive(id);
+    pinnedUntil.current = Date.now() + 1000;
     const section = document.getElementById(`c-${id}`);
     if (section) {
       window.scrollTo({ top: section.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET + 8, behavior: 'smooth' });
@@ -130,7 +201,8 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
   return (
     // Alt xətli tablar: aktiv olan tünd mətn və brend rəngli qalın xətt; zolağın altında incə ayırıcı
     <nav className="sticky top-16 z-[5] -mx-4 border-b border-border bg-background px-4" aria-label={t('menu.categories')}>
-      <div ref={strip} className="flex gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Yalnız üfüqi sürüşür; alt xətt zolağın içindədir — şaquli sürüşmə yaranmır */}
+      <div ref={strip} className="flex gap-6 overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {categories.map((category) => (
           <button
             key={category.id}
@@ -140,7 +212,7 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
             aria-current={active === category.id ? 'true' : undefined}
             className={cn(
               'relative shrink-0 py-3.5 text-[15px] font-semibold whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              'after:absolute after:inset-x-0 after:-bottom-px after:h-[3px] after:rounded-full',
+              'after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:rounded-full',
               active === category.id ? 'text-foreground after:bg-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >

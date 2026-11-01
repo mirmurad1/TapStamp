@@ -327,6 +327,13 @@
     "cardHint": "Möhür toplamağa davam edin",
     "joinReward": "Hədiyyə: {{reward}}",
     "stubCard": "Kartım",
-    "stubJoin": "Qoşul"
+    "stubJoin": "Qoşul",
+    "searchClear": "Axtarışı təmizlə",
+    "searchEmpty": "\"{{query}}\" üzrə heç nə tapılmadı",
+    "searchIn": {
+      "MENU": "Menyuda axtarın",
+      "SERVICES": "Xidmətlərdə axtarın",
+      "PRICES": "Qiymətlərdə axtarın"
+    }
   }
 }
