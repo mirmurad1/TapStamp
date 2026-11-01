@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { formatCurrency } from '@/shared/lib/format';
+import { prepareImage } from '@/shared/lib/image';
 import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -542,11 +543,19 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
     event.preventDefault();
     save.mutate();
   };
-  const pick = (picked: File | undefined) => {
-    const ok = !picked || ((picked.type === 'image/png' || picked.type === 'image/jpeg') && picked.size <= IMAGE_MAX_BYTES);
+  // İstənilən şəkil (iPhone-un HEIC-i, böyük foto) brauzerdə kiçildilib JPEG-ə çevrilir, sonra yüklənir
+  const [preparing, setPreparing] = useState(false);
+  const pick = async (picked: File | undefined) => {
+    if (!picked) {
+      return;
+    }
+    setPreparing(true);
+    const prepared = await prepareImage(picked);
+    setPreparing(false);
+    const ok = prepared !== null && prepared.size <= IMAGE_MAX_BYTES;
     setFileError(!ok);
-    setFile(ok ? picked : undefined);
-    if (picked && ok) {
+    setFile(ok ? prepared : undefined);
+    if (ok) {
       setRemoveImage(false);
     }
   };
@@ -602,9 +611,13 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
               <div className="flex flex-col items-start gap-2">
                 <label className="cursor-pointer text-sm font-medium text-primary underline-offset-2 hover:underline">
                   {shownImage ? t('admin:catalog.form.changeImage') : t('admin:catalog.form.chooseImage')}
-                  <input type="file" accept="image/png,image/jpeg" className="sr-only"
-                    onChange={(event) => pick(event.target.files?.[0])} />
+                  <input type="file" accept="image/*" className="sr-only"
+                    onChange={(event) => {
+                      void pick(event.target.files?.[0]);
+                      event.target.value = '';
+                    }} />
                 </label>
+                {preparing ? <span className="text-sm text-muted-foreground">{t('admin:catalog.form.imagePreparing')}</span> : null}
                 {shownImage ? (
                   <button type="button" className="text-sm text-muted-foreground hover:text-foreground"
                     onClick={() => { setFile(undefined); setRemoveImage(true); }}>
@@ -628,7 +641,7 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common:actions.cancel')}
             </Button>
-            <Button type="submit" disabled={save.isPending || !name.az.trim() || !priceValid || !durationValid}>
+            <Button type="submit" disabled={save.isPending || preparing || !name.az.trim() || !priceValid || !durationValid}>
               {t('common:actions.save')}
             </Button>
           </DialogFooter>

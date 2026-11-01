@@ -1327,10 +1327,11 @@
       "chooseImage": "Şəkil seç",
       "changeImage": "Başqa şəkil seç",
       "removeImage": "Şəkli sil",
-      "imageHint": "PNG və ya JPEG, 2 MB-a qədər. Kvadrat kəsilir.",
-      "imageInvalid": "Yalnız PNG və ya JPEG, 2 MB-a qədər.",
+      "imageHint": "İstənilən foto (iPhone qalereyası da). Telefonda kiçildilir və kvadrat kəsilir.",
+      "imageInvalid": "Bu şəkli açmaq alınmadı və ya çox kiçikdir (qısa tərəfi ən az 200 piksel). Başqa şəkil seçin.",
       "soldOut": "Hazırda yoxdur",
-      "soldOutHint": "Müştəriyə solğun göstərilir, silinmir."
+      "soldOutHint": "Müştəriyə solğun göstərilir, silinmir.",
+      "imagePreparing": "Şəkil hazırlanır…"
     },
     "qr": {
       "open": "Stol üçün QR kod",

@@ -1327,10 +1327,11 @@
       "chooseImage": "Choose image",
       "changeImage": "Choose another image",
       "removeImage": "Remove image",
-      "imageHint": "PNG or JPEG, up to 2 MB. Cropped to a square.",
-      "imageInvalid": "PNG or JPEG only, up to 2 MB.",
+      "imageHint": "Any photo (including the iPhone gallery). It is resized on your phone and cropped to a square.",
+      "imageInvalid": "This image couldn’t be opened or is too small (shorter side at least 200 pixels). Choose another image.",
       "soldOut": "Sold out",
-      "soldOutHint": "Shown faded to customers, not deleted."
+      "soldOutHint": "Shown faded to customers, not deleted.",
+      "imagePreparing": "Preparing image…"
     },
     "qr": {
       "open": "Table QR code",
