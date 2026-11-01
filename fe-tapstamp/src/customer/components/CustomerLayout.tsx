@@ -34,9 +34,14 @@ export function CustomerLayout() {
   const logoUrl = company.data?.logoUrl;
   useEffect(() => applyIconVersion(brandColor, logoUrl), [brandColor, logoUrl]);
 
+  // Menyu səhifəsi tabın adını özü qoyur ("Şirkət · Menyu")
+  const ownTitle = location.pathname === '/menu';
   useEffect(() => {
+    if (ownTitle) {
+      return;
+    }
     document.title = companyName ? `${companyName} · ${t('common:app.loyaltyCard')}` : t('common:app.loyaltyCard');
-  }, [companyName, t, i18n.language]);
+  }, [companyName, t, i18n.language, ownTitle]);
 
   // Yeni versiyalı sənədlərə razılıq verilməyibsə — əvvəlcə razılıq (hüquqi sənədlər açıq qalır)
   const pendingConsents = me?.pendingConsents ?? [];

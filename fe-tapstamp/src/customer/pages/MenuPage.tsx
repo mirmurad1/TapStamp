@@ -47,9 +47,11 @@ export function MenuPage() {
   const rewardNames = new Set(Object.values(company.data?.rewardRule?.rewardName ?? {}).map(normalized).filter(Boolean));
   const isReward = (item: Item) => Object.values(item.name ?? {}).some((name) => rewardNames.has(normalized(name)));
 
+  // Brauzer tabı: "Şirkət · Menyu" (layout menyu səhifəsində öz başlığını qoymur)
+  const companyName = resolveText(company.data?.name, lang);
   useEffect(() => {
-    document.title = title;
-  }, [title]);
+    document.title = companyName ? `${companyName} · ${title}` : title;
+  }, [companyName, title]);
 
   if (catalog.isPending) {
     return <p className="py-16 text-center text-muted-foreground" role="status">{t('menu.loading')}</p>;
@@ -101,6 +103,10 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
         if (section && section.getBoundingClientRect().top <= SCROLL_OFFSET + 8) {
           current = category.id;
         }
+      }
+      // Səhifənin sonunda — sonuncu kateqoriya (qısa bölmə yuxarıya çata bilmir)
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        current = categories[categories.length - 1]?.id;
       }
       setActive(current);
     };

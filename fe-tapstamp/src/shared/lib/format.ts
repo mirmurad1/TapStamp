@@ -119,7 +119,15 @@ export function formatNumber(value: number, lang: Language): string {
   return new Intl.NumberFormat(lang).format(value);
 }
 
+/**
+ * Pul məbləği. Azərbaycan dilində manat əl ilə yazılır ("1 234,50 ₼"): bəzi brauzerlərin (məs. Chromium) dil
+ * məlumatında {@code az} üçün valyuta formatı yoxdur və "AZN 1234.50" göstərilir.
+ */
 export function formatCurrency(value: number, lang: Language, currency = 'AZN'): string {
+  if (lang === 'az' && currency === 'AZN') {
+    const digits = new Intl.NumberFormat('ru', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    return `${digits} ₼`;
+  }
   return new Intl.NumberFormat(lang, { style: 'currency', currency }).format(value);
 }
 

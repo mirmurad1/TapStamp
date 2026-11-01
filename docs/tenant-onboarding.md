@@ -61,6 +61,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs certbot | t
 2. **Komanda**: menecer və işçilərin dəvəti.
 3. **NFC çipləri**: bu addımı **siz** (platforma admini) edirsiniz, şirkətin səhifəsində: hər piştaxta üçün çipin qeydiyyatı → provisioning paketi → çipin proqramlaşdırılması ([nfc-ntag424-programming.md](nfc-ntag424-programming.md)) → ilk toxunuşla aktivləşmə. Hər şirkətdə ilk çip pulsuzdur, qalanları pulludur (say kartda görünür; limit `APP_NFC_FREE_TAGS`).
 4. **Hesabım**: 2FA-nı qurmaq tövsiyə olunur.
+5. **Menyu və xidmətlər** (yalnız əlavə alınıbsa): əvvəlcə **siz** platforma panelində şirkətin səhifəsində **Əlavələr → Menyu və xidmətlər → Aç** edirsiniz. Sonra sahib admin panelində bölmənin adını seçir (Menyu, Xidmətlər və ya Qiymətlər), kateqoriyaları və məhsulları qiymət və şəkillə əlavə edir, **"Stol üçün QR kod"**dan QR-ı yükləyib çap edir. Müştəri QR-ı skan edəndə `https://moyka.sizinbrend.az/menu` açılır (giriş tələb etmir).
 
 ## 6. Domenlərin idarəsi
 

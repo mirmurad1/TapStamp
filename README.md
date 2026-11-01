@@ -297,6 +297,17 @@ Platforma panelində (`superadmin@platform.localhost`) şirkətin səhifəsində
 
 Ekran görüntüləri: `docs/screenshots/phase7-*`.
 
+### Menyu və xidmətlər (əlavə, Mərhələ 12)
+
+Paketdən asılı olmayan, ayrıca satılan bölmə (qərar #64). Platforma admini şirkətə açır: **Platforma → şirkət → Əlavələr → Menyu və xidmətlər → Aç** (bağlananda məlumat silinmir).
+
+| Harada | Nə var |
+|---|---|
+| **Admin → Menyu və xidmətlər** (yalnız sahib) | Açar və bölmənin adı (Menyu, Xidmətlər, Qiymətlər); kateqoriyalar (ən çox 30, gizlətmək olar) və məhsullar (ən çox 300): 3 dildə ad və izah, qiymət (AZN), müddət, şəkil (PNG/JPEG, 2 MB → 640 px kvadrat), "hazırda yoxdur", filial; yuxarı/aşağı ilə sıralama; stol üçün QR kod (SVG, filiala görə) |
+| **Müştəri: `/menu`** (giriş tələb etmir) | Kateqoriya düymələri, şəkilli kartlar, kampaniya lenti, möhür kartının hədiyyəsi olan məhsulda nişan (adı eyni olanda), aşağıda "Möhür kartına qoşulun" və ya kartın vəziyyəti; `?branch=` — yalnız o filialın məhsulları. Ana səhifədə "Menyu" sətri |
+
+Dev-də yoxlamaq üçün əlavəni `mockcoffee` şirkətinə platforma panelindən açın. Ekran görüntüləri: `docs/screenshots/12-*`.
+
 ## Sənədlər
 
 | Sənəd | Mövzu |
