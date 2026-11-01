@@ -6022,6 +6022,26 @@
         "tags" : [ "Müştəri: dost dəvəti" ]
       }
     },
+    "/api/v1/public/share/menu" : {
+      "get" : {
+        "description" : "Link önizləmə botları üçün: başlıq, izah və şəkil şirkətin standart dilində. Nginx `/menu` ünvanına gələn botları bura göndərir. Menyu göstərilmirsə 404.",
+        "operationId" : "menu",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Menyu linkinin önizləməsi (HTML, Open Graph)",
+        "tags" : [ "İctimai: menyu və xidmətlər" ]
+      }
+    },
     "/api/v1/site/demo-requests" : {
       "post" : {
         "description" : "Müraciət saxlanılmır: məzmunu şirkətin poçt qutusuna (`app.site.inbox`) email kimi göndərilir. Autentifikasiya tələb etmir; IP və ümumi gündəlik limit var. `website` sahəsi botlar üçün tələdir (honeypot — insan görmədiyi gizli sahə): doludursa müraciət səssizcə atılır.",

@@ -206,6 +206,28 @@ class CatalogIT extends TapIntegrationTest {
     }
 
     @Test
+    void menuLinkPreviewHasOpenGraphTagsInTheCompanyLanguage() throws Exception {
+        AdminClient owner = owner();
+        owner.post("/catalog/categories", Map.of("name", Map.of("az", "Önizləmə"))).andExpect(status().isCreated());
+        owner.put("/catalog/settings", Map.of("enabled", true, "title", "SERVICES")).andExpect(status().isOk());
+        String html = client().get("/api/v1/public/share/menu").andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.startsWith("text/html")))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertThat(html).contains("<meta property=\"og:title\" content=\"")
+                .contains(" · Xidmətlər\">")
+                .contains("xidmətləri və qiymətləri ilə tanış olun.")
+                .contains("<meta property=\"og:url\" content=\"http://" + HOST + "/menu\">")
+                .contains("/api/v1/public/icons/512.png")
+                .contains("http-equiv=\"refresh\"")
+                // Şirkət adı HTML-də qaçırılır
+                .doesNotContain("<script");
+
+        // Menyu söndürülübsə — önizləmə yoxdur
+        owner.put("/catalog/settings", Map.of("enabled", false, "title", "MENU")).andExpect(status().isOk());
+        client().get("/api/v1/public/share/menu").andExpect(status().isNotFound());
+    }
+
+    @Test
     void catalogIsClosedWithoutTheAddonAndOnlyForOwners() throws Exception {
         platformJdbc.sql("DELETE FROM tenant_addons WHERE tenant_id = :id").param("id", alpha().id()).update();
         plans.evictCaches();

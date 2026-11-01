@@ -3373,6 +3373,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/share/menu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Menyu linkinin önizləməsi (HTML, Open Graph)
+         * @description Link önizləmə botları üçün: başlıq, izah və şəkil şirkətin standart dilində. Nginx `/menu` ünvanına gələn botları bura göndərir. Menyu göstərilmirsə 404.
+         */
+        get: operations["menu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/site/demo-requests": {
         parameters: {
             query?: never;
@@ -9792,6 +9812,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ProgramInfo"];
+                };
+            };
+        };
+    };
+    menu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
                 };
             };
         };

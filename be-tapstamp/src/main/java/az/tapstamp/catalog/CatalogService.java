@@ -96,6 +96,12 @@ public class CatalogService {
         return new CatalogView(true, settings.title(), categories);
     }
 
+    /** Bölmənin adı (MENU, SERVICES, PRICES) — link önizləməsi üçün; menyu göstərilmirsə boş. */
+    public Optional<String> publicTitle() {
+        Settings settings = catalog.settings();
+        return plans.has(Addon.CATALOG) && settings.enabled() ? Optional.of(settings.title()) : Optional.empty();
+    }
+
     /** Şəkil (versiya ünvandakı ilə eyni olmasa da qaytarılır — köhnə keşlənmiş səhifələr üçün). */
     public Optional<Image> image(UUID itemId) {
         if (!plans.has(Addon.CATALOG)) {
