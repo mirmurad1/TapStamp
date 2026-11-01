@@ -154,7 +154,7 @@ export function AdminLayout() {
                   <p className="px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground">{t(`nav.groups.${group}`)}</p>
                 ) : null}
                 <div className="flex flex-col gap-0.5">
-                  {groupItems.map(({ section, to, icon: ItemIcon, feature }) => (
+                  {groupItems.map(({ section, to, icon: ItemIcon, feature, addon }) => (
                     <NavLink
                       key={section}
                       to={to}
@@ -179,7 +179,8 @@ export function AdminLayout() {
                           {unresolvedBad}
                         </span>
                       ) : null}
-                      {feature && features && !features.includes(feature) ? (
+                      {(feature && features && !features.includes(feature))
+                      || (addon && plan.data && !(plan.data.addons ?? []).includes(addon)) ? (
                         <Lock className="ml-auto size-3.5 shrink-0" aria-label={t('plan.locked')} />
                       ) : null}
                     </NavLink>

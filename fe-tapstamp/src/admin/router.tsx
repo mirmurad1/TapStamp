@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 
 import { RequireActive, RequireState } from './auth/guards';
-import { RequireFeature } from './components/PlanLocked';
+import { RequireAddon, RequireFeature } from './components/PlanLocked';
 import { AdminLayout } from './layout/AdminLayout';
 import { AuthLayout } from './layout/AuthLayout';
 import { AccountPage } from './pages/account/AccountPage';
@@ -21,6 +21,7 @@ import { StaffConsolePage } from './pages/staff/StaffConsolePage';
 import { PlatformAuditPage } from './pages/platform/PlatformAuditPage';
 import { PlatformCampaignsPage } from './pages/platform/PlatformCampaignsPage';
 import { ReferralsPage } from './pages/referrals/ReferralsPage';
+import { CatalogPage } from './pages/catalog/CatalogPage';
 import { TiersPage } from './pages/tiers/TiersPage';
 import { FeedbackPage } from './pages/feedback/FeedbackPage';
 import { RemindersPage } from './pages/reminders/RemindersPage';
@@ -89,6 +90,7 @@ export const adminRouter = createBrowserRouter(
                         { path: 'bonus-rules', element: <Navigate to="/campaigns?tab=bonus" replace /> },
                         { path: 'tiers', element: <RequireFeature feature="TIERS"><TiersPage /></RequireFeature> },
                         { path: 'feedback', element: <RequireFeature feature="FEEDBACK"><FeedbackPage /></RequireFeature> },
+                        { path: 'catalog', element: <RequireAddon addon="CATALOG"><CatalogPage /></RequireAddon> },
                       ],
                     },
                     { path: 'staff-console/*', element: <StaffConsolePage /> },

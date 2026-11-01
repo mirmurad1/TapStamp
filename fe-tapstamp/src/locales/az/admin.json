@@ -29,7 +29,8 @@
       "main": "Əsas",
       "growth": "Müştəri cəlbi",
       "manage": "İdarəetmə"
-    }
+    },
+    "catalog": "Menyu və xidmətlər"
   },
   "dashboard": {
     "title": "Göstəricilər paneli",
@@ -1074,7 +1075,9 @@
       "trialEnds_other": "Pulsuz sınaq {{date}} tarixində bitir ({{count}} gün qalıb). Sonra xidmət dayandırılacaq.",
       "limits": "Filial limiti: {{branches}} · İşçi limiti: {{staff}}",
       "unlimited": "limitsiz"
-    }
+    },
+    "addonLockedTitle": "Bu bölmə ayrıca əlavədir",
+    "addonLockedBody": "Menyu və xidmətlər paketə daxil deyil, ayrıca qoşulur. Qoşmaq üçün bizimlə əlaqə saxlayın."
   },
   "bonusRules": {
     "title": "Bonus kampaniyası",
@@ -1267,6 +1270,67 @@
       "bonus": "Bonus kampaniyası",
       "sms": "SMS kampaniyaları",
       "stamp": "Möhür kampaniyası"
+    }
+  },
+  "catalog": {
+    "title": "Menyu və xidmətlər",
+    "subtitle": "Müştərilər menyunuzu və ya xidmətlərinizi qiymətləri ilə görür. Stol üstündəki QR və ya NFC ilə açılır, giriş tələb etmir.",
+    "addCategory": "Kateqoriya əlavə et",
+    "addItem": "Məhsul əlavə et",
+    "hidden": "Gizli",
+    "soldOut": "Hazırda yoxdur",
+    "itemCount_one": "{{count}} məhsul",
+    "itemCount_other": "{{count}} məhsul",
+    "minutes_one": "{{count}} dəq",
+    "minutes_other": "{{count}} dəq",
+    "emptyCategory": "Bu kateqoriyada hələ məhsul yoxdur.",
+    "limits": "Ən çox {{categories}} kateqoriya və {{items}} məhsul.",
+    "moveUp": "Yuxarı",
+    "moveDown": "Aşağı",
+    "deleteCategoryConfirm": "Kateqoriya silinsin? İçində məhsul varsa, əvvəlcə onları silin və ya köçürün.",
+    "deleteItemConfirm": "Məhsul silinsin?",
+    "newCategory": "Yeni kateqoriya",
+    "editCategory": "Kateqoriyanı dəyiş",
+    "categoryHint": "Məsələn: Qəhvələr, Desertlər və ya Yuma, Cilalama.",
+    "newItem": "Yeni məhsul",
+    "editItem": "Məhsulu dəyiş",
+    "itemHint": "Ad və qiymət kifayətdir; izah, şəkil və müddət istəyə bağlıdır.",
+    "empty": {
+      "title": "Menyunuzu yaradın",
+      "hint": "Əvvəlcə kateqoriya əlavə edin (məsələn, \"Qəhvələr\"), sonra ona məhsullar."
+    },
+    "settings": {
+      "enabled": "Müştərilərə göstər",
+      "enabledHint": "Menyu müştəri səhifəsində görünür.",
+      "disabledHint": "Söndürülüb: müştərilər görmür, məlumat silinmir.",
+      "titleLabel": "Bölmənin adı"
+    },
+    "titles": {
+      "MENU": "Menyu",
+      "SERVICES": "Xidmətlər",
+      "PRICES": "Qiymətlər"
+    },
+    "form": {
+      "categoryName": "Kateqoriyanın adı",
+      "visible": "Müştərilərə göstər",
+      "visibleHint": "Söndürsəniz, kateqoriya və içindəkilər müştəriyə görünmür.",
+      "category": "Kateqoriya",
+      "name": "Ad",
+      "description": "İzah (istəyə bağlı)",
+      "price": "Qiymət (AZN)",
+      "priceHint": "Boş qoysanız, qiymət göstərilmir.",
+      "duration": "Müddət (dəq)",
+      "durationHint": "Xidmətlər üçün, istəyə bağlı.",
+      "branch": "Filial",
+      "allBranches": "Bütün filiallarda",
+      "image": "Şəkil",
+      "chooseImage": "Şəkil seç",
+      "changeImage": "Başqa şəkil seç",
+      "removeImage": "Şəkli sil",
+      "imageHint": "PNG və ya JPEG, 2 MB-a qədər. Kvadrat kəsilir.",
+      "imageInvalid": "Yalnız PNG və ya JPEG, 2 MB-a qədər.",
+      "soldOut": "Hazırda yoxdur",
+      "soldOutHint": "Müştəriyə solğun göstərilir, silinmir."
     }
   }
 }

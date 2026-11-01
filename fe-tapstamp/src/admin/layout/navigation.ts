@@ -1,5 +1,6 @@
 import {
   BellRing,
+  BookOpen,
   Building2,
   ClipboardList,
   LayoutDashboard,
@@ -17,7 +18,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import type { Feature } from '@/shared/plan/plan';
+import type { Addon, Feature } from '@/shared/plan/plan';
 
 import type { ContextScope, Me } from '../api/adminApi';
 
@@ -33,6 +34,7 @@ export type AdminSection =
   | 'bonusRules'
   | 'tiers'
   | 'feedback'
+  | 'catalog'
   | 'settings'
   | 'audit'
   | 'tenants'
@@ -51,6 +53,8 @@ export interface NavItem {
   roles: readonly Role[];
   /** Bölmə yalnız bu imkan şirkətin paketində olanda açıqdır (menyuda kilid nişanı ilə görünür). */
   feature?: Feature;
+  /** Bölmə ayrıca satılan əlavədir: şirkətdə açıq deyilsə menyuda kilid nişanı ilə görünür. */
+  addon?: Addon;
   /** Menyuda qrup: əsas iş, marketinq, idarəetmə. */
   group: NavGroup;
 }
@@ -63,6 +67,7 @@ const TENANT_ITEMS: readonly NavItem[] = [
   { section: 'customers', to: '/customers', icon: Users, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER'], group: 'main' },
   { section: 'staffConsole', to: '/staff-console', icon: ClipboardList, roles: ['COMPANY_OWNER', 'BRANCH_MANAGER', 'STAFF'], group: 'main' },
   { section: 'feedback', to: '/feedback', icon: MessageSquareHeart, roles: ['COMPANY_OWNER'], feature: 'FEEDBACK', group: 'main' },
+  { section: 'catalog', to: '/catalog', icon: BookOpen, roles: ['COMPANY_OWNER'], addon: 'CATALOG', group: 'main' },
   { section: 'campaigns', to: '/campaigns', icon: Megaphone, roles: ['COMPANY_OWNER'], group: 'growth' },
   { section: 'tiers', to: '/tiers', icon: Medal, roles: ['COMPANY_OWNER'], feature: 'TIERS', group: 'growth' },
   { section: 'referrals', to: '/referrals', icon: UserPlus, roles: ['COMPANY_OWNER'], feature: 'REFERRALS', group: 'growth' },

@@ -530,6 +530,45 @@ export const platformPlanApi = {
     })),
 };
 
+export type CatalogView = Schemas['CatalogView'];
+export type CatalogCategory = Schemas['CategoryView'];
+export type CatalogItem = Schemas['ItemView'];
+export type CatalogItemRequest = Schemas['ItemRequest'];
+export type CatalogTitle = 'MENU' | 'SERVICES' | 'PRICES';
+export const CATALOG_KEY = ['catalog'] as const;
+
+/** Menyu və ya xidmətlər (şirkət sahibi, əlavə CATALOG): hər dəyişiklik bütün kataloqu qaytarır. */
+export const catalogApi = {
+  get: () => unwrap(api.GET('/api/v1/admin/catalog')),
+  settings: (enabled: boolean, title: CatalogTitle) =>
+    unwrap(api.PUT('/api/v1/admin/catalog/settings', { body: { enabled, title } })),
+  createCategory: (name: Localized, active: boolean) =>
+    unwrap(api.POST('/api/v1/admin/catalog/categories', { body: { name, active } })),
+  updateCategory: (categoryId: string, name: Localized, active: boolean) =>
+    unwrap(api.PUT('/api/v1/admin/catalog/categories/{categoryId}', { params: { path: { categoryId } }, body: { name, active } })),
+  deleteCategory: (categoryId: string) =>
+    unwrap(api.DELETE('/api/v1/admin/catalog/categories/{categoryId}', { params: { path: { categoryId } } })),
+  reorderCategories: (ids: string[]) => unwrap(api.PUT('/api/v1/admin/catalog/categories/order', { body: { ids } })),
+  reorderItems: (categoryId: string, ids: string[]) =>
+    unwrap(api.PUT('/api/v1/admin/catalog/categories/{categoryId}/order', { params: { path: { categoryId } }, body: { ids } })),
+  createItem: (body: CatalogItemRequest) => unwrap(api.POST('/api/v1/admin/catalog/items', { body })),
+  updateItem: (itemId: string, body: CatalogItemRequest) =>
+    unwrap(api.PUT('/api/v1/admin/catalog/items/{itemId}', { params: { path: { itemId } }, body })),
+  deleteItem: (itemId: string) => unwrap(api.DELETE('/api/v1/admin/catalog/items/{itemId}', { params: { path: { itemId } } })),
+  /** Şəkil multipart ilə göndərilir (brauzerdə növ və həcm əvvəlcədən yoxlanılır). */
+  uploadImage: (itemId: string, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return unwrap(api.PUT('/api/v1/admin/catalog/items/{itemId}/image', {
+      params: { path: { itemId } },
+      body: { file: '' },
+      bodySerializer: () => form,
+    }));
+  },
+  removeImage: (itemId: string) =>
+    unwrap(api.DELETE('/api/v1/admin/catalog/items/{itemId}/image', { params: { path: { itemId } } })),
+};
+
 export type AddonName = NonNullable<Schemas['TenantAddonsResponse']['addons']>[number];
 /** Satılan əlavələrin hamısı (platforma panelində sıra ilə). */
 export const ADDONS: readonly AddonName[] = ['CATALOG'];

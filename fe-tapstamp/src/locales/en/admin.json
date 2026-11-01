@@ -29,7 +29,8 @@
       "main": "Main",
       "growth": "Growth",
       "manage": "Manage"
-    }
+    },
+    "catalog": "Menu and services"
   },
   "dashboard": {
     "title": "Insights dashboard",
@@ -1074,7 +1075,9 @@
       "trialEnds_other": "The free trial ends on {{date}} ({{count}} days left). After that the service will be suspended.",
       "limits": "Branch limit: {{branches}} · Staff limit: {{staff}}",
       "unlimited": "unlimited"
-    }
+    },
+    "addonLockedTitle": "This section is an add-on",
+    "addonLockedBody": "Menu and services is not part of your plan and is added separately. Contact us to turn it on."
   },
   "bonusRules": {
     "title": "Bonus campaigns",
@@ -1267,6 +1270,67 @@
       "bonus": "Bonus campaigns",
       "sms": "SMS campaigns",
       "stamp": "Stamp campaign"
+    }
+  },
+  "catalog": {
+    "title": "Menu and services",
+    "subtitle": "Customers see your menu or services with prices. It opens from the table QR or NFC tag, no sign-in needed.",
+    "addCategory": "Add category",
+    "addItem": "Add item",
+    "hidden": "Hidden",
+    "soldOut": "Sold out",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "emptyCategory": "No items in this category yet.",
+    "limits": "Up to {{categories}} categories and {{items}} items.",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "deleteCategoryConfirm": "Delete this category? If it has items, delete or move them first.",
+    "deleteItemConfirm": "Delete this item?",
+    "newCategory": "New category",
+    "editCategory": "Edit category",
+    "categoryHint": "For example: Coffee, Desserts or Wash, Polish.",
+    "newItem": "New item",
+    "editItem": "Edit item",
+    "itemHint": "A name and price are enough; description, image and duration are optional.",
+    "empty": {
+      "title": "Create your menu",
+      "hint": "Add a category first (for example, \"Coffee\"), then add items to it."
+    },
+    "settings": {
+      "enabled": "Show to customers",
+      "enabledHint": "The menu is visible on the customer page.",
+      "disabledHint": "Off: customers don’t see it, nothing is deleted.",
+      "titleLabel": "Section name"
+    },
+    "titles": {
+      "MENU": "Menu",
+      "SERVICES": "Services",
+      "PRICES": "Prices"
+    },
+    "form": {
+      "categoryName": "Category name",
+      "visible": "Show to customers",
+      "visibleHint": "If off, the category and its items are hidden from customers.",
+      "category": "Category",
+      "name": "Name",
+      "description": "Description (optional)",
+      "price": "Price (AZN)",
+      "priceHint": "Leave empty to hide the price.",
+      "duration": "Duration (min)",
+      "durationHint": "For services, optional.",
+      "branch": "Branch",
+      "allBranches": "All branches",
+      "image": "Image",
+      "chooseImage": "Choose image",
+      "changeImage": "Choose another image",
+      "removeImage": "Remove image",
+      "imageHint": "PNG or JPEG, up to 2 MB. Cropped to a square.",
+      "imageInvalid": "PNG or JPEG only, up to 2 MB.",
+      "soldOut": "Sold out",
+      "soldOutHint": "Shown faded to customers, not deleted."
     }
   }
 }
