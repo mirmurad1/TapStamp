@@ -1,27 +1,15 @@
 package az.tapstamp.company.service;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.Clock;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.repository.CompanyMapper;
 import az.tapstamp.security.admin.AccessPolicy;
 import az.tapstamp.security.admin.AdminPrincipal;
-import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.image.SquarePng;
 import org.springframework.stereotype.Service;
 
 /**
@@ -41,8 +29,8 @@ public class CompanyLogoService {
     /** Saxlanılan loqonun ölçüsü (başlıqda 40–64 px göstərilir, yüksək sıxlıqlı ekranlar üçün ehtiyatla). */
     public static final int STORED_SIZE = 512;
 
-    private static final byte[] PNG_MAGIC = {(byte) 0x89, 'P', 'N', 'G'};
-    private static final byte[] JPEG_MAGIC = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
+    private static final SquarePng IMAGE =
+            new SquarePng(MAX_BYTES, MIN_SIZE, MAX_SIZE, STORED_SIZE, ErrorCode.LOGO_INVALID);
 
     private final CompanyMapper companies;
     private final AuditLogger audit;
@@ -75,69 +63,6 @@ public class CompanyLogoService {
 
     /** Yoxlama (növ, həcm, ölçü həddləri), kvadrata gətirmə və PNG-yə çevirmə. */
     static byte[] normalize(byte[] file) {
-        if (file == null || file.length == 0 || file.length > MAX_BYTES
-                || !(startsWith(file, PNG_MAGIC) || startsWith(file, JPEG_MAGIC))) {
-            throw new ApiException(ErrorCode.LOGO_INVALID);
-        }
-        BufferedImage image = squared(decode(file));
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "png", out);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return out.toByteArray();
-    }
-
-    /**
-     * Ölçülər şəkil açılmazdan əvvəl başlıqdan oxunur: kiçik fayl böyük ölçü elan edib yaddaşı doldura bilməz
-     * (decompression bomb).
-     */
-    private static BufferedImage decode(byte[] file) {
-        try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(file))) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
-            if (!readers.hasNext()) {
-                throw new ApiException(ErrorCode.LOGO_INVALID);
-            }
-            ImageReader reader = readers.next();
-            try {
-                reader.setInput(input, true, true);
-                int width = reader.getWidth(0);
-                int height = reader.getHeight(0);
-                if (Math.min(width, height) < MIN_SIZE || Math.max(width, height) > MAX_SIZE) {
-                    throw new ApiException(ErrorCode.LOGO_INVALID);
-                }
-                return reader.read(0);
-            } finally {
-                reader.dispose();
-            }
-        } catch (IOException | RuntimeException e) {
-            if (e instanceof ApiException api) {
-                throw api;
-            }
-            throw new ApiException(ErrorCode.LOGO_INVALID);
-        }
-    }
-
-    /** Mərkəzdən kvadrat kəsir və lazım olsa {@value #STORED_SIZE} piksələ kiçildir (şəffaflıq saxlanılır). */
-    private static BufferedImage squared(BufferedImage source) {
-        int side = Math.min(source.getWidth(), source.getHeight());
-        BufferedImage crop = source.getSubimage((source.getWidth() - side) / 2, (source.getHeight() - side) / 2,
-                side, side);
-        int target = Math.min(side, STORED_SIZE);
-        BufferedImage result = new BufferedImage(target, target, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = result.createGraphics();
-        try {
-            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            graphics.drawImage(crop, 0, 0, target, target, null);
-        } finally {
-            graphics.dispose();
-        }
-        return result;
-    }
-
-    private static boolean startsWith(byte[] data, byte[] prefix) {
-        return data.length >= prefix.length && Arrays.equals(data, 0, prefix.length, prefix, 0, prefix.length);
+        return IMAGE.normalize(file);
     }
 }

@@ -1015,6 +1015,8 @@ Baza yolu `/api/v1`-dir. Tenant **domendən** müəyyən olunur, ona görə yoll
 | GET | `/api/v1/public/company` | Kafe, filiallar və mükafat qaydası (3 dildə) |
 | GET | `/api/v1/public/legal/{type}` | Cari məxfilik siyasəti və ya şərtlər (3 dildə, versiya ilə) |
 | GET | `/manifest.webmanifest` | Şirkətə xas PWA manifesti (ad, rənglər, ikonlar) |
+| GET | `/api/v1/public/catalog?branchId=` | Menyu və ya xidmətlər (əlavə `CATALOG`, #64): görünən kateqoriyalar və məhsullar; əlavə yoxdursa `enabled = false` |
+| GET | `/api/v1/public/catalog/items/{id}/image?v=` | Məhsulun şəkli (PNG, versiyalı ünvan, uzun keş) |
 | GET | `/api/v1/csrf` | CSRF cookie-sini təmin edir |
 
 ### 10.2 Müştəri autentifikasiyası — `/api/v1/auth`
@@ -1118,6 +1120,10 @@ Göstəricilərin dəqiq tərifləri `docs/metrics.md` faylında olacaq. Məsəl
 | POST | `/team/{staffUserId}/mfa-reset` | 2FA-nın sıfırlanması (step-up) |
 | GET | `/audit-logs` | Audit jurnalı (filtrlər: icraçı, əməliyyat, tarix) |
 | GET | `/tap-events` | Toxunuş jurnalı (rədd edilənlər və səbəbləri daxil) |
+| GET, PUT | `/catalog`, `/catalog/settings` | Kataloq (OWNER, əlavə `CATALOG`): bütün kateqoriya və məhsullar; açar və bölmənin adı (MENU, SERVICES, PRICES) |
+| POST, PUT, DELETE | `/catalog/categories[/{id}]`, `/catalog/categories/order` | Kateqoriyalar (ən çox 30), gizlətmə, sıra; boş olmayan silinmir (`CATALOG_CATEGORY_NOT_EMPTY`) |
+| POST, PUT, DELETE | `/catalog/items[/{id}]`, `/catalog/categories/{id}/order` | Məhsul və xidmətlər (ən çox 300): 3 dildə ad və izah, qiymət, müddət, "hazırda yoxdur", filial, sıra |
+| PUT, DELETE | `/catalog/items/{id}/image` | Məhsulun şəkli (PNG/JPEG, 2 MB-a qədər → 640 px kvadrat PNG, EXIF silinir) |
 
 ### 10.9 Platforma — `/api/v1/platform` (yalnız platforma domenində)
 
@@ -1128,6 +1134,7 @@ Göstəricilərin dəqiq tərifləri `docs/metrics.md` faylında olacaq. Məsəl
 | GET, POST | `/tenants` | Tenant-ların siyahısı və yaradılması (provisioning) |
 | PATCH | `/tenants/{id}` | Status (dayandırmaq, aktivləşdirmək) |
 | GET | `/tenants/{id}/stats` | Yalnız ümumi saylar (müştəri, möhür) — fərdi məlumat yoxdur |
+| GET, PUT | `/tenants/{id}/plan/addons[/{addon}]` | Şirkətin əlavələri (#64): siyahı, açmaq və bağlamaq (platforma auditinə yazılır) |
 | POST, DELETE | `/tenants/{id}/domains[/{domainId}]` | Domenin qoşulması və çıxarılması |
 | POST | `/tenants/{id}/owner-invitations` | OWNER dəvəti |
 | POST | `/tenants/{id}/owners/{staffUserId}/mfa-reset` | OWNER-in 2FA-sının sıfırlanması (step-up) |

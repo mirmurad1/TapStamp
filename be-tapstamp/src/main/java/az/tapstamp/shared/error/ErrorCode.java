@@ -22,6 +22,12 @@ public enum ErrorCode {
     PAYLOAD_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE),
     /** Loqo faylı tələblərə uyğun deyil (növ, həcm, ölçü). */
     LOGO_INVALID(HttpStatus.BAD_REQUEST),
+    /** Kataloq şəkli uyğun deyil (növ, həcm, ölçü). */
+    CATALOG_IMAGE_INVALID(HttpStatus.BAD_REQUEST),
+    /** Kataloqda kateqoriya və ya məhsul limiti dolub. */
+    CATALOG_LIMIT_REACHED(HttpStatus.CONFLICT),
+    /** Kateqoriyada məhsul var — əvvəlcə məhsulları silmək və ya köçürmək lazımdır. */
+    CATALOG_CATEGORY_NOT_EMPTY(HttpStatus.CONFLICT),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
     /** Şirkətin (yeni nömrələrə) və ya platformanın gündəlik SMS kod limiti dolub. */
     SMS_DAILY_LIMIT_REACHED(HttpStatus.TOO_MANY_REQUESTS),

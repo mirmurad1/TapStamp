@@ -550,6 +550,192 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kataloq
+         * @description Parametrlər (açar, bölmənin adı), kateqoriyalar sıra ilə və hər kateqoriyanın məhsulları (gizlədilənlər və "hazırda yoxdur" olanlar da daxil).
+         */
+        get: operations["get_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kateqoriya yaratmaq
+         * @description Siyahının sonuna əlavə olunur. Ən çox 30 kateqoriya.
+         */
+        post: operations["createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/categories/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Kateqoriyaların sırası
+         * @description Bütün kateqoriyaların id-ləri yeni sıra ilə, hər biri bir dəfə.
+         */
+        put: operations["reorderCategories"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/categories/{categoryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Kateqoriyanı dəyişmək
+         * @description `active = false` — müştəriyə göstərilmir (silmədən).
+         */
+        put: operations["updateCategory"];
+        post?: never;
+        /**
+         * Kateqoriyanı silmək
+         * @description Yalnız boş kateqoriya: içində məhsul varsa 409 `CATALOG_CATEGORY_NOT_EMPTY`.
+         */
+        delete: operations["deleteCategory"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/categories/{categoryId}/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Kateqoriyadakı məhsulların sırası
+         * @description Həmin kateqoriyanın bütün məhsullarının id-ləri yeni sıra ilə.
+         */
+        put: operations["reorderItems"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Məhsul və ya xidmət yaratmaq
+         * @description Kateqoriyanın sonuna əlavə olunur. Ən çox 300 məhsul.
+         */
+        post: operations["createItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Məhsulu dəyişmək
+         * @description Başqa kateqoriyaya köçürülən məhsul həmin kateqoriyanın sonuna düşür.
+         */
+        put: operations["updateItem"];
+        post?: never;
+        /** Məhsulu silmək */
+        delete: operations["deleteItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/items/{itemId}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Məhsulun şəkli
+         * @description PNG və ya JPEG, 2 MB-a qədər, qısa tərəfi ən az 200 piksel; mərkəzdən kvadrat kəsilir, 640 piksələ kiçildilir və PNG kimi saxlanılır (EXIF silinir). Uyğun deyilsə `CATALOG_IMAGE_INVALID`.
+         */
+        put: operations["uploadImage"];
+        post?: never;
+        /** Məhsulun şəklini silmək */
+        delete: operations["removeImage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Parametrlər
+         * @description `enabled = false` — müştəriyə göstərilmir (məlumat qalır). `title` — müştəriyə görünən ad: MENU (menyu), SERVICES (xidmətlər), PRICES (qiymətlər).
+         */
+        put: operations["settings_4"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/customers": {
         parameters: {
             query?: never;
@@ -618,7 +804,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_3"];
+        get: operations["get_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2554,7 +2740,7 @@ export interface paths {
             cookie?: never;
         };
         /** Şirkət haqqında məlumat */
-        get: operations["get_2"];
+        get: operations["get_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2979,6 +3165,46 @@ export interface paths {
          * @description Bu gün tarix aralığında olan aktiv qaydalar: cədvəl (günlər, saat aralığı), bitmə tarixi, filial və bu an qüvvədədirmi (`runningNow`). Paketdə imkan yoxdursa — boş siyahı.
          */
         get: operations["current"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Menyu və ya xidmətlər (giriş tələb etmir)
+         * @description Əlavə açıq deyilsə və ya bölmə söndürülübsə `enabled = false` və boş siyahı. Gizlədilmiş və boş kateqoriyalar göstərilmir; "hazırda yoxdur" məhsullar `available = false` ilə qaytarılır. `branchId` verilibsə — bütün filiallar üçün olanlar və həmin filialınkılar.
+         */
+        get: operations["get_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/items/{itemId}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Məhsulun şəkli (PNG)
+         * @description Ünvan versiyalıdır (`imageUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Şəkil yoxdursa 404.
+         */
+        get: operations["image"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3490,6 +3716,22 @@ export interface components {
             /** Format: int32 */
             totalStamps?: number;
         };
+        CatalogView: {
+            categories?: components["schemas"]["CategoryView"][];
+            enabled?: boolean;
+            title?: string;
+        };
+        CategoryRequest: {
+            active?: boolean;
+            name: components["schemas"]["LocalizedText"];
+        };
+        CategoryView: {
+            active?: boolean;
+            /** Format: uuid */
+            id?: string;
+            items?: components["schemas"]["ItemView"][];
+            name?: components["schemas"]["LocalizedText"];
+        };
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
@@ -3862,6 +4104,41 @@ export interface components {
             /** @enum {string} */
             role: "SUPER_ADMIN" | "COMPANY_OWNER" | "BRANCH_MANAGER" | "STAFF";
         };
+        ItemRequest: {
+            /** @description false — "hazırda yoxdur" (müştəriyə solğun göstərilir) */
+            available?: boolean;
+            /**
+             * Format: uuid
+             * @description Yalnız bu filialda; null — bütün filiallarda
+             */
+            branchId?: string;
+            /** Format: uuid */
+            categoryId: string;
+            description?: components["schemas"]["LocalizedText"];
+            /**
+             * Format: int32
+             * @description Xidmətin müddəti, dəqiqə (istəyə bağlı)
+             */
+            durationMinutes?: number;
+            name: components["schemas"]["LocalizedText"];
+            /** @description AZN; null — qiymət göstərilmir */
+            price?: number;
+        };
+        ItemView: {
+            available?: boolean;
+            /** Format: uuid */
+            branchId?: string;
+            /** Format: uuid */
+            categoryId?: string;
+            description?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            durationMinutes?: number;
+            /** Format: uuid */
+            id?: string;
+            imageUrl?: string;
+            name?: components["schemas"]["LocalizedText"];
+            price?: number;
+        };
         Keys: {
             auth: string;
             p256dh: string;
@@ -3941,6 +4218,9 @@ export interface components {
         };
         MemberStatusRequest: {
             status: string;
+        };
+        OrderRequest: {
+            ids: string[];
         };
         /** @description Kod göndərildi. Cavab nömrənin qeydiyyatda olub-olmamasından asılı deyil. */
         OtpChallengeResponse: {
@@ -4687,6 +4967,11 @@ export interface components {
         /** @description Cari sessiyanın vəziyyəti: NONE — daxil olmayıb, PENDING_MFA — TOTP gözlənilir, MFA_ENROLLMENT — TOTP qurulmalıdır, ACTIVE — tam daxil olub */
         SessionStateResponse: {
             state?: string;
+        };
+        SettingsRequest: {
+            enabled: boolean;
+            /** @description MENU, SERVICES və ya PRICES */
+            title: string;
         };
         SmsLimitRequest: {
             /**
@@ -5781,6 +6066,295 @@ export interface operations {
             };
         };
     };
+    get_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    reorderCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    deleteCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    reorderItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    createItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    updateItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    deleteItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    uploadImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    removeImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    settings_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
     list_12: {
         parameters: {
             query?: {
@@ -5863,7 +6437,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -8400,7 +8974,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -9010,6 +9584,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicRule"][];
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: {
+                branchId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    image: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
                 };
             };
         };

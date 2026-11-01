@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Menyu və ya xidmətlər kataloqu: parametrlər, kateqoriyalar, məhsul və xidmətlər, şəkillər -->
+<mapper namespace="az.tapstamp.catalog.repository.CatalogMapper">
+
+    <sql id="itemColumns">
+        id, category_id, name, description, price, duration_minutes,
+        CASE WHEN image IS NULL THEN 0 ELSE image_version END AS image_version, available, branch_id, position
+    </sql>
+
+    <select id="settings" resultType="az.tapstamp.catalog.repository.CatalogMapper$Settings">
+        SELECT enabled, title FROM catalog_settings WHERE id = 1
+    </select>
+
+    <update id="updateSettings">
+        UPDATE catalog_settings SET enabled = #{enabled}, title = #{title}, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = 1
+    </update>
+
+    <select id="categories" resultType="az.tapstamp.catalog.repository.CatalogMapper$Category">
+        SELECT id, name, position, active FROM catalog_categories ORDER BY position, created_at
+    </select>
+
+    <select id="findCategory" resultType="az.tapstamp.catalog.repository.CatalogMapper$Category">
+        SELECT id, name, position, active FROM catalog_categories WHERE id = #{id}
+    </select>
+
+    <select id="countCategories" resultType="long">
+        SELECT count(*) FROM catalog_categories
+    </select>
+
+    <select id="nextCategoryPosition" resultType="int">
+        SELECT coalesce(max(position) + 1, 0) FROM catalog_categories
+    </select>
+
+    <insert id="insertCategory">
+        INSERT INTO catalog_categories (id, name, position, active, created_at, updated_at, updated_by)
+        VALUES (#{id}, CAST(#{name} AS jsonb), #{position}, #{active}, #{now}, #{now}, #{staffId})
+    </insert>
+
+    <update id="updateCategory">
+        UPDATE catalog_categories
+        SET name = CAST(#{name} AS jsonb), active = #{active}, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="setCategoryPosition">
+        UPDATE catalog_categories SET position = #{position} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteEmptyCategory">
+        DELETE FROM catalog_categories c
+        WHERE c.id = #{id} AND NOT EXISTS (SELECT 1 FROM catalog_items i WHERE i.category_id = c.id)
+    </delete>
+
+    <select id="items" resultType="az.tapstamp.catalog.repository.CatalogMapper$Item">
+        SELECT <include refid="itemColumns"/> FROM catalog_items ORDER BY category_id, position, created_at
+    </select>
+
+    <select id="findItem" resultType="az.tapstamp.catalog.repository.CatalogMapper$Item">
+        SELECT <include refid="itemColumns"/> FROM catalog_items WHERE id = #{id}
+    </select>
+
+    <select id="countItems" resultType="long">
+        SELECT count(*) FROM catalog_items
+    </select>
+
+    <select id="nextItemPosition" resultType="int">
+        SELECT coalesce(max(position) + 1, 0) FROM catalog_items WHERE category_id = #{categoryId}
+    </select>
+
+    <insert id="insertItem">
+        INSERT INTO catalog_items (id, category_id, name, description, price, duration_minutes, available, branch_id,
+                                   position, created_at, updated_at, updated_by)
+        VALUES (#{id}, #{categoryId}, CAST(#{name} AS jsonb), CAST(#{description} AS jsonb), #{price},
+                #{durationMinutes}, #{available}, #{branchId}, #{position}, #{now}, #{now}, #{staffId})
+    </insert>
+
+    <update id="updateItem">
+        UPDATE catalog_items
+        SET category_id = #{categoryId}, name = CAST(#{name} AS jsonb), description = CAST(#{description} AS jsonb),
+            price = #{price}, duration_minutes = #{durationMinutes}, available = #{available}, branch_id = #{branchId},
+            position = #{position}, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="setItemPosition">
+        UPDATE catalog_items SET position = #{position} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteItem">
+        DELETE FROM catalog_items WHERE id = #{id}
+    </delete>
+
+    <update id="updateImage">
+        UPDATE catalog_items
+        SET image = #{png,jdbcType=BINARY}, image_version = image_version + 1, updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findImage" resultType="az.tapstamp.catalog.repository.CatalogMapper$Image">
+        SELECT image AS png, image_version AS version FROM catalog_items WHERE id = #{id} AND image IS NOT NULL
+    </select>
+
+    <select id="branchExists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId})
+    </select>
+</mapper>

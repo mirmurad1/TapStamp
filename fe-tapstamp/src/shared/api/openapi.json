@@ -1065,6 +1065,387 @@
         "tags" : [ "Admin: kampaniyalar" ]
       }
     },
+    "/api/v1/admin/catalog" : {
+      "get" : {
+        "description" : "Parametrlər (açar, bölmənin adı), kateqoriyalar sıra ilə və hər kateqoriyanın məhsulları (gizlədilənlər və \"hazırda yoxdur\" olanlar da daxil).",
+        "operationId" : "get_5",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kataloq",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/categories" : {
+      "post" : {
+        "description" : "Siyahının sonuna əlavə olunur. Ən çox 30 kateqoriya.",
+        "operationId" : "createCategory",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CategoryRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Kateqoriya yaratmaq",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/categories/order" : {
+      "put" : {
+        "description" : "Bütün kateqoriyaların id-ləri yeni sıra ilə, hər biri bir dəfə.",
+        "operationId" : "reorderCategories",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kateqoriyaların sırası",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/categories/{categoryId}" : {
+      "delete" : {
+        "description" : "Yalnız boş kateqoriya: içində məhsul varsa 409 `CATALOG_CATEGORY_NOT_EMPTY`.",
+        "operationId" : "deleteCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kateqoriyanı silmək",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      },
+      "put" : {
+        "description" : "`active = false` — müştəriyə göstərilmir (silmədən).",
+        "operationId" : "updateCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CategoryRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kateqoriyanı dəyişmək",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/categories/{categoryId}/order" : {
+      "put" : {
+        "description" : "Həmin kateqoriyanın bütün məhsullarının id-ləri yeni sıra ilə.",
+        "operationId" : "reorderItems",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "categoryId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Kateqoriyadakı məhsulların sırası",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/items" : {
+      "post" : {
+        "description" : "Kateqoriyanın sonuna əlavə olunur. Ən çox 300 məhsul.",
+        "operationId" : "createItem",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Məhsul və ya xidmət yaratmaq",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/items/{itemId}" : {
+      "delete" : {
+        "operationId" : "deleteItem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulu silmək",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      },
+      "put" : {
+        "description" : "Başqa kateqoriyaya köçürülən məhsul həmin kateqoriyanın sonuna düşür.",
+        "operationId" : "updateItem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulu dəyişmək",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/items/{itemId}/image" : {
+      "delete" : {
+        "operationId" : "removeImage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulun şəklini silmək",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      },
+      "put" : {
+        "description" : "PNG və ya JPEG, 2 MB-a qədər, qısa tərəfi ən az 200 piksel; mərkəzdən kvadrat kəsilir, 640 piksələ kiçildilir və PNG kimi saxlanılır (EXIF silinir). Uyğun deyilsə `CATALOG_IMAGE_INVALID`.",
+        "operationId" : "uploadImage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulun şəkli",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/settings" : {
+      "put" : {
+        "description" : "`enabled = false` — müştəriyə göstərilmir (məlumat qalır). `title` — müştəriyə görünən ad: MENU (menyu), SERVICES (xidmətlər), PRICES (qiymətlər).",
+        "operationId" : "settings_4",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Parametrlər",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
@@ -1280,7 +1661,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_3",
+        "operationId" : "get_4",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -4488,7 +4869,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}" : {
       "get" : {
-        "operationId" : "get_2",
+        "operationId" : "get_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -5401,6 +5782,65 @@
         "tags" : [ "Müştəri: bonus qaydaları" ]
       }
     },
+    "/api/v1/public/catalog" : {
+      "get" : {
+        "description" : "Əlavə açıq deyilsə və ya bölmə söndürülübsə `enabled = false` və boş siyahı. Gizlədilmiş və boş kateqoriyalar göstərilmir; \"hazırda yoxdur\" məhsullar `available = false` ilə qaytarılır. `branchId` verilibsə — bütün filiallar üçün olanlar və həmin filialınkılar.",
+        "operationId" : "get_2",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "branchId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CatalogView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Menyu və ya xidmətlər (giriş tələb etmir)",
+        "tags" : [ "İctimai: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/public/catalog/items/{itemId}/image" : {
+      "get" : {
+        "description" : "Ünvan versiyalıdır (`imageUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Şəkil yoxdursa 404.",
+        "operationId" : "image",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulun şəkli (PNG)",
+        "tags" : [ "İctimai: menyu və xidmətlər" ]
+      }
+    },
     "/api/v1/public/company" : {
       "get" : {
         "description" : "Domenə görə müəyyən olunan kafenin adı, təsviri, aktiv filialları və mükafat qaydası. Autentifikasiya tələb etmir. Platforma domenində 404 qaytarır.",
@@ -6266,6 +6706,56 @@
           "totalStamps" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "CatalogView" : {
+        "type" : "object",
+        "properties" : {
+          "categories" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CategoryView"
+            }
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CategoryRequest" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "CategoryView" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemView"
+            }
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
           }
         }
       },
@@ -7226,6 +7716,80 @@
         },
         "required" : [ "email", "language", "role" ]
       },
+      "ItemRequest" : {
+        "type" : "object",
+        "properties" : {
+          "available" : {
+            "type" : "boolean",
+            "description" : "false — \"hazırda yoxdur\" (müştəriyə solğun göstərilir)"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Yalnız bu filialda; null — bütün filiallarda"
+          },
+          "categoryId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "durationMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Xidmətin müddəti, dəqiqə (istəyə bağlı)",
+            "maximum" : 1440,
+            "minimum" : 1
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "price" : {
+            "type" : "number",
+            "description" : "AZN; null — qiymət göstərilmir",
+            "maximum" : 100000,
+            "minimum" : 0
+          }
+        },
+        "required" : [ "categoryId", "name" ]
+      },
+      "ItemView" : {
+        "type" : "object",
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "categoryId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "description" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "durationMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "imageUrl" : {
+            "type" : "string"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "price" : {
+            "type" : "number"
+          }
+        }
+      },
       "Keys" : {
         "type" : "object",
         "properties" : {
@@ -7441,6 +8005,21 @@
           }
         },
         "required" : [ "status" ]
+      },
+      "OrderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            },
+            "maxItems" : 300,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "ids" ]
       },
       "OtpChallengeResponse" : {
         "type" : "object",
@@ -9215,6 +9794,20 @@
             "type" : "string"
           }
         }
+      },
+      "SettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "MENU, SERVICES və ya PRICES",
+            "pattern" : "MENU|SERVICES|PRICES"
+          }
+        },
+        "required" : [ "enabled", "title" ]
       },
       "SmsLimitRequest" : {
         "type" : "object",
