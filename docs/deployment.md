@@ -94,12 +94,13 @@ Sonra https://platform.sizinbrend.az/admin ünvanına daxil olun. 2FA-nı **Hesa
 
 ## 7. HTTPS sertifikatları
 
-`certbot` konteyneri saatda bir dəfə bunları edir:
-1. backend-dən domen siyahısını alır (daxili endpoint, `APP_INTERNAL_TOKEN` ilə);
-2. sertifikatı olmayan domen üçün Let's Encrypt sertifikatı alır;
-3. vaxtı yaxınlaşanları yeniləyir.
+`certbot` konteyneri hər 30 saniyədə backend-dən domen siyahısını alır (daxili endpoint, `APP_INTERNAL_TOKEN` ilə) və:
+1. sertifikatı olmayan yeni domen üçün Let's Encrypt sertifikatı alır — domen təxminən **1 dəqiqə ərzində** HTTPS ilə açılır, restart lazım deyil;
+2. alınmayan sertifikatı (məs. DNS hələ yönəlməyib) 10 dəqiqədən bir yenidən sınayır (Let's Encrypt limitinə düşməmək üçün);
+3. paneldən silinmiş domenin sertifikatını silir — köhnə domen dərhal bağlanır, serverdə əl ilə heç nə etmək lazım deyil;
+4. saatda bir dəfə vaxtı yaxınlaşan sertifikatları yeniləyir.
 
-nginx sertifikatları 10 dəqiqədən bir yenidən oxuyur. Nəticədə yeni şirkət domeni təxminən **1 saat ərzində** HTTPS ilə açılır. Sertifikat alınana qədər bu domenə TLS bağlantısı qurulmur (fail closed).
+Backend cavab vermirsə, heç bir sertifikat silinmir. Sertifikat alınana qədər domenə TLS bağlantısı qurulmur (fail closed). Müddətlər `CERTBOT_POLL_SECONDS`, `CERTBOT_RETRY_SECONDS`, `CERTBOT_INTERVAL_SECONDS` ilə dəyişdirilə bilər.
 
 Yoxlama:
 
