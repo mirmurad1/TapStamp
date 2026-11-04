@@ -30,6 +30,9 @@ public interface TenantRegistryMapper {
 
     void updateStatus(UUID id, TenantStatus status, String error);
 
+    /** Şirkət adminində ad dəyişəndə platforma panelində də yeni ad görünsün. */
+    void updateDisplayName(UUID id, az.tapstamp.shared.i18n.LocalizedText name);
+
     // --- Domenlər ---
 
     Optional<String> findPrimaryHost(UUID tenantId);

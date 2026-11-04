@@ -22,6 +22,9 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.tenancy.TenantContext;
+import az.tapstamp.tenancy.registry.TenantDirectory;
+import az.tapstamp.tenancy.repository.TenantRegistryMapper;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
@@ -54,8 +57,13 @@ public class CompanyAdminService {
     private final AuditLogger audit;
     private final Clock clock;
     private final PlanService plans;
+    private final TenantRegistryMapper registry;
+    private final TenantDirectory directory;
 
-    public CompanyAdminService(CompanyMapper companies, AuditLogger audit, Clock clock, PlanService plans) {
+    public CompanyAdminService(CompanyMapper companies, AuditLogger audit, Clock clock, PlanService plans,
+                               TenantRegistryMapper registry, TenantDirectory directory) {
+        this.registry = registry;
+        this.directory = directory;
         this.companies = companies;
         this.audit = audit;
         this.clock = clock;
@@ -84,6 +92,11 @@ public class CompanyAdminService {
         companies.updateCompany(new Company(trim(company.name()), trim(company.description()), company.timezone(),
                 company.defaultLanguage(), company.brandColor().toUpperCase(java.util.Locale.ROOT),
                 company.smsSenderName().strip()), clock.instant());
+        // Platforma reyestrindəki ad da yenilənir (platforma paneli şirkəti bu adla göstərir)
+        TenantContext.current().ifPresent(tenant -> {
+            registry.updateDisplayName(tenant.id(), trim(company.name()));
+            directory.evictCaches();
+        });
         audit.tenant("COMPANY_PROFILE_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "company", null,
                 Map.of("timezone", company.timezone(), "defaultLanguage", company.defaultLanguage(),
                         "brandColor", company.brandColor()));

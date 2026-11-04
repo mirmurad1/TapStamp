@@ -21,6 +21,9 @@ import org.springframework.test.web.servlet.ResultActions;
 /** Şirkətin məzmunu (3 dil), filiallar, iş saatları və filial üzrə qaydanın override-ı. */
 class CompanySettingsIT extends TapIntegrationTest {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private az.tapstamp.tenancy.repository.TenantRegistryMapper registry;
+
     @Test
     void ownerEditsCompanyContentAndCustomersSeeItImmediately() throws Exception {
         // Beta şirkəti: digər testlərin alpha məlumatına təsir etməmək üçün; sonda bərpa olunur
@@ -51,6 +54,10 @@ class CompanySettingsIT extends TapIntegrationTest {
                     }))
                     .andExpect(jsonPath("$.name.en").value("Moyka Plus"))
                     .andExpect(jsonPath("$.brandColor").value("#0EA5E9"));
+            // Platforma panelində də yeni ad görünür
+            UUID tenantId = directory.findByHost(host).orElseThrow().id();
+            org.assertj.core.api.Assertions.assertThat(registry.findById(tenantId).orElseThrow().displayName().az())
+                    .isEqualTo("Moyka Plus");
 
             owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Mars/Olympus",
                     "defaultLanguage", "az", "brandColor", "#000000")).andExpect(status().isBadRequest());

@@ -64,6 +64,12 @@
         VALUES (#{id}, #{tenantId}, #{hostname}, false, 'PENDING', #{now})
     </insert>
 
+    <update id="updateDisplayName">
+        UPDATE tenants
+        SET display_name = CAST(#{name} AS jsonb), updated_at = now(), version = version + 1
+        WHERE id = #{id} AND display_name &lt;&gt; CAST(#{name} AS jsonb)
+    </update>
+
     <update id="clearPrimary">
         UPDATE tenant_domains SET is_primary = false WHERE tenant_id = #{tenantId} AND is_primary
     </update>
