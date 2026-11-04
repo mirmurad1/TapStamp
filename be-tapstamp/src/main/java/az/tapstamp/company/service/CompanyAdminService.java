@@ -78,7 +78,7 @@ public class CompanyAdminService {
         if (!List.of("az", "en", "ru").contains(company.defaultLanguage())
                 || company.brandColor() == null || !company.brandColor().matches("^#[0-9A-Fa-f]{6}$")
                 || company.smsSenderName() == null
-                || !company.smsSenderName().strip().matches("^[A-Za-z0-9 ]{1,11}$")) {
+                || !company.smsSenderName().strip().matches("^[A-Za-z0-9 ]{1,30}$")) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
         companies.updateCompany(new Company(trim(company.name()), trim(company.description()), company.timezone(),

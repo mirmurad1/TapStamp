@@ -63,6 +63,13 @@ class CompanySettingsIT extends TapIntegrationTest {
                     "defaultLanguage", "az", "brandColor", "#000000")).andExpect(status().isBadRequest());
             owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
                     "defaultLanguage", "az", "brandColor", "#000000", "smsSenderName", "  ")).andExpect(status().isBadRequest());
+            // Uzun şirkət adları üçün 30 simvola qədər (bazanın CHECK-i də buraxır), 31 — yox
+            owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
+                    "defaultLanguage", "az", "brandColor", "#000000", "smsSenderName", "42 Coffee Roasters Baku Center"))
+                    .andExpect(status().isOk());
+            owner.put("/settings/company", Map.of("name", Map.of("az", "X"), "timezone", "Asia/Baku",
+                    "defaultLanguage", "az", "brandColor", "#000000", "smsSenderName", "42 Coffee Roasters Baku Centers"))
+                    .andExpect(status().isBadRequest());
         } finally {
             owner.put("/settings/company", original).andExpect(status().isOk());
         }

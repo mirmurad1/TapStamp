@@ -571,7 +571,7 @@
       "brandColor": "Brand colour",
       "brandColorHint": "Main colour of the customer app and stamp icons.",
       "smsSender": "Name shown in SMS",
-      "smsSenderHint": "Required. This name appears in the code message sent to customers. Latin letters and digits, up to 11 characters. The sender name is TrendStamp for all companies.",
+      "smsSenderHint": "Required. This name appears in the code message sent to customers. Latin letters and digits, up to 30 characters. The sender name is TrendStamp for all companies.",
       "logo": {
         "title": "Logo",
         "hint": "Shown at the top of the customer app, next to the company name. If none is uploaded, a default icon is shown.",

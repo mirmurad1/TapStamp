@@ -247,7 +247,7 @@ function CompanyForm({ initial }: { initial: CompanyContent }) {
         </Field>
         <div className="flex flex-col gap-2">
           <Field id="company-sms" label={t('admin:settings.company.smsSender')} hint={t('admin:settings.company.smsSenderHint')}>
-            <Input value={smsSender} maxLength={11} required onChange={(event) => setSmsSender(event.target.value)} />
+            <Input value={smsSender} maxLength={30} required onChange={(event) => setSmsSender(event.target.value)} />
           </Field>
           <p className="text-sm">
             {t('admin:settings.company.smsPreview')}{' '}
