@@ -30,6 +30,7 @@ import javax.smartcardio.TerminalFactory;
  *
  * <pre>
  *   java ProgramTag.java --uid                      # çipin UID-ini oxuyur (paneldə qeydiyyat üçün)
+ *   java ProgramTag.java --info                     # kartın növü: NTAG 424 DNA-dırmı (yanlış kart alınıbsa)
  *   java ProgramTag.java paket.json                 # yeni (zavod) çip: açarlar sıfırdır
  *   java ProgramTag.java yeni.json --old kohne.json # açarın yenilənməsi (rotasiya): çipdə köhnə paketin açarları var
  *   java ProgramTag.java --self-test                # kriptoqrafiyanı NXP-nin rəsmi test vektorları ilə yoxlayır
@@ -78,8 +79,12 @@ public class ProgramTag {
             }
             return;
         }
+        if (args.length == 1 && args[0].equals("--info")) {
+            info();
+            return;
+        }
         if (args.length != 1 && !(args.length == 3 && args[1].equals("--old"))) {
-            System.err.println("İstifadə: java ProgramTag.java --uid | paket.json [--old kohne-paket.json] | --self-test");
+            System.err.println("İstifadə: java ProgramTag.java --uid | --info | paket.json [--old kohne-paket.json] | --self-test");
             System.exit(2);
         }
         Map<String, String> pkg = readJson(Path.of(args[0]));
@@ -343,6 +348,64 @@ public class ProgramTag {
     }
 
     // ---------------------------------------------------------------- köməkçilər
+
+    /**
+     * Kartın növünü göstərir: UID, oxuyucunun ATR-dən təyin etdiyi növ (PC/SC "card name" — MIFARE Classic,
+     * Ultralight/NTAG 21x və s.) və NTAG 424 DNA tətbiqinin seçilib-seçilmədiyi. Yanlış kart alınıbsa, bundan bilinir.
+     */
+    private static void info() throws CardException {
+        CardTerminal terminal = terminal();
+        System.out.println("Çipi oxuyucuya qoyun…");
+        if (!terminal.waitForCardPresent(60_000)) {
+            fail("60 saniyə ərzində çip tapılmadı");
+        }
+        Card card = terminal.connect("*");
+        try {
+            CardChannel channel = card.getBasicChannel();
+            byte[] atr = card.getATR().getBytes();
+            ResponseAPDU uid = channel.transmit(new CommandAPDU(0xFF, 0xCA, 0x00, 0x00, 256));
+            System.out.println("UID: " + (uid.getSW() == 0x9000 ? HEX.formatHex(uid.getData()) : "oxunmadı"));
+            System.out.println("ATR: " + HEX.formatHex(atr));
+            System.out.println("Növ (oxuyucuya görə): " + cardName(atr));
+            // MIFARE Classic kimi kartlar bu əmri tanımır — oxuyucu əlaqəni kəsir; bu da "NTAG 424 deyil" deməkdir
+            String select;
+            try {
+                ResponseAPDU response = channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x0C, APP_DF_NAME, 256));
+                select = response.getSW() == 0x9000 ? "VAR — bu kart proqramlaşdırıla bilər"
+                        : String.format("YOXDUR (SW=%04X) — bu kart NTAG 424 DNA deyil", response.getSW());
+            } catch (CardException e) {
+                select = "YOXDUR (kart bu əmri tanımır) — bu kart NTAG 424 DNA deyil";
+            }
+            System.out.println("NTAG 424 DNA tətbiqi: " + select);
+            if (uid.getSW() == 0x9000 && uid.getData().length == 4) {
+                System.out.println("Qeyd: 4 baytlıq UID. NTAG 424 DNA-nın UID-i 7 baytdır (04 ilə başlayır); "
+                        + "08 ilə başlayan 4 baytlıq UID — təsadüfi UID rejimidir.");
+            }
+        } finally {
+            try {
+                card.disconnect(false);
+            } catch (CardException ignored) {
+                // Əlaqə artıq kəsilib (kart əmri tanımadı)
+            }
+        }
+    }
+
+    /** PC/SC 2.01 ATR-indəki "card name" (ACR1252U kimi oxuyucular ISO 14443-3 kartları üçün yazır). */
+    private static String cardName(byte[] atr) {
+        // 3B 8F 80 01 80 4F 0C A0 00 00 03 06 <standart> <ad: 2 bayt> ...
+        if (atr.length >= 15 && (atr[4] & 0xFF) == 0x80 && (atr[5] & 0xFF) == 0x4F && (atr[7] & 0xFF) == 0xA0) {
+            int name = ((atr[13] & 0xFF) << 8) | (atr[14] & 0xFF);
+            return switch (name) {
+                case 0x0001 -> "MIFARE Classic 1K (NTAG 424 deyil)";
+                case 0x0002 -> "MIFARE Classic 4K (NTAG 424 deyil)";
+                case 0x0003 -> "MIFARE Ultralight / NTAG 21x (NTAG 424 deyil)";
+                case 0x0026 -> "MIFARE Mini (NTAG 424 deyil)";
+                case 0x003A -> "MIFARE Ultralight C (NTAG 424 deyil)";
+                default -> String.format("ISO 14443-3 kart, kod %04X (NTAG 424 deyil)", name);
+            };
+        }
+        return "ISO 14443-4 kart (NTAG 424 DNA, DESFire, bank kartı və s. — aşağıdakı yoxlamaya baxın)";
+    }
 
     private static void selectApplication(CardChannel channel) throws CardException {
         check(channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x0C, APP_DF_NAME, 256)), 0x9000);

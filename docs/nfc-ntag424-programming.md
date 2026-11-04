@@ -18,6 +18,12 @@ Bu təlimat admin panelindən alınan **provisioning paketi** (çipi proqramlaş
    ```
 3. Etiketi (məs. "Piştaxta 1") və filialı seçin.
 
+NTAG 424 DNA-nın UID-i həmişə **7 baytdır və `04` ilə başlayır** (məs. `04333782782390`). UID 4 baytdırsa (məs. `6EE53B7C`), çox güman ki, kart NTAG 424 deyil. Yoxlamaq üçün:
+```
+java tools/nfc/ProgramTag.java --info
+```
+Alət oxuyucunun bildirdiyi növü (məs. "MIFARE Classic 1K") və NTAG 424 DNA tətbiqinin olub-olmadığını göstərir.
+
 Server 3 təsadüfi AES-128 açarı yaradır və onları şifrəli saxlayır. Açarların statusu **PENDING**-dir:
 
 | Açar | Təyinatı |
