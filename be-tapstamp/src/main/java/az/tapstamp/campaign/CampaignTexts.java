@@ -8,10 +8,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * Kampaniya mətni: müştəri SMS-in hansı şirkətdən gəldiyini bilsin deyə əvvəlinə şirkətin "SMS-də görünən adı" əlavə
  * olunur ({@code "Kafe: <mətn>"}) — göndərən adı bütün şirkətlər üçün eynidir (TrendStamp). Fərdi müraciət seçiləndə
- * adın ardınca {@code "Hörmətli <ad>, "} (adı yoxdursa {@code "Hörmətli istifadəçi, "}) gəlir.
+ * adın ardınca {@code "Dəyərli <ad>, "} (adı yoxdursa {@code "Dəyərli istifadəçi, "}) gəlir.
  *
- * <p>Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) mesajı UCS-2-yə keçirir: bir SMS 160 yox, 70 simvol tutur ("Hörmətli"
- * sözünün özündə də ö var). Önizləmə mətnin latın hərfləri ilə variantını və onun SMS sayını da göstərir.
+ * <p>Azərbaycan hərfləri (ə, ş, ğ, ı, ç, ö, ü) mesajı UCS-2-yə keçirir: bir SMS 160 yox, 70 simvol tutur ("Dəyərli"
+ * sözünün özündə də ə var). Önizləmə mətnin latın hərfləri ilə variantını və onun SMS sayını da göstərir.
  */
 public final class CampaignTexts {
 
@@ -32,7 +32,7 @@ public final class CampaignTexts {
     }
 
     static String greeting(@Nullable String customerName) {
-        return "Hörmətli " + (customerName == null || customerName.isBlank() ? "istifadəçi" : customerName.strip());
+        return "Dəyərli " + (customerName == null || customerName.isBlank() ? "istifadəçi" : customerName.strip());
     }
 
     /** Göndəriləcək mesaj: {@code latin} olanda bütün mətn (müraciət və ad daxil) latın hərfləri ilə. */

@@ -61,7 +61,7 @@ public class AdminCampaignController {
             @NotNull Audience audience,
             @Schema(description = "Yalnız INACTIVE: neçə gündür gəlməyənlər (7–365)") @Min(7) @Max(365) Integer inactiveDays,
             @Schema(description = "Yalnız bu filialda möhürü olan müştərilər; boşdursa hamısı") UUID branchId,
-            @Schema(description = "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")")
+            @Schema(description = "Mətn \"Dəyərli <ad>,\" ilə başlasın (adı yoxdursa \"Dəyərli istifadəçi,\")")
             Boolean personalized,
             @Schema(description = "Bütün mesaj latın hərfləri ilə göndərilsin (ə→e, ş→s, ...): 160 simvol/SMS")
             Boolean latin,

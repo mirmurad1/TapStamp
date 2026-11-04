@@ -6573,7 +6573,7 @@
           },
           "personalized" : {
             "type" : "boolean",
-            "description" : "Mətn \"Hörmətli <ad>,\" ilə başlasın (adı yoxdursa \"Hörmətli istifadəçi,\")"
+            "description" : "Mətn \"Dəyərli <ad>,\" ilə başlasın (adı yoxdursa \"Dəyərli istifadəçi,\")"
           },
           "stampCount" : {
             "type" : "integer",

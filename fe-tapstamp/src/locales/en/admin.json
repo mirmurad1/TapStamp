@@ -858,7 +858,7 @@
       "submit": "Send for approval",
       "sent": "The campaign was sent for platform approval. It will be approved and sent after payment.",
       "personalized": "Start with a greeting",
-      "personalizedHint": "Each SMS starts with \"Hörmətli <customer name>,\"; customers without a name get \"Hörmətli istifadəçi,\"."
+      "personalizedHint": "Each SMS starts with \"Dəyərli <customer name>,\"; customers without a name get \"Dəyərli istifadəçi,\"."
     },
     "preview": {
       "title": "Preview",
@@ -881,7 +881,7 @@
       "cancelConfirm": "Delete this campaign? It will stay in the history as \"Cancelled\".",
       "rejectReason": "Rejection reason: {{reason}}",
       "personalized": "Personal greeting",
-      "greetingPrefix": "Hörmətli <name>,",
+      "greetingPrefix": "Dəyərli <name>,",
       "latin": "Latin letters",
       "edit": "Edit",
       "updated": "Edited: {{time}}",

@@ -48,7 +48,7 @@ public class CampaignService {
 
     /**
      * Kampaniyanın parametrləri. {@code inactiveDays} yalnız INACTIVE üçün (7–365); {@code personalized} — mətn
-     * "Hörmətli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Hörmətli istifadəçi,"); {@code stampCount} — yalnız möhür
+     * "Dəyərli &lt;ad&gt;," ilə başlayır (adı yoxdursa "Dəyərli istifadəçi,"); {@code stampCount} — yalnız möhür
      * kampaniyası (1 … hədd − 1).
      */
     public record Draft(Type type, @Nullable Integer stampCount, String text, Audience audience,
@@ -63,7 +63,7 @@ public class CampaignService {
     /**
      * Önizləmə ({@code latin} — mesaj latın hərfləri ilə gedəcək, saylar da buna görə): {@code fullText} — nümunə
      * (fərdi müraciətdə auditoriyadan adı olan müştəri ilə), {@code template} — ad yerinə {@link #NAME_TOKEN} olan
-     * şablon (müştəri panelində "Hörmətli &lt;müştərinin adı&gt;" kimi göstərilir), hər müştəriyə ən az/ən çox SMS və
+     * şablon (müştəri panelində "Dəyərli &lt;müştərinin adı&gt;" kimi göstərilir), hər müştəriyə ən az/ən çox SMS və
      * cəmi (hər müştərinin adı ilə hesablanır); həmçinin latın hərfləri ilə variant (ASCII olmayan simvol bir SMS-i
      * 160 yox, 70 simvol edir).
      */

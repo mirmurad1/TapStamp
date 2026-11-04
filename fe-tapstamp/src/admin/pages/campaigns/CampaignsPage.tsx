@@ -148,7 +148,7 @@ function NewCampaignCard({ type, editing, onDone }: { type: CampaignType; editin
   const data = text.trim() ? preview.data : undefined;
   // Möhür sayı: 1 … "hədd − 1" (müştəri hədiyyə üçün yenə ən azı bir dəfə gəlməlidir)
   const maxStamps = Math.max(preview.data?.maxStamps ?? stampCount, 1);
-  // Bildiriş yalnız istifadəçinin öz mətnindən asılıdır ("Hörmətli" müraciəti nəzərə alınmır)
+  // Bildiriş yalnız istifadəçinin öz mətnindən asılıdır ("Dəyərli" müraciəti nəzərə alınmır)
   const nonLatin = !isAscii(text);
   // Latın variantı yalnız mətn həqiqətən latına çevrilə bilirsə təklif olunur (məs. kiril hərfləri çevrilmir)
   const latinizable = nonLatin && isAscii(toLatin(text));

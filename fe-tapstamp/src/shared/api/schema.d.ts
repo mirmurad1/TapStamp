@@ -3654,7 +3654,7 @@ export interface components {
             inactiveDays?: number;
             /** @description Bütün mesaj latın hərfləri ilə göndərilsin (ə→e, ş→s, ...): 160 simvol/SMS */
             latin?: boolean;
-            /** @description Mətn "Hörmətli <ad>," ilə başlasın (adı yoxdursa "Hörmətli istifadəçi,") */
+            /** @description Mətn "Dəyərli <ad>," ilə başlasın (adı yoxdursa "Dəyərli istifadəçi,") */
             personalized?: boolean;
             /**
              * Format: int32

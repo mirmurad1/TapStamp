@@ -13,19 +13,19 @@ class CampaignTextsTest {
     @Test
     void composesCompanyNameAndOptionalGreeting() {
         assertThat(CampaignTexts.compose("Kafe", " Endirim var! ", false, "Aysel")).isEqualTo("Kafe: Endirim var!");
-        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, " Aysel ")).isEqualTo("Kafe: Hörmətli Aysel, Endirim var!");
-        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, null)).isEqualTo("Kafe: Hörmətli istifadəçi, Endirim var!");
-        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, "  ")).isEqualTo("Kafe: Hörmətli istifadəçi, Endirim var!");
+        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, " Aysel ")).isEqualTo("Kafe: Dəyərli Aysel, Endirim var!");
+        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, null)).isEqualTo("Kafe: Dəyərli istifadəçi, Endirim var!");
+        assertThat(CampaignTexts.compose("Kafe", "Endirim var!", true, "  ")).isEqualTo("Kafe: Dəyərli istifadəçi, Endirim var!");
     }
 
     @Test
     void latinVersionReplacesAzerbaijaniLetters() {
-        assertThat(CampaignTexts.latin("Hörmətli Gülşən, ÇƏĞIŞ ı")).isEqualTo("Hormetli Gulsen, CEGIS i");
+        assertThat(CampaignTexts.latin("Dəyərli Gülşən, ÇƏĞIŞ ı")).isEqualTo("Deyerli Gulsen, CEGIS i");
     }
 
     @Test
     void personalizedTotalsAreCountedPerRecipientName() {
-        // "Hörmətli" ö-dür: hər mesaj UCS-2 (70 simvol); uzun ad mesajı 2 SMS edir
+        // "Dəyərli"-də ə var: hər mesaj UCS-2 (70 simvol); uzun ad mesajı 2 SMS edir
         String text = "x".repeat(40);
         List<String> names = Arrays.asList("Aysel", null, "Abdulrahmanzadə Gülnarə Məmmədəli qızı");
         CampaignTexts.Totals totals = CampaignTexts.totals("Kafe", text, true, names, false);

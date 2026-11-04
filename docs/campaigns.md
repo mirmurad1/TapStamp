@@ -8,15 +8,15 @@ göndərir. Qərar: `architecture-plan.md` §18 #49.
 1. **Sahib** — admin panel → **Kampaniyalar** → **Yeni kampaniya**:
    - mətn (1000 simvola qədər); əvvəlinə şirkətin "SMS-də görünən adı" avtomatik əlavə olunur: `Kafe: <mətn>`
      (göndərən adı bütün şirkətlər üçün `TrendStamp`-dır — müştəri SMS-in kimdən olduğunu adla bilir);
-   - **"Müraciətlə başla"** (istəyə bağlı): hər SMS `Kafe: Hörmətli <ad>, <mətn>` olur, adı olmayan müştəriyə
-     `Kafe: Hörmətli istifadəçi, <mətn>`. "Hörmətli" sözündə `ö` olduğu üçün mesaj UCS-2-yə keçir (70 simvol/SMS);
+   - **"Müraciətlə başla"** (istəyə bağlı): hər SMS `Kafe: Dəyərli <ad>, <mətn>` olur, adı olmayan müştəriyə
+     `Kafe: Dəyərli istifadəçi, <mətn>`. "Dəyərli" sözündə `ə` olduğu üçün mesaj UCS-2-yə keçir (70 simvol/SMS);
      SMS sayı hər müştərinin öz adı ilə hesablanır (önizləmədə "hər müştəriyə 1–2 SMS" kimi aralıq görünə bilər),
      cəmi kampaniya yaradılanda alıcıların adları ilə dəqiqləşir. Önizləmədə bir mətn göstərilir:
-     `Kafe: Hörmətli <müştərinin adı>, <mətn>`;
-   - **Latın olmayan simvollar** — bildiriş yalnız sahibin öz mətnində ASCII olmayan simvol olanda çıxır ("Hörmətli"
+     `Kafe: Dəyərli <müştərinin adı>, <mətn>`;
+   - **Latın olmayan simvollar** — bildiriş yalnız sahibin öz mətnində ASCII olmayan simvol olanda çıxır ("Dəyərli"
      müraciəti nəzərə alınmır): "bir SMS-ə 160 yox, 70 simvol sığır". Mətn latına çevrilə bilirsə (Azərbaycan
      hərfləri), latın variantı, onun SMS sayı və **"Latın hərfləri ilə göndər"** düyməsi də göstərilir; çevrilə
-     bilmirsə (məs. kiril), yalnız bildiriş. Seçiləndə bütün mesaj — müraciət (`Hormetli`), müştərinin adı və mətn —
+     bilmirsə (məs. kiril), yalnız bildiriş. Seçiləndə bütün mesaj — müraciət (`Deyerli`), müştərinin adı və mətn —
      göndəriləndə latına çevrilir (160 simvol/SMS); "Yazıldığı kimi göndər" ilə geri qaytarılır;
    - auditoriya: bütün müştərilər / uzun müddət gəlməyənlər (30, 60, 90 gün) / hədiyyəyə 1–2 möhür qalanlar /
      istifadə olunmamış hədiyyə kartı olanlar; istəyə bağlı filial (həmin filialda möhürü olanlar);

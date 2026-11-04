@@ -121,22 +121,22 @@ class CampaignIT extends TapIntegrationTest {
         AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
         String text = "Bu hefte ikinci qehve hediyyedir!";
         Map<String, Object> request = Map.of("text", text, "audience", "ALL", "personalized", true);
-        // "Hörmətli" sözündə ö var: mesaj UCS-2 olur, latın variantı tövsiyə olunur
+        // "Dəyərli" sözündə ə var: mesaj UCS-2 olur, latın variantı tövsiyə olunur
         owner.post("/campaigns/preview", request).andExpect(status().isOk())
                 .andExpect(jsonPath("$.personalized").value(true))
-                .andExpect(jsonPath("$.fullText").value(org.hamcrest.Matchers.matchesPattern("Alpha Kafe: Hörmətli .+, " + text)))
-                .andExpect(jsonPath("$.template").value("Alpha Kafe: Hörmətli {name}, " + text))
+                .andExpect(jsonPath("$.fullText").value(org.hamcrest.Matchers.matchesPattern("Alpha Kafe: Dəyərli .+, " + text)))
+                .andExpect(jsonPath("$.template").value("Alpha Kafe: Dəyərli {name}, " + text))
                 .andExpect(jsonPath("$.encoding").value("UCS_2"))
-                .andExpect(jsonPath("$.latinText").value(org.hamcrest.Matchers.startsWith("Alpha Kafe: Hormetli ")));
+                .andExpect(jsonPath("$.latinText").value(org.hamcrest.Matchers.startsWith("Alpha Kafe: Deyerli ")));
 
         String id = json(owner.post("/campaigns", confirmed(request)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.personalized").value(true)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
         sendAll();
 
-        assertThat(sms.to(named)).anySatisfy(m -> assertThat(m.text()).isEqualTo("Alpha Kafe: Hörmətli Aysel, " + text));
+        assertThat(sms.to(named)).anySatisfy(m -> assertThat(m.text()).isEqualTo("Alpha Kafe: Dəyərli Aysel, " + text));
         assertThat(sms.to(unnamed)).anySatisfy(m -> assertThat(m.text())
-                .isEqualTo("Alpha Kafe: Hörmətli istifadəçi, " + text));
+                .isEqualTo("Alpha Kafe: Dəyərli istifadəçi, " + text));
     }
 
     @Test
@@ -149,13 +149,13 @@ class CampaignIT extends TapIntegrationTest {
         owner.post("/campaigns/preview", request).andExpect(status().isOk())
                 .andExpect(jsonPath("$.latin").value(true))
                 .andExpect(jsonPath("$.encoding").value("GSM_7"))
-                .andExpect(jsonPath("$.template").value("Alpha Kafe: Hormetli {name}, Senbe gunu endirim var!"));
+                .andExpect(jsonPath("$.template").value("Alpha Kafe: Deyerli {name}, Senbe gunu endirim var!"));
         String id = json(owner.post("/campaigns", confirmed(request)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.latin").value(true)), "$.id");
         signedInPlatformAdmin().post("/campaigns/" + alpha().id() + "/" + id + "/approve").andExpect(status().isOk());
         sendAll();
         assertThat(sms.to(phone)).anySatisfy(m -> assertThat(m.text())
-                .isEqualTo("Alpha Kafe: Hormetli Gulsen, Senbe gunu endirim var!"));
+                .isEqualTo("Alpha Kafe: Deyerli Gulsen, Senbe gunu endirim var!"));
     }
 
     @Test

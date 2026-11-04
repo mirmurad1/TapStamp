@@ -858,7 +858,7 @@
       "submit": "Təsdiqə göndər",
       "sent": "Kampaniya platformanın təsdiqinə göndərildi. Ödəniş alındıqdan sonra təsdiqlənəcək və göndəriləcək.",
       "personalized": "Müraciətlə başla",
-      "personalizedHint": "Hər SMS \"Hörmətli <müştərinin adı>,\" ilə başlayacaq; adı olmayan müştəriyə \"Hörmətli istifadəçi,\"."
+      "personalizedHint": "Hər SMS \"Dəyərli <müştərinin adı>,\" ilə başlayacaq; adı olmayan müştəriyə \"Dəyərli istifadəçi,\"."
     },
     "preview": {
       "title": "Önizləmə",
@@ -881,7 +881,7 @@
       "cancelConfirm": "Kampaniya silinsin? Tarixçədə \"Ləğv edilib\" kimi qalacaq.",
       "rejectReason": "Rədd səbəbi: {{reason}}",
       "personalized": "Fərdi müraciət",
-      "greetingPrefix": "Hörmətli <ad>,",
+      "greetingPrefix": "Dəyərli <ad>,",
       "latin": "Latın hərfləri",
       "edit": "Dəyiş",
       "updated": "Dəyişdirilib: {{time}}",
