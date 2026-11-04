@@ -5159,7 +5159,7 @@
         "tags" : [ "Platforma: paketlər" ]
       },
       "put" : {
-        "description" : "`TRIAL` — həmin paketin 14 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.",
+        "description" : "`TRIAL` — həmin paketin 30 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.",
         "operationId" : "update",
         "parameters" : [ {
           "in" : "path",
@@ -9026,7 +9026,7 @@
           },
           "plan" : {
             "type" : "string",
-            "description" : "Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)",
+            "description" : "Paket — şirkət onun 30 günlük sınağı ilə başlayır (standart PREMIUM)",
             "enum" : [ "BASIC", "STANDARD", "PREMIUM" ]
           },
           "primaryDomain" : {
@@ -10339,7 +10339,7 @@
           },
           "status" : {
             "type" : "string",
-            "description" : "TRIAL — 14 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub",
+            "description" : "TRIAL — 30 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub",
             "enum" : [ "TRIAL", "ACTIVE" ]
           }
         },

@@ -83,7 +83,7 @@ public class PlatformTenantService {
         return summary(tenant(tenantId));
     }
 
-    /** Yeni şirkət: ayrıca baza, DB rolları, miqrasiyalar; seçilmiş paketin 14 günlük sınağı. Step-up tələb edir. */
+    /** Yeni şirkət: ayrıca baza, DB rolları, miqrasiyalar; seçilmiş paketin 30 günlük sınağı. Step-up tələb edir. */
     public TenantSummary provision(AdminPrincipal principal, ProvisionTenantCommand command, Plan plan) {
         auth.requireStepUp(principal);
         if (!tenancy.provisioner().enabled()) {

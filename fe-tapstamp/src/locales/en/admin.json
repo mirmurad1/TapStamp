@@ -295,7 +295,7 @@
       "timezone": "Time zone",
       "submit": "Create company",
       "created": "Company created.",
-      "planHint": "The company starts with a 14-day free trial of the selected plan."
+      "planHint": "The company starts with a 30-day free trial of the selected plan."
     },
     "detail": {
       "back": "All companies",
@@ -447,14 +447,14 @@
     },
     "plan": {
       "title": "Plan",
-      "description": "Each plan’s 14-day free trial is given to a company only once. When the trial ends without a recorded payment, the company’s service is suspended.",
+      "description": "Each plan’s 30-day free trial is given to a company only once. When the trial ends without a recorded payment, the company’s service is suspended.",
       "current": "Current plan: {{plan}}",
       "until": "trial until {{date}}",
       "ended": "trial ended on {{date}}",
       "trialsUsed": "Trials used: {{list}}",
       "plan": "Plan",
       "status": "Status",
-      "trialOption": "14-day free trial",
+      "trialOption": "30-day free trial",
       "activeOption": "Paid (active)",
       "extraBranches": "Extra branches",
       "extraBranchesHint": "On top of the 5 branches included in Premium.",

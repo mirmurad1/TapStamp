@@ -165,7 +165,7 @@ public class PlanService {
         return new PlanView(subscription, subscription.expired(clock.instant()), subscriptions.trials(tenantId));
     }
 
-    /** Yeni şirkət seçilmiş paketin 14 günlük sınağı ilə başlayır. */
+    /** Yeni şirkət seçilmiş paketin 30 günlük sınağı ilə başlayır. */
     public void startTrial(UUID tenantId, Plan plan, @Nullable UUID by) {
         Instant now = clock.instant();
         Instant ends = now.plus(Duration.ofDays(Plan.TRIAL_DAYS));

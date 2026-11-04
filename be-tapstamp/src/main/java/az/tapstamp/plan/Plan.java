@@ -14,7 +14,7 @@ public enum Plan {
     PREMIUM(5, null, EnumSet.allOf(Feature.class));
 
     /** Sınaq müddəti (gün). */
-    public static final int TRIAL_DAYS = 14;
+    public static final int TRIAL_DAYS = 30;
 
     private final int includedBranches;
     private final Integer staffLimit;

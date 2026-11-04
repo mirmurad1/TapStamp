@@ -56,7 +56,7 @@ public class PlatformPlanController {
 
     public record TenantPlanRequest(
             @NotNull Plan plan,
-            @Schema(description = "TRIAL — 14 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub")
+            @Schema(description = "TRIAL — 30 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub")
             @NotNull Subscription.Status status,
             @Schema(description = "Yalnız Premium: paketə daxil olan 5 filialdan əlavə") @Min(0) @Max(100) int extraBranches) {
     }
@@ -93,7 +93,7 @@ public class PlatformPlanController {
 
     @PutMapping
     @Operation(summary = "Paketi dəyişmək", description = """
-            `TRIAL` — həmin paketin 14 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. \
+            `TRIAL` — həmin paketin 30 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. \
             `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.""")
     TenantPlanResponse update(@PathVariable UUID tenantId, @Valid @RequestBody TenantPlanRequest request,
                               @AuthenticationPrincipal AdminPrincipal principal) {

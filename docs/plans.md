@@ -53,7 +53,7 @@ olunmur), Premium parametrləri saxlanılır və yuxarı paketə qayıdanda yeni
 
 ## Sınaq müddəti
 
-- Platforma admini yeni şirkət yaradanda paketi seçir — şirkət onun **14 günlük pulsuz sınağı** ilə başlayır.
+- Platforma admini yeni şirkət yaradanda paketi seçir — şirkət onun **30 günlük pulsuz sınağı** ilə başlayır.
 - Hər paketin sınağı şirkətə **bir dəfə** verilir (sui-istifadənin qarşısı). Məs. Basic-in sınağından sonra
   Premium-un sınağı verilə bilər, Basic-inki isə yox — `PLAN_TRIAL_ALREADY_USED` (409).
 - Davam edən sınaqda eyni paket yenidən saxlananda müddət dəyişmir (məs. yalnız əlavə filiallar dəyişir).
@@ -85,7 +85,7 @@ Məlumat silinmir. Platforma ödənişi qeyd edən kimi (`ACTIVE`) xidmət bərp
 ## İnterfeys
 
 - **Platforma paneli:** şirkətlər siyahısında "Paket" sütunu (paket, sınaq/aktiv/sınaq bitib, sınağın sonu);
-  şirkətin səhifəsində "Paket" kartı — paket, vəziyyət (14 günlük sınaq / ödənişli), əlavə filiallar, istifadə
+  şirkətin səhifəsində "Paket" kartı — paket, vəziyyət (30 günlük sınaq / ödənişli), əlavə filiallar, istifadə
   olunmuş sınaqlar; yeni şirkət formasında paket seçimi.
 - **Şirkətin paneli:** Parametrlərdə "Paketiniz" kartı (sınağın bitmə tarixi, neçə gün qalıb, limitlər); menyuda
   paketdə olmayan bölmələrin yanında kilid; belə bölmə açılanda "Bu imkan Premium paketindədir" izahı;

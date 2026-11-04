@@ -57,11 +57,11 @@ class PlanIT extends TapIntegrationTest {
         admin.put(addons + "/UNKNOWN", Map.of("enabled", true)).andExpect(status().isBadRequest());
 
         // Sınaq bitəndə əlavələr də bağlanır (platforma panelində isə qalır)
-        clock.advance(Duration.ofDays(14));
+        clock.advance(Duration.ofDays(Plan.TRIAL_DAYS));
         plans.evictCaches();
         client().get("/api/v1/public/plan").andExpect(jsonPath("$.expired").value(true))
                 .andExpect(jsonPath("$.addons").isEmpty());
-        // 14 gün sonra platforma adminin sessiyası da bitib
+        // Sınaq bitəndə platforma adminin sessiyası da bitib
         admin = signedInPlatformAdmin();
         admin.get(addons).andExpect(jsonPath("$.addons[0]").value("CATALOG"));
 
@@ -95,7 +95,7 @@ class PlanIT extends TapIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         Instant ends = Instant.parse(JsonPath.read(body, "$.trialEndsAt"));
         // Baza vaxtı mikrosaniyəyə qədər saxlayır
-        assertThat(Duration.between(clock.instant(), ends)).isBetween(Duration.ofDays(14).minusSeconds(1), Duration.ofDays(14));
+        assertThat(Duration.between(clock.instant(), ends)).isBetween(Duration.ofDays(Plan.TRIAL_DAYS).minusSeconds(1), Duration.ofDays(Plan.TRIAL_DAYS));
 
         // Davam edən sınaqda eyni paket — müddət dəyişmir; başqa paketin sınağı ayrıca
         clock.advance(Duration.ofMinutes(5));
@@ -183,7 +183,7 @@ class PlanIT extends TapIntegrationTest {
         setPlan(admin, "PREMIUM", "TRIAL", 0);
         client().get("/api/v1/public/legal").andExpect(status().isOk());
 
-        clock.advance(Duration.ofDays(14));
+        clock.advance(Duration.ofDays(Plan.TRIAL_DAYS));
         plans.evictCaches();
         // Hər şey bağlıdır: işçinin girişi, müştəri API-si
         AdminClient.staff(mvc, HOST).login("someone@example.test", STAFF_PASSWORD)

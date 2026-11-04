@@ -2881,7 +2881,7 @@ export interface paths {
         get: operations["get"];
         /**
          * Paketi dəyişmək
-         * @description `TRIAL` — həmin paketin 14 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.
+         * @description `TRIAL` — həmin paketin 30 günlük sınağı; bu paketin sınağı artıq istifadə olunubsa `PLAN_TRIAL_ALREADY_USED`. `ACTIVE` — ödənişli (sınaq bitir). Əlavə filial yalnız Premium-da. Audit jurnalına yazılır.
          */
         put: operations["update"];
         post?: never;
@@ -4644,7 +4644,7 @@ export interface components {
             defaultLanguage: string;
             displayName: components["schemas"]["LocalizedText"];
             /**
-             * @description Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)
+             * @description Paket — şirkət onun 30 günlük sınağı ilə başlayır (standart PREMIUM)
              * @enum {string}
              */
             plan?: "BASIC" | "STANDARD" | "PREMIUM";
@@ -5216,7 +5216,7 @@ export interface components {
             /** @enum {string} */
             plan: "BASIC" | "STANDARD" | "PREMIUM";
             /**
-             * @description TRIAL — 14 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub
+             * @description TRIAL — 30 günlük sınaq (hər paket üçün bir dəfə), ACTIVE — ödəniş qeyd olunub
              * @enum {string}
              */
             status: "TRIAL" | "ACTIVE";

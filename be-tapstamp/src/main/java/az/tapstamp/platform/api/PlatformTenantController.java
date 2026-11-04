@@ -71,7 +71,7 @@ public class PlatformTenantController {
             @NotBlank @Size(max = 253) @Pattern(regexp = "^[a-z0-9-]+(\\.[a-z0-9-]+)+$") String primaryDomain,
             @NotBlank @Pattern(regexp = "az|en|ru") String defaultLanguage,
             @NotBlank @Size(max = 64) String timezone,
-            @Schema(description = "Paket — şirkət onun 14 günlük sınağı ilə başlayır (standart PREMIUM)") Plan plan) {
+            @Schema(description = "Paket — şirkət onun 30 günlük sınağı ilə başlayır (standart PREMIUM)") Plan plan) {
     }
 
     public record TenantStatusRequest(@NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status) {

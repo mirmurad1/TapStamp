@@ -295,7 +295,7 @@
       "timezone": "Saat qurşağı",
       "submit": "Şirkəti yarat",
       "created": "Şirkət yaradıldı.",
-      "planHint": "Şirkət seçilmiş paketin 14 günlük pulsuz sınağı ilə başlayır."
+      "planHint": "Şirkət seçilmiş paketin 30 günlük pulsuz sınağı ilə başlayır."
     },
     "detail": {
       "back": "Bütün şirkətlər",
@@ -447,14 +447,14 @@
     },
     "plan": {
       "title": "Paket",
-      "description": "Hər paketin 14 günlük pulsuz sınağı şirkətə yalnız bir dəfə verilir. Sınaq bitəndə ödəniş qeyd olunmayıbsa, şirkətin xidməti dayandırılır.",
+      "description": "Hər paketin 30 günlük pulsuz sınağı şirkətə yalnız bir dəfə verilir. Sınaq bitəndə ödəniş qeyd olunmayıbsa, şirkətin xidməti dayandırılır.",
       "current": "Cari paket: {{plan}}",
       "until": "sınaq {{date}} tarixinədək",
       "ended": "sınaq {{date}} tarixində bitib",
       "trialsUsed": "İstifadə olunmuş sınaqlar: {{list}}",
       "plan": "Paket",
       "status": "Vəziyyət",
-      "trialOption": "14 günlük pulsuz sınaq",
+      "trialOption": "30 günlük pulsuz sınaq",
       "activeOption": "Ödənişli (aktiv)",
       "extraBranches": "Əlavə filiallar",
       "extraBranchesHint": "Premium-a daxil olan 5 filialdan əlavə.",
