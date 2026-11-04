@@ -885,7 +885,8 @@
       "latin": "Latın hərfləri",
       "edit": "Dəyiş",
       "updated": "Dəyişdirilib: {{time}}",
-      "pausedNote": "Göndəriş SMS hesabındakı problemə görə dayandırılıb. Platforma problemi həll edib davam etdirəcək."
+      "pausedNote": "Göndəriş SMS hesabındakı problemə görə dayandırılıb. Platforma problemi həll edib davam etdirəcək.",
+      "greetingPrefixLatin": "Deyerli <ad>,"
     },
     "status": {
       "PENDING_APPROVAL": "Təsdiq gözləyir",

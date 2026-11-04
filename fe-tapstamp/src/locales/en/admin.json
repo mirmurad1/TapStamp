@@ -885,7 +885,8 @@
       "latin": "Latin letters",
       "edit": "Edit",
       "updated": "Edited: {{time}}",
-      "pausedNote": "Sending is paused because of an SMS account problem. The platform will resume it once fixed."
+      "pausedNote": "Sending is paused because of an SMS account problem. The platform will resume it once fixed.",
+      "greetingPrefixLatin": "Deyerli <name>,"
     },
     "status": {
       "PENDING_APPROVAL": "Awaiting approval",

@@ -97,7 +97,10 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
           <span className="text-muted-foreground">{campaign.createdAt ? formatDateTime(campaign.createdAt, lang) : null}</span>
         </div>
         <p className="whitespace-pre-wrap rounded-lg bg-muted p-3">
-          {campaign.personalized ? `${t('admin:campaigns.list.greetingPrefix')} ` : null}
+          {/* Müraciət müştəriyə gedən kimi: latın hərfləri ilə göndərilirsə "Deyerli" */}
+          {campaign.personalized
+            ? `${t(campaign.latin ? 'admin:campaigns.list.greetingPrefixLatin' : 'admin:campaigns.list.greetingPrefix')} `
+            : null}
           {campaign.text}
         </p>
         <p className="text-muted-foreground">
