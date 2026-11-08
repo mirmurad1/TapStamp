@@ -781,11 +781,13 @@
       "package": "Provisioning paketi",
       "rotate": "Açarı yenilə",
       "disable": "Deaktiv et",
-      "enable": "Aktivləşdir"
+      "enable": "Aktivləşdir",
+      "transfer": "Köçürmə paketi"
     },
     "confirm": {
       "disable": "\"{{label}}\" deaktiv edilsin? Bu çipə edilən bütün toxunuşlar dərhal rədd olunacaq.",
-      "rotate": "\"{{label}}\" üçün yeni açarlar yaradılsın? Çipi yeni açarlarla proqramlaşdırana qədər köhnə açar işləməyə davam edəcək."
+      "rotate": "\"{{label}}\" üçün yeni açarlar yaradılsın? Çipi yeni açarlarla proqramlaşdırana qədər köhnə açar işləməyə davam edəcək.",
+      "transfer": "\"{{label}}\" çipinin açarları göstərilsin? Bu, çipi başqa şirkətə vermək üçündür: açarları olan hər kəs çipi yenidən proqramlaşdıra bilər."
     },
     "register": {
       "open": "Çip əlavə et",
@@ -802,7 +804,9 @@
       "title": "Provisioning paketi: {{uid}} (v{{version}})",
       "description": "JSON faylını yükləyin və çipi NFC oxuyucusu ilə proqramlaşdırın: java tools/nfc/ProgramTag.java paket.json (bax: docs/nfc-ntag424-programming.md).",
       "once": "Açarlar yalnız indi göstərilir və bir daha göstərilməyəcək. Faylı təhlükəsiz yerdə saxlayın və proqramlaşdırmadan sonra silin.",
-      "download": "JSON yüklə"
+      "download": "JSON yüklə",
+      "transferDescription": "Çipdə hazırda yazılı olan açarlar. Yeni şirkətin paketini bununla birlikdə yazın: java tools/nfc/ProgramTag.java yeni.json --old bu-fayl.json",
+      "transferWarning": "Faylı yalnız proqramlaşdırma üçün saxlayın və işdən sonra silin."
     },
     "events": {
       "title": "\"{{label}}\" — toxunuş jurnalı",

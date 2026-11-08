@@ -781,11 +781,13 @@
       "package": "Provisioning package",
       "rotate": "Rotate keys",
       "disable": "Disable",
-      "enable": "Enable"
+      "enable": "Enable",
+      "transfer": "Transfer package"
     },
     "confirm": {
       "disable": "Disable \"{{label}}\"? All taps on this tag will be rejected immediately.",
-      "rotate": "Create new keys for \"{{label}}\"? The old key keeps working until the tag is reprogrammed with the new keys."
+      "rotate": "Create new keys for \"{{label}}\"? The old key keeps working until the tag is reprogrammed with the new keys.",
+      "transfer": "Show the keys of \"{{label}}\"? This is for handing the tag to another company: anyone with these keys can reprogram the tag."
     },
     "register": {
       "open": "Add tag",
@@ -802,7 +804,9 @@
       "title": "Provisioning package: {{uid}} (v{{version}})",
       "description": "Download the JSON file and program the tag with an NFC reader: java tools/nfc/ProgramTag.java package.json (see docs/nfc-ntag424-programming.md).",
       "once": "The keys are shown only now and will never be shown again. Keep the file safe and delete it after programming.",
-      "download": "Download JSON"
+      "download": "Download JSON",
+      "transferDescription": "The keys currently written on the tag. Program the new company's package together with it: java tools/nfc/ProgramTag.java new.json --old this-file.json",
+      "transferWarning": "Keep the file only for programming and delete it afterwards."
     },
     "events": {
       "title": "\"{{label}}\" — tap log",

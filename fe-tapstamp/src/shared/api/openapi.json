@@ -5738,6 +5738,43 @@
         "tags" : [ "Platforma: NFC çipləri" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/transfer-package" : {
+      "post" : {
+        "description" : "Deaktiv çipə sonuncu yazılmış açarlar — çipi başqa şirkətə vermək üçün (yeni paket bununla birlikdə yazılır: ProgramTag yeni.json --old bu.json). Step-up tələb edir, auditə yazılır; aktiv çip üçün TAG_NOT_DISABLED.",
+        "operationId" : "transferPackage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "tagId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProvisioningPackage"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Köçürmə paketi",
+        "tags" : [ "Platforma: NFC çipləri" ]
+      }
+    },
     "/api/v1/public/admin.webmanifest" : {
       "get" : {
         "description" : "Ad — \"İdarəetmə\", ikon — şirkətin ikonu; /admin/ ünvanında açılır.",
@@ -6892,7 +6929,7 @@
           "smsSenderName" : {
             "type" : "string",
             "description" : "SMS-də görünən ad (məcburi): \"<ad> OTP: <kod>\"; latın hərfləri, rəqəm, boşluq, 11 simvola qədər",
-            "maxLength" : 11,
+            "maxLength" : 30,
             "minLength" : 0
           },
           "timezone" : {

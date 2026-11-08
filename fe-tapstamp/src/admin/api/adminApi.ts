@@ -362,6 +362,8 @@ export const platformTagsApi = {
     unwrap(
       api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package', { params: { path: { tenantId, tagId } } }),
     ),
+  transferPackage: (tenantId: string, tagId: string) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/transfer-package', { params: { path: { tenantId, tagId } } })),
   events: (tenantId: string, tagId: string, query: PageParams) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events', { params: { path: { tenantId, tagId }, query } })),
 };

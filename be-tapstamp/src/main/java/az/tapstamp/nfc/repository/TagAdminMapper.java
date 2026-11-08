@@ -58,6 +58,9 @@ public interface TagAdminMapper {
     /** PENDING dəsti ixrac olunmuş kimi işarələyir və qaytarır (yalnız bir dəfə). */
     Optional<ExportedKeys> exportPendingKeys(UUID tagId, Instant now);
 
+    /** Çipə sonuncu yazılmış (ixrac olunmuş) açar dəsti — çipi başqa şirkətə köçürmək üçün. */
+    Optional<ExportedKeys> findLastExportedKeys(UUID tagId);
+
     /** Son 100 toxunuş cəhdi. */
     List<TapEvent> events(UUID tagId, int limit, long offset);
 

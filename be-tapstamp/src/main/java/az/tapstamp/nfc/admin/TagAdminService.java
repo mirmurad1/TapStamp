@@ -206,9 +206,36 @@ public class TagAdminService {
         adminAuth.requireStepUp(principal);
         TagView tag = get(principal, tagId);
         UUID tenantId = TenantContext.require().id();
-        ProvisioningPackage pkg = Objects.requireNonNull(tx.execute(status -> {
-            ExportedKeys keys = tags.exportPendingKeys(tagId, clock.instant())
-                    .orElseThrow(() -> new ApiException(ErrorCode.PROVISIONING_ALREADY_EXPORTED));
+        ProvisioningPackage pkg = Objects.requireNonNull(tx.execute(status -> toPackage(tag, tenantId,
+                tags.exportPendingKeys(tagId, clock.instant())
+                        .orElseThrow(() -> new ApiException(ErrorCode.PROVISIONING_ALREADY_EXPORTED)))));
+        audit.tenant("TAG_PROVISIONING_EXPORTED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId,
+                Map.of("keyVersion", pkg.keyVersion()));
+        return pkg;
+    }
+
+    /**
+     * Köçürmə paketi: deaktiv çipə sonuncu yazılmış açarlar (sahib + step-up, auditə yazılır). Çipi başqa şirkətə
+     * vermək üçündür — yeni şirkətin paketi bununla birlikdə yazılır: {@code ProgramTag yeni.json --old bu.json}.
+     * Aktiv çip üçün verilmir: açarlar yalnız çip artıq bu şirkətdə işləmədikdə göstərilir.
+     */
+    public ProvisioningPackage transferPackage(AdminPrincipal principal, UUID tagId) {
+        requirePlatform(principal);
+        adminAuth.requireStepUp(principal);
+        TagView tag = get(principal, tagId);
+        if (!"DISABLED".equals(tag.status())) {
+            throw new ApiException(ErrorCode.TAG_NOT_DISABLED);
+        }
+        ExportedKeys keys = tags.findLastExportedKeys(tagId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        ProvisioningPackage pkg = toPackage(tag, TenantContext.require().id(), keys);
+        audit.tenant("TAG_TRANSFER_KEYS_EXPORTED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId,
+                Map.of("keyVersion", pkg.keyVersion()));
+        return pkg;
+    }
+
+    private ProvisioningPackage toPackage(TagView tag, UUID tenantId, ExportedKeys keys) {
+        {
             UUID keyId = keys.id();
             String k0 = HEX.formatHex(cipher.decrypt(keys.appMasterKeyEnc(),
                     TapVerificationService.keyAad(tenantId, "app_master_key_enc", keyId)));
@@ -225,10 +252,7 @@ public class TagAdminService {
             return new ProvisioningPackage(tag.uid(), keys.keyVersion(), url, k0, k1, k2,
                     piccOffset, macOffset, macOffset,
                     "SDM: PICCData K1 ilə şifrəli (UID + sayğac), CMAC K2 ilə (boş giriş). Ətraflı: docs/nfc-ntag424-programming.md");
-        }));
-        audit.tenant("TAG_PROVISIONING_EXPORTED", AuditLogger.ActorType.PLATFORM, principal.userId(), "tag", tagId,
-                Map.of("keyVersion", pkg.keyVersion()));
-        return pkg;
+        }
     }
 
     /** Çipin son toxunuşları (qəbul və rədd edilənlər, səbəbləri ilə). */

@@ -66,6 +66,14 @@ public class PlatformTagService {
         return inTenant(tenantId, () -> tags.rotateKeys(principal, tagId));
     }
 
+    /** Deaktiv çipin köçürmə paketi (sonuncu yazılmış açarlar) — platforma auditinə də yazılır. */
+    public ProvisioningPackage transferPackage(AdminPrincipal principal, UUID tenantId, UUID tagId) {
+        ProvisioningPackage pkg = inTenant(tenantId, () -> tags.transferPackage(principal, tagId));
+        realms.audit(AdminRealm.PLATFORM, "TENANT_TAG_TRANSFER_KEYS_EXPORTED", principal.userId(), "tenant", tenantId,
+                Map.of("uid", pkg.uid(), "keyVersion", pkg.keyVersion()));
+        return pkg;
+    }
+
     public ProvisioningPackage provisioningPackage(AdminPrincipal principal, UUID tenantId, UUID tagId) {
         ProvisioningPackage pkg = inTenant(tenantId, () -> tags.provisioningPackage(principal, tagId));
         realms.audit(AdminRealm.PLATFORM, "TENANT_TAG_PROVISIONING_EXPORTED", principal.userId(), "tenant", tenantId,

@@ -112,6 +112,12 @@ class TagAdminIT extends TapIntegrationTest {
         // Deaktivasiya dərhal qüvvəyə minir
         admin.post(base + "/" + tagId + "/disable").andExpect(jsonPath("$.status").value("DISABLED"));
         assertThat(tap(customer, tapPath(rotated, 5))).isEqualTo("/tap/error?code=TAG_DISABLED");
+        // Köçürmə paketi: deaktiv çipə sonuncu yazılmış açarlar (v2), təkrar da verilir; aktiv çip üçün yox
+        String transferPath = base + "/" + tagId + "/transfer-package";
+        ResultActions transfer = admin.post(transferPath).andExpect(status().isOk()).andExpect(jsonPath("$.keyVersion").value(2));
+        assertThat(json(transfer, "$.appMasterKey")).isEqualTo(json(admin.post(transferPath), "$.appMasterKey"));
+        admin.post(base + "/" + tagId + "/enable").andExpect(jsonPath("$.status").value("ACTIVE"));
+        admin.post(transferPath).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("TAG_NOT_DISABLED"));
         admin.post(base + "/" + tagId + "/enable").andExpect(jsonPath("$.status").value("ACTIVE"));
         admin.patch(base + "/" + tagId, Map.of("label", "Kassa yanı")).andExpect(jsonPath("$.label").value("Kassa yanı"));
 
@@ -142,6 +148,7 @@ class TagAdminIT extends TapIntegrationTest {
                 .andExpect(status().is4xxClientError());
         owner.post(tagPath + "/disable").andExpect(status().is4xxClientError());
         owner.post(tagPath + "/provisioning-package").andExpect(status().is4xxClientError());
+        owner.post(tagPath + "/transfer-package").andExpect(status().is4xxClientError());
         owner.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                         .get("/api/v1/platform/tenants/" + alpha().id() + "/tags"))
                 .andExpect(status().isNotFound());

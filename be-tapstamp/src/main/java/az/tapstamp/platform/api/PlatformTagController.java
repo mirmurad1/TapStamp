@@ -112,6 +112,16 @@ public class PlatformTagController {
                 .body(tags.provisioningPackage(principal, tenantId, tagId));
     }
 
+    @PostMapping("/{tagId}/transfer-package")
+    @Operation(summary = "Köçürmə paketi", description = """
+            Deaktiv çipə sonuncu yazılmış açarlar — çipi başqa şirkətə vermək üçün (yeni paket bununla birlikdə yazılır: \
+            ProgramTag yeni.json --old bu.json). Step-up tələb edir, auditə yazılır; aktiv çip üçün TAG_NOT_DISABLED.""")
+    ResponseEntity<ProvisioningPackage> transferPackage(@AuthenticationPrincipal AdminPrincipal principal,
+                                                        @PathVariable UUID tenantId, @PathVariable UUID tagId) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(tags.transferPackage(principal, tenantId, tagId));
+    }
+
     @GetMapping("/{tagId}/events")
     @Operation(summary = "Çipin toxunuş jurnalı", description = "Cəhdlər (qəbul və rədd edilənlər, səbəbləri ilə), yenidən köhnəyə, səhifə ilə.")
     PageResult<TapEvent> events(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,

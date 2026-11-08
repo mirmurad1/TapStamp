@@ -104,6 +104,14 @@
         RETURNING id, key_version, app_master_key_enc, meta_read_key_enc, file_read_key_enc
     </select>
 
+    <select id="findLastExportedKeys" resultType="az.tapstamp.nfc.repository.TagAdminMapper$ExportedKeys">
+        SELECT id, key_version, app_master_key_enc, meta_read_key_enc, file_read_key_enc
+        FROM nfc_tag_keys
+        WHERE tag_id = #{tagId} AND provisioning_exported_at IS NOT NULL
+        ORDER BY key_version DESC
+        LIMIT 1
+    </select>
+
     <select id="events" resultType="az.tapstamp.nfc.admin.TagAdminService$TapEvent">
         SELECT id, stage, outcome, reason, counter, counter_gap, customer_id, created_at
         FROM tap_events

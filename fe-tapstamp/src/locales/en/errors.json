@@ -64,5 +64,6 @@
   "PLAN_TRIAL_EXPIRED": "The free trial has ended and the service is suspended.",
   "PLAN_TRIAL_ALREADY_USED": "The free trial of this plan has already been used by this company.",
   "TIER_THRESHOLD_TAKEN": "Another tier already uses this number of visits. Choose a different threshold.",
-  "TIER_IN_USE": "This tier has already given bonus stamps, so it cannot be deleted. You can change its name, threshold or bonus."
+  "TIER_IN_USE": "This tier has already given bonus stamps, so it cannot be deleted. You can change its name, threshold or bonus.",
+  "TAG_NOT_DISABLED": "The transfer package is only available for a disabled tag."
 }

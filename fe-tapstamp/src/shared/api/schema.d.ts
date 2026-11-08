@@ -3133,6 +3133,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/transfer-package": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Köçürmə paketi
+         * @description Deaktiv çipə sonuncu yazılmış açarlar — çipi başqa şirkətə vermək üçün (yeni paket bununla birlikdə yazılır: ProgramTag yeni.json --old bu.json). Step-up tələb edir, auditə yazılır; aktiv çip üçün TAG_NOT_DISABLED.
+         */
+        post: operations["transferPackage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/admin.webmanifest": {
         parameters: {
             query?: never;
@@ -9544,6 +9564,29 @@ export interface operations {
         };
     };
     provisioningPackage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                tagId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProvisioningPackage"];
+                };
+            };
+        };
+    };
+    transferPackage: {
         parameters: {
             query?: never;
             header?: never;

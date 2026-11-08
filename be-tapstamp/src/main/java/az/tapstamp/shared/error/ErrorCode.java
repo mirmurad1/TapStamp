@@ -116,6 +116,8 @@ public enum ErrorCode {
     STAMP_ADJUSTMENT_TOO_LARGE(HttpStatus.CONFLICT),
     TAG_ROTATION_IN_PROGRESS(HttpStatus.CONFLICT),
     PROVISIONING_ALREADY_EXPORTED(HttpStatus.CONFLICT),
+    /** Köçürmə paketi yalnız deaktiv çip üçündür. */
+    TAG_NOT_DISABLED(HttpStatus.CONFLICT),
     DOMAIN_IS_PRIMARY(HttpStatus.CONFLICT),
     CAMPAIGN_NO_RECIPIENTS(HttpStatus.CONFLICT),
     CAMPAIGN_STATE_CHANGED(HttpStatus.CONFLICT),
