@@ -317,7 +317,13 @@
       "resetMfa": "2FA-nı sıfırla",
       "resetMfaConfirm": "{{name}} üçün iki addımlı yoxlama sıfırlansın? Bu, sahib telefonunu və bərpa kodlarını itirəndə edilir və audit jurnalına yazılır.",
       "mfaReset": "2FA sıfırlandı.",
-      "unavailable": "Şirkət aktiv deyil — məlumatlar əlçatmazdır."
+      "unavailable": "Şirkət aktiv deyil — məlumatlar əlçatmazdır.",
+      "resetLink": "Şifrə bərpa linki",
+      "resetLinkConfirm": "{{name}} üçün şifrə bərpa linki yaradılsın? Linki sahibə özünüz göndərəcəksiniz (məs. WhatsApp ilə).",
+      "resetLinkTitle": "{{name}} üçün şifrə bərpa linki",
+      "resetLinkHint": "Linki yalnız sahibin özünə göndərin. Bir dəfəlikdir və {{time}} tarixinə qədər etibarlıdır. Bu səhifəni bağlasanız, link bir daha göstərilməyəcək.",
+      "copyLink": "Kopyala",
+      "copied": "Kopyalandı"
     },
     "domains": {
       "title": "Domenlər",

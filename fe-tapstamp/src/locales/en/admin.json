@@ -317,7 +317,13 @@
       "resetMfa": "Reset 2FA",
       "resetMfaConfirm": "Reset two-step verification for {{name}}? Do this only when the owner has lost both the phone and the recovery codes. The action is recorded in the audit log.",
       "mfaReset": "2FA reset.",
-      "unavailable": "The company is not active — its data is unavailable."
+      "unavailable": "The company is not active — its data is unavailable.",
+      "resetLink": "Password reset link",
+      "resetLinkConfirm": "Create a password reset link for {{name}}? You will send the link to the owner yourself (e.g. via WhatsApp).",
+      "resetLinkTitle": "Password reset link for {{name}}",
+      "resetLinkHint": "Send the link only to the owner. It works once and is valid until {{time}}. If you leave this page, the link will not be shown again.",
+      "copyLink": "Copy",
+      "copied": "Copied"
     },
     "domains": {
       "title": "Domains",

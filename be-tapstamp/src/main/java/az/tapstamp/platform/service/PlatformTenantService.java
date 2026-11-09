@@ -157,6 +157,31 @@ public class PlatformTenantService {
                 Map.of("userId", userId.toString()));
     }
 
+    /** Bərpa linkinin ömrü: email əvəzinə messencerlə göndərilir, ona görə adi 30 dəqiqədən uzundur. */
+    static final java.time.Duration RESET_LINK_TTL = java.time.Duration.ofHours(24);
+
+    public record PasswordResetLink(String link, Instant expiresAt) {
+    }
+
+    /** Sahib şifrəni unudub və bərpa emaili çatmır: platforma bir dəfəlik link yaradır (step-up, audit). */
+    public PasswordResetLink ownerPasswordResetLink(AdminPrincipal principal, UUID tenantId, UUID userId) {
+        auth.requireStepUp(principal);
+        TenantRecord tenant = activeTenant(tenantId);
+        boolean found = owners(tenantId).stream().anyMatch(owner -> owner.id().equals(userId));
+        if (!found) {
+            throw new ApiException(ErrorCode.NOT_FOUND);
+        }
+        Instant expiresAt = clock.instant().plus(RESET_LINK_TTL);
+        String link = TenantContext.callAs(tenant.toInfo(), () -> {
+            String issued = auth.issuePasswordResetLink(AdminRealm.STAFF, userId, RESET_LINK_TTL);
+            audit.tenant("ADMIN_PASSWORD_RESET_LINK_ISSUED", AuditLogger.ActorType.PLATFORM, principal.userId(),
+                    "account", userId, Map.of());
+            return issued;
+        });
+        realms.audit(AdminRealm.PLATFORM, "TENANT_OWNER_PASSWORD_RESET_LINK", principal.userId(), "tenant", tenantId,
+                Map.of("userId", userId.toString()));
+        return new PasswordResetLink(link, expiresAt);
+    }
 
     private TenantRecord tenant(UUID tenantId) {
         return directory.findById(tenantId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));

@@ -5131,6 +5131,43 @@
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/owners/{userId}/password-reset-link" : {
+      "post" : {
+        "description" : "Sahib şifrəni unudub və bərpa emaili çatmayanda: bir dəfəlik link (24 saat) paneldə göstərilir, platforma onu sahibə özü göndərir. Email göndərilmir. Step-up tələb edir; audit jurnalına yazılır.",
+        "operationId" : "ownerPasswordResetLink",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PasswordResetLink"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Sahib üçün şifrə bərpa linki",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/plan" : {
       "get" : {
         "operationId" : "get",
@@ -8672,6 +8709,18 @@
           }
         },
         "required" : [ "email" ]
+      },
+      "PasswordResetLink" : {
+        "type" : "object",
+        "properties" : {
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "link" : {
+            "type" : "string"
+          }
+        }
       },
       "PasswordResetRequest" : {
         "type" : "object",

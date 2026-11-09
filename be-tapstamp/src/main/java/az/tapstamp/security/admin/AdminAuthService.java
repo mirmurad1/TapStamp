@@ -360,6 +360,17 @@ public class AdminAuthService {
         realms.audit(realm, "ADMIN_PASSWORD_RESET_REQUESTED", account.get().id(), "account", account.get().id(), Map.of());
     }
 
+    /**
+     * Platforma adminin əl ilə verdiyi bərpa linki (email çatmayanda — məs. WhatsApp ilə göndərilir). Email göndərilmir;
+     * link adi bərpa linki kimi bir dəfəlikdir. Çağıran tərəf step-up və auditi təmin edir.
+     */
+    public String issuePasswordResetLink(AdminRealm realm, UUID userId, java.time.Duration ttl) {
+        Instant now = clock.instant();
+        String token = SecureTokens.generate();
+        realms.accounts(realm).createResetToken(userId, SecureTokens.hash(token), now.plus(ttl), null, now);
+        return realms.baseUrl(realm) + "/admin/reset-password#token=" + token;
+    }
+
     public void resetPassword(AdminRealm realm, String token, String newPassword, ClientInfo client) {
         Instant now = clock.instant();
         rateLimiter.consume(RateLimitPolicy.TOKEN_REDEEM_PER_IP, realms.rateLimitScope(realm), client.ip());

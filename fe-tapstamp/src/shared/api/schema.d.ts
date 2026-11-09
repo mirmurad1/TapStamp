@@ -2870,6 +2870,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/owners/{userId}/password-reset-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sahib üçün şifrə bərpa linki
+         * @description Sahib şifrəni unudub və bərpa emaili çatmayanda: bir dəfəlik link (24 saat) paneldə göstərilir, platforma onu sahibə özü göndərir. Email göndərilmir. Step-up tələb edir; audit jurnalına yazılır.
+         */
+        post: operations["ownerPasswordResetLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/plan": {
         parameters: {
             query?: never;
@@ -4497,6 +4517,11 @@ export interface components {
         PasswordForgotRequest: {
             /** Format: email */
             email: string;
+        };
+        PasswordResetLink: {
+            /** Format: date-time */
+            expiresAt?: string;
+            link?: string;
         };
         PasswordResetRequest: {
             newPassword: string;
@@ -9194,6 +9219,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    ownerPasswordResetLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PasswordResetLink"];
+                };
             };
         };
     };

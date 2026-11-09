@@ -170,4 +170,27 @@ class PlatformAdminIT extends AdminIntegrationTest {
                 .param("id", ownerId.toString()).query(Integer.class).single());
         assertThat(audited).isEqualTo(1);
     }
+
+    @Test
+    void ownerWhoForgotPasswordGetsResetLinkFromPlatform() throws Exception {
+        String ownerEmail = uniqueEmail("forgot");
+        UUID ownerId = createStaff(TestTenants.ALPHA_HOST, ownerEmail, AdminRole.COMPANY_OWNER, null, false);
+        String path = "/tenants/" + tenant(TestTenants.ALPHA_HOST).id() + "/owners/" + ownerId + "/password-reset-link";
+
+        AdminClient admin = superAdmin();
+        admin.post(path).andExpect(jsonPath("$.code").value("STEP_UP_REQUIRED"));
+        admin.post("/auth/step-up", Map.of("code", freshTotp(TOTP_SECRET)));
+        admin.post(path.replace(ownerId.toString(), UUID.randomUUID().toString())).andExpect(status().isNotFound());
+        String link = json(admin.post(path).andExpect(status().isOk()), "$.link");
+        assertThat(link).startsWith("https://" + TestTenants.ALPHA_HOST + "/admin/reset-password#token=");
+
+        // Link adi bərpa linki kimi işləyir və bir dəfəlikdir
+        String token = link.substring(link.indexOf("#token=") + "#token=".length());
+        String newPassword = "Yeni-Sahib-Parolu-2026";
+        AdminClient anonymous = AdminClient.staff(mvc, TestTenants.ALPHA_HOST);
+        anonymous.post("/auth/password/reset", Map.of("token", token, "newPassword", newPassword)).andExpect(status().isNoContent());
+        anonymous.post("/auth/password/reset", Map.of("token", token, "newPassword", newPassword + "!"))
+                .andExpect(jsonPath("$.code").value("TOKEN_INVALID"));
+        AdminClient.staff(mvc, TestTenants.ALPHA_HOST).login(ownerEmail, newPassword).andExpect(status().isOk());
+    }
 }

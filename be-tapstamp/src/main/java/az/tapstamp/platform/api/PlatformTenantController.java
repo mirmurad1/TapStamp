@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -158,5 +159,15 @@ public class PlatformTenantController {
     void resetOwnerMfa(@PathVariable UUID tenantId, @PathVariable UUID userId,
                        @AuthenticationPrincipal AdminPrincipal principal) {
         tenants.resetOwnerMfa(principal, tenantId, userId);
+    }
+
+    @PostMapping("/{tenantId}/owners/{userId}/password-reset-link")
+    @Operation(summary = "Sahib üçün şifrə bərpa linki", description = """
+            Sahib şifrəni unudub və bərpa emaili çatmayanda: bir dəfəlik link (24 saat) paneldə göstərilir, platforma onu \
+            sahibə özü göndərir. Email göndərilmir. Step-up tələb edir; audit jurnalına yazılır.""")
+    ResponseEntity<az.tapstamp.platform.service.PlatformTenantService.PasswordResetLink> ownerPasswordResetLink(
+            @PathVariable UUID tenantId, @PathVariable UUID userId, @AuthenticationPrincipal AdminPrincipal principal) {
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(tenants.ownerPasswordResetLink(principal, tenantId, userId));
     }
 }
