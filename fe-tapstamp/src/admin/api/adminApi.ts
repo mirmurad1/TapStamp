@@ -1,284 +1,202 @@
-import type { Client } from "openapi-fetch";
+import type { Client } from 'openapi-fetch';
 
-import { api, unwrap } from "@/shared/api/client";
-import type { components } from "@/shared/api/schema";
+import { api, unwrap } from '@/shared/api/client';
+import type { components } from '@/shared/api/schema';
 
 /**
  * Admin API. Ä°ki "realm" eyni endpoint-lÉ™rÉ™ malikdir: ÅŸirkÉ™t domenindÉ™ iÅŸÃ§ilÉ™r ({@code /api/v1/admin}),
  * platforma domenindÉ™ platforma adminlÉ™ri ({@code /api/v1/platform}). Yollar tipli qalsÄ±n deyÉ™ hÉ™r realm Ã¼Ã§Ã¼n
  * ayrÄ±ca literal yol yazÄ±lÄ±r.
  */
-export type Realm = "STAFF" | "PLATFORM";
+export type Realm = 'STAFF' | 'PLATFORM';
 
-type Schemas = components["schemas"];
+type Schemas = components['schemas'];
 
 /** SÉ™hifÉ™ parametrlÉ™ri: `page` 0-dan, `size` â€” 5, 10, 20 vÉ™ ya 50. */
 export interface PageParams {
   page: number;
   size: number;
 }
-export type LoginStatus = NonNullable<Schemas["LoginResponse"]["status"]>;
-export type SessionState = "NONE" | "PENDING_MFA" | "MFA_ENROLLMENT" | "ACTIVE";
-export type Me = Schemas["MeResponse"];
-export type AdminSession = Schemas["SessionResponse"];
-export type Member = Schemas["MemberResponse"];
-export type Invitation = Schemas["InvitationResponse"];
-export type InviteRequest = Schemas["InviteRequest"];
-export type InvitationDetails = Schemas["InvitationDetailsResponse"];
-export type Tenant = Schemas["TenantResponse"];
-export type TenantOwner = Schemas["OwnerResponse"];
-export type TenantStats = Schemas["StatsResponse"];
-export type ProvisionRequest = Schemas["ProvisionRequest"];
-export type Branch = Schemas["BranchResponse"];
-export type ContextScope = NonNullable<Schemas["ContextResponse"]["scope"]>;
+export type LoginStatus = NonNullable<Schemas['LoginResponse']['status']>;
+export type SessionState = 'NONE' | 'PENDING_MFA' | 'MFA_ENROLLMENT' | 'ACTIVE';
+export type Me = Schemas['MeResponse'];
+export type AdminSession = Schemas['SessionResponse'];
+export type Member = Schemas['MemberResponse'];
+export type Invitation = Schemas['InvitationResponse'];
+export type InviteRequest = Schemas['InviteRequest'];
+export type InvitationDetails = Schemas['InvitationDetailsResponse'];
+export type Tenant = Schemas['TenantResponse'];
+export type TenantOwner = Schemas['OwnerResponse'];
+export type TenantStats = Schemas['StatsResponse'];
+export type ProvisionRequest = Schemas['ProvisionRequest'];
+export type Branch = Schemas['BranchResponse'];
+export type ContextScope = NonNullable<Schemas['ContextResponse']['scope']>;
 
-const isPlatform = (realm: Realm) => realm === "PLATFORM";
+const isPlatform = (realm: Realm) => realm === 'PLATFORM';
 
 export const contextApi = {
-  context: () => unwrap(api.GET("/api/v1/context")),
-  company: () => unwrap(api.GET("/api/v1/public/company")),
+  context: () => unwrap(api.GET('/api/v1/context')),
+  company: () => unwrap(api.GET('/api/v1/public/company')),
 };
 
 export const authApi = {
   session: async (realm: Realm): Promise<SessionState> => {
     const response = await unwrap(
-      isPlatform(realm)
-        ? api.GET("/api/v1/platform/auth/session")
-        : api.GET("/api/v1/admin/auth/session"),
+      isPlatform(realm) ? api.GET('/api/v1/platform/auth/session') : api.GET('/api/v1/admin/auth/session'),
     );
-    return (response.state ?? "NONE") as SessionState;
+    return (response.state ?? 'NONE') as SessionState;
   },
-  login: (realm: Realm, body: Schemas["LoginRequest"]) =>
+  login: (realm: Realm, body: Schemas['LoginRequest']) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/login", { body })
-        : api.POST("/api/v1/admin/auth/login", { body }),
+        ? api.POST('/api/v1/platform/auth/login', { body })
+        : api.POST('/api/v1/admin/auth/login', { body }),
     ),
   verifyMfa: (realm: Realm, code: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/mfa/verify", { body: { code } })
-        : api.POST("/api/v1/admin/auth/mfa/verify", { body: { code } }),
+        ? api.POST('/api/v1/platform/auth/mfa/verify', { body: { code } })
+        : api.POST('/api/v1/admin/auth/mfa/verify', { body: { code } }),
     ),
   startEnrollment: (realm: Realm) =>
     unwrap(
-      isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/mfa/enrollment")
-        : api.POST("/api/v1/admin/auth/mfa/enrollment"),
+      isPlatform(realm) ? api.POST('/api/v1/platform/auth/mfa/enrollment') : api.POST('/api/v1/admin/auth/mfa/enrollment'),
     ),
   confirmEnrollment: (realm: Realm, code: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/mfa/enrollment/confirm", {
-            body: { code },
-          })
-        : api.POST("/api/v1/admin/auth/mfa/enrollment/confirm", {
-            body: { code },
-          }),
+        ? api.POST('/api/v1/platform/auth/mfa/enrollment/confirm', { body: { code } })
+        : api.POST('/api/v1/admin/auth/mfa/enrollment/confirm', { body: { code } }),
     ),
   /** 2FA aktivdirsÉ™ code (TOTP), deyilsÉ™ password (cari ÅŸifrÉ™). */
   stepUp: (realm: Realm, body: { code?: string; password?: string }) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/step-up", { body })
-        : api.POST("/api/v1/admin/auth/step-up", { body }),
+        ? api.POST('/api/v1/platform/auth/step-up', { body })
+        : api.POST('/api/v1/admin/auth/step-up', { body }),
     ),
   logout: (realm: Realm) =>
-    unwrap(
-      isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/logout")
-        : api.POST("/api/v1/admin/auth/logout"),
-    ),
+    unwrap(isPlatform(realm) ? api.POST('/api/v1/platform/auth/logout') : api.POST('/api/v1/admin/auth/logout')),
   forgotPassword: (realm: Realm, email: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/password/forgot", { body: { email } })
-        : api.POST("/api/v1/admin/auth/password/forgot", { body: { email } }),
+        ? api.POST('/api/v1/platform/auth/password/forgot', { body: { email } })
+        : api.POST('/api/v1/admin/auth/password/forgot', { body: { email } }),
     ),
-  resetPassword: (realm: Realm, body: Schemas["PasswordResetRequest"]) =>
+  resetPassword: (realm: Realm, body: Schemas['PasswordResetRequest']) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/auth/password/reset", { body })
-        : api.POST("/api/v1/admin/auth/password/reset", { body }),
+        ? api.POST('/api/v1/platform/auth/password/reset', { body })
+        : api.POST('/api/v1/admin/auth/password/reset', { body }),
     ),
   inspectInvitation: (token: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/auth/invitations/inspect", { body: { token } }),
-    ),
-  acceptInvitation: (body: Schemas["AcceptInvitationRequest"]) =>
-    unwrap(api.POST("/api/v1/admin/auth/invitations/accept", { body })),
+    unwrap(api.POST('/api/v1/admin/auth/invitations/inspect', { body: { token } })),
+  acceptInvitation: (body: Schemas['AcceptInvitationRequest']) =>
+    unwrap(api.POST('/api/v1/admin/auth/invitations/accept', { body })),
 };
 
 export const accountApi = {
-  me: (realm: Realm) =>
+  me: (realm: Realm) => unwrap(isPlatform(realm) ? api.GET('/api/v1/platform/me') : api.GET('/api/v1/admin/me')),
+  updateMe: (realm: Realm, body: Schemas['UpdateProfileRequest']) =>
+    unwrap(isPlatform(realm) ? api.PATCH('/api/v1/platform/me', { body }) : api.PATCH('/api/v1/admin/me', { body })),
+  changePassword: (realm: Realm, body: Schemas['ChangePasswordRequest']) =>
     unwrap(
       isPlatform(realm)
-        ? api.GET("/api/v1/platform/me")
-        : api.GET("/api/v1/admin/me"),
-    ),
-  updateMe: (realm: Realm, body: Schemas["UpdateProfileRequest"]) =>
-    unwrap(
-      isPlatform(realm)
-        ? api.PATCH("/api/v1/platform/me", { body })
-        : api.PATCH("/api/v1/admin/me", { body }),
-    ),
-  changePassword: (realm: Realm, body: Schemas["ChangePasswordRequest"]) =>
-    unwrap(
-      isPlatform(realm)
-        ? api.POST("/api/v1/platform/me/password", { body })
-        : api.POST("/api/v1/admin/me/password", { body }),
+        ? api.POST('/api/v1/platform/me/password', { body })
+        : api.POST('/api/v1/admin/me/password', { body }),
     ),
   sessions: (realm: Realm) =>
-    unwrap(
-      isPlatform(realm)
-        ? api.GET("/api/v1/platform/me/sessions")
-        : api.GET("/api/v1/admin/me/sessions"),
-    ),
+    unwrap(isPlatform(realm) ? api.GET('/api/v1/platform/me/sessions') : api.GET('/api/v1/admin/me/sessions')),
   revokeSession: (realm: Realm, sessionId: string) => {
     const params = { path: { sessionId } };
     return unwrap(
       isPlatform(realm)
-        ? api.DELETE("/api/v1/platform/me/sessions/{sessionId}", { params })
-        : api.DELETE("/api/v1/admin/me/sessions/{sessionId}", { params }),
+        ? api.DELETE('/api/v1/platform/me/sessions/{sessionId}', { params })
+        : api.DELETE('/api/v1/admin/me/sessions/{sessionId}', { params }),
     );
   },
   regenerateRecoveryCodes: (realm: Realm) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/me/mfa/recovery-codes")
-        : api.POST("/api/v1/admin/me/mfa/recovery-codes"),
+        ? api.POST('/api/v1/platform/me/mfa/recovery-codes')
+        : api.POST('/api/v1/admin/me/mfa/recovery-codes'),
     ),
   /** 2FA-nÄ±n mÃ¼vÉ™qqÉ™ti sÃ¶ndÃ¼rÃ¼lmÉ™si (cari ÅŸifrÉ™ ilÉ™; sirr saxlanÄ±lÄ±r). */
   pauseMfa: (realm: Realm, password: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/me/mfa/pause", { body: { password } })
-        : api.POST("/api/v1/admin/me/mfa/pause", { body: { password } }),
+        ? api.POST('/api/v1/platform/me/mfa/pause', { body: { password } })
+        : api.POST('/api/v1/admin/me/mfa/pause', { body: { password } }),
     ),
   resumeMfa: (realm: Realm, code: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/me/mfa/resume", { body: { code } })
-        : api.POST("/api/v1/admin/me/mfa/resume", { body: { code } }),
+        ? api.POST('/api/v1/platform/me/mfa/resume', { body: { code } })
+        : api.POST('/api/v1/admin/me/mfa/resume', { body: { code } }),
     ),
   /** 2FA-nÄ±n tam silinmÉ™si (sirr vÉ™ bÉ™rpa kodlarÄ±). */
   removeMfa: (realm: Realm, password: string) =>
     unwrap(
       isPlatform(realm)
-        ? api.POST("/api/v1/platform/me/mfa/remove", { body: { password } })
-        : api.POST("/api/v1/admin/me/mfa/remove", { body: { password } }),
+        ? api.POST('/api/v1/platform/me/mfa/remove', { body: { password } })
+        : api.POST('/api/v1/admin/me/mfa/remove', { body: { password } }),
     ),
 };
 
 export const teamApi = {
-  members: (query: PageParams) =>
-    unwrap(api.GET("/api/v1/admin/team", { params: { query } })),
-  invitations: (query: PageParams) =>
-    unwrap(api.GET("/api/v1/admin/team/invitations", { params: { query } })),
-  invite: (body: InviteRequest) =>
-    unwrap(api.POST("/api/v1/admin/team/invitations", { body })),
+  members: (query: PageParams) => unwrap(api.GET('/api/v1/admin/team', { params: { query } })),
+  invitations: (query: PageParams) => unwrap(api.GET('/api/v1/admin/team/invitations', { params: { query } })),
+  invite: (body: InviteRequest) => unwrap(api.POST('/api/v1/admin/team/invitations', { body })),
   revokeInvitation: (invitationId: string) =>
+    unwrap(api.DELETE('/api/v1/admin/team/invitations/{invitationId}', { params: { path: { invitationId } } })),
+  updateStatus: (userId: string, status: 'ACTIVE' | 'DISABLED') =>
     unwrap(
-      api.DELETE("/api/v1/admin/team/invitations/{invitationId}", {
-        params: { path: { invitationId } },
-      }),
-    ),
-  updateStatus: (userId: string, status: "ACTIVE" | "DISABLED") =>
-    unwrap(
-      api.PATCH("/api/v1/admin/team/members/{userId}/status", {
-        params: { path: { userId } },
-        body: { status },
-      }),
+      api.PATCH('/api/v1/admin/team/members/{userId}/status', { params: { path: { userId } }, body: { status } }),
     ),
   resetMfa: (userId: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/team/members/{userId}/mfa-reset", {
-        params: { path: { userId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/admin/team/members/{userId}/mfa-reset', { params: { path: { userId } } })),
   /** YumÅŸaq silinmÉ™: hesab bazada qalÄ±r, giriÅŸ vÉ™ siyahÄ±dan Ã§Ä±xÄ±r. */
   deleteMember: (userId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/team/members/{userId}", {
-        params: { path: { userId } },
-      }),
-    ),
+    unwrap(api.DELETE('/api/v1/admin/team/members/{userId}', { params: { path: { userId } } })),
 };
 
 export const platformApi = {
-  tenants: (query: PageParams) =>
-    unwrap(api.GET("/api/v1/platform/tenants", { params: { query } })),
-  tenant: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}", {
-        params: { path: { tenantId } },
-      }),
-    ),
-  provision: (body: ProvisionRequest) =>
-    unwrap(api.POST("/api/v1/platform/tenants", { body })),
-  updateStatus: (tenantId: string, status: "ACTIVE" | "SUSPENDED") =>
-    unwrap(
-      api.PATCH("/api/v1/platform/tenants/{tenantId}/status", {
-        params: { path: { tenantId } },
-        body: { status },
-      }),
-    ),
+  tenants: (query: PageParams) => unwrap(api.GET('/api/v1/platform/tenants', { params: { query } })),
+  tenant: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}', { params: { path: { tenantId } } })),
+  provision: (body: ProvisionRequest) => unwrap(api.POST('/api/v1/platform/tenants', { body })),
+  updateStatus: (tenantId: string, status: 'ACTIVE' | 'SUSPENDED') =>
+    unwrap(api.PATCH('/api/v1/platform/tenants/{tenantId}/status', { params: { path: { tenantId } }, body: { status } })),
   stats: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/stats", {
-        params: { path: { tenantId } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/stats', { params: { path: { tenantId } } })),
   owners: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/owners", {
-        params: { path: { tenantId } },
-      }),
-    ),
-  inviteOwner: (tenantId: string, body: Schemas["OwnerInvitationRequest"]) =>
-    unwrap(
-      api.POST("/api/v1/platform/tenants/{tenantId}/owner-invitations", {
-        params: { path: { tenantId } },
-        body,
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/owners', { params: { path: { tenantId } } })),
+  inviteOwner: (tenantId: string, body: Schemas['OwnerInvitationRequest']) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/owner-invitations', { params: { path: { tenantId } }, body })),
   ownerPasswordResetLink: (tenantId: string, userId: string) =>
     unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/owners/{userId}/password-reset-link",
-        {
-          params: { path: { tenantId, userId } },
-        },
-      ),
+      api.POST('/api/v1/platform/tenants/{tenantId}/owners/{userId}/password-reset-link', {
+        params: { path: { tenantId, userId } },
+      }),
     ),
   resetOwnerMfa: (tenantId: string, userId: string) =>
     unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/owners/{userId}/mfa-reset",
-        { params: { path: { tenantId, userId } } },
-      ),
+      api.POST('/api/v1/platform/tenants/{tenantId}/owners/{userId}/mfa-reset', { params: { path: { tenantId, userId } } }),
     ),
 };
 
-export type PendingStamp = Schemas["PendingStampResponse"];
+export type PendingStamp = Schemas['PendingStampResponse'];
 
 /** Ä°ÅŸÃ§i konsolu: tÉ™sdiq gÃ¶zlÉ™yÉ™n mÃ¶hÃ¼rlÉ™r (filial Ã¼zrÉ™). */
 export const staffConsoleApi = {
   pendingStamps: (branchId: string, paging: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/admin/staff-console/pending-stamps", {
-        params: { query: { branchId, ...paging } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/staff-console/pending-stamps', { params: { query: { branchId, ...paging } } })),
   confirmStamp: (stampId: string) =>
     unwrap(
-      api.POST("/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm", {
-        params: { path: { stampId } },
-      }),
+      api.POST('/api/v1/admin/staff-console/pending-stamps/{stampId}/confirm', { params: { path: { stampId } } }),
     ),
   rejectStamp: (stampId: string, reason: string) =>
     unwrap(
-      api.POST("/api/v1/admin/staff-console/pending-stamps/{stampId}/reject", {
+      api.POST('/api/v1/admin/staff-console/pending-stamps/{stampId}/reject', {
         params: { path: { stampId } },
         body: { reason },
       }),
@@ -290,11 +208,11 @@ export interface SimulatedTag {
   id: string;
   uid: string;
   label: string;
-  type: "NTAG424_SUN" | "SIMULATED";
+  type: 'NTAG424_SUN' | 'SIMULATED';
   active: boolean;
   lastCounter: number;
   branchId: string;
-  branchName?: Schemas["LocalizedText"];
+  branchName?: Schemas['LocalizedText'];
 }
 
 export interface SimulatedTap {
@@ -303,15 +221,13 @@ export interface SimulatedTap {
 }
 
 interface DevPaths {
-  "/api/v1/dev/simulator/tags": {
-    get: {
-      responses: { 200: { content: { "application/json": SimulatedTag[] } } };
-    };
+  '/api/v1/dev/simulator/tags': {
+    get: { responses: { 200: { content: { 'application/json': SimulatedTag[] } } } };
   };
-  "/api/v1/dev/simulator/taps": {
+  '/api/v1/dev/simulator/taps': {
     post: {
-      requestBody: { content: { "application/json": { tagId: string } } };
-      responses: { 200: { content: { "application/json": SimulatedTap } } };
+      requestBody: { content: { 'application/json': { tagId: string } } };
+      responses: { 200: { content: { 'application/json': SimulatedTap } } };
     };
   };
 }
@@ -321,58 +237,37 @@ const devApi = api as unknown as Client<DevPaths>;
 
 /** NFC simulyatoru â€” yalnÄ±z dev mÃ¼hitindÉ™ mÃ¶vcuddur (prod-da 403). */
 export const simulatorApi = {
-  tags: () => unwrap(devApi.GET("/api/v1/dev/simulator/tags")),
-  tap: (tagId: string) =>
-    unwrap(devApi.POST("/api/v1/dev/simulator/taps", { body: { tagId } })),
+  tags: () => unwrap(devApi.GET('/api/v1/dev/simulator/tags')),
+  tap: (tagId: string) => unwrap(devApi.POST('/api/v1/dev/simulator/taps', { body: { tagId } })),
 };
 
-export type StampPolicy = Schemas["StampPolicyResponse"];
-export type StampPolicyRequest = Schemas["StampPolicyRequest"];
-export type RewardSettings = Schemas["RewardSettingsResponse"];
-export type RewardSettingsRequest = Schemas["RewardSettingsRequest"];
-export type RewardImpact = Schemas["RewardImpactResponse"];
-export type ExistingCards = NonNullable<RewardSettingsRequest["existingCards"]>;
+export type StampPolicy = Schemas['StampPolicyResponse'];
+export type StampPolicyRequest = Schemas['StampPolicyRequest'];
+export type RewardSettings = Schemas['RewardSettingsResponse'];
+export type RewardSettingsRequest = Schemas['RewardSettingsRequest'];
+export type RewardImpact = Schemas['RewardImpactResponse'];
+export type ExistingCards = NonNullable<RewardSettingsRequest['existingCards']>;
 
 /** LoyallÄ±q parametrlÉ™ri (yalnÄ±z sahib): mÃ¶hÃ¼r qaydasÄ± vÉ™ hÉ™diyyÉ™. */
 export const settingsApi = {
-  stampPolicy: () => unwrap(api.GET("/api/v1/admin/settings/stamp-policy")),
-  updateStampPolicy: (body: StampPolicyRequest) =>
-    unwrap(api.PUT("/api/v1/admin/settings/stamp-policy", { body })),
+  stampPolicy: () => unwrap(api.GET('/api/v1/admin/settings/stamp-policy')),
+  updateStampPolicy: (body: StampPolicyRequest) => unwrap(api.PUT('/api/v1/admin/settings/stamp-policy', { body })),
   /** Yeni ÅŸirkÉ™tdÉ™ hÉ™diyyÉ™ qaydasÄ± hÉ™lÉ™ yoxdur: boÅŸ cavab null olur (react-query undefined-i xÉ™ta sayÄ±r). */
-  rewardRule: async () =>
-    (await unwrap(api.GET("/api/v1/admin/settings/reward-rule"))) ?? null,
-  updateRewardRule: (body: RewardSettingsRequest) =>
-    unwrap(api.PUT("/api/v1/admin/settings/reward-rule", { body })),
+  rewardRule: async () => (await unwrap(api.GET('/api/v1/admin/settings/reward-rule'))) ?? null,
+  updateRewardRule: (body: RewardSettingsRequest) => unwrap(api.PUT('/api/v1/admin/settings/reward-rule', { body })),
   rewardImpact: (stampsRequired: number) =>
-    unwrap(
-      api.GET("/api/v1/admin/settings/reward-rule/impact", {
-        params: { query: { stampsRequired } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/settings/reward-rule/impact', { params: { query: { stampsRequired } } })),
 };
 
-export type GiftCardCheck = Schemas["GiftCardCheckResponse"];
+export type GiftCardCheck = Schemas['GiftCardCheckResponse'];
 
 /** Ä°ÅŸÃ§i konsolu: hÉ™diyyÉ™ kartÄ±nÄ±n yoxlanmasÄ± vÉ™ tÉ™hvili. */
 export const giftCardConsoleApi = {
-  check: (code: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/staff-console/gift-cards/check", {
-        body: { code },
-      }),
-    ),
+  check: (code: string) => unwrap(api.POST('/api/v1/admin/staff-console/gift-cards/check', { body: { code } })),
   redeem: (code: string, branchId: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/staff-console/gift-cards/redeem", {
-        body: { code, branchId },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/admin/staff-console/gift-cards/redeem', { body: { code, branchId } })),
   recent: (branchId: string) =>
-    unwrap(
-      api.GET("/api/v1/admin/staff-console/gift-cards/recent", {
-        params: { query: { branchId } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/staff-console/gift-cards/recent', { params: { query: { branchId } } })),
 };
 
 export interface AnalyticsFilter {
@@ -381,44 +276,32 @@ export interface AnalyticsFilter {
   branchId?: string;
 }
 
-export type AnalyticsOverview = Schemas["Overview"];
-export type SeriesPoint = Schemas["SeriesPoint"];
-export type HeatCell = Schemas["HeatCell"];
-export type Retention = Schemas["Retention"];
-export type LanguageShare = Schemas["LanguageShare"];
+export type AnalyticsOverview = Schemas['Overview'];
+export type SeriesPoint = Schemas['SeriesPoint'];
+export type HeatCell = Schemas['HeatCell'];
+export type Retention = Schemas['Retention'];
+export type LanguageShare = Schemas['LanguageShare'];
 
 /** Analitika (sahib vÉ™ menecer); boÅŸ filtr â€” son 30 gÃ¼n, bÃ¼tÃ¼n icazÉ™li filiallar. */
 export const analyticsApi = {
-  overview: (query: AnalyticsFilter) =>
-    unwrap(api.GET("/api/v1/admin/analytics/overview", { params: { query } })),
-  series: (query: AnalyticsFilter & { granularity: "DAY" | "WEEK" }) =>
-    unwrap(
-      api.GET("/api/v1/admin/analytics/stamps-series", { params: { query } }),
-    ),
-  heatmap: (query: AnalyticsFilter) =>
-    unwrap(api.GET("/api/v1/admin/analytics/heatmap", { params: { query } })),
-  retention: (query: AnalyticsFilter) =>
-    unwrap(api.GET("/api/v1/admin/analytics/retention", { params: { query } })),
+  overview: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/overview', { params: { query } })),
+  series: (query: AnalyticsFilter & { granularity: 'DAY' | 'WEEK' }) =>
+    unwrap(api.GET('/api/v1/admin/analytics/stamps-series', { params: { query } })),
+  heatmap: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/heatmap', { params: { query } })),
+  retention: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/analytics/retention', { params: { query } })),
   languages: (query: AnalyticsFilter) =>
-    unwrap(
-      api.GET("/api/v1/admin/analytics/languages", {
-        params: { query: { branchId: query.branchId } },
-      }),
-    ),
-  comparison: (query: { from: string; to: string }) =>
-    unwrap(
-      api.GET("/api/v1/admin/analytics/comparison", { params: { query } }),
-    ),
+    unwrap(api.GET('/api/v1/admin/analytics/languages', { params: { query: { branchId: query.branchId } } })),
+  comparison: (query: { from: string; to: string }) => unwrap(api.GET('/api/v1/admin/analytics/comparison', { params: { query } })),
 };
 
-export type BranchComparison = Schemas["BranchComparison"];
-export type StaffComparison = Schemas["StaffComparison"];
+export type BranchComparison = Schemas['BranchComparison'];
+export type StaffComparison = Schemas['StaffComparison'];
 
-export type CustomerRow = Schemas["Row"];
-export type CustomerPage = Schemas["Page"];
-export type TimelineItem = Schemas["TimelineItem"];
-export type FraudFlag = Schemas["FraudFlag"];
-export type AdjustmentResult = Schemas["AdjustmentResult"];
+export type CustomerRow = Schemas['Row'];
+export type CustomerPage = Schemas['Page'];
+export type TimelineItem = Schemas['TimelineItem'];
+export type FraudFlag = Schemas['FraudFlag'];
+export type AdjustmentResult = Schemas['AdjustmentResult'];
 
 export interface CustomerFilter {
   q?: string;
@@ -430,160 +313,76 @@ export interface CustomerFilter {
   registeredTo?: string;
 }
 
-export type CustomerSort =
-  "REGISTERED_AT" | "LAST_VISIT_AT" | "NAME" | "TOTAL_STAMPS";
+export type CustomerSort = 'REGISTERED_AT' | 'LAST_VISIT_AT' | 'NAME' | 'TOTAL_STAMPS';
 
 /** MÃ¼ÅŸtÉ™rilÉ™r (sahib vÉ™ menecer). Tam nÃ¶mrÉ™, bloklama vÉ™ CSV yalnÄ±z sahibÉ™ aÃ§Ä±qdÄ±r. */
 export const customersApi = {
-  list: (
-    query: CustomerFilter & {
-      sort: CustomerSort;
-      direction: "asc" | "desc";
-      page: number;
-      size: number;
-    },
-  ) => unwrap(api.GET("/api/v1/admin/customers", { params: { query } })),
-  get: (customerId: string) =>
-    unwrap(
-      api.GET("/api/v1/admin/customers/{customerId}", {
-        params: { path: { customerId } },
-      }),
-    ),
+  list: (query: CustomerFilter & { sort: CustomerSort; direction: 'asc' | 'desc'; page: number; size: number }) =>
+    unwrap(api.GET('/api/v1/admin/customers', { params: { query } })),
+  get: (customerId: string) => unwrap(api.GET('/api/v1/admin/customers/{customerId}', { params: { path: { customerId } } })),
   timeline: (customerId: string, query: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/timeline', { params: { path: { customerId }, query } })),
+  adjust: (customerId: string, body: { delta: number; reason: string; branchId?: string }, idempotencyKey: string) =>
     unwrap(
-      api.GET("/api/v1/admin/customers/{customerId}/timeline", {
-        params: { path: { customerId }, query },
-      }),
-    ),
-  adjust: (
-    customerId: string,
-    body: { delta: number; reason: string; branchId?: string },
-    idempotencyKey: string,
-  ) =>
-    unwrap(
-      api.POST("/api/v1/admin/customers/{customerId}/stamp-adjustments", {
-        params: {
-          path: { customerId },
-          header: { "Idempotency-Key": idempotencyKey },
-        },
+      api.POST('/api/v1/admin/customers/{customerId}/stamp-adjustments', {
+        params: { path: { customerId }, header: { 'Idempotency-Key': idempotencyKey } },
         body,
       }),
     ),
-  updateStatus: (customerId: string, status: "ACTIVE" | "BLOCKED") =>
-    unwrap(
-      api.PATCH("/api/v1/admin/customers/{customerId}/status", {
-        params: { path: { customerId } },
-        body: { status },
-      }),
-    ),
+  updateStatus: (customerId: string, status: 'ACTIVE' | 'BLOCKED') =>
+    unwrap(api.PATCH('/api/v1/admin/customers/{customerId}/status', { params: { path: { customerId } }, body: { status } })),
   fraudFlags: (customerId: string, query: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/admin/customers/{customerId}/fraud-flags", {
-        params: { path: { customerId }, query },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/customers/{customerId}/fraud-flags', { params: { path: { customerId }, query } })),
   resolveFlag: (flagId: string, note: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/customers/fraud-flags/{flagId}/resolve", {
-        params: { path: { flagId } },
-        body: { note },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/admin/customers/fraud-flags/{flagId}/resolve', { params: { path: { flagId } }, body: { note } })),
   /** CSV faylÄ± (Blob); step-up tÉ™lÉ™b edir. */
   exportCsv: (query: CustomerFilter) =>
-    unwrap(
-      api.POST("/api/v1/admin/customers/export", {
-        params: { query },
-        parseAs: "blob",
-      }),
-    ) as Promise<Blob>,
+    unwrap(api.POST('/api/v1/admin/customers/export', { params: { query }, parseAs: 'blob' })) as Promise<Blob>,
 };
 
-export type NfcTag = Schemas["TagView"];
-export type TapEvent = Schemas["TapEvent"];
-export type ProvisioningPackage = Schemas["ProvisioningPackage"];
-export type AuditEntry = Schemas["Entry"];
+export type NfcTag = Schemas['TagView'];
+export type TapEvent = Schemas['TapEvent'];
+export type ProvisioningPackage = Schemas['ProvisioningPackage'];
+export type AuditEntry = Schemas['Entry'];
 
 /** NFC Ã§iplÉ™ri ÅŸirkÉ™t panelindÉ™ yalnÄ±z baxÄ±ÅŸ Ã¼Ã§Ã¼ndÃ¼r (sahib â€” hamÄ±sÄ±, menecer â€” Ã¶z filiallarÄ±). */
 export const tagsApi = {
-  list: (query: PageParams) =>
-    unwrap(api.GET("/api/v1/admin/tags", { params: { query } })),
+  list: (query: PageParams) => unwrap(api.GET('/api/v1/admin/tags', { params: { query } })),
   events: (tagId: string, query: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/admin/tags/{tagId}/events", {
-        params: { path: { tagId }, query },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/tags/{tagId}/events', { params: { path: { tagId }, query } })),
 };
 
 /** ÅžirkÉ™tin Ã§iplÉ™ri platforma panelindÉ™n: qeydiyyat, idarÉ™, say. Rotasiya vÉ™ provisioning paketi step-up tÉ™lÉ™b edir. */
 export const platformTagsApi = {
   overview: (tenantId: string, query: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/tags", {
-        params: { path: { tenantId }, query },
-      }),
-    ),
-  register: (
-    tenantId: string,
-    body: { uid: string; branchId: string; label: string },
-  ) =>
-    unwrap(
-      api.POST("/api/v1/platform/tenants/{tenantId}/tags", {
-        params: { path: { tenantId } },
-        body,
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId }, query } })),
+  register: (tenantId: string, body: { uid: string; branchId: string; label: string }) =>
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags', { params: { path: { tenantId } }, body })),
   disable: (tenantId: string, tagId: string) =>
-    unwrap(
-      api.POST("/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable", {
-        params: { path: { tenantId, tagId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/disable', { params: { path: { tenantId, tagId } } })),
   enable: (tenantId: string, tagId: string) =>
-    unwrap(
-      api.POST("/api/v1/platform/tenants/{tenantId}/tags/{tagId}/enable", {
-        params: { path: { tenantId, tagId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/enable', { params: { path: { tenantId, tagId } } })),
   rotate: (tenantId: string, tagId: string) =>
-    unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/key-rotations",
-        { params: { path: { tenantId, tagId } } },
-      ),
-    ),
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/key-rotations', { params: { path: { tenantId, tagId } } })),
   provisioningPackage: (tenantId: string, tagId: string) =>
     unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package",
-        { params: { path: { tenantId, tagId } } },
-      ),
+      api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/provisioning-package', { params: { path: { tenantId, tagId } } }),
     ),
   transferPackage: (tenantId: string, tagId: string) =>
-    unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/tags/{tagId}/transfer-package",
-        { params: { path: { tenantId, tagId } } },
-      ),
-    ),
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/transfer-package', { params: { path: { tenantId, tagId } } })),
   events: (tenantId: string, tagId: string, query: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events", {
-        params: { path: { tenantId, tagId }, query },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/tags/{tagId}/events', { params: { path: { tenantId, tagId }, query } })),
 };
 
 export const auditApi = {
   list: (query: { action?: string; from?: string; to?: string } & PageParams) =>
-    unwrap(api.GET("/api/v1/admin/audit-logs", { params: { query } })),
-  actions: () => unwrap(api.GET("/api/v1/admin/audit-logs/actions")),
+    unwrap(api.GET('/api/v1/admin/audit-logs', { params: { query } })),
+  actions: () => unwrap(api.GET('/api/v1/admin/audit-logs/actions')),
 };
 
-export type CompanyContent = Schemas["Company"];
-export type BranchSettings = Schemas["BranchView"];
-export type BranchPolicy = Schemas["BranchPolicy"];
+export type CompanyContent = Schemas['Company'];
+export type BranchSettings = Schemas['BranchView'];
+export type BranchPolicy = Schemas['BranchPolicy'];
 export type BusinessHours = Record<string, string[][]>;
 export interface Localized {
   az: string;
@@ -593,438 +392,242 @@ export interface Localized {
 
 /** ÅžirkÉ™tin mÉ™zmunu, filiallar vÉ™ filial Ã¼zrÉ™ qayda (yalnÄ±z sahib). */
 export const companyApi = {
-  get: () => unwrap(api.GET("/api/v1/admin/settings/company")),
-  update: (body: Schemas["CompanyRequest"]) =>
-    unwrap(api.PUT("/api/v1/admin/settings/company", { body })),
+  get: () => unwrap(api.GET('/api/v1/admin/settings/company')),
+  update: (body: Schemas['CompanyRequest']) => unwrap(api.PUT('/api/v1/admin/settings/company', { body })),
   /** Loqo multipart ilÉ™ gÃ¶ndÉ™rilir (fayl brauzerdÉ™ Ã¶lÃ§Ã¼ vÉ™ nÃ¶v Ã¼zrÉ™ É™vvÉ™lcÉ™dÉ™n yoxlanÄ±lÄ±r). */
   uploadLogo: (file: File) => {
     const form = new FormData();
-    form.append("file", file);
-    return unwrap(
-      api.PUT("/api/v1/admin/settings/company/logo", {
-        body: { file: "" },
-        bodySerializer: () => form,
-      }),
-    );
+    form.append('file', file);
+    return unwrap(api.PUT('/api/v1/admin/settings/company/logo', { body: { file: '' }, bodySerializer: () => form }));
   },
-  removeLogo: () => unwrap(api.DELETE("/api/v1/admin/settings/company/logo")),
-  branches: () => unwrap(api.GET("/api/v1/admin/settings/branches")),
-  createBranch: (body: Schemas["BranchRequest"]) =>
-    unwrap(api.POST("/api/v1/admin/settings/branches", { body })),
-  updateBranch: (branchId: string, body: Schemas["BranchRequest"]) =>
-    unwrap(
-      api.PATCH("/api/v1/admin/settings/branches/{branchId}", {
-        params: { path: { branchId } },
-        body,
-      }),
-    ),
+  removeLogo: () => unwrap(api.DELETE('/api/v1/admin/settings/company/logo')),
+  branches: () => unwrap(api.GET('/api/v1/admin/settings/branches')),
+  createBranch: (body: Schemas['BranchRequest']) => unwrap(api.POST('/api/v1/admin/settings/branches', { body })),
+  updateBranch: (branchId: string, body: Schemas['BranchRequest']) =>
+    unwrap(api.PATCH('/api/v1/admin/settings/branches/{branchId}', { params: { path: { branchId } }, body })),
   branchPolicy: (branchId: string) =>
-    unwrap(
-      api.GET("/api/v1/admin/settings/branches/{branchId}/stamp-policy", {
-        params: { path: { branchId } },
-      }),
-    ),
-  overridePolicy: (branchId: string, body: Schemas["BranchPolicyRequest"]) =>
-    unwrap(
-      api.PUT("/api/v1/admin/settings/branches/{branchId}/stamp-policy", {
-        params: { path: { branchId } },
-        body,
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } } })),
+  overridePolicy: (branchId: string, body: Schemas['BranchPolicyRequest']) =>
+    unwrap(api.PUT('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } }, body })),
   resetPolicy: (branchId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/settings/branches/{branchId}/stamp-policy", {
-        params: { path: { branchId } },
-      }),
-    ),
+    unwrap(api.DELETE('/api/v1/admin/settings/branches/{branchId}/stamp-policy', { params: { path: { branchId } } })),
 };
 
-export type TenantDomain = Schemas["Domain"];
-export type PlatformAuditEntry = Schemas["PlatformAuditEntry"];
+export type TenantDomain = Schemas['Domain'];
+export type PlatformAuditEntry = Schemas['PlatformAuditEntry'];
 
 /** Platforma: ÅŸirkÉ™tin domenlÉ™ri (É™sas domen vÉ™ silmÉ™ step-up tÉ™lÉ™b edir) vÉ™ platforma audit jurnalÄ±. */
 export const platformDomainsApi = {
-  list: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/domains", {
-        params: { path: { tenantId } },
-      }),
-    ),
+  list: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/domains', { params: { path: { tenantId } } })),
   add: (tenantId: string, hostname: string) =>
-    unwrap(
-      api.POST("/api/v1/platform/tenants/{tenantId}/domains", {
-        params: { path: { tenantId } },
-        body: { hostname },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/domains', { params: { path: { tenantId } }, body: { hostname } })),
   makePrimary: (tenantId: string, domainId: string) =>
     unwrap(
-      api.POST(
-        "/api/v1/platform/tenants/{tenantId}/domains/{domainId}/primary",
-        { params: { path: { tenantId, domainId } } },
-      ),
+      api.POST('/api/v1/platform/tenants/{tenantId}/domains/{domainId}/primary', { params: { path: { tenantId, domainId } } }),
     ),
   remove: (tenantId: string, domainId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/platform/tenants/{tenantId}/domains/{domainId}", {
-        params: { path: { tenantId, domainId } },
-      }),
-    ),
+    unwrap(api.DELETE('/api/v1/platform/tenants/{tenantId}/domains/{domainId}', { params: { path: { tenantId, domainId } } })),
 };
 
 export const platformAuditApi = {
-  list: (query: { action?: string } & PageParams) =>
-    unwrap(api.GET("/api/v1/platform/audit-logs", { params: { query } })),
+  list: (query: { action?: string } & PageParams) => unwrap(api.GET('/api/v1/platform/audit-logs', { params: { query } })),
 };
 
-export type SmsUsageReport = Schemas["SmsUsageReport"];
+export type SmsUsageReport = Schemas['SmsUsageReport'];
 
-export type ReminderSettings = Schemas["ReminderSettings"];
+export type ReminderSettings = Schemas['ReminderSettings'];
 
 /** Avtomatik xatırlatmalar (şirkət sahibi): parametrlər və statistika. */
 export const remindersApi = {
-  settings: () => unwrap(api.GET("/api/v1/admin/reminders/settings")),
-  updateSettings: (body: Schemas["ReminderSettingsRequest"]) =>
-    unwrap(api.PUT("/api/v1/admin/reminders/settings", { body })),
-  stats: () => unwrap(api.GET("/api/v1/admin/reminders/stats")),
+  settings: () => unwrap(api.GET('/api/v1/admin/reminders/settings')),
+  updateSettings: (body: Schemas['ReminderSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/reminders/settings', { body })),
+  stats: () => unwrap(api.GET('/api/v1/admin/reminders/stats')),
 };
 
-export type ReferralSettings = Schemas["ReferralSettings"];
-export type ReferralActivity = "ALL" | "NONE" | "ONCE" | "RETURNED";
+export type ReferralSettings = Schemas['ReferralSettings'];
+export type ReferralActivity = 'ALL' | 'NONE' | 'ONCE' | 'RETURNED';
 
 /** Dost dÉ™vÉ™ti (ÅŸirkÉ™t sahibi): parametrlÉ™r, xÃ¼lasÉ™ vÉ™ dÉ™vÉ™tlÉ™r. */
 export const referralsApi = {
-  settings: () => unwrap(api.GET("/api/v1/admin/referrals/settings")),
-  updateSettings: (body: Schemas["ReferralSettingsRequest"]) =>
-    unwrap(api.PUT("/api/v1/admin/referrals/settings", { body })),
-  summary: () => unwrap(api.GET("/api/v1/admin/referrals/summary")),
+  settings: () => unwrap(api.GET('/api/v1/admin/referrals/settings')),
+  updateSettings: (body: Schemas['ReferralSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/referrals/settings', { body })),
+  summary: () => unwrap(api.GET('/api/v1/admin/referrals/summary')),
   /** {@code activity}: ALL, NONE (gəlməyib), ONCE (bir gün), RETURNED (2+ gün). */
-  list: (query: PageParams & { activity: ReferralActivity }) =>
-    unwrap(api.GET("/api/v1/admin/referrals", { params: { query } })),
+  list: (query: PageParams & { activity: ReferralActivity }) => unwrap(api.GET('/api/v1/admin/referrals', { params: { query } })),
   /** İdarəetmə paneli: dövrün statistikası və ən çox dost gətirənlər. */
-  dashboard: (query: AnalyticsFilter) =>
-    unwrap(api.GET("/api/v1/admin/referrals/dashboard", { params: { query } })),
+  dashboard: (query: AnalyticsFilter) => unwrap(api.GET('/api/v1/admin/referrals/dashboard', { params: { query } })),
 };
 
-export type CampaignRequest = Schemas["CampaignRequest"];
-export type CampaignView = Schemas["CampaignView"];
-export type CampaignPreview = Schemas["Preview"];
-export type PlatformCampaign = Schemas["PlatformCampaignView"];
+export type CampaignRequest = Schemas['CampaignRequest'];
+export type CampaignView = Schemas['CampaignView'];
+export type CampaignPreview = Schemas['Preview'];
+export type PlatformCampaign = Schemas['PlatformCampaignView'];
 
 /** Kampaniya SMS-lÉ™ri (ÅŸirkÉ™t sahibi). */
 export const campaignsApi = {
-  preview: (body: CampaignRequest) =>
-    unwrap(api.POST("/api/v1/admin/campaigns/preview", { body })),
-  create: (body: CampaignRequest) =>
-    unwrap(api.POST("/api/v1/admin/campaigns", { body })),
-  list: (type: "SMS" | "STAMPS", paging: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/admin/campaigns", {
-        params: { query: { type, ...paging } },
-      }),
-    ),
+  preview: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns/preview', { body })),
+  create: (body: CampaignRequest) => unwrap(api.POST('/api/v1/admin/campaigns', { body })),
+  list: (type: 'SMS' | 'STAMPS', paging: PageParams) =>
+    unwrap(api.GET('/api/v1/admin/campaigns', { params: { query: { type, ...paging } } })),
   /** SMS-i gÃ¶ndÉ™rilmÉ™yÉ™n alÄ±cÄ±lar (ad, nÃ¶mrÉ™, sÉ™bÉ™b). */
   failures: (campaignId: string, query: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/admin/campaigns/{campaignId}/failures", {
-        params: { path: { campaignId }, query },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/admin/campaigns/{campaignId}/failures', { params: { path: { campaignId }, query } })),
   /** YalnÄ±z tÉ™sdiq gÃ¶zlÉ™yÉ™n kampaniya. */
   update: (campaignId: string, body: CampaignRequest) =>
-    unwrap(
-      api.PUT("/api/v1/admin/campaigns/{campaignId}", {
-        params: { path: { campaignId } },
-        body,
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/campaigns/{campaignId}', { params: { path: { campaignId } }, body })),
   cancel: (campaignId: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/campaigns/{campaignId}/cancel", {
-        params: { path: { campaignId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/admin/campaigns/{campaignId}/cancel', { params: { path: { campaignId } } })),
 };
 
 /** Kampaniyalar (platforma): tÉ™sdiq gÃ¶zlÉ™yÉ™nlÉ™r vÉ™ qÉ™rar. */
 export const platformCampaignsApi = {
-  list: (status: "PENDING" | "ALL", paging: PageParams) =>
-    unwrap(
-      api.GET("/api/v1/platform/campaigns", {
-        params: { query: { status, ...paging } },
-      }),
-    ),
+  list: (status: 'PENDING' | 'ALL', paging: PageParams) =>
+    unwrap(api.GET('/api/v1/platform/campaigns', { params: { query: { status, ...paging } } })),
   approve: (tenantId: string, campaignId: string) =>
-    unwrap(
-      api.POST("/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve", {
-        params: { path: { tenantId, campaignId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/approve', { params: { path: { tenantId, campaignId } } })),
   /** Hesab xÉ™tasÄ±na gÃ¶rÉ™ dayandÄ±rÄ±lmÄ±ÅŸ kampaniyanÄ± davam etdirmÉ™k. */
   resume: (tenantId: string, campaignId: string) =>
-    unwrap(
-      api.POST("/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume", {
-        params: { path: { tenantId, campaignId } },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume', { params: { path: { tenantId, campaignId } } })),
   reject: (tenantId: string, campaignId: string, reason: string) =>
     unwrap(
-      api.POST("/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject", {
+      api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject', {
         params: { path: { tenantId, campaignId } },
         body: { reason },
       }),
     ),
 };
 
-export type TenantSmsLimit = Schemas["TenantSmsLimit"];
+export type TenantSmsLimit = Schemas['TenantSmsLimit'];
 
 export const platformSmsApi = {
   /** Şirkətin gündəlik SMS limiti (yeni nömrələrə giriş kodları) və bu günkü istifadə. */
   tenantLimit: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/sms-limit", {
-        params: { path: { tenantId } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/sms-limit', { params: { path: { tenantId } } })),
   /** {@code null} — standart dəyərə qaytarmaq. */
   updateTenantLimit: (tenantId: string, limit: number | null) =>
     unwrap(
-      api.PUT("/api/v1/platform/tenants/{tenantId}/sms-limit", {
+      api.PUT('/api/v1/platform/tenants/{tenantId}/sms-limit', {
         params: { path: { tenantId } },
         body: { limit: limit ?? undefined },
       }),
     ),
   /** Platformanın gündəlik büdcəsi və bu günkü istifadə. */
-  budget: () => unwrap(api.GET("/api/v1/platform/sms-usage/budget")),
+  budget: () => unwrap(api.GET('/api/v1/platform/sms-usage/budget')),
   /** GÃ¼nlÉ™r daxil (YYYY-MM-DD, BakÄ± vaxtÄ±). */
-  usage: (from: string, to: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/sms-usage", {
-        params: { query: { from, to } },
-      }),
-    ),
+  usage: (from: string, to: string) => unwrap(api.GET('/api/v1/platform/sms-usage', { params: { query: { from, to } } })),
   /** SMS axtarÄ±ÅŸÄ±: status (SENT/FAILED) vÉ™ nÃ¶mrÉ™ (vÉ™ ya hissÉ™si) istÉ™yÉ™ baÄŸlÄ±; 20-lik sÉ™hifÉ™lÉ™r (page 0-dan). */
-  messages: (
-    query: {
-      from: string;
-      to: string;
-      status?: "SENT" | "FAILED";
-      phone?: string;
-    } & PageParams,
-  ) =>
-    unwrap(
-      api.GET("/api/v1/platform/sms-usage/messages", { params: { query } }),
-    ),
+  messages: (query: { from: string; to: string; status?: 'SENT' | 'FAILED'; phone?: string } & PageParams) =>
+    unwrap(api.GET('/api/v1/platform/sms-usage/messages', { params: { query } })),
 };
 
-export type TenantPlan = Schemas["TenantPlanResponse"];
-export type PlanName = Schemas["TenantPlanRequest"]["plan"];
+export type TenantPlan = Schemas['TenantPlanResponse'];
+export type PlanName = Schemas['TenantPlanRequest']['plan'];
 
 /** Platforma paneli: şirkətin paketi və sınaq müddəti (hər paket üçün bir dəfə). */
 export const platformPlanApi = {
   get: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/plan", {
-        params: { path: { tenantId } },
-      }),
-    ),
-  update: (tenantId: string, body: Schemas["TenantPlanRequest"]) =>
-    unwrap(
-      api.PUT("/api/v1/platform/tenants/{tenantId}/plan", {
-        params: { path: { tenantId } },
-        body,
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } } })),
+  update: (tenantId: string, body: Schemas['TenantPlanRequest']) =>
+    unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan', { params: { path: { tenantId } }, body })),
   addons: (tenantId: string) =>
-    unwrap(
-      api.GET("/api/v1/platform/tenants/{tenantId}/plan/addons", {
-        params: { path: { tenantId } },
-      }),
-    ),
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/plan/addons', { params: { path: { tenantId } } })),
   setAddon: (tenantId: string, addon: AddonName, enabled: boolean) =>
-    unwrap(
-      api.PUT("/api/v1/platform/tenants/{tenantId}/plan/addons/{addon}", {
-        params: { path: { tenantId, addon } },
-        body: { enabled },
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/platform/tenants/{tenantId}/plan/addons/{addon}', {
+      params: { path: { tenantId, addon } },
+      body: { enabled },
+    })),
 };
 
-export type CatalogView = Schemas["CatalogView"];
-export type CatalogCategory = Schemas["CategoryView"];
-export type CatalogItem = Schemas["ItemView"];
-export type CatalogItemRequest = Schemas["ItemRequest"];
-export type CatalogTitle = "MENU" | "SERVICES" | "PRICES";
-export const CATALOG_KEY = ["catalog"] as const;
+export type CatalogView = Schemas['CatalogView'];
+export type CatalogCategory = Schemas['CategoryView'];
+export type CatalogItem = Schemas['ItemView'];
+export type CatalogItemRequest = Schemas['ItemRequest'];
+export type CatalogTitle = 'MENU' | 'SERVICES' | 'PRICES';
+export const CATALOG_KEY = ['catalog'] as const;
 
 /** Menyu və ya xidmətlər (şirkət sahibi, əlavə CATALOG): hər dəyişiklik bütün kataloqu qaytarır. */
 export const catalogApi = {
-  get: () => unwrap(api.GET("/api/v1/admin/catalog")),
+  get: () => unwrap(api.GET('/api/v1/admin/catalog')),
   settings: (enabled: boolean, title: CatalogTitle) =>
-    unwrap(
-      api.PUT("/api/v1/admin/catalog/settings", { body: { enabled, title } }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/catalog/settings', { body: { enabled, title } })),
   createCategory: (name: Localized, active: boolean) =>
-    unwrap(
-      api.POST("/api/v1/admin/catalog/categories", { body: { name, active } }),
-    ),
+    unwrap(api.POST('/api/v1/admin/catalog/categories', { body: { name, active } })),
   updateCategory: (categoryId: string, name: Localized, active: boolean) =>
-    unwrap(
-      api.PUT("/api/v1/admin/catalog/categories/{categoryId}", {
-        params: { path: { categoryId } },
-        body: { name, active },
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/catalog/categories/{categoryId}', { params: { path: { categoryId } }, body: { name, active } })),
   deleteCategory: (categoryId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/catalog/categories/{categoryId}", {
-        params: { path: { categoryId } },
-      }),
-    ),
-  reorderCategories: (ids: string[]) =>
-    unwrap(
-      api.PUT("/api/v1/admin/catalog/categories/order", { body: { ids } }),
-    ),
+    unwrap(api.DELETE('/api/v1/admin/catalog/categories/{categoryId}', { params: { path: { categoryId } } })),
+  reorderCategories: (ids: string[]) => unwrap(api.PUT('/api/v1/admin/catalog/categories/order', { body: { ids } })),
   reorderItems: (categoryId: string, ids: string[]) =>
-    unwrap(
-      api.PUT("/api/v1/admin/catalog/categories/{categoryId}/order", {
-        params: { path: { categoryId } },
-        body: { ids },
-      }),
-    ),
-  createItem: (body: CatalogItemRequest) =>
-    unwrap(api.POST("/api/v1/admin/catalog/items", { body })),
+    unwrap(api.PUT('/api/v1/admin/catalog/categories/{categoryId}/order', { params: { path: { categoryId } }, body: { ids } })),
+  createItem: (body: CatalogItemRequest) => unwrap(api.POST('/api/v1/admin/catalog/items', { body })),
   updateItem: (itemId: string, body: CatalogItemRequest) =>
-    unwrap(
-      api.PUT("/api/v1/admin/catalog/items/{itemId}", {
-        params: { path: { itemId } },
-        body,
-      }),
-    ),
-  deleteItem: (itemId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/catalog/items/{itemId}", {
-        params: { path: { itemId } },
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/catalog/items/{itemId}', { params: { path: { itemId } }, body })),
+  deleteItem: (itemId: string) => unwrap(api.DELETE('/api/v1/admin/catalog/items/{itemId}', { params: { path: { itemId } } })),
   /** Şəkil multipart ilə göndərilir (brauzerdə növ və həcm əvvəlcədən yoxlanılır). */
   uploadImage: (itemId: string, file: File) => {
     const form = new FormData();
-    form.append("file", file);
-    return unwrap(
-      api.PUT("/api/v1/admin/catalog/items/{itemId}/image", {
-        params: { path: { itemId } },
-        body: { file: "" },
-        bodySerializer: () => form,
-      }),
-    );
+    form.append('file', file);
+    return unwrap(api.PUT('/api/v1/admin/catalog/items/{itemId}/image', {
+      params: { path: { itemId } },
+      body: { file: '' },
+      bodySerializer: () => form,
+    }));
   },
   removeImage: (itemId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/catalog/items/{itemId}/image", {
-        params: { path: { itemId } },
-      }),
-    ),
+    unwrap(api.DELETE('/api/v1/admin/catalog/items/{itemId}/image', { params: { path: { itemId } } })),
 };
 
-export type AddonName = NonNullable<
-  Schemas["TenantAddonsResponse"]["addons"]
->[number];
+export type AddonName = NonNullable<Schemas['TenantAddonsResponse']['addons']>[number];
 /** Satılan əlavələrin hamısı (platforma panelində sıra ilə). */
-export const ADDONS: readonly AddonName[] = ["CATALOG"];
+export const ADDONS: readonly AddonName[] = ['CATALOG'];
 
-export type BonusRule = Schemas["RuleView"];
-export type BonusRuleRequest = Schemas["BonusRuleRequest"];
+export type BonusRule = Schemas['RuleView'];
+export type BonusRuleRequest = Schemas['BonusRuleRequest'];
 
 /** Bonus qaydaları (şirkət sahibi): xoşbəxt saatlar və tarixli kampaniyalar. */
 export const bonusRulesApi = {
-  list: () => unwrap(api.GET("/api/v1/admin/bonus-rules")),
-  create: (body: BonusRuleRequest) =>
-    unwrap(api.POST("/api/v1/admin/bonus-rules", { body })),
+  list: () => unwrap(api.GET('/api/v1/admin/bonus-rules')),
+  create: (body: BonusRuleRequest) => unwrap(api.POST('/api/v1/admin/bonus-rules', { body })),
   update: (ruleId: string, body: BonusRuleRequest) =>
-    unwrap(
-      api.PUT("/api/v1/admin/bonus-rules/{ruleId}", {
-        params: { path: { ruleId } },
-        body,
-      }),
-    ),
-  remove: (ruleId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/bonus-rules/{ruleId}", {
-        params: { path: { ruleId } },
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } }, body })),
+  remove: (ruleId: string) => unwrap(api.DELETE('/api/v1/admin/bonus-rules/{ruleId}', { params: { path: { ruleId } } })),
 };
 
-export type BonusDeliveryStatus = "PENDING" | "DELIVERED" | "FAILED";
+export type BonusDeliveryStatus = 'PENDING' | 'DELIVERED' | 'FAILED';
 
 /** Bonus kampaniyasının başlanğıc bildirişini alanlar (nəticə ilə, səhifə-səhifə). */
 export const bonusDeliveriesApi = {
-  list: (
-    ruleId: string,
-    query: PageParams & { status?: BonusDeliveryStatus },
-  ) =>
-    unwrap(
-      api.GET("/api/v1/admin/bonus-rules/{ruleId}/deliveries", {
-        params: { path: { ruleId }, query },
-      }),
-    ),
+  list: (ruleId: string, query: PageParams & { status?: BonusDeliveryStatus }) =>
+    unwrap(api.GET('/api/v1/admin/bonus-rules/{ruleId}/deliveries', { params: { path: { ruleId }, query } })),
 };
 
-export type TierOverview = Schemas["TierOverview"];
-export type TierView = Schemas["TierView"];
-export type TierRequest = Schemas["TierRequest"];
+export type TierOverview = Schemas['TierOverview'];
+export type TierView = Schemas['TierView'];
+export type TierRequest = Schemas['TierRequest'];
 
 /** Müştəri səviyyələri (şirkət sahibi). */
 export const tiersApi = {
-  list: () => unwrap(api.GET("/api/v1/admin/tiers")),
-  setEnabled: (enabled: boolean) =>
-    unwrap(api.PUT("/api/v1/admin/tiers/settings", { body: { enabled } })),
-  create: (body: TierRequest) =>
-    unwrap(api.POST("/api/v1/admin/tiers", { body })),
+  list: () => unwrap(api.GET('/api/v1/admin/tiers')),
+  setEnabled: (enabled: boolean) => unwrap(api.PUT('/api/v1/admin/tiers/settings', { body: { enabled } })),
+  create: (body: TierRequest) => unwrap(api.POST('/api/v1/admin/tiers', { body })),
   update: (tierId: string, body: TierRequest) =>
-    unwrap(
-      api.PUT("/api/v1/admin/tiers/{tierId}", {
-        params: { path: { tierId } },
-        body,
-      }),
-    ),
-  remove: (tierId: string) =>
-    unwrap(
-      api.DELETE("/api/v1/admin/tiers/{tierId}", {
-        params: { path: { tierId } },
-      }),
-    ),
+    unwrap(api.PUT('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } }, body })),
+  remove: (tierId: string) => unwrap(api.DELETE('/api/v1/admin/tiers/{tierId}', { params: { path: { tierId } } })),
 };
 
-export type FeedbackView = Schemas["FeedbackView"];
-export type FeedbackRating = "GOOD" | "OK" | "BAD";
-export const FEEDBACK_SUMMARY_KEY = ["feedback-summary"] as const;
+export type FeedbackView = Schemas['FeedbackView'];
+export type FeedbackRating = 'GOOD' | 'OK' | 'BAD';
+export const FEEDBACK_SUMMARY_KEY = ['feedback-summary'] as const;
 
 /** Ziyarətdən sonra rəy (şirkət sahibi): parametrlər, xülasə, rəylər və həll. */
 export const feedbackApi = {
-  settings: () => unwrap(api.GET("/api/v1/admin/feedback/settings")),
-  updateSettings: (body: Schemas["FeedbackSettingsRequest"]) =>
-    unwrap(api.PUT("/api/v1/admin/feedback/settings", { body })),
+  settings: () => unwrap(api.GET('/api/v1/admin/feedback/settings')),
+  updateSettings: (body: Schemas['FeedbackSettingsRequest']) => unwrap(api.PUT('/api/v1/admin/feedback/settings', { body })),
   /** Dövr verilməyibsə — son 30 gün; göstəricilər paneli seçilmiş dövrü ötürür. */
   summary: (branchId?: string, period?: { from?: string; to?: string }) =>
-    unwrap(
-      api.GET("/api/v1/admin/feedback/summary", {
-        params: { query: { branchId, ...period } },
-      }),
-    ),
-  list: (
-    query: PageParams & {
-      rating?: FeedbackRating;
-      unresolved?: boolean;
-      branchId?: string;
-    },
-  ) => unwrap(api.GET("/api/v1/admin/feedback", { params: { query } })),
+    unwrap(api.GET('/api/v1/admin/feedback/summary', { params: { query: { branchId, ...period } } })),
+  list: (query: PageParams & { rating?: FeedbackRating; unresolved?: boolean; branchId?: string }) =>
+    unwrap(api.GET('/api/v1/admin/feedback', { params: { query } })),
   resolve: (feedbackId: string, note?: string) =>
-    unwrap(
-      api.POST("/api/v1/admin/feedback/{feedbackId}/resolve", {
-        params: { path: { feedbackId } },
-        body: { note },
-      }),
-    ),
+    unwrap(api.POST('/api/v1/admin/feedback/{feedbackId}/resolve', { params: { path: { feedbackId } }, body: { note } })),
 };
