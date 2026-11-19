@@ -534,7 +534,9 @@
           "MENU": "Menyuya baxın",
           "SERVICES": "Xidmətlərə baxın",
           "PRICES": "Qiymətlərə baxın"
-        }
+        },
+        "welcome": "Xoş gəlmisiniz!",
+        "scanEither": "Telefonun kamerasını lazım olan QR koda tutun"
       },
       "withMenu": "Menyunun QR kodunu da əlavə et",
       "withMenuHint": "Kartda iki QR olacaq: Google rəyi və menyu. Kartın ölçüsü dəyişmir.",

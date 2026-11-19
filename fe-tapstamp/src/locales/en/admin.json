@@ -534,7 +534,9 @@
           "MENU": "See the menu",
           "SERVICES": "See our services",
           "PRICES": "See our prices"
-        }
+        },
+        "welcome": "Welcome!",
+        "scanEither": "Point your phone camera at the QR code you need"
       },
       "withMenu": "Add the menu QR code too",
       "withMenuHint": "The card will have two QR codes: Google review and menu. The card size stays the same.",

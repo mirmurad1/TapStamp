@@ -58,6 +58,8 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
     scan: t('platform.reviewCard.card.scan', { lng }),
     thanks: t('platform.reviewCard.card.thanks', { lng }),
     review: t('platform.reviewCard.card.review', { lng }),
+    welcome: t('platform.reviewCard.card.welcome', { lng }),
+    scanEither: t('platform.reviewCard.card.scanEither', { lng }),
     menu: menu ? t(`platform.reviewCard.card.menu.${menu.title}`, { lng }) : '',
   });
   const az = texts('az');
@@ -67,7 +69,13 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
       className="flex size-full flex-col items-center overflow-hidden bg-white text-center text-[#151a2d] [-webkit-print-color-adjust:exact] [print-color-adjust:exact]"
       style={{ fontSize, '--brand': brandColor } as CSSProperties}
     >
-      <div className="flex w-full flex-col items-center gap-[0.35em] bg-[linear-gradient(150deg,var(--brand),color-mix(in_srgb,var(--brand)_68%,#000))] px-[1.4em] pt-[1.4em] pb-[2.1em] text-white">
+      <div
+        className={cn(
+          'flex w-full flex-col items-center gap-[0.35em] bg-[linear-gradient(150deg,var(--brand),color-mix(in_srgb,var(--brand)_68%,#000))] px-[1.4em] pt-[1.4em] text-white',
+          // Ulduzlar zolağın altına girir — menyu kartında ulduz yoxdur, zolaq qısadır
+          menu ? 'pb-[1.4em]' : 'pb-[2.1em]',
+        )}
+      >
         <TenantLogo
           tenantId={tenantId}
           name={companyName}
@@ -77,16 +85,24 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
         <p className="mt-[0.2em] text-[1.55em] leading-tight font-extrabold tracking-tight">{companyName}</p>
         <p className="text-[0.9em] opacity-85">{branchName}</p>
       </div>
-      <div className="-mt-[1.35em] flex gap-[0.15em] rounded-full bg-white px-[0.9em] py-[0.5em] shadow-[0_0.4em_1em_-0.4em_rgb(0_0_0/0.3)]">
-        {[0, 1, 2, 3, 4].map((index) => (
-          <Star key={index} className="size-[1.9em] fill-amber-400 text-amber-400" aria-hidden="true" />
-        ))}
-      </div>
-      <p className="mt-[0.85em] px-[0.8em] text-[1.7em] leading-[1.12] font-extrabold tracking-tight text-balance">
-        {az.title}
+      {/*
+       * Menyu QR-ı da olanda kart yalnız rəy üçün deyil: başlıq neytral salamdır, ulduzlar göstərilmir — hər QR-ın
+       * altında nəyə apardığı yazılır.
+       */}
+      {menu ? null : (
+        <div className="-mt-[1.35em] flex gap-[0.15em] rounded-full bg-white px-[0.9em] py-[0.5em] shadow-[0_0.4em_1em_-0.4em_rgb(0_0_0/0.3)]">
+          {[0, 1, 2, 3, 4].map((index) => (
+            <Star key={index} className="size-[1.9em] fill-amber-400 text-amber-400" aria-hidden="true" />
+          ))}
+        </div>
+      )}
+      <p className={cn('px-[0.8em] text-[1.7em] leading-[1.12] font-extrabold tracking-tight text-balance', menu ? 'mt-[0.75em]' : 'mt-[0.85em]')}>
+        {menu ? az.welcome : az.title}
       </p>
       {other ? (
-        <p className="mt-[0.2em] px-[1em] text-[1.15em] leading-tight font-bold text-[#5b6178]">{other?.title}</p>
+        <p className="mt-[0.2em] px-[1em] text-[1.15em] leading-tight font-bold text-[#5b6178]">
+          {menu ? other.welcome : other.title}
+        </p>
       ) : null}
       {menu ? (
         // İki QR: Google rəyi və menyu — hər birinin altında nəyə apardığı yazılır
@@ -115,8 +131,12 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
           </div>
         </>
       )}
-      <p className="mt-[0.75em] px-[1.5em] text-[0.92em] leading-snug font-semibold text-[#3b3f55]">{az.scan}</p>
-      {other ? <p className="px-[1.5em] text-[0.8em] leading-snug text-[#5b6178]">{other?.scan}</p> : null}
+      <p className="mt-[0.75em] px-[1.5em] text-[0.92em] leading-snug font-semibold text-[#3b3f55]">
+        {menu ? az.scanEither : az.scan}
+      </p>
+      {other ? (
+        <p className="px-[1.5em] text-[0.8em] leading-snug text-[#5b6178]">{menu ? other.scanEither : other.scan}</p>
+      ) : null}
       <p className="mt-auto pb-[1em] text-[0.78em] text-[#9aa0b4]">
         {az.thanks}
         {other ? ` · ${other.thanks}` : null}
