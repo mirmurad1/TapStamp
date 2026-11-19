@@ -241,6 +241,21 @@ class CatalogIT extends TapIntegrationTest {
     }
 
     @Test
+    void platformPrintCardOffersTheMenuQrOnlyWhileTheMenuIsOpen() throws Exception {
+        AdminClient platform = signedInPlatformAdmin();
+        String path = "/tenants/" + alpha().id() + "/review-cards";
+        // Əlavə açıq, bölmə aktiv (cleanUp-da MENU) — menyunun linki şirkətin domenindədir
+        platform.get(path).andExpect(status().isOk())
+                .andExpect(jsonPath("$.menuTitle").value("MENU"))
+                .andExpect(jsonPath("$.menuUrl").value(org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString(HOST), org.hamcrest.Matchers.endsWith("/menu"))));
+        // Bölmə söndürülüb — ikinci QR təklif olunmur
+        az.tapstamp.tenancy.TenantContext.runAs(alpha(), () ->
+                tenantJdbc.sql("UPDATE catalog_settings SET enabled = false").update());
+        platform.get(path).andExpect(jsonPath("$.menuUrl").doesNotExist());
+    }
+
+    @Test
     void menuLinkPreviewHasOpenGraphTagsInTheCompanyLanguage() throws Exception {
         AdminClient owner = owner();
         owner.post("/catalog/categories", Map.of("name", Map.of("az", "Önizləmə"))).andExpect(status().isCreated());

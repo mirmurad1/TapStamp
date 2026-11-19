@@ -3037,7 +3037,7 @@ export interface paths {
         };
         /**
          * Google rəyi üçün çap kartları (QR)
-         * @description Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi.
+         * @description Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi. Menyu açıqdırsa `menuTitle` və `menuUrl` — kartda ikinci QR.
          */
         get: operations["reviewCards"];
         put?: never;
@@ -5033,6 +5033,8 @@ export interface components {
         ReviewCardsView: {
             brandColor?: string;
             cards?: components["schemas"]["ReviewCardView"][];
+            menuTitle?: string;
+            menuUrl?: string;
         };
         RevokedResponse: {
             /** Format: int32 */

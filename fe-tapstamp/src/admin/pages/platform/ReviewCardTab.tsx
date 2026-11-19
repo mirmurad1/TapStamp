@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Check, Copy, Download, Printer, Star, TriangleAlert } from 'lucide-react';
+import { BookOpen, Check, Copy, Download, Printer, Star, TriangleAlert } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
@@ -22,6 +22,7 @@ import { TenantLogo } from './TenantLogo';
 
 type Size = 'A6' | 'A5' | 'A4';
 type Languages = 'az' | 'az-ru' | 'az-en';
+type MenuTitle = 'MENU' | 'SERVICES' | 'PRICES';
 const SIZES: readonly Size[] = ['A6', 'A5', 'A4'];
 const LANGUAGES: readonly Languages[] = ['az', 'az-ru', 'az-en'];
 
@@ -39,13 +40,15 @@ interface CardProps {
   languages: Languages;
   /** Kartın əsas şrift ölçüsü; bütün ölçülər ona nisbətdədir. */
   fontSize: string;
+  /** Menyu QR-ı da olsun: kartın ölçüsü eyni qalır, iki QR yan-yana yerləşir. */
+  menu?: { url: string; title: MenuTitle };
 }
 
 /**
  * Çap olunan kartın üzü (A6 nisbəti, 105 × 148 mm). Bütün ölçülər em-dədir: eyni kart önizləmədə, A6 və A5 çapında
  * yalnız əsas şrift ölçüsü ilə böyüyür. Mətnlər seçilmiş dil(lər)dədir, panelin dilindən asılı deyil.
  */
-function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, languages, fontSize }: CardProps) {
+function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, languages, fontSize, menu }: CardProps) {
   const { t } = useTranslation('admin');
   const second = languages === 'az' ? undefined : languages.slice(3);
   // Kartın mətnləri seçilmiş dildə (panelin dilindən asılı deyil)
@@ -54,6 +57,8 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
     subtitle: t('platform.reviewCard.card.subtitle', { lng }),
     scan: t('platform.reviewCard.card.scan', { lng }),
     thanks: t('platform.reviewCard.card.thanks', { lng }),
+    review: t('platform.reviewCard.card.review', { lng }),
+    menu: menu ? t(`platform.reviewCard.card.menu.${menu.title}`, { lng }) : '',
   });
   const az = texts('az');
   const other = second ? texts(second) : undefined;
@@ -83,10 +88,33 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
       {other ? (
         <p className="mt-[0.2em] px-[1em] text-[1.15em] leading-tight font-bold text-[#5b6178]">{other?.title}</p>
       ) : null}
-      <p className="mt-[0.5em] px-[2em] text-[0.92em] leading-snug text-[#5b6178]">{az.subtitle}</p>
-      <div className="mt-[0.9em] size-[11.5em] rounded-[1.1em] border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)] p-[0.5em]">
-        <QrCode value={qrUrl} label={az.scan} className="size-full" />
-      </div>
+      {menu ? (
+        // İki QR: Google rəyi və menyu — hər birinin altında nəyə apardığı yazılır
+        <div className="mt-[1em] grid w-full grid-cols-2 gap-[1em] px-[1.6em]">
+          {[
+            { url: qrUrl, icon: <Star className="size-[1em] fill-amber-400 text-amber-400" aria-hidden="true" />, label: az.review, second: other?.review },
+            { url: menu.url, icon: <BookOpen className="size-[1em] text-[var(--brand)]" aria-hidden="true" />, label: az.menu, second: other?.menu },
+          ].map((item) => (
+            <div key={item.url} className="flex min-w-0 flex-col items-center">
+              <div className="aspect-square w-full rounded-[0.9em] border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)] p-[0.4em]">
+                <QrCode value={item.url} label={item.label} className="size-full" />
+              </div>
+              <p className="mt-[0.45em] flex items-center gap-[0.3em] text-[0.88em] leading-tight font-bold">
+                {item.icon}
+                {item.label}
+              </p>
+              {item.second ? <p className="text-[0.75em] leading-tight text-[#5b6178]">{item.second}</p> : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <p className="mt-[0.5em] px-[2em] text-[0.92em] leading-snug text-[#5b6178]">{az.subtitle}</p>
+          <div className="mt-[0.9em] size-[11.5em] rounded-[1.1em] border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)] p-[0.5em]">
+            <QrCode value={qrUrl} label={az.scan} className="size-full" />
+          </div>
+        </>
+      )}
       <p className="mt-[0.75em] px-[1.5em] text-[0.92em] leading-snug font-semibold text-[#3b3f55]">{az.scan}</p>
       {other ? <p className="px-[1.5em] text-[0.8em] leading-snug text-[#5b6178]">{other?.scan}</p> : null}
       <p className="mt-auto pb-[1em] text-[0.78em] text-[#9aa0b4]">
@@ -148,6 +176,7 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
   const [size, setSize] = useState<Size>('A6');
   const [languages, setLanguages] = useState<Languages>('az');
   const [printing, setPrinting] = useState(false);
+  const [withMenu, setWithMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const selected: ReviewCard | undefined = cards.find((card) => card.branchId === branchId) ?? cards[0];
 
@@ -186,7 +215,12 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
     brandColor: data.data?.brandColor ?? '#6D28D9',
     qrUrl: selected.qrUrl ?? '',
     languages,
+    // Menyu yalnız açıq olanda və seçiləndə; kartın ölçüsü dəyişmir
+    menu: withMenu && data.data?.menuUrl
+      ? { url: data.data.menuUrl, title: (data.data.menuTitle ?? 'MENU') as MenuTitle }
+      : undefined,
   };
+  const menuOpen = Boolean(data.data?.menuUrl);
   const copyLink = () => void navigator.clipboard.writeText(card.qrUrl).then(() => setCopied(true));
 
   return (
@@ -245,6 +279,25 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
             onChange={setLanguages}
           />
 
+          <label className={cn('flex items-start gap-3 text-sm', !menuOpen && 'cursor-not-allowed opacity-60')}>
+            <input
+              type="checkbox"
+              checked={withMenu && menuOpen}
+              disabled={!menuOpen}
+              onChange={(event) => setWithMenu(event.target.checked)}
+              className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+            />
+            <span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <BookOpen className="size-4 text-primary" aria-hidden="true" />
+                {t('platform.reviewCard.withMenu')}
+              </span>
+              <span className="block text-muted-foreground">
+                {menuOpen ? t('platform.reviewCard.withMenuHint') : t('platform.reviewCard.menuClosed')}
+              </span>
+            </span>
+          </label>
+
           <p className="rounded-xl bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
             {t('platform.reviewCard.scans', {
               recent: formatNumber(selected.recentScans ?? 0, lang),
@@ -266,6 +319,15 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
                 <Download aria-hidden="true" />
                 {t('platform.reviewCard.downloadQr')}
               </Button>
+              {card.menu ? (
+                <Button
+                  variant="outline"
+                  onClick={() => downloadBlob(new Blob([qrSvg(card.menu?.url ?? '')], { type: 'image/svg+xml' }), `menu-qr-${slug}.svg`)}
+                >
+                  <Download aria-hidden="true" />
+                  {t('platform.reviewCard.downloadMenuQr')}
+                </Button>
+              ) : null}
               <Button variant="ghost" onClick={copyLink}>
                 {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
                 {copied ? t('platform.reviewCard.copied') : t('platform.reviewCard.copyLink')}

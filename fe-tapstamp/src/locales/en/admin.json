@@ -528,8 +528,18 @@
         "title": "Rate us on Google",
         "subtitle": "Your review helps others find us",
         "scan": "Point your phone camera at the QR code",
-        "thanks": "Thank you!"
-      }
+        "thanks": "Thank you!",
+        "review": "Review us on Google",
+        "menu": {
+          "MENU": "See the menu",
+          "SERVICES": "See our services",
+          "PRICES": "See our prices"
+        }
+      },
+      "withMenu": "Add the menu QR code too",
+      "withMenuHint": "The card will have two QR codes: Google review and menu. The card size stays the same.",
+      "menuClosed": "The company menu is not open: the \"Menu and services\" add-on must be enabled and the section turned on.",
+      "downloadMenuQr": "Menu QR code (SVG)"
     }
   },
   "staffConsole": {

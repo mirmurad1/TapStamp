@@ -144,7 +144,7 @@ public class PlatformTenantController {
     @GetMapping("/{tenantId}/review-cards")
     @Operation(summary = "Google rəyi üçün çap kartları (QR)", description = """
             Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a \
-            yönləndirir) və skanlar — son 30 gün və cəmi.""")
+            yönləndirir) və skanlar — son 30 gün və cəmi. Menyu açıqdırsa `menuTitle` və `menuUrl` — kartda ikinci QR.""")
     PlatformTenantService.ReviewCardsView reviewCards(@PathVariable UUID tenantId) {
         return tenants.reviewCards(tenantId);
     }

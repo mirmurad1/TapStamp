@@ -10,6 +10,7 @@ import java.util.UUID;
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.repository.CompanyMapper;
+import az.tapstamp.catalog.CatalogService;
 import az.tapstamp.company.service.CompanyLogoService;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.feedback.ReviewLinkService;
@@ -74,12 +75,13 @@ public class PlatformTenantService {
     private final CompanyLogoService logos;
     private final ReviewLinkService reviewLinks;
     private final CompanySettings companySettings;
+    private final CatalogService catalog;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
                                  TenantOverviewMapper overview, Clock clock, PlanService plans,
                                  AuditLogQuery auditLog, CompanyLogoService logos, ReviewLinkService reviewLinks,
-                                 CompanySettings companySettings) {
+                                 CompanySettings companySettings, CatalogService catalog) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -94,6 +96,7 @@ public class PlatformTenantService {
         this.logos = logos;
         this.reviewLinks = reviewLinks;
         this.companySettings = companySettings;
+        this.catalog = catalog;
     }
 
     public List<TenantSummary> list() {
@@ -158,8 +161,12 @@ public class PlatformTenantService {
                                  @Nullable String googleReviewUrl, String qrUrl, long recentScans, long totalScans) {
     }
 
-    /** Çap ekranı: kartın rəngi şirkətin brend rəngidir. */
-    public record ReviewCardsView(String brandColor, List<ReviewCardView> cards) {
+    /**
+     * Çap ekranı: kartın rəngi şirkətin brend rəngidir. Menyu açıqdırsa ({@code CATALOG} əlavəsi və bölmə aktivdir)
+     * kartda ikinci QR — menyunun linki: {@code menuTitle} bölmənin adıdır (MENU, SERVICES, PRICES).
+     */
+    public record ReviewCardsView(String brandColor, List<ReviewCardView> cards, @Nullable String menuTitle,
+                                  @Nullable String menuUrl) {
     }
 
     /**
@@ -175,7 +182,9 @@ public class PlatformTenantService {
                             card.googleReviewUrl(), base + "/api/v1/public/review/" + card.branchId(),
                             card.recentScans(), card.totalScans()))
                     .toList();
-            return new ReviewCardsView(companySettings.current().brandColor(), cards);
+            String menuTitle = catalog.publicTitle().orElse(null);
+            return new ReviewCardsView(companySettings.current().brandColor(), cards, menuTitle,
+                    menuTitle == null ? null : base + "/menu");
         });
     }
 

@@ -528,8 +528,18 @@
         "title": "Bizi Google‑da qiymətləndirin",
         "subtitle": "Rəyiniz başqalarının bizi tapmasına kömək edir",
         "scan": "Telefonun kamerasını QR koda tutun",
-        "thanks": "Təşəkkür edirik!"
-      }
+        "thanks": "Təşəkkür edirik!",
+        "review": "Google-da rəy yazın",
+        "menu": {
+          "MENU": "Menyuya baxın",
+          "SERVICES": "Xidmətlərə baxın",
+          "PRICES": "Qiymətlərə baxın"
+        }
+      },
+      "withMenu": "Menyunun QR kodunu da əlavə et",
+      "withMenuHint": "Kartda iki QR olacaq: Google rəyi və menyu. Kartın ölçüsü dəyişmir.",
+      "menuClosed": "Şirkətin menyusu açıq deyil: \"Menyu və xidmətlər\" əlavəsi qoşulmalı və bölmə aktiv olmalıdır.",
+      "downloadMenuQr": "Menyu QR kodu (SVG)"
     }
   },
   "staffConsole": {

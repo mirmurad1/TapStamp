@@ -5449,7 +5449,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/review-cards" : {
       "get" : {
-        "description" : "Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi.",
+        "description" : "Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi. Menyu açıqdırsa `menuTitle` və `menuUrl` — kartda ikinci QR.",
         "operationId" : "reviewCards",
         "parameters" : [ {
           "in" : "path",
@@ -9861,6 +9861,12 @@
             "items" : {
               "$ref" : "#/components/schemas/ReviewCardView"
             }
+          },
+          "menuTitle" : {
+            "type" : "string"
+          },
+          "menuUrl" : {
+            "type" : "string"
           }
         }
       },
