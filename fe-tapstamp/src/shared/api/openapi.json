@@ -5447,6 +5447,35 @@
         "tags" : [ "Platforma: paketlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/review-cards" : {
+      "get" : {
+        "description" : "Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi.",
+        "operationId" : "reviewCards",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReviewCardsView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Google rəyi üçün çap kartları (QR)",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/sms-limit" : {
       "get" : {
         "description" : "Limit yalnız sistemdə olmayan (yeni) nömrələrə göndərilən giriş kodlarını sayır; qeydiyyatlı müştərilərin kodları limitə düşmür. `usedToday` — bu gün (şirkətin saatı ilə) yeni nömrələrə göndərilən kodlar.",
@@ -6262,6 +6291,28 @@
         },
         "summary" : "Dəvət proqramı (giriş tələb etmir)",
         "tags" : [ "Müştəri: dost dəvəti" ]
+      }
+    },
+    "/api/v1/public/review/{branchId}" : {
+      "get" : {
+        "description" : "Filialın Google rəy səhifəsinə `302` (link qoşulmayıbsa — şirkət və filial adı ilə Google Maps axtarışına). Skan gün üzrə sayılır (HEAD və önizləmə botları sayılmır). Filial tapılmırsa — tətbiqin ana səhifəsinə.",
+        "operationId" : "review",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "branchId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "QR kartdan Google rəyinə keçid",
+        "tags" : [ "İctimai: Google rəyi" ]
       }
     },
     "/api/v1/public/share/menu" : {
@@ -9767,6 +9818,49 @@
           "returned" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "ReviewCardView" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "branchId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "googleReviewUrl" : {
+            "type" : "string"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "qrUrl" : {
+            "type" : "string"
+          },
+          "recentScans" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalScans" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ReviewCardsView" : {
+        "type" : "object",
+        "properties" : {
+          "brandColor" : {
+            "type" : "string"
+          },
+          "cards" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReviewCardView"
+            }
           }
         }
       },

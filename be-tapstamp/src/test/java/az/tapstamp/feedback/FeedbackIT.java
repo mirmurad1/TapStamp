@@ -1,6 +1,9 @@
 package az.tapstamp.feedback;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -148,6 +151,39 @@ class FeedbackIT extends TapIntegrationTest {
 
         owner.patch("/settings/branches/" + branchId, Map.of("googleReviewUrl", ""))
                 .andExpect(jsonPath("$.googleReviewUrl").doesNotExist());
+    }
+
+    @Test
+    void printedQrCardCountsScansAndRedirectsToTheBranchGoogleReviewPage() throws Exception {
+        UUID branchId = newBranch(Policy.relaxed());
+        String path = "/api/v1/public/review/" + branchId;
+        // Link qoşulmayıb — Google Maps axtarışına (kart heç vaxt "ölü" qalmır)
+        String search = mvc.perform(get(path).with(r -> { r.setServerName(HOST); return r; }))
+                .andExpect(status().isFound()).andReturn().getResponse().getHeader("Location");
+        assertThat(search).startsWith("https://www.google.com/maps/search/?api=1&query=");
+
+        String reviewUrl = "https://g.page/r/QrCard123/review";
+        owner().patch("/settings/branches/" + branchId, Map.of("googleReviewUrl", reviewUrl)).andExpect(status().isOk());
+        mvc.perform(get(path).with(r -> { r.setServerName(HOST); return r; }))
+                .andExpect(status().isFound())
+                .andExpect(header()
+                        .string("Location", reviewUrl))
+                .andExpect(header()
+                        .string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+        // Önizləmə botu və HEAD sayılmır
+        mvc.perform(get(path).header("User-Agent", "WhatsApp/2.23").with(r -> { r.setServerName(HOST); return r; }))
+                .andExpect(status().isFound());
+        mvc.perform(head(path)
+                .with(r -> { r.setServerName(HOST); return r; }));
+        Integer scans = TenantContext.callAs(alpha(), () -> tenantJdbc.sql(
+                        "SELECT COALESCE(sum(scans), 0) FROM review_qr_scans WHERE branch_id = :id")
+                .param("id", branchId).query(Integer.class).single());
+        assertThat(scans).isEqualTo(2);
+
+        // Naməlum filial — tətbiqin ana səhifəsi
+        mvc.perform(get("/api/v1/public/review/" + UUID.randomUUID()).with(r -> { r.setServerName(HOST); return r; }))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "/"));
     }
 
     @Test

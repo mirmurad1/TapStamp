@@ -30,6 +30,7 @@ import { emailField, useValidationMessage } from '../../lib/forms';
 import { DomainsCard } from './DomainsCard';
 import { TenantSmsLimitCard } from './SmsLimitCards';
 import { TenantAddonsCard } from './TenantAddonsCard';
+import { ReviewCardTab } from './ReviewCardTab';
 import { TenantAuditCard } from './TenantAuditCard';
 import { TenantLogo } from './TenantLogo';
 import { TenantPlanCard } from './TenantPlanCard';
@@ -37,8 +38,8 @@ import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
 import { TenantStatusBadge } from './TenantStatusBadge';
 
-type TenantTab = 'overview' | 'tags' | 'sms' | 'domains' | 'audit';
-const TABS: readonly TenantTab[] = ['overview', 'tags', 'sms', 'domains', 'audit'];
+type TenantTab = 'overview' | 'tags' | 'sms' | 'print' | 'domains' | 'audit';
+const TABS: readonly TenantTab[] = ['overview', 'tags', 'sms', 'print', 'domains', 'audit'];
 /** Şirkət aktiv deyilsə, onun bazasına qoşulmaq olmur — yalnız bu bölmələr açıqdır. */
 const OFFLINE_TABS: readonly TenantTab[] = ['overview', 'domains'];
 
@@ -91,6 +92,13 @@ export function TenantDetailPage() {
           ) : null}
           {tab === 'tags' ? <TenantTagsCard tenantId={tenantId} /> : null}
           {tab === 'sms' ? <TenantSmsLimitCard tenantId={tenantId} /> : null}
+          {tab === 'print' ? (
+            <ReviewCardTab
+              tenantId={tenantId}
+              companyName={resolveText(tenant.data.displayName, 'az')}
+              slug={tenant.data.slug ?? ''}
+            />
+          ) : null}
           {tab === 'domains' ? <DomainsCard tenantId={tenantId} /> : null}
           {tab === 'audit' ? <TenantAuditCard tenantId={tenantId} /> : null}
         </>

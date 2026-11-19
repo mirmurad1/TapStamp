@@ -497,3 +497,31 @@ input::-ms-clear {
 @utility stamp-countdown {
   animation: stamp-countdown 3s linear both;
 }
+
+/*
+ * Google rəyi üçün çap kartı (platforma paneli): çap zamanı yalnız kartlar görünür. Səhifə ölçüsü adlı @page ilə
+ * verilir — CSP inline <style>-a icazə vermir, ona görə ölçülər burada sabitdir.
+ */
+@page review-a6 {
+  size: 105mm 148mm;
+  margin: 0;
+}
+@page review-a5 {
+  size: 148mm 210mm;
+  margin: 0;
+}
+@page review-a4 {
+  size: 210mm 297mm;
+  margin: 0;
+}
+.review-print-root {
+  display: none;
+}
+@media print {
+  body.printing-review > *:not(.review-print-root) {
+    display: none !important;
+  }
+  body.printing-review .review-print-root {
+    display: block;
+  }
+}

@@ -11,6 +11,9 @@ import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.repository.CompanyMapper;
 import az.tapstamp.company.service.CompanyLogoService;
+import az.tapstamp.company.service.CompanySettings;
+import az.tapstamp.feedback.ReviewLinkService;
+import az.tapstamp.feedback.repository.FeedbackMapper.ReviewCard;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.plan.Subscription;
@@ -34,6 +37,7 @@ import az.tapstamp.tenancy.provisioning.ProvisionTenantCommand;
 import az.tapstamp.tenancy.provisioning.TenantProvisioner;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -68,11 +72,14 @@ public class PlatformTenantService {
     private final PlanService plans;
     private final AuditLogQuery auditLog;
     private final CompanyLogoService logos;
+    private final ReviewLinkService reviewLinks;
+    private final CompanySettings companySettings;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
                                  TenantOverviewMapper overview, Clock clock, PlanService plans,
-                                 AuditLogQuery auditLog, CompanyLogoService logos) {
+                                 AuditLogQuery auditLog, CompanyLogoService logos, ReviewLinkService reviewLinks,
+                                 CompanySettings companySettings) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -85,6 +92,8 @@ public class PlatformTenantService {
         this.plans = plans;
         this.auditLog = auditLog;
         this.logos = logos;
+        this.reviewLinks = reviewLinks;
+        this.companySettings = companySettings;
     }
 
     public List<TenantSummary> list() {
@@ -142,6 +151,32 @@ public class PlatformTenantService {
             return Optional.empty();
         }
         return TenantContext.callAs(tenant.toInfo(), () -> logos.logo().map(CompanyMapper.Logo::png));
+    }
+
+    /** Çap kartı: filial, QR-ın ünvanı (şirkətin domenində) və skanlar. */
+    public record ReviewCardView(UUID branchId, LocalizedText name, @Nullable LocalizedText address,
+                                 @Nullable String googleReviewUrl, String qrUrl, long recentScans, long totalScans) {
+    }
+
+    /** Çap ekranı: kartın rəngi şirkətin brend rəngidir. */
+    public record ReviewCardsView(String brandColor, List<ReviewCardView> cards) {
+    }
+
+    /**
+     * Google rəyi üçün çap olunan QR kartlar (stend) — platforma hazırlayır. QR şirkətin əsas domeninə aparır, ona
+     * görə domen dəyişsə köhnə domen də işlədikcə kartlar işləyir.
+     */
+    public ReviewCardsView reviewCards(UUID tenantId) {
+        TenantRecord tenant = activeTenant(tenantId);
+        return TenantContext.callAs(tenant.toInfo(), () -> {
+            String base = realms.baseUrl(AdminRealm.STAFF);
+            List<ReviewCardView> cards = reviewLinks.cards().stream()
+                    .map((ReviewCard card) -> new ReviewCardView(card.branchId(), card.name(), card.address(),
+                            card.googleReviewUrl(), base + "/api/v1/public/review/" + card.branchId(),
+                            card.recentScans(), card.totalScans()))
+                    .toList();
+            return new ReviewCardsView(companySettings.current().brandColor(), cards);
+        });
     }
 
     /** Şirkətin öz audit jurnalı (şirkətin bazasından), yenidən köhnəyə. Şəxsi məlumat jurnalda saxlanılmır. */

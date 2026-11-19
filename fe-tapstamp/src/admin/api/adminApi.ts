@@ -28,6 +28,7 @@ export type InvitationDetails = Schemas['InvitationDetailsResponse'];
 export type Tenant = Schemas['TenantResponse'];
 export type TenantOwner = Schemas['OwnerResponse'];
 export type TenantStats = Schemas['StatsResponse'];
+export type ReviewCard = Schemas['ReviewCardView'];
 export type ProvisionRequest = Schemas['ProvisionRequest'];
 export type Branch = Schemas['BranchResponse'];
 export type ContextScope = NonNullable<Schemas['ContextResponse']['scope']>;
@@ -172,6 +173,8 @@ export const platformApi = {
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/owners', { params: { path: { tenantId } } })),
   auditLog: (tenantId: string, query: { action?: string } & PageParams) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/audit-logs', { params: { path: { tenantId }, query } })),
+  reviewCards: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/review-cards', { params: { path: { tenantId } } })),
   auditActions: (tenantId: string) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/audit-logs/actions', { params: { path: { tenantId } } })),
   inviteOwner: (tenantId: string, body: Schemas['OwnerInvitationRequest']) =>

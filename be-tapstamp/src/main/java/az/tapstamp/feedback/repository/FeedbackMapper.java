@@ -1,6 +1,7 @@
 package az.tapstamp.feedback.repository;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,7 +30,26 @@ public interface FeedbackMapper {
     record SummaryRow(long good, long ok, long bad, long sent, long unresolvedBad, long reviewClicks) {
     }
 
+    /** QR kartın hədəfi: filialın Google rəy linki, yoxdursa Google Maps axtarışı üçün şirkət və filial adı. */
+    record ReviewTarget(@Nullable String googleReviewUrl, LocalizedText companyName, LocalizedText branchName,
+                        @Nullable LocalizedText address) {
+    }
+
+    /** Platforma üçün çap kartı: aktiv filial, Google linki və QR skanları. */
+    record ReviewCard(UUID branchId, LocalizedText name, @Nullable LocalizedText address,
+                      @Nullable String googleReviewUrl, long recentScans, long totalScans) {
+    }
+
     FeedbackSettings settings();
+
+    /** Aktiv filial üçün QR hədəfi; filial yoxdursa və ya bağlıdırsa boş. */
+    Optional<ReviewTarget> reviewTarget(UUID branchId);
+
+    /** QR skanını günün sayğacına əlavə edir. */
+    void recordQrScan(UUID branchId, LocalDate day);
+
+    /** Aktiv filiallar: {@code recentScans} — {@code since} günündən bəri, {@code totalScans} — hamısı. */
+    List<ReviewCard> reviewCards(LocalDate since);
 
     void updateSettings(boolean enabled, int frequencyDays, UUID staffId, Instant now);
 

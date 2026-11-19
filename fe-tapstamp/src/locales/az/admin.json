@@ -333,7 +333,8 @@
         "tags": "NFC çipləri",
         "sms": "SMS limiti",
         "domains": "Domenlər",
-        "audit": "Audit jurnalı"
+        "audit": "Audit jurnalı",
+        "print": "Çap materialları"
       }
     },
     "domains": {
@@ -489,6 +490,45 @@
       },
       "hints": {
         "CATALOG": "Restoran üçün menyu, digər sahələr üçün xidmətlər və qiymətlər — müştəriyə ayrıca səhifə."
+      }
+    },
+    "reviewCard": {
+      "title": "Google rəyi üçün masaüstü kart",
+      "description": "Stend üçün kart: müştəri QR kodu skan edib filialın Google rəy səhifəsinə düşür. Kartı burada hazırlayıb çap etdirin və şirkətə təhvil verin.",
+      "branch": "Filial",
+      "linkSet": "Google rəy linki qoşulub",
+      "linkMissing": "Google rəy linki qoşulmayıb: QR şirkətin adı ilə Google Maps axtarışına aparacaq. Dəqiq link üçün sahib onu Parametrlər → Filiallar bölməsində əlavə etsin — kartı yenidən çap etmək lazım olmayacaq.",
+      "size": "Ölçü",
+      "sizes": {
+        "A6": "A6 kart",
+        "A5": "A5 poster",
+        "A4": "A4 – 4 kart"
+      },
+      "sizeHints": {
+        "A6": "Masa və piştaxta",
+        "A5": "Divar və vitrin",
+        "A4": "Bir vərəqdə 4 ədəd"
+      },
+      "language": "Dil",
+      "languages": {
+        "az": "Azərbaycanca",
+        "az-ru": "AZ + RU",
+        "az-en": "AZ + EN"
+      },
+      "scans": "Skanlar: son 30 gündə {{recent}}, cəmi {{total}}",
+      "note": "QR kod şirkətin domeninə yönəlir, oradan Google-a keçir və hər skan sayılır. Google linki sonradan dəyişsə, kartı yenidən çap etmək lazım deyil.",
+      "print": "Çap et / PDF",
+      "printHint": "Çap pəncərəsində \"PDF kimi saxla\" seçib faylı stend hazırlayana göndərə bilərsiniz.",
+      "downloadQr": "QR kodu yüklə (SVG)",
+      "copyLink": "QR linkini kopyala",
+      "copied": "Kopyalandı",
+      "noBranches": "Şirkətin aktiv filialı yoxdur.",
+      "preview": "Kartın önizləməsi",
+      "card": {
+        "title": "Bizi Google‑da qiymətləndirin",
+        "subtitle": "Rəyiniz başqalarının bizi tapmasına kömək edir",
+        "scan": "Telefonun kamerasını QR koda tutun",
+        "thanks": "Təşəkkür edirik!"
       }
     }
   },

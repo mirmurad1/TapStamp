@@ -3028,6 +3028,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/review-cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Google rəyi üçün çap kartları (QR)
+         * @description Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi.
+         */
+        get: operations["reviewCards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/sms-limit": {
         parameters: {
             query?: never;
@@ -3502,6 +3522,26 @@ export interface paths {
          * @description Dəvət linki açılanda göstərmək üçün: proqram aktivdirmi və dosta neçə bonus möhür verilir.
          */
         get: operations["program"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/review/{branchId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * QR kartdan Google rəyinə keçid
+         * @description Filialın Google rəy səhifəsinə `302` (link qoşulmayıbsa — şirkət və filial adı ilə Google Maps axtarışına). Skan gün üzrə sayılır (HEAD və önizləmə botları sayılmır). Filial tapılmırsa — tətbiqin ana səhifəsinə.
+         */
+        get: operations["review"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4977,6 +5017,22 @@ export interface components {
             rate?: number;
             /** Format: int64 */
             returned?: number;
+        };
+        ReviewCardView: {
+            address?: components["schemas"]["LocalizedText"];
+            /** Format: uuid */
+            branchId?: string;
+            googleReviewUrl?: string;
+            name?: components["schemas"]["LocalizedText"];
+            qrUrl?: string;
+            /** Format: int64 */
+            recentScans?: number;
+            /** Format: int64 */
+            totalScans?: number;
+        };
+        ReviewCardsView: {
+            brandColor?: string;
+            cards?: components["schemas"]["ReviewCardView"][];
         };
         RevokedResponse: {
             /** Format: int32 */
@@ -9541,6 +9597,28 @@ export interface operations {
             };
         };
     };
+    reviewCards: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewCardsView"];
+                };
+            };
+        };
+    };
     tenantLimit: {
         parameters: {
             query?: never;
@@ -10125,6 +10203,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ProgramInfo"];
                 };
+            };
+        };
+    };
+    review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                branchId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

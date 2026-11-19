@@ -141,6 +141,14 @@ public class PlatformTenantController {
         return new StatsResponse(stats.branches(), stats.totalCustomers(), stats.activeCustomers(), stats.activeStaff());
     }
 
+    @GetMapping("/{tenantId}/review-cards")
+    @Operation(summary = "Google rəyi üçün çap kartları (QR)", description = """
+            Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a \
+            yönləndirir) və skanlar — son 30 gün və cəmi.""")
+    PlatformTenantService.ReviewCardsView reviewCards(@PathVariable UUID tenantId) {
+        return tenants.reviewCards(tenantId);
+    }
+
     @GetMapping("/{tenantId}/logo")
     @Operation(summary = "Şirkətin loqosu (PNG)",
             description = "Platforma panelində şirkətin ikonu üçün. Loqo yoxdursa 404 — onda panel şirkət adının ilk hərfini göstərir.")

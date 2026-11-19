@@ -333,7 +333,8 @@
         "tags": "NFC tags",
         "sms": "SMS limit",
         "domains": "Domains",
-        "audit": "Audit log"
+        "audit": "Audit log",
+        "print": "Print materials"
       }
     },
     "domains": {
@@ -489,6 +490,45 @@
       },
       "hints": {
         "CATALOG": "A menu for restaurants, services and prices for other businesses — a separate page for customers."
+      }
+    },
+    "reviewCard": {
+      "title": "Google review table card",
+      "description": "A card for a stand: customers scan the QR code and land on the branch Google review page. Prepare the card here, have it printed and hand it over to the company.",
+      "branch": "Branch",
+      "linkSet": "Google review link connected",
+      "linkMissing": "No Google review link yet: the QR code will open a Google Maps search for the company. For the exact link the owner can add it in Settings → Branches — the card will not need reprinting.",
+      "size": "Size",
+      "sizes": {
+        "A6": "A6 card",
+        "A5": "A5 poster",
+        "A4": "A4 – 4 cards"
+      },
+      "sizeHints": {
+        "A6": "Table and counter",
+        "A5": "Wall and window",
+        "A4": "4 on one sheet"
+      },
+      "language": "Language",
+      "languages": {
+        "az": "Azerbaijani",
+        "az-ru": "AZ + RU",
+        "az-en": "AZ + EN"
+      },
+      "scans": "Scans: {{recent}} in the last 30 days, {{total}} in total",
+      "note": "The QR code points to the company domain, which redirects to Google and counts every scan. If the Google link changes later, the card does not need reprinting.",
+      "print": "Print / PDF",
+      "printHint": "In the print dialog choose \"Save as PDF\" to send the file to the stand maker.",
+      "downloadQr": "Download QR code (SVG)",
+      "copyLink": "Copy QR link",
+      "copied": "Copied",
+      "noBranches": "The company has no active branches.",
+      "preview": "Card preview",
+      "card": {
+        "title": "Rate us on Google",
+        "subtitle": "Your review helps others find us",
+        "scan": "Point your phone camera at the QR code",
+        "thanks": "Thank you!"
       }
     }
   },

@@ -48,6 +48,28 @@
         ON CONFLICT (request_id) DO NOTHING
     </insert>
 
+    <!-- Google rəyi üçün QR kart (platforma hazırlayır) -->
+    <select id="reviewTarget" resultType="az.tapstamp.feedback.repository.FeedbackMapper$ReviewTarget">
+        SELECT b.google_review_url, c.name AS company_name, b.name AS branch_name, b.address
+        FROM branches b CROSS JOIN company_profile c
+        WHERE b.id = #{branchId} AND b.status = 'ACTIVE' AND c.singleton
+    </select>
+
+    <insert id="recordQrScan">
+        INSERT INTO review_qr_scans (branch_id, day, scans) VALUES (#{branchId}, #{day}, 1)
+        ON CONFLICT (branch_id, day) DO UPDATE SET scans = review_qr_scans.scans + 1
+    </insert>
+
+    <select id="reviewCards" resultType="az.tapstamp.feedback.repository.FeedbackMapper$ReviewCard">
+        SELECT b.id AS branch_id, b.name, b.address, b.google_review_url,
+               COALESCE(sum(s.scans) FILTER (WHERE s.day &gt;= #{since}), 0) AS recent_scans,
+               COALESCE(sum(s.scans), 0) AS total_scans
+        FROM branches b LEFT JOIN review_qr_scans s ON s.branch_id = b.id
+        WHERE b.status = 'ACTIVE'
+        GROUP BY b.id
+        ORDER BY b.created_at
+    </select>
+
     <!-- Müştəri Google rəy səhifəsini açdı: yalnız öz rəyinə və bir dəfə (ilk açılış) -->
     <update id="markReviewClicked">
         UPDATE feedback SET review_clicked_at = #{now}

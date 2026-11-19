@@ -95,6 +95,12 @@ class PlatformAdminIT extends AdminIntegrationTest {
                 .andExpect(jsonPath("$.totalCustomers").isNumber())
                 .andReturn().getResponse().getContentAsString();
         assertThat(body).doesNotContain("phone", "+994");
+        // Google rəyi üçün çap kartları: QR şirkətin domeninə aparır
+        admin.get("/tenants/" + alphaId + "/review-cards").andExpect(status().isOk())
+                .andExpect(jsonPath("$.cards[0].qrUrl").value(org.hamcrest.Matchers.containsString(
+                        TestTenants.ALPHA_HOST + "/api/v1/public/review/")))
+                .andExpect(jsonPath("$.cards[0].recentScans").isNumber())
+                .andExpect(jsonPath("$.brandColor").value(org.hamcrest.Matchers.startsWith("#")));
         // Loqo yalnız mövcud şirkət üçün; yoxdursa 404 (panel onda adın ilk hərfini göstərir)
         admin.get("/tenants/" + UUID.randomUUID() + "/logo").andExpect(status().isNotFound());
         // DB şifrələri və adları heç vaxt qaytarılmır
