@@ -519,8 +519,8 @@
       "note": "QR kod şirkətin domeninə yönəlir, oradan Google-a keçir və hər skan sayılır. Google linki sonradan dəyişsə, kartı yenidən çap etmək lazım deyil.",
       "print": "Çap et / PDF",
       "printHint": "Çap pəncərəsində \"PDF kimi saxla\" seçib faylı stend hazırlayana göndərə bilərsiniz.",
-      "downloadQr": "QR kodu yüklə (SVG)",
-      "copyLink": "QR linkini kopyala",
+      "downloadQr": "Google QR (SVG)",
+      "copyLink": "Google QR linkini kopyala",
       "copied": "Kopyalandı",
       "noBranches": "Şirkətin aktiv filialı yoxdur.",
       "preview": "Kartın önizləməsi",
@@ -541,7 +541,9 @@
       "withMenu": "Menyunun QR kodunu da əlavə et",
       "withMenuHint": "Kartda iki QR olacaq: Google rəyi və menyu. Kartın ölçüsü dəyişmir.",
       "menuClosed": "Şirkətin menyusu açıq deyil: \"Menyu və xidmətlər\" əlavəsi qoşulmalı və bölmə aktiv olmalıdır.",
-      "downloadMenuQr": "Menyu QR kodu (SVG)"
+      "downloadQrs": "QR kodlarını yüklə",
+      "qrReview": "Google rəyi QR (SVG)",
+      "qrMenu": "Menyu QR (SVG)"
     }
   },
   "staffConsole": {

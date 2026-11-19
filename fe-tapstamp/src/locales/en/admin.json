@@ -519,8 +519,8 @@
       "note": "The QR code points to the company domain, which redirects to Google and counts every scan. If the Google link changes later, the card does not need reprinting.",
       "print": "Print / PDF",
       "printHint": "In the print dialog choose \"Save as PDF\" to send the file to the stand maker.",
-      "downloadQr": "Download QR code (SVG)",
-      "copyLink": "Copy QR link",
+      "downloadQr": "Google QR (SVG)",
+      "copyLink": "Copy Google QR link",
       "copied": "Copied",
       "noBranches": "The company has no active branches.",
       "preview": "Card preview",
@@ -541,7 +541,9 @@
       "withMenu": "Add the menu QR code too",
       "withMenuHint": "The card will have two QR codes: Google review and menu. The card size stays the same.",
       "menuClosed": "The company menu is not open: the \"Menu and services\" add-on must be enabled and the section turned on.",
-      "downloadMenuQr": "Menu QR code (SVG)"
+      "downloadQrs": "Download QR codes",
+      "qrReview": "Google review QR (SVG)",
+      "qrMenu": "Menu QR (SVG)"
     }
   },
   "staffConsole": {

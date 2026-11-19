@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, Check, Copy, Download, Printer, Star, TriangleAlert } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, Copy, Download, Printer, Star, TriangleAlert } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
@@ -11,6 +11,7 @@ import { cn } from '@/shared/lib/cn';
 import { formatNumber } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
 import { Select } from '@/shared/ui/input';
 import { QrCode } from '@/shared/ui/QrCode';
 
@@ -145,6 +146,18 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
   );
 }
 
+/** Fayl adı üçün: Azərbaycan hərfləri latın qarşılığına, qalanı tire ilə ("Nərimanov filialı" → "nerimanov-filiali"). */
+function fileSlug(value: string): string {
+  const map: Record<string, string> = { ə: 'e', ı: 'i', ö: 'o', ü: 'u', ş: 's', ç: 'c', ğ: 'g' };
+  return value
+    .toLocaleLowerCase('az')
+    .replace(/[əıöüşçğ]/g, (letter) => map[letter] ?? letter)
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'filial';
+}
+
 /** QR kodun vektor faylı — stend hazırlayan öz dizaynında istifadə etsin. */
 function qrSvg(value: string): string {
   const qr = QRCode.create(value, { errorCorrectionLevel: 'M' });
@@ -200,7 +213,9 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
   const [copied, setCopied] = useState(false);
   const selected: ReviewCard | undefined = cards.find((card) => card.branchId === branchId) ?? cards[0];
 
-  // Çap: kartlar səhifəyə əlavə olunur, brauzerin çap pəncərəsi açılır, bağlananda təmizlənir
+  // Çap: kartlar səhifəyə əlavə olunur, brauzerin çap pəncərəsi açılır, bağlananda təmizlənir.
+  // Səhifə ölçüsü və sıfır kənar ayrıca CSS faylı ilə qoşulur (CSP inline <style>-a icazə vermir): brauzer kağız
+  // ölçüsünü kartdan götürür və kənar olmadığı üçün yuxarı/aşağı başlıqları (tarix, səhifə adı, ünvan) yazmır.
   useEffect(() => {
     if (!printing) {
       return;
@@ -208,14 +223,24 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
     document.body.classList.add('printing-review');
     const done = () => setPrinting(false);
     window.addEventListener('afterprint', done);
-    // Loqo və şriftlər hazır olsun deyə bir kadr gözlənilir
-    const frame = window.requestAnimationFrame(() => window.setTimeout(() => window.print(), 150));
+    const page = document.createElement('link');
+    page.rel = 'stylesheet';
+    page.href = `/admin/print/review-${size.toLowerCase()}.css`;
+    let timer: number | undefined;
+    // Stil yüklənəndən sonra (loqo və şriftlər də hazır olsun deyə qısa gözləmə ilə) çap pəncərəsi açılır
+    const open = () => {
+      timer = window.setTimeout(() => window.print(), 150);
+    };
+    page.addEventListener('load', open, { once: true });
+    page.addEventListener('error', open, { once: true });
+    document.head.append(page);
     return () => {
-      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
       window.removeEventListener('afterprint', done);
       document.body.classList.remove('printing-review');
+      page.remove();
     };
-  }, [printing]);
+  }, [printing, size]);
 
   if (data.isPending) {
     return <InlineLoading />;
@@ -242,6 +267,14 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
   };
   const menuOpen = Boolean(data.data?.menuUrl);
   const copyLink = () => void navigator.clipboard.writeText(card.qrUrl).then(() => setCopied(true));
+  // Fayl adında filial da var: hər filialın Google QR-ı fərqlidir; menyu QR-ı şirkət üzrə birdir
+  const svg = (value: string) => new Blob([qrSvg(value)], { type: 'image/svg+xml' });
+  const downloadReviewQr = () => downloadBlob(svg(card.qrUrl), `google-qr-${slug}-${fileSlug(branchName)}.svg`);
+  const downloadMenuQr = () => {
+    if (card.menu) {
+      downloadBlob(svg(card.menu.url), `menu-qr-${slug}.svg`);
+    }
+  };
 
   return (
     <Card>
@@ -332,22 +365,33 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
                 <Printer aria-hidden="true" />
                 {t('platform.reviewCard.print')}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => downloadBlob(new Blob([qrSvg(card.qrUrl)], { type: 'image/svg+xml' }), `google-qr-${slug}.svg`)}
-              >
-                <Download aria-hidden="true" />
-                {t('platform.reviewCard.downloadQr')}
-              </Button>
+              {/* QR faylları: menyu varsa seçim siyahısı (Google rəyi, menyu), yoxdursa birbaşa Google QR-ı */}
               {card.menu ? (
-                <Button
-                  variant="outline"
-                  onClick={() => downloadBlob(new Blob([qrSvg(card.menu?.url ?? '')], { type: 'image/svg+xml' }), `menu-qr-${slug}.svg`)}
-                >
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <Download aria-hidden="true" />
+                      {t('platform.reviewCard.downloadQrs')}
+                      <ChevronDown aria-hidden="true" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem onSelect={downloadReviewQr}>
+                      <Star aria-hidden="true" />
+                      {t('platform.reviewCard.qrReview')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={downloadMenuQr}>
+                      <BookOpen aria-hidden="true" />
+                      {t('platform.reviewCard.qrMenu')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="outline" onClick={downloadReviewQr}>
                   <Download aria-hidden="true" />
-                  {t('platform.reviewCard.downloadMenuQr')}
+                  {t('platform.reviewCard.downloadQr')}
                 </Button>
-              ) : null}
+              )}
               <Button variant="ghost" onClick={copyLink}>
                 {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
                 {copied ? t('platform.reviewCard.copied') : t('platform.reviewCard.copyLink')}

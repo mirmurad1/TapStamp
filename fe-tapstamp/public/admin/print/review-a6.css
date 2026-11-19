@@ -1,0 +1,5 @@
+/* Google rəyi çap kartı: səhifə ölçüsü və sıfır kənar — brauzer yuxarı/aşağı başlıq (tarix, ünvan) yazmır. Yalnız çap zamanı qoşulur (ReviewCardTab). */
+@page {
+  size: 105mm 148mm;
+  margin: 0;
+}
