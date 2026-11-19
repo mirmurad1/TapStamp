@@ -298,7 +298,12 @@
     "thanksOther": "Your feedback has reached the team. We will do better.",
     "close": "Close",
     "error": "Could not send. Please try again in a moment.",
-    "privacy": "The company sees your feedback with your name and number so it can contact you if needed."
+    "privacy": "The company sees your feedback with your name and number so it can contact you if needed.",
+    "googleTitle": "Share it on Google too",
+    "googleText": "Write a few words on Google so others can find us. It only takes 30 seconds.",
+    "googleButton": "Write a Google review",
+    "googleOther": "If you like, you can also leave your review on Google.",
+    "later": "Later"
   },
   "menu": {
     "titles": {

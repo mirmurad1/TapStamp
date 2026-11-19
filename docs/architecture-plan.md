@@ -1105,7 +1105,7 @@ Göstəricilərin dəqiq tərifləri `docs/metrics.md` faylında olacaq. Məsəl
 | Metod | Yol | Təsvir |
 |---|---|---|
 | GET, PUT | `/settings/company` | Kafe məzmunu (3 dildə), saat qurşağı, standart dil, SMS göndərən adı |
-| GET, POST, PATCH | `/settings/branches[/{id}]` | Filiallar, iş saatları |
+| GET, POST, PATCH | `/settings/branches[/{id}]` | Filiallar, iş saatları, Google rəy linki (`googleReviewUrl`, yalnız Google ünvanları; boş sətir — silinir) |
 | GET, PUT | `/settings/reward-rule` | Mükafat qaydası (möhür sayı, adı 3 dildə) |
 | GET, PUT | `/settings/stamp-policy` | Sui-istifadə limitləri (şirkət üzrə və filial override-ı) |
 | GET, POST | `/settings/legal-documents` | Hüquqi sənədin yeni versiyasının dərci |
@@ -1669,6 +1669,7 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 62 | Filial və işçi müqayisəsi (istifadəçi qərarı) | Göstəricilər panelində "Müqayisə" tabı (`BRANCH_COMPARISON`, Premium): filiallar — ziyarətlər, müştərilər, yeni (ilk ziyarəti bu filialda), geri qayıdan (2+ gün), verilən/təhvil verilən hədiyyələr, bonus möhürlər, məmnuniyyət; əvvəlki eyni uzunluqlu dövrlə fərq, ən yaxşı/zəif rənglə; işçilər — təsdiqlədiyi/rədd etdiyi/əl ilə verdiyi möhürlər, təhvil verdiyi hədiyyələr. Sütunlara görə sıralama və CSV (brauzerdə yaradılır). Menecer yalnız öz filiallarını görür. Rəylər bölməsində filial süzgəci | Ayrıca "şübhəli hallar" bölməsi seçilmədi — sahib işçilər cədvəlindən özü incələyir |
 | 63 | Paket bölgüsünün dəyişməsi (istifadəçi qərarı) | Avtomatik xatırlatmalar (`REMINDERS`) Standard və Premium-dadır; bonus kampaniyası (`BONUS_RULES`) yalnız Premium-dadır. Standard-dan Premium-a keçəndə heç nə silinmir; Premium-dan Standard-a düşəndə bonus kampaniyaları işləmir (saxlanılır) | Xatırlatma müştərini geri qaytaran əsas avtomatikadır, Standard üçün dəyərlidir; bonus kampaniyası Premium-a keçmək üçün əlavə səbəbdir |
 | 64 | Əlavələr (add-on) və menyu/xidmətlər kataloqu (istifadəçi qərarı) | Paketdən asılı olmayan, ayrıca satılan bölmələr: `Addon` (ilk — `CATALOG`), platforma bazasında `tenant_addons`. Platforma admini şirkətə açıb-bağlayır (platforma auditinə yazılır), bağlananda məlumat silinmir. Sınaq müddəti bitmiş şirkətdə əlavələr də bağlıdır. Controller-də `@RequiresAddon`, frontend-də `useAddon`; ictimai `/api/v1/public/plan` cavabında `addons`. İlk versiya yalnız kataloqdur (sifariş və ödəniş yoxdur); əlavənin qiyməti və ödənişi hələlik sistemdən kənarda | Menyu restoranlar üçün, xidmətlər digər sahələr üçün əlavə gəlir mənbəyidir; paket pilləsinə bağlamaq hər paketə satmağa imkan vermir |
+| 65 | Google rəyinə yönləndirmə (istifadəçi qərarı) | Filial üzrə Google rəy linki (`branches.google_review_url`). Rəy verən müştəriyə cavabdan sonra Google-da yazmaq təklif olunur: əla qiymətdə ulduzlu kart və əsas düymə, normal və pisdə sakit keçid. Keçid bir dəfə sayılır (`feedback.review_clicked_at`), sahib "Rəylər" xülasəsində "Google-a keçid" sayını görür | Google qaydası seçmə yolla yalnız razı müştəridən rəy istəməyi qadağan edir (review gating) — ona görə təklif hamıya göstərilir; link yalnız Google domenlərinə icazə verilir ki, panel başqa sayta yönləndirməsin |
 
 ---
 

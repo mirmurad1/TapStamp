@@ -28,7 +28,7 @@ public interface CompanyMapper {
 
     /** Filial (iş saatları JSON mətni kimi). */
     record BranchRow(UUID id, LocalizedText name, LocalizedText address, String businessHours, String status,
-                     boolean policyOverridden) {
+                     boolean policyOverridden, @Nullable String googleReviewUrl) {
     }
 
     // --- Profil ---
@@ -71,10 +71,10 @@ public interface CompanyMapper {
 
     /**
      * {@code null} sahələr dəyişmir; {@code clearHours} — iş saatları silinir (hər zaman açıq).
-     * {@code businessHours} — JSON mətni.
+     * {@code businessHours} — JSON mətni. {@code googleReviewUrl}: boş sətir — link silinir.
      */
     void updateBranch(UUID id, LocalizedText name, LocalizedText address, String businessHours, boolean clearHours,
-                      String status, Instant now);
+                      String status, @Nullable String googleReviewUrl, Instant now);
 
     // --- Filialın qaydası ---
 

@@ -3868,6 +3868,28 @@
         "tags" : [ "Müştəri: rəy" ]
       }
     },
+    "/api/v1/me/feedback-request/{requestId}/review-click" : {
+      "post" : {
+        "description" : "Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).",
+        "operationId" : "reviewClick",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "requestId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "Google rəy səhifəsinə keçid",
+        "tags" : [ "Müştəri: rəy" ]
+      }
+    },
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
@@ -6626,6 +6648,12 @@
             "type" : "boolean",
             "description" : "true — iş saatları silinir (hər zaman açıq)"
           },
+          "googleReviewUrl" : {
+            "type" : "string",
+            "description" : "Filialın Google rəy linki (g.page, maps.app.goo.gl, google.com); boş sətir — silinir",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
           "name" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },
@@ -6722,6 +6750,9 @@
                 }
               }
             }
+          },
+          "googleReviewUrl" : {
+            "type" : "string"
           },
           "id" : {
             "type" : "string",
@@ -7586,6 +7617,9 @@
             "type" : "string",
             "format" : "uuid"
           },
+          "reviewUrl" : {
+            "type" : "string"
+          },
           "visitAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -7649,6 +7683,10 @@
           "responseRate" : {
             "type" : "number",
             "format" : "double"
+          },
+          "reviewClicks" : {
+            "type" : "integer",
+            "format" : "int64"
           },
           "satisfaction" : {
             "type" : "number",

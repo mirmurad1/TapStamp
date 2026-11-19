@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.support.AdminClient;
@@ -110,6 +111,43 @@ class FeedbackIT extends TapIntegrationTest {
         owner.post("/feedback/" + ids.get(0) + "/resolve", Map.of("note", "Zəng etdik")).andExpect(status().isNoContent());
         owner.get("/feedback?unresolved=true&size=50")
                 .andExpect(jsonPath("$.items[?(@.id == '" + ids.get(0) + "')]").isEmpty());
+    }
+
+    @Test
+    void customerIsOfferedTheBranchGoogleReviewPageAndTheOwnerSeesHowManyOpenedIt() throws Exception {
+        settings(true, 7);
+        UUID branchId = newBranch(Policy.relaxed());
+        TestTag tag = newTag(branchId);
+        AdminClient owner = owner();
+        // Yalnız Google ünvanları; boş sətir linki silir
+        owner.patch("/settings/branches/" + branchId, Map.of("googleReviewUrl", "https://evil.example/review"))
+                .andExpect(status().isBadRequest());
+        String reviewUrl = "https://g.page/r/CbX123abc/review";
+        owner.patch("/settings/branches/" + branchId, Map.of("googleReviewUrl", reviewUrl))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.googleReviewUrl").value(reviewUrl));
+
+        CustomerClient customer = signedIn(uniquePhone());
+        claim(customer, tag, 1);
+        elapse();
+        sendDue();
+        String body = customer.get("/api/v1/me/feedback-request").andExpect(status().isOk())
+                .andExpect(jsonPath("$.reviewUrl").value(reviewUrl))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        String requestId = JsonPath.read(body, "$.id");
+        customer.post("/api/v1/me/feedback-request/" + requestId, Map.of("rating", "GOOD")).andExpect(status().isNoContent());
+
+        java.time.LocalDate today = clock.instant().atZone(alpha().timezone()).toLocalDate();
+        String period = "/feedback/summary?branchId=" + branchId + "&from=" + today + "&to=" + today;
+        owner.get(period).andExpect(jsonPath("$.reviewClicks").value(0));
+        // Keçid bir dəfə sayılır; başqasının sorğusu sayılmır
+        customer.post("/api/v1/me/feedback-request/" + requestId + "/review-click").andExpect(status().isNoContent());
+        customer.post("/api/v1/me/feedback-request/" + requestId + "/review-click").andExpect(status().isNoContent());
+        signedIn(uniquePhone()).post("/api/v1/me/feedback-request/" + requestId + "/review-click")
+                .andExpect(status().isNoContent());
+        owner.get(period).andExpect(jsonPath("$.reviewClicks").value(1));
+
+        owner.patch("/settings/branches/" + branchId, Map.of("googleReviewUrl", ""))
+                .andExpect(jsonPath("$.googleReviewUrl").doesNotExist());
     }
 
     @Test

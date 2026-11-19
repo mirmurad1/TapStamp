@@ -298,7 +298,12 @@
     "thanksOther": "Rəyiniz rəhbərliyə çatdı. Daha yaxşı olmağa çalışacağıq.",
     "close": "Bağla",
     "error": "Göndərmək alınmadı. Bir azdan yenidən cəhd edin.",
-    "privacy": "Rəyinizi şirkət adınız və nömrənizlə birlikdə görür ki, lazım olsa sizinlə əlaqə saxlasın."
+    "privacy": "Rəyinizi şirkət adınız və nömrənizlə birlikdə görür ki, lazım olsa sizinlə əlaqə saxlasın.",
+    "googleTitle": "Google-da da paylaşın",
+    "googleText": "Bir neçə sözlə Google-da rəy yazın — başqaları da bizi tapsın. Cəmi 30 saniyə çəkir.",
+    "googleButton": "Google-da rəy yaz",
+    "googleOther": "İstəsəniz, rəyinizi Google-da da yaza bilərsiniz.",
+    "later": "Sonra"
   },
   "menu": {
     "titles": {

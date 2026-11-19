@@ -639,7 +639,11 @@
         "fri": "Cümə",
         "sat": "Şənbə",
         "sun": "Bazar"
-      }
+      },
+      "googleReview": "Google rəy linki",
+      "googleReviewHint": "Google Business Profile → \"Rəy istəyin\" bölməsindəki link (məs. https://g.page/r/…/review). Rəy verən müştəriyə Google-da da yazmaq təklif olunur. Boş qoysanız, təklif göstərilmir.",
+      "googleReviewSet": "Google rəy linki qoşulub",
+      "googleReviewPlaceholder": "https://g.page/r/…/review"
     },
     "tabs": {
       "loyalty": "Loyallıq qaydası",
@@ -1253,7 +1257,8 @@
       "satisfaction": "Məmnuniyyət",
       "responses": "Cavablar",
       "responseRate": "Cavab payı",
-      "none": "—"
+      "none": "—",
+      "reviewClicks": "Google-a keçid"
     },
     "unresolvedAlert_one": "{{count}} pis rəy cavab gözləyir",
     "unresolvedAlert_other": "{{count}} pis rəy cavab gözləyir",

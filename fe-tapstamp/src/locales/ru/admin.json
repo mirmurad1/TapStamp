@@ -659,7 +659,11 @@
         "fri": "Пятница",
         "sat": "Суббота",
         "sun": "Воскресенье"
-      }
+      },
+      "googleReview": "Ссылка на отзыв в Google",
+      "googleReviewHint": "Ссылка из Google Business Profile → «Попросить оставить отзыв» (напр. https://g.page/r/…/review). Клиентам, оставившим оценку, предлагается написать отзыв и в Google. Оставьте пустым, чтобы отключить.",
+      "googleReviewSet": "Ссылка на отзыв в Google подключена",
+      "googleReviewPlaceholder": "https://g.page/r/…/review"
     },
     "tabs": {
       "loyalty": "Правила лояльности",
@@ -1309,7 +1313,8 @@
       "satisfaction": "Удовлетворённость",
       "responses": "Ответы",
       "responseRate": "Доля ответов",
-      "none": "—"
+      "none": "—",
+      "reviewClicks": "Перешли в Google"
     },
     "unresolvedAlert_one": "{{count}} плохой отзыв ждёт ответа",
     "unresolvedAlert_few": "{{count}} плохих отзыва ждут ответа",

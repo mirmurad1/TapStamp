@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, MapPin, Pencil, Plus, SlidersHorizontal, Store } from 'lucide-react';
+import { Clock, MapPin, Pencil, Plus, SlidersHorizontal, Star, Store } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -66,6 +66,12 @@ export function BranchesCard() {
                     {resolveText(branch.address, lang)}
                   </p>
                 ) : null}
+                {branch.googleReviewUrl ? (
+                  <p className="flex items-center gap-1 text-muted-foreground">
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                    {t('admin:settings.branches.googleReviewSet')}
+                  </p>
+                ) : null}
                 <p className="flex items-center gap-1 text-muted-foreground">
                   <Clock className="size-3.5" aria-hidden="true" />
                   {branch.businessHours ? summarizeHours(branch.businessHours, t) : t('admin:settings.branches.alwaysOpen')}
@@ -123,6 +129,7 @@ function BranchDialog({ branch, onClose }: { branch?: BranchSettings; onClose: (
   const [scheduled, setScheduled] = useState(Boolean(branch?.businessHours));
   const [rows, setRows] = useState(() => toRows(branch?.businessHours));
   const [closed, setClosed] = useState(branch?.status === 'CLOSED');
+  const [reviewUrl, setReviewUrl] = useState(branch?.googleReviewUrl ?? '');
 
   const save = useMutation({
     mutationFn: () => {
@@ -136,6 +143,8 @@ function BranchDialog({ branch, onClose }: { branch?: BranchSettings; onClose: (
         businessHours: scheduled ? hours : undefined,
         clearBusinessHours: !scheduled,
         status: closed ? 'CLOSED' : 'ACTIVE',
+        // Boş sətir linki silir; yeni filial üçün link sonra, redaktədə əlavə olunur
+        googleReviewUrl: branch?.id ? reviewUrl.trim() : undefined,
       };
       return branch?.id ? companyApi.updateBranch(branch.id, body) : companyApi.createBranch(body);
     },
@@ -201,6 +210,24 @@ function BranchDialog({ branch, onClose }: { branch?: BranchSettings; onClose: (
               ))}
               <p className="text-xs text-muted-foreground">{t('admin:settings.branches.hoursHint')}</p>
             </div>
+          ) : null}
+          {branch ? (
+            <Field
+              id="branch-google-review"
+              label={t('admin:settings.branches.googleReview')}
+              hint={t('admin:settings.branches.googleReviewHint')}
+            >
+              <Input
+                type="url"
+                inputMode="url"
+                value={reviewUrl}
+                onChange={(event) => setReviewUrl(event.target.value)}
+                placeholder={t('admin:settings.branches.googleReviewPlaceholder')}
+                maxLength={500}
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </Field>
           ) : null}
           {branch ? (
             <label className="flex items-start gap-3 text-sm">

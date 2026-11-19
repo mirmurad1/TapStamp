@@ -153,10 +153,12 @@ function SummaryCard({ branchId }: { branchId?: string }) {
                 {t('feedback.unresolvedAlert', { count: s.unresolvedBad })}
               </p>
             ) : null}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {tile(t('feedback.summary.satisfaction'), s.satisfaction == null ? t('feedback.summary.none') : formatPercent(s.satisfaction, lang, 0))}
               {tile(t('feedback.summary.responses'), formatNumber(s.answered ?? 0, lang))}
               {tile(t('feedback.summary.responseRate'), s.responseRate == null ? t('feedback.summary.none') : formatPercent(s.responseRate, lang, 0))}
+              {/* Rəydən sonra filialın Google rəy səhifəsini açanlar — Google reytinqinə töhfə */}
+              {tile(t('feedback.summary.reviewClicks'), formatNumber(s.reviewClicks ?? 0, lang))}
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
               {(['GOOD', 'OK', 'BAD'] as const).map((value) => (

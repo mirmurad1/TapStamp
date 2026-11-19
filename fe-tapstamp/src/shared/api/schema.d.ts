@@ -2062,6 +2062,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/feedback-request/{requestId}/review-click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google rəy səhifəsinə keçid
+         * @description Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).
+         */
+        post: operations["reviewClick"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/gift-cards": {
         parameters: {
             query?: never;
@@ -3697,6 +3717,8 @@ export interface components {
             };
             /** @description true — iş saatları silinir (hər zaman açıq) */
             clearBusinessHours?: boolean;
+            /** @description Filialın Google rəy linki (g.page, maps.app.goo.gl, google.com); boş sətir — silinir */
+            googleReviewUrl?: string;
             name?: components["schemas"]["LocalizedText"];
             status?: string;
         };
@@ -3737,6 +3759,7 @@ export interface components {
             businessHours?: {
                 [key: string]: string[][];
             };
+            googleReviewUrl?: string;
             /** Format: uuid */
             id?: string;
             name?: components["schemas"]["LocalizedText"];
@@ -4083,6 +4106,7 @@ export interface components {
             branchName?: components["schemas"]["LocalizedText"];
             /** Format: uuid */
             id?: string;
+            reviewUrl?: string;
             /** Format: date-time */
             visitAt?: string;
         };
@@ -4110,6 +4134,8 @@ export interface components {
             ok?: number;
             /** Format: double */
             responseRate?: number;
+            /** Format: int64 */
+            reviewClicks?: number;
             /** Format: double */
             satisfaction?: number;
             /** Format: int64 */
@@ -8322,6 +8348,26 @@ export interface operations {
                 "application/json": components["schemas"]["FeedbackAnswerRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    reviewClick: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

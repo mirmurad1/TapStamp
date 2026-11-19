@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, MessageSquareHeart } from 'lucide-react';
-import { useState } from 'react';
+import { Check, ExternalLink, MessageSquareHeart, Star } from 'lucide-react';
+import { forwardRef, useState, type AnchorHTMLAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
@@ -35,17 +35,19 @@ export function FeedbackRow() {
   return (
     <>
       <OfferRow icon={<MessageSquareHeart />} title={t('feedback.rowTitle')} hint={t('feedback.rowHint')} onClick={() => setOpen(true)} />
-      <FeedbackSheet open={open} onOpenChange={setOpen} requestId={data.id ?? ''}
+      <FeedbackSheet open={open} onOpenChange={setOpen} requestId={data.id ?? ''} reviewUrl={data.reviewUrl}
         place={`${resolveText(data.branchName, currentLanguage())} · ${data.visitAt ? formatDate(data.visitAt, currentLanguage()) : ''}`} />
     </>
   );
 }
 
-function FeedbackSheet({ open, onOpenChange, requestId, place }: {
+function FeedbackSheet({ open, onOpenChange, requestId, place, reviewUrl }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   requestId: string;
   place: string;
+  /** Filialın Google rəy səhifəsi (sahib qoşubsa) — cavabdan sonra təklif olunur. */
+  reviewUrl?: string;
 }) {
   const { t } = useTranslation('profile');
   const queryClient = useQueryClient();
@@ -80,9 +82,27 @@ function FeedbackSheet({ open, onOpenChange, requestId, place }: {
           </span>
           <p className="text-lg font-bold">{t('feedback.thanks')}</p>
           <p className="text-sm text-muted-foreground">{t(rating === 'GOOD' ? 'feedback.thanksGood' : 'feedback.thanksOther')}</p>
-          <Button size="lg" className="mt-2 w-full" onClick={() => close(false)}>
-            {t('feedback.close')}
-          </Button>
+          {reviewUrl && rating === 'GOOD' ? (
+            <GoogleReviewOffer requestId={requestId} url={reviewUrl} onLater={() => close(false)} />
+          ) : (
+            <>
+              {/*
+               * Google qaydası: rəy yalnız razı müştərilərdən seçmə yolla istənə bilməz (review gating). Ona görə
+               * normal və pis qiymət verənlərə də təklif olunur — sakit, ikinci dərəcəli keçid kimi.
+               */}
+              {reviewUrl ? (
+                <p className="text-sm text-muted-foreground">
+                  {t('feedback.googleOther')}{' '}
+                  <ReviewLink requestId={requestId} url={reviewUrl} className="font-semibold text-primary underline underline-offset-4">
+                    {t('feedback.googleButton')}
+                  </ReviewLink>
+                </p>
+              ) : null}
+              <Button size="lg" className="mt-2 w-full" onClick={() => close(false)}>
+                {t('feedback.close')}
+              </Button>
+            </>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -144,5 +164,57 @@ function FeedbackSheet({ open, onOpenChange, requestId, place }: {
         </div>
       )}
     </Sheet>
+  );
+}
+
+/**
+ * Google rəy səhifəsinə keçid: yeni pəncərədə açılır, keçid sahibin hesabatı üçün sayılır (cavabı gözlənilmir).
+ * {@code forwardRef} — {@code Button asChild} ilə düymə kimi də istifadə olunur.
+ */
+const ReviewLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement> & { requestId: string; url: string }>(
+  ({ requestId, url, onClick, ...props }, ref) => (
+    <a
+      ref={ref}
+      {...props}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(event) => {
+        onClick?.(event);
+        void feedbackApi.reviewClick(requestId).catch(() => undefined);
+      }}
+    />
+  ),
+);
+ReviewLink.displayName = 'ReviewLink';
+
+/** Əla qiymətdən sonra: beş ulduz, qısa çağırış və Google-a keçid düyməsi. */
+function GoogleReviewOffer({ requestId, url, onLater }: { requestId: string; url: string; onLater: () => void }) {
+  const { t } = useTranslation('profile');
+  return (
+    <div className="mt-2 flex w-full flex-col gap-3">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-500/30 dark:bg-amber-500/10">
+        <div className="flex justify-center gap-1" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((index) => (
+            <Star
+              key={index}
+              className="animate-stamp-pop size-7 fill-amber-400 text-amber-400"
+              style={{ animationDelay: `${0.15 + index * 0.08}s` }}
+            />
+          ))}
+        </div>
+        <p className="mt-2 font-bold">{t('feedback.googleTitle')}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t('feedback.googleText')}</p>
+      </div>
+      <Button asChild size="lg" className="w-full">
+        <ReviewLink requestId={requestId} url={url}>
+          <ExternalLink aria-hidden="true" />
+          {t('feedback.googleButton')}
+        </ReviewLink>
+      </Button>
+      <Button size="lg" variant="ghost" className="w-full" onClick={onLater}>
+        {t('feedback.later')}
+      </Button>
+    </div>
   );
 }

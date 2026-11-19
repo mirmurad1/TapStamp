@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.company.repository.CompanyMapper;
@@ -25,6 +26,7 @@ import az.tapstamp.shared.id.Ids;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.repository.TenantRegistryMapper;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
@@ -44,8 +46,9 @@ public class CompanyAdminService {
                           String brandColor, String smsSenderName) {
     }
 
+    /** {@code googleReviewUrl} — filialın Google Maps rəy səhifəsi (rəydən sonra müştəriyə təklif olunur). */
     public record BranchView(UUID id, LocalizedText name, LocalizedText address, Map<String, List<List<String>>> businessHours,
-                             String status, boolean policyOverridden) {
+                             String status, boolean policyOverridden, @Nullable String googleReviewUrl) {
     }
 
     /** Filialın qaydası: {@code overridden=false} olduqda şirkətin standart qaydası göstərilir. */
@@ -109,7 +112,7 @@ public class CompanyAdminService {
         AccessPolicy.requireCompanyWide(principal);
         return companies.branches().stream()
                 .map(row -> new BranchView(row.id(), row.name(), row.address(), parseHours(row.businessHours()),
-                        row.status(), row.policyOverridden()))
+                        row.status(), row.policyOverridden(), row.googleReviewUrl()))
                 .toList();
     }
 
@@ -127,10 +130,25 @@ public class CompanyAdminService {
         return branch(principal, id);
     }
 
-    /** {@code null} sahələr dəyişmir; boş iş saatları ({@code {}}) — qrafik silinir (hər zaman açıq). */
+    /**
+     * Google rəy linki: yalnız Google ünvanları (Business Profile-un "rəy istə" linki, Maps linki) — panelə başqa
+     * sayta yönləndirən link yazıla bilməsin.
+     */
+    static final Pattern GOOGLE_REVIEW_URL = Pattern.compile(
+            "^https://(g\\.page|maps\\.app\\.goo\\.gl|goo\\.gl|(www\\.|search\\.|maps\\.)?google\\.[a-z]{2,3}(\\.[a-z]{2})?)/\\S{0,450}$");
+
+    /**
+     * {@code null} sahələr dəyişmir; boş iş saatları ({@code {}}) — qrafik silinir (hər zaman açıq).
+     * {@code googleReviewUrl}: boş sətir — link silinir.
+     */
     public BranchView updateBranch(AdminPrincipal principal, UUID branchId, LocalizedText name, LocalizedText address,
-                                   Map<String, List<List<String>>> hours, boolean clearHours, String status) {
+                                   Map<String, List<List<String>>> hours, boolean clearHours, String status,
+                                   @Nullable String googleReviewUrl) {
         AccessPolicy.requireCompanyWide(principal);
+        String reviewUrl = googleReviewUrl == null ? null : googleReviewUrl.strip();
+        if (reviewUrl != null && !reviewUrl.isEmpty() && !GOOGLE_REVIEW_URL.matcher(reviewUrl).matches()) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
         BranchView current = branch(principal, branchId);
         if (status != null && !List.of("ACTIVE", "CLOSED").contains(status)) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
@@ -145,10 +163,13 @@ public class CompanyAdminService {
             }
         }
         companies.updateBranch(branchId, name == null ? null : trim(name), address == null ? null : trim(address),
-                hours == null ? null : hoursJson(hours), clearHours, status, clock.instant());
+                hours == null ? null : hoursJson(hours), clearHours, status, reviewUrl, clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         if (status != null) {
             details.put("status", status);
+        }
+        if (reviewUrl != null) {
+            details.put("googleReviewUrl", reviewUrl.isEmpty() ? "removed" : "set");
         }
         audit.tenant("BRANCH_UPDATED", AuditLogger.ActorType.STAFF, principal.userId(), "branch", branchId, details);
         return branch(principal, branchId);

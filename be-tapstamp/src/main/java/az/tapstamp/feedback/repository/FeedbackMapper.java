@@ -16,8 +16,8 @@ public interface FeedbackMapper {
     record FeedbackSettings(boolean enabled, int frequencyDays) {
     }
 
-    /** Müştəriyə göstəriləcək sorğu: filial və ziyarət vaxtı ilə. */
-    record OpenRequest(UUID id, UUID branchId, LocalizedText branchName, Instant visitAt) {
+    /** Müştəriyə göstəriləcək sorğu: filial, ziyarət vaxtı və filialın Google rəy linki (varsa). */
+    record OpenRequest(UUID id, UUID branchId, LocalizedText branchName, Instant visitAt, @Nullable String reviewUrl) {
     }
 
     /** Admin üçün rəy: müştərinin adı və şifrəli telefonu (servis açır). */
@@ -26,7 +26,7 @@ public interface FeedbackMapper {
                Instant createdAt, @Nullable Instant resolvedAt, @Nullable String resolutionNote) {
     }
 
-    record SummaryRow(long good, long ok, long bad, long sent, long unresolvedBad) {
+    record SummaryRow(long good, long ok, long bad, long sent, long unresolvedBad, long reviewClicks) {
     }
 
     FeedbackSettings settings();
@@ -48,6 +48,9 @@ public interface FeedbackMapper {
     /** Cavabı yazır; sorğu bu müştərinin deyilsə, vaxtı keçibsə və ya cavab varsa 0. */
     int answer(UUID id, UUID requestId, UUID customerId, String rating, @Nullable String reasons,
                @Nullable String comment, Instant now);
+
+    /** Müştəri rəydən sonra Google rəy səhifəsini açdı (ilk dəfə); 0 — rəy tapılmadı və ya artıq qeyd olunub. */
+    int markReviewClicked(UUID requestId, UUID customerId, Instant now);
 
     List<Row> list(@Nullable String rating, boolean unresolvedOnly, @Nullable UUID branchId, int limit, long offset);
 

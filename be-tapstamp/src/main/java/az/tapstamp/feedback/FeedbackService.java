@@ -56,7 +56,9 @@ public class FeedbackService {
     private static final int BATCH = 500;
     private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
 
-    public record FeedbackPrompt(UUID id, UUID branchId, LocalizedText branchName, Instant visitAt) {
+    /** {@code reviewUrl} — filialın Google rəy linki: rəydən sonra müştəriyə "Google-da da yaz" təklif olunur. */
+    public record FeedbackPrompt(UUID id, UUID branchId, LocalizedText branchName, Instant visitAt,
+                                 @Nullable String reviewUrl) {
     }
 
     /** Admin üçün rəy: müştərinin adı və tam telefonu. */
@@ -66,9 +68,12 @@ public class FeedbackService {
                                @Nullable String resolutionNote) {
     }
 
-    /** Son 30 gün: qiymətlər, məmnuniyyət (GOOD payı), cavab payı; həll olunmamış pis rəylər — hamısı. */
+    /**
+     * Son 30 gün: qiymətlər, məmnuniyyət (GOOD payı), cavab payı, Google rəy səhifəsinə keçənlər; həll olunmamış pis
+     * rəylər — hamısı.
+     */
     public record FeedbackSummary(long good, long ok, long bad, long answered, long sent, @Nullable Double satisfaction,
-                              @Nullable Double responseRate, long unresolvedBad) {
+                              @Nullable Double responseRate, long unresolvedBad, long reviewClicks) {
     }
 
     private final FeedbackMapper feedback;
@@ -140,7 +145,7 @@ public class FeedbackService {
             return null;
         }
         return feedback.openRequest(customerId, clock.instant())
-                .map(r -> new FeedbackPrompt(r.id(), r.branchId(), r.branchName(), r.visitAt()))
+                .map(r -> new FeedbackPrompt(r.id(), r.branchId(), r.branchName(), r.visitAt(), r.reviewUrl()))
                 .orElse(null);
     }
 
@@ -154,6 +159,14 @@ public class FeedbackService {
         if (feedback.answer(Ids.newId(), requestId, customerId, rating, reasonText, text, clock.instant()) != 1) {
             throw new ApiException(ErrorCode.NOT_FOUND);
         }
+    }
+
+    /**
+     * Müştəri rəydən sonra Google rəy səhifəsini açdı — yalnız sayılır (sahib nəticəni görsün). Rəy tapılmırsa da
+     * səssizdir: keçid onsuz da açılıb, müştəriyə xəta göstərməyə səbəb yoxdur.
+     */
+    public void reviewClicked(UUID customerId, UUID requestId) {
+        feedback.markReviewClicked(requestId, customerId, clock.instant());
     }
 
     // ---------------------------------------------------------------- admin (şirkət sahibi)
@@ -216,7 +229,7 @@ public class FeedbackService {
         long answered = s.good() + s.ok() + s.bad();
         return new FeedbackSummary(s.good(), s.ok(), s.bad(), answered, s.sent(),
                 answered == 0 ? null : (double) s.good() / answered,
-                s.sent() == 0 ? null : Math.min(1.0, (double) answered / s.sent()), s.unresolvedBad());
+                s.sent() == 0 ? null : Math.min(1.0, (double) answered / s.sent()), s.unresolvedBad(), s.reviewClicks());
     }
 
     public void resolve(AdminPrincipal principal, UUID id, @Nullable String note) {

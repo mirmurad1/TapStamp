@@ -73,7 +73,9 @@ public class AdminCompanyController {
             @Valid LocalizedText address,
             Map<String, List<List<String>>> businessHours,
             @Schema(description = "true — iş saatları silinir (hər zaman açıq)") Boolean clearBusinessHours,
-            @Pattern(regexp = "ACTIVE|CLOSED") String status) {
+            @Pattern(regexp = "ACTIVE|CLOSED") String status,
+            @Schema(description = "Filialın Google rəy linki (g.page, maps.app.goo.gl, google.com); boş sətir — silinir")
+            @Size(max = 500) String googleReviewUrl) {
     }
 
     public record BranchPolicyRequest(
@@ -135,7 +137,7 @@ public class AdminCompanyController {
     BranchView updateBranch(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID branchId,
                             @Valid @RequestBody BranchRequest request) {
         return company.updateBranch(principal, branchId, request.name(), request.address(), request.businessHours(),
-                Boolean.TRUE.equals(request.clearBusinessHours()), request.status());
+                Boolean.TRUE.equals(request.clearBusinessHours()), request.status(), request.googleReviewUrl());
     }
 
     @GetMapping("/branches/{branchId}/stamp-policy")

@@ -31,7 +31,7 @@
     </select>
 
     <select id="openRequest" resultType="az.tapstamp.feedback.repository.FeedbackMapper$OpenRequest">
-        SELECT r.id, r.branch_id, b.name AS branch_name, r.visit_at
+        SELECT r.id, r.branch_id, b.name AS branch_name, r.visit_at, b.google_review_url AS review_url
         FROM feedback_requests r JOIN branches b ON b.id = r.branch_id
         WHERE r.customer_id = #{customerId} AND r.sent_at IS NOT NULL AND r.expires_at &gt; #{now}
           AND NOT EXISTS (SELECT 1 FROM feedback f WHERE f.request_id = r.id)
@@ -47,6 +47,12 @@
           AND r.sent_at IS NOT NULL
         ON CONFLICT (request_id) DO NOTHING
     </insert>
+
+    <!-- Müştəri Google rəy səhifəsini açdı: yalnız öz rəyinə və bir dəfə (ilk açılış) -->
+    <update id="markReviewClicked">
+        UPDATE feedback SET review_clicked_at = #{now}
+        WHERE request_id = #{requestId} AND customer_id = #{customerId} AND review_clicked_at IS NULL
+    </update>
 
     <sql id="filter">
         <where>
@@ -82,7 +88,9 @@
             (SELECT count(*) FROM feedback_requests r WHERE r.sent_at &gt;= #{since} AND r.sent_at &lt; #{until}
                 <if test="branchId != null">AND r.branch_id = #{branchId}</if>) AS sent,
             (SELECT count(*) FROM feedback f WHERE f.rating = 'BAD' AND f.resolved_at IS NULL
-                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS unresolved_bad
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS unresolved_bad,
+            (SELECT count(*) FROM feedback f WHERE f.review_clicked_at &gt;= #{since} AND f.review_clicked_at &lt; #{until}
+                <if test="branchId != null">AND f.branch_id = #{branchId}</if>) AS review_clicks
     </select>
 
     <update id="resolve">

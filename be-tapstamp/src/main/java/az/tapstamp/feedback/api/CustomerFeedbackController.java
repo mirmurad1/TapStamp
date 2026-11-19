@@ -53,4 +53,12 @@ public class CustomerFeedbackController {
                 request.reasons() == null ? List.of() : request.reasons(), request.comment());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/api/v1/me/feedback-request/{requestId}/review-click")
+    @Operation(summary = "Google rəy səhifəsinə keçid", description = """
+            Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir             dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).""")
+    ResponseEntity<Void> reviewClick(@AuthenticationPrincipal CustomerPrincipal principal, @PathVariable UUID requestId) {
+        feedback.reviewClicked(principal.customerId(), requestId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -74,7 +74,7 @@ class MyBatisMappingIT extends IntegrationTest {
             assertThat(saved.id().version()).isEqualTo(7);
             assertThat(saved.name()).isEqualTo(name);
             assertThat(saved.address()).isNull();
-            companies.updateBranch(id, null, null, null, false, "CLOSED", Instant.now());
+            companies.updateBranch(id, null, null, null, false, "CLOSED", null, Instant.now());
         });
     }
 

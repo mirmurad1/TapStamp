@@ -639,7 +639,11 @@
         "fri": "Friday",
         "sat": "Saturday",
         "sun": "Sunday"
-      }
+      },
+      "googleReview": "Google review link",
+      "googleReviewHint": "The link from Google Business Profile → \"Ask for reviews\" (e.g. https://g.page/r/…/review). Customers who leave feedback are invited to review you on Google too. Leave empty to turn it off.",
+      "googleReviewSet": "Google review link connected",
+      "googleReviewPlaceholder": "https://g.page/r/…/review"
     },
     "tabs": {
       "loyalty": "Loyalty rules",
@@ -1253,7 +1257,8 @@
       "satisfaction": "Satisfaction",
       "responses": "Responses",
       "responseRate": "Response rate",
-      "none": "—"
+      "none": "—",
+      "reviewClicks": "Went to Google"
     },
     "unresolvedAlert_one": "{{count}} bad rating needs a response",
     "unresolvedAlert_other": "{{count}} bad ratings need a response",
