@@ -20,7 +20,7 @@ import { TierChip, TierNote } from '../components/TierCard';
 import { useMyTier } from '../lib/useMyTier';
 import { useSecondsUntil } from '../lib/useSecondsUntil';
 import { InstallRow } from '../pwa/InstallCard';
-import { NotificationsRow } from '../pwa/NotificationsCard';
+import { NotificationsBanner } from '../pwa/NotificationsCard';
 
 /** Ana səhifə: daxil olmuş müştəri üçün möhür kartı, qonaq üçün kafe haqqında qısa məlumat və giriş düyməsi. */
 export function HomePage() {
@@ -56,6 +56,7 @@ function Profile({ me }: { me: Me }) {
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">{t('intro')}</p>
       </section>
+      <NotificationsBanner />
       <BonusRulesBanner />
       {card ? (
         <StampCard
@@ -108,7 +109,6 @@ function Profile({ me }: { me: Me }) {
         <MenuRow />
         <FeedbackRow />
         <InviteFriendRow />
-        <NotificationsRow />
         <InstallRow />
       </div>
     </>

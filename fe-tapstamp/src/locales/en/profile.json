@@ -203,16 +203,14 @@
     "unsupported": "This browser does not support notifications.",
     "blocked": "Notifications are blocked in your browser settings. Change the site permissions to turn them on.",
     "offerTitle": "Don’t miss your gift",
-    "offerDescription": "Turn on notifications to know right away when a stamp is confirmed and your gift is ready.",
-    "dismiss": "Close",
     "errors": {
       "denied": "Permission was not granted.",
       "failed": "Could not turn on notifications. Please try again shortly."
     },
-    "rowHint": "Know when your gift is ready",
     "previewReward": "Your card is full, {{reward}} is waiting for you!",
-    "previewStamp": "Stamp confirmed: {{count}}/{{total}}",
-    "previewNow": "now"
+    "previewNow": "now",
+    "bannerText": "We’ll tell you the moment a stamp is confirmed and your gift is ready.",
+    "later": "Remind me later"
   },
   "switchNumberConfirm": {
     "title": "Sign out of this number?",

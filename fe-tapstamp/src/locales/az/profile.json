@@ -203,16 +203,14 @@
     "unsupported": "Bu brauzer bildirişləri dəstəkləmir.",
     "blocked": "Bildirişlər brauzerin parametrlərində bloklanıb. Açmaq üçün saytın icazələrini dəyiş.",
     "offerTitle": "Hədiyyəni qaçırma",
-    "offerDescription": "Bildirişləri aç — möhür təsdiqlənəndə və hədiyyən hazır olanda dərhal xəbər alacaqsan.",
-    "dismiss": "Bağla",
     "errors": {
       "denied": "İcazə verilmədi.",
       "failed": "Bildirişləri açmaq alınmadı. Bir azdan yenidən cəhd et."
     },
-    "rowHint": "Hədiyyən hazır olanda xəbər alacaqsan",
     "previewReward": "Kartın doldu, {{reward}} səni gözləyir!",
-    "previewStamp": "Möhürün təsdiqləndi: {{count}}/{{total}}",
-    "previewNow": "indi"
+    "previewNow": "indi",
+    "bannerText": "Möhür təsdiqlənəndə və hədiyyən hazır olanda dərhal xəbər verək.",
+    "later": "Sonra xatırlat"
   },
   "switchNumberConfirm": {
     "title": "Hesabdan çıxılsın?",
