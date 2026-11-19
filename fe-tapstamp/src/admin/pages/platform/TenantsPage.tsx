@@ -14,6 +14,7 @@ import { platformApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
 import { TENANTS_KEY } from './keys';
+import { TenantLogo } from './TenantLogo';
 import { TenantPlanSummary } from './TenantPlanCard';
 import { TenantStatusBadge } from './TenantStatusBadge';
 
@@ -73,12 +74,7 @@ export function TenantsPage() {
                     >
                       <td className="px-5 py-3 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <span
-                            className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-sm font-semibold text-primary"
-                            aria-hidden="true"
-                          >
-                            {name.trim().charAt(0).toLocaleUpperCase(lang)}
-                          </span>
+                          <TenantLogo tenantId={tenant.id ?? ''} name={name} lang={lang} className="size-9 rounded-xl text-sm" />
                           <div className="min-w-0">
                             <Link
                               to={`/tenants/${tenant.id}`}

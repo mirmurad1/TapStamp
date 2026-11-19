@@ -31,6 +31,7 @@ import { DomainsCard } from './DomainsCard';
 import { TenantSmsLimitCard } from './SmsLimitCards';
 import { TenantAddonsCard } from './TenantAddonsCard';
 import { TenantAuditCard } from './TenantAuditCard';
+import { TenantLogo } from './TenantLogo';
 import { TenantPlanCard } from './TenantPlanCard';
 import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
@@ -128,12 +129,12 @@ function TenantHeader({ tenant, onNotice }: { tenant: Tenant; onNotice: (message
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          <span
-            className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary/10 font-display text-2xl font-semibold text-primary"
-            aria-hidden="true"
-          >
-            {name.trim().charAt(0).toLocaleUpperCase(lang)}
-          </span>
+          <TenantLogo
+            tenantId={tenant.id ?? ''}
+            name={name}
+            lang={lang}
+            className="size-14 rounded-2xl font-display text-2xl ring-1 ring-border"
+          />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-semibold">{name}</h1>

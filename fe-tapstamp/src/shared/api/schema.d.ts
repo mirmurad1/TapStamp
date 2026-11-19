@@ -2850,6 +2850,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin loqosu (PNG)
+         * @description Platforma panelində şirkətin ikonu üçün. Loqo yoxdursa 404 — onda panel şirkət adının ilk hərfini göstərir.
+         */
+        get: operations["tenantLogo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/owner-invitations": {
         parameters: {
             query?: never;
@@ -9239,6 +9259,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Domain"];
+                };
+            };
+        };
+    };
+    tenantLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
                 };
             };
         };

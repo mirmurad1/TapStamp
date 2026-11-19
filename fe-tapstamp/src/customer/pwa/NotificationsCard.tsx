@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 
 import { pushApi } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
-import { useCompanyInitial, useCompanyName } from '../lib/companyInitial';
+import { CompanyIcon } from '../components/CompanyIcon';
+import { useCompanyName } from '../lib/companyInitial';
 import { currentSubscription, disablePush, enablePush, notificationPermission, pushSupport } from './push';
 
 const SUBSCRIPTION_KEY = ['push-subscription'] as const;
@@ -119,7 +120,6 @@ export function NotificationsBanner() {
   const toggle = useToggle();
   const [dismissed, setDismissed] = useState(offerDismissed);
   const companyName = useCompanyName();
-  const initial = useCompanyInitial();
   if (!loaded || !config?.enabled || subscribed || dismissed || pushSupport() !== 'supported') {
     return null;
   }
@@ -167,9 +167,7 @@ export function NotificationsBanner() {
         className="mt-3 flex items-center gap-2.5 rounded-xl bg-card p-2.5 text-left text-[13px] text-card-foreground shadow-sm"
         aria-hidden="true"
       >
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-xs font-extrabold text-primary-foreground">
-          {initial}
-        </span>
+        <CompanyIcon className="size-8 rounded-lg text-xs" />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{companyName}</span>
           <span className="line-clamp-2 leading-snug">

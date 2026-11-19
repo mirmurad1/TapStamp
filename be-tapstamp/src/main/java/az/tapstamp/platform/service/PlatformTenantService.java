@@ -4,10 +4,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogger;
+import az.tapstamp.company.repository.CompanyMapper;
+import az.tapstamp.company.service.CompanyLogoService;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.plan.Subscription;
@@ -64,11 +67,12 @@ public class PlatformTenantService {
     private final Clock clock;
     private final PlanService plans;
     private final AuditLogQuery auditLog;
+    private final CompanyLogoService logos;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
                                  TenantOverviewMapper overview, Clock clock, PlanService plans,
-                                 AuditLogQuery auditLog) {
+                                 AuditLogQuery auditLog, CompanyLogoService logos) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -80,6 +84,7 @@ public class PlatformTenantService {
         this.clock = clock;
         this.plans = plans;
         this.auditLog = auditLog;
+        this.logos = logos;
     }
 
     public List<TenantSummary> list() {
@@ -125,6 +130,18 @@ public class PlatformTenantService {
     public TenantStats stats(UUID tenantId) {
         TenantRecord tenant = activeTenant(tenantId);
         return TenantContext.callAs(tenant.toInfo(), overview::stats);
+    }
+
+    /**
+     * Şirkətin loqosu (PNG) — platforma panelində şirkətin ikonu üçün. Loqo şirkətin bazasındadır; şirkət aktiv və ya
+     * dayandırılmış deyilsə (yaradılır, bağlanıb və s.) və ya loqo yüklənməyibsə — boş.
+     */
+    public Optional<byte[]> logo(UUID tenantId) {
+        TenantRecord tenant = tenant(tenantId);
+        if (tenant.status() != TenantStatus.ACTIVE && tenant.status() != TenantStatus.SUSPENDED) {
+            return Optional.empty();
+        }
+        return TenantContext.callAs(tenant.toInfo(), () -> logos.logo().map(CompanyMapper.Logo::png));
     }
 
     /** Şirkətin öz audit jurnalı (şirkətin bazasından), yenidən köhnəyə. Şəxsi məlumat jurnalda saxlanılmır. */

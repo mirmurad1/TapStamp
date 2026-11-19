@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
+import { initialOf } from '@/shared/lib/initial';
 
 import { publicApi } from '../api/customerApi';
 
@@ -13,5 +14,5 @@ export function useCompanyName(): string {
 
 /** Şirkət adının ilk hərfi (ad yoxdursa boş). */
 export function useCompanyInitial(): string {
-  return useCompanyName().trim().charAt(0).toLocaleUpperCase(currentLanguage());
+  return initialOf(useCompanyName(), currentLanguage());
 }

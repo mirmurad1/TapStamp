@@ -95,6 +95,8 @@ class PlatformAdminIT extends AdminIntegrationTest {
                 .andExpect(jsonPath("$.totalCustomers").isNumber())
                 .andReturn().getResponse().getContentAsString();
         assertThat(body).doesNotContain("phone", "+994");
+        // Loqo yalnız mövcud şirkət üçün; yoxdursa 404 (panel onda adın ilk hərfini göstərir)
+        admin.get("/tenants/" + UUID.randomUUID() + "/logo").andExpect(status().isNotFound());
         // DB şifrələri və adları heç vaxt qaytarılmır
         assertThat(admin.get("/tenants").andReturn().getResponse().getContentAsString())
                 .doesNotContain("password", "dbName", "loyalty_t_");

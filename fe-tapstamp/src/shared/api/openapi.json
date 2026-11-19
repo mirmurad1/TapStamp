@@ -5117,6 +5117,36 @@
         "tags" : [ "Platforma: domenlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/logo" : {
+      "get" : {
+        "description" : "Platforma panelində şirkətin ikonu üçün. Loqo yoxdursa 404 — onda panel şirkət adının ilk hərfini göstərir.",
+        "operationId" : "tenantLogo",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin loqosu (PNG)",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/owner-invitations" : {
       "post" : {
         "description" : "Dəvət linki şirkətin öz domenində açılır, 72 saat etibarlıdır.",

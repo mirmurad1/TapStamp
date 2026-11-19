@@ -1,5 +1,6 @@
 package az.tapstamp.platform.api;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -8,6 +9,8 @@ import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.platform.service.PlatformTenantService;
 import az.tapstamp.security.admin.AdminPrincipal;
+import az.tapstamp.shared.error.ApiException;
+import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.paging.PageQuery;
@@ -23,7 +26,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -134,6 +139,19 @@ public class PlatformTenantController {
     StatsResponse stats(@PathVariable UUID tenantId) {
         var stats = tenants.stats(tenantId);
         return new StatsResponse(stats.branches(), stats.totalCustomers(), stats.activeCustomers(), stats.activeStaff());
+    }
+
+    @GetMapping("/{tenantId}/logo")
+    @Operation(summary = "Şirkətin loqosu (PNG)",
+            description = "Platforma panelində şirkətin ikonu üçün. Loqo yoxdursa 404 — onda panel şirkət adının ilk hərfini göstərir.")
+    ResponseEntity<byte[]> tenantLogo(@PathVariable UUID tenantId) {
+        return tenants.logo(tenantId)
+                .map(png -> ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        // Ünvan versiyasızdır: loqo dəyişəndə panel 5 dəqiqə ərzində yenisini görür
+                        .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePrivate())
+                        .body(png))
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
     @GetMapping("/{tenantId}/audit-logs")

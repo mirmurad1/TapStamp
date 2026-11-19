@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 
 import { OfferRow, Sheet } from '../components/Sheet';
-import { useCompanyInitial } from '../lib/companyInitial';
+import { CompanyIcon } from '../components/CompanyIcon';
 
 /** Chrome/Edge/Samsung brauzerinin quraşdırma hadisəsi (standart tiplərdə yoxdur). */
 interface InstallPromptEvent extends Event {
@@ -138,7 +138,6 @@ function StepNumber({ value }: { value: number }) {
 
 /** Ana ekranın sxemi: şirkətin ikonu boş yerə "düşür" — quraşdırmadan sonra nə olacağı görünür. */
 function HomeScreenPreview() {
-  const initial = useCompanyInitial();
   return (
     <div
       aria-hidden="true"
@@ -146,12 +145,10 @@ function HomeScreenPreview() {
     >
       {Array.from({ length: 8 }, (_, index) =>
         index === 5 ? (
-          <span
+          <CompanyIcon
             key={index}
-            className="animate-stamp-pop flex aspect-square items-center justify-center rounded-xl leading-none bg-primary text-lg font-extrabold text-primary-foreground shadow-md [animation-delay:0.35s]"
-          >
-            {initial}
-          </span>
+            className="animate-stamp-pop aspect-square rounded-xl text-lg leading-none shadow-md [animation-delay:0.35s]"
+          />
         ) : (
           <span key={index} className="aspect-square rounded-xl bg-white/55" />
         ),
