@@ -94,13 +94,24 @@
 
     <update id="updateImage">
         UPDATE catalog_items
-        SET image = #{png,jdbcType=BINARY}, image_version = image_version + 1, updated_at = #{now}, updated_by = #{staffId}
+        SET image = #{png,jdbcType=BINARY}, image_thumb = #{thumb,jdbcType=BINARY}, image_version = image_version + 1,
+            updated_at = #{now}, updated_by = #{staffId}
         WHERE id = #{id}
     </update>
 
     <select id="findImage" resultType="az.tapstamp.catalog.repository.CatalogMapper$Image">
         SELECT image AS png, image_version AS version FROM catalog_items WHERE id = #{id} AND image IS NOT NULL
     </select>
+
+    <select id="findThumbnail" resultType="az.tapstamp.catalog.repository.CatalogMapper$Thumbnail">
+        SELECT image_thumb AS jpeg FROM catalog_items WHERE id = #{id} AND image IS NOT NULL AND image_thumb IS NOT NULL
+    </select>
+
+    <!-- Yalnız şəkil hələ eynidirsə (arada dəyişdirilməyib və ya silinməyib) -->
+    <update id="saveThumbnail">
+        UPDATE catalog_items SET image_thumb = #{thumb,jdbcType=BINARY}
+        WHERE id = #{id} AND image IS NOT NULL AND image_thumb IS NULL
+    </update>
 
     <select id="branchExists" resultType="boolean">
         SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId})

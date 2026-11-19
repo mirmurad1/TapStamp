@@ -30,7 +30,12 @@ public interface CatalogMapper {
                 @Nullable UUID branchId, int position) {
     }
 
+    /** Əsas şəkil: yeni yükləmələrdə JPEG, köhnələrdə PNG (sahənin adı tarixi səbəbdən {@code png}-dir). */
     record Image(byte[] png, int version) {
+    }
+
+    /** Şəklin kiçik variantı (JPEG). */
+    record Thumbnail(byte[] jpeg) {
     }
 
     Settings settings();
@@ -80,10 +85,15 @@ public interface CatalogMapper {
 
     void deleteItem(UUID id);
 
-    /** Şəkil (null — silinir); versiya hər dəfə artır. */
-    void updateImage(UUID id, byte @Nullable [] png, UUID staffId, Instant now);
+    /** Şəkil və kiçik variantı (null — silinir); versiya hər dəfə artır. */
+    void updateImage(UUID id, byte @Nullable [] png, byte @Nullable [] thumb, UUID staffId, Instant now);
 
     Optional<Image> findImage(UUID id);
+
+    Optional<Thumbnail> findThumbnail(UUID id);
+
+    /** Köhnə şəkil üçün sonradan yaradılmış kiçik variant (versiya dəyişmir — şəkil eynidir). */
+    void saveThumbnail(UUID id, byte[] thumb);
 
     boolean branchExists(UUID branchId);
 }

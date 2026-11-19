@@ -1,5 +1,6 @@
 package az.tapstamp.shared.image;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -9,8 +10,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 
 import az.tapstamp.shared.error.ApiException;
@@ -32,18 +37,81 @@ public record SquarePng(int maxBytes, int minSize, int maxSize, int storedSize, 
     private static final byte[] PNG_MAGIC = {(byte) 0x89, 'P', 'N', 'G'};
     private static final byte[] JPEG_MAGIC = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
 
+    /** JPEG keyfiyyəti: fotolar üçün gözlə fərq edilmir, həcm PNG-dən təxminən 6–8 dəfə kiçikdir. */
+    static final float JPEG_QUALITY = 0.82f;
+
     /** Yoxlama (növ, həcm, ölçü həddləri), kvadrata gətirmə və PNG-yə çevirmə. */
     public byte[] normalize(byte[] file) {
-        if (file == null || file.length == 0 || file.length > maxBytes
-                || !(startsWith(file, PNG_MAGIC) || startsWith(file, JPEG_MAGIC))) {
-            throw new ApiException(invalid);
-        }
-        BufferedImage image = squared(decode(file));
+        BufferedImage image = squared(decode(validated(file)), storedSize);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", out);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+        return out.toByteArray();
+    }
+
+    /**
+     * Fotolar üçün (menyu şəkilləri): yoxlama, kvadrata gətirmə və JPEG-ə çevirmə. JPEG şəffaflığı saxlamır — şəffaf
+     * hissələr ağ olur.
+     */
+    public byte[] normalizeJpeg(byte[] file) {
+        return jpeg(squared(decode(validated(file)), storedSize));
+    }
+
+    /**
+     * Artıq saxlanılmış (yoxlanılmış) kvadrat şəkildən kiçik JPEG variant — siyahılarda göstərmək üçün. Şəkil
+     * {@code size}-dan kiçikdirsə böyüdülmür.
+     */
+    public static byte[] jpegThumbnail(byte[] stored, int size) {
+        try {
+            BufferedImage source = ImageIO.read(new ByteArrayInputStream(stored));
+            if (source == null) {
+                throw new IllegalArgumentException("Unreadable stored image");
+            }
+            return jpeg(squared(source, size));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** Baytlara görə şəklin növü (saxlanılmış şəkillər üçün): JPEG və ya PNG. */
+    public static String contentType(byte[] image) {
+        return startsWith(image, JPEG_MAGIC) ? "image/jpeg" : "image/png";
+    }
+
+    private byte[] validated(byte[] file) {
+        if (file == null || file.length == 0 || file.length > maxBytes
+                || !(startsWith(file, PNG_MAGIC) || startsWith(file, JPEG_MAGIC))) {
+            throw new ApiException(invalid);
+        }
+        return file;
+    }
+
+    /** JPEG-ə çevirmə: şəffaf hissələr ağ fonla doldurulur (JPEG-də alfa kanal yoxdur). */
+    private static byte[] jpeg(BufferedImage image) {
+        BufferedImage rgb = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = rgb.createGraphics();
+        try {
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(0, 0, rgb.getWidth(), rgb.getHeight());
+            graphics.drawImage(image, 0, 0, null);
+        } finally {
+            graphics.dispose();
+        }
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ImageOutputStream output = ImageIO.createImageOutputStream(out)) {
+            writer.setOutput(output);
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(JPEG_QUALITY);
+            writer.write(null, new IIOImage(rgb, null, null), param);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            writer.dispose();
         }
         return out.toByteArray();
     }
@@ -78,12 +146,12 @@ public record SquarePng(int maxBytes, int minSize, int maxSize, int storedSize, 
         }
     }
 
-    /** Mərkəzdən kvadrat kəsir və lazım olsa {@code storedSize} piksələ kiçildir (şəffaflıq saxlanılır). */
-    private BufferedImage squared(BufferedImage source) {
+    /** Mərkəzdən kvadrat kəsir və lazım olsa {@code size} piksələ kiçildir (şəffaflıq saxlanılır). */
+    private static BufferedImage squared(BufferedImage source, int size) {
         int side = Math.min(source.getWidth(), source.getHeight());
         BufferedImage crop = source.getSubimage((source.getWidth() - side) / 2, (source.getHeight() - side) / 2,
                 side, side);
-        int target = Math.min(side, storedSize);
+        int target = Math.min(side, size);
         BufferedImage result = new BufferedImage(target, target, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = result.createGraphics();
         try {

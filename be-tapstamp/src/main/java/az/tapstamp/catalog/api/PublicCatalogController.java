@@ -7,6 +7,7 @@ import az.tapstamp.catalog.CatalogService;
 import az.tapstamp.catalog.CatalogService.CatalogView;
 import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
+import az.tapstamp.shared.image.SquarePng;
 import az.tapstamp.tenancy.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,15 +42,28 @@ public class PublicCatalogController {
     }
 
     @GetMapping("/api/v1/public/catalog/items/{itemId}/image")
-    @Operation(summary = "Məhsulun şəkli (PNG)", description = """
+    @Operation(summary = "Məhsulun şəkli (640 px, JPEG və ya köhnə şəkillərdə PNG)", description = """
             Ünvan versiyalıdır (`imageUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Şəkil yoxdursa 404.""")
     ResponseEntity<byte[]> image(@PathVariable UUID itemId) {
         TenantContext.require();
         return catalog.image(itemId)
                 .map(found -> ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_PNG)
+                        .contentType(MediaType.parseMediaType(SquarePng.contentType(found.png())))
                         .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable())
                         .body(found.png()))
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+    }
+
+    @GetMapping("/api/v1/public/catalog/items/{itemId}/thumb")
+    @Operation(summary = "Məhsulun kiçik şəkli (192 px, JPEG)", description = """
+            Menyu siyahısı üçün (`thumbUrl`). Ünvan versiyalıdır, uzun müddət keşlənir. Şəkil yoxdursa 404.""")
+    ResponseEntity<byte[]> thumb(@PathVariable UUID itemId) {
+        TenantContext.require();
+        return catalog.thumbnail(itemId)
+                .map(jpeg -> ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable())
+                        .body(jpeg))
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 }

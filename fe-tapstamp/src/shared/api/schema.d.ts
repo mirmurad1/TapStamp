@@ -3298,10 +3298,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Məhsulun şəkli (PNG)
+         * Məhsulun şəkli (640 px, JPEG və ya köhnə şəkillərdə PNG)
          * @description Ünvan versiyalıdır (`imageUrl`-dakı `?v=N`), ona görə uzun müddət keşlənir. Şəkil yoxdursa 404.
          */
         get: operations["image"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/items/{itemId}/thumb": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Məhsulun kiçik şəkli (192 px, JPEG)
+         * @description Menyu siyahısı üçün (`thumbUrl`). Ünvan versiyalıdır, uzun müddət keşlənir. Şəkil yoxdursa 404.
+         */
+        get: operations["thumb"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4255,6 +4275,7 @@ export interface components {
             imageUrl?: string;
             name?: components["schemas"]["LocalizedText"];
             price?: number;
+            thumbUrl?: string;
         };
         Keys: {
             auth: string;
@@ -9854,6 +9875,28 @@ export interface operations {
         };
     };
     image: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    thumb: {
         parameters: {
             query?: never;
             header?: never;

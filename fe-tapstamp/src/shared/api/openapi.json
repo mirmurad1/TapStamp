@@ -6027,7 +6027,37 @@
             "description" : "OK"
           }
         },
-        "summary" : "Məhsulun şəkli (PNG)",
+        "summary" : "Məhsulun şəkli (640 px, JPEG və ya köhnə şəkillərdə PNG)",
+        "tags" : [ "İctimai: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/public/catalog/items/{itemId}/thumb" : {
+      "get" : {
+        "description" : "Menyu siyahısı üçün (`thumbUrl`). Ünvan versiyalıdır, uzun müddət keşlənir. Şəkil yoxdursa 404.",
+        "operationId" : "thumb",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "itemId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Məhsulun kiçik şəkli (192 px, JPEG)",
         "tags" : [ "İctimai: menyu və xidmətlər" ]
       }
     },
@@ -7997,6 +8027,9 @@
           },
           "price" : {
             "type" : "number"
+          },
+          "thumbUrl" : {
+            "type" : "string"
           }
         }
       },

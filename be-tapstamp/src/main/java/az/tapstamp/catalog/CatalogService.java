@@ -41,19 +41,21 @@ public class CatalogService {
     public static final int MAX_CATEGORIES = 30;
     public static final int MAX_ITEMS = 300;
     public static final Set<String> TITLES = Set.of("MENU", "SERVICES", "PRICES");
-    /** Məhsul şəkli: PNG və ya JPEG, 2 MB-a qədər, qısa tərəfi ən az 200 piksel; 640 px kvadrat PNG saxlanılır. */
+    /** Məhsul şəkli: PNG və ya JPEG, 2 MB-a qədər, qısa tərəfi ən az 200 piksel; 640 px kvadrat JPEG saxlanılır. */
     public static final int IMAGE_MAX_BYTES = 2 * 1024 * 1024;
     static final SquarePng IMAGE = new SquarePng(IMAGE_MAX_BYTES, 200, 4096, 640, ErrorCode.CATALOG_IMAGE_INVALID);
+    /** Siyahıdakı şəklin tərəfi: ekranda 88 px, 2x ekranlar üçün ehtiyatla 192 px. */
+    static final int THUMB_SIZE = 192;
 
     public record ItemInput(UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                             @Nullable BigDecimal price, @Nullable Integer durationMinutes, boolean available,
                             @Nullable UUID branchId) {
     }
 
-    /** {@code imageUrl} — versiyalı ictimai ünvan (şəkil yoxdursa null). */
+    /** {@code imageUrl} — versiyalı ictimai ünvan (şəkil yoxdursa null); {@code thumbUrl} — siyahı üçün kiçik variant. */
     public record ItemView(UUID id, UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                            @Nullable BigDecimal price, @Nullable Integer durationMinutes, @Nullable String imageUrl,
-                           boolean available, @Nullable UUID branchId) {
+                           @Nullable String thumbUrl, boolean available, @Nullable UUID branchId) {
     }
 
     public record CategoryView(UUID id, LocalizedText name, boolean active, List<ItemView> items) {
@@ -108,6 +110,25 @@ public class CatalogService {
             return Optional.empty();
         }
         return catalog.findImage(itemId);
+    }
+
+    /**
+     * Şəklin kiçik variantı (JPEG). Bu dəyişiklikdən əvvəl yüklənmiş şəkillər üçün ilk sorğuda yaradılıb saxlanılır —
+     * ayrıca köçürmə lazım deyil.
+     */
+    public Optional<byte[]> thumbnail(UUID itemId) {
+        if (!plans.has(Addon.CATALOG)) {
+            return Optional.empty();
+        }
+        Optional<byte[]> stored = catalog.findThumbnail(itemId).map(CatalogMapper.Thumbnail::jpeg);
+        if (stored.isPresent()) {
+            return stored;
+        }
+        return catalog.findImage(itemId).map(image -> {
+            byte[] thumb = SquarePng.jpegThumbnail(image.png(), THUMB_SIZE);
+            catalog.saveThumbnail(itemId, thumb);
+            return thumb;
+        });
     }
 
     // ---------------------------------------------------------------- admin
@@ -235,9 +256,10 @@ public class CatalogService {
     public CatalogView uploadImage(AdminPrincipal principal, UUID itemId, byte[] file) {
         AccessPolicy.requireCompanyWide(principal);
         item(itemId);
-        byte[] png = IMAGE.normalize(file);
-        catalog.updateImage(itemId, png, principal.userId(), clock.instant());
-        audit(principal, "CATALOG_ITEM_IMAGE_UPDATED", itemId, Map.of("bytes", png.length));
+        byte[] image = IMAGE.normalizeJpeg(file);
+        byte[] thumb = SquarePng.jpegThumbnail(image, THUMB_SIZE);
+        catalog.updateImage(itemId, image, thumb, principal.userId(), clock.instant());
+        audit(principal, "CATALOG_ITEM_IMAGE_UPDATED", itemId, Map.of("bytes", image.length));
         return adminCatalog(principal);
     }
 
@@ -245,7 +267,7 @@ public class CatalogService {
     public CatalogView removeImage(AdminPrincipal principal, UUID itemId) {
         AccessPolicy.requireCompanyWide(principal);
         item(itemId);
-        catalog.updateImage(itemId, null, principal.userId(), clock.instant());
+        catalog.updateImage(itemId, null, null, principal.userId(), clock.instant());
         audit(principal, "CATALOG_ITEM_IMAGE_REMOVED", itemId, Map.of());
         return adminCatalog(principal);
     }
@@ -285,10 +307,11 @@ public class CatalogService {
     }
 
     private static ItemView view(Item item) {
-        String imageUrl = item.imageVersion() == 0 ? null
-                : "/api/v1/public/catalog/items/" + item.id() + "/image?v=" + item.imageVersion();
+        String base = "/api/v1/public/catalog/items/" + item.id();
+        String imageUrl = item.imageVersion() == 0 ? null : base + "/image?v=" + item.imageVersion();
+        String thumbUrl = item.imageVersion() == 0 ? null : base + "/thumb?v=" + item.imageVersion();
         return new ItemView(item.id(), item.categoryId(), item.name(), item.description(), item.price(),
-                item.durationMinutes(), imageUrl, item.available(), item.branchId());
+                item.durationMinutes(), imageUrl, thumbUrl, item.available(), item.branchId());
     }
 
     private void audit(AdminPrincipal principal, String action, @Nullable UUID targetId, Map<String, Object> details) {

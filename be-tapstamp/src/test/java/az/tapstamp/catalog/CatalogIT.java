@@ -185,13 +185,23 @@ class CatalogIT extends TapIntegrationTest {
         upload(owner, imagePath, image(1200, 900, "jpeg")).andExpect(status().isOk());
         String imageUrl = idOf(body(publicCatalog("")), "$.categories[0].items[0].imageUrl");
         assertThat(imageUrl).startsWith("/api/v1/public/catalog/items/" + itemId + "/image?v=");
-        byte[] png = client().get(imageUrl).andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", "image/png"))
+        byte[] jpeg = client().get(imageUrl).andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/jpeg"))
                 .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("immutable")))
                 .andReturn().getResponse().getContentAsByteArray();
-        BufferedImage stored = ImageIO.read(new ByteArrayInputStream(png));
+        BufferedImage stored = ImageIO.read(new ByteArrayInputStream(jpeg));
         assertThat(stored.getWidth()).isEqualTo(640);
         assertThat(stored.getHeight()).isEqualTo(640);
+
+        // Siyahı üçün kiçik variant: 192 px JPEG, əsas şəkildən xeyli yüngül
+        String thumbUrl = idOf(body(publicCatalog("")), "$.categories[0].items[0].thumbUrl");
+        assertThat(thumbUrl).startsWith("/api/v1/public/catalog/items/" + itemId + "/thumb?v=");
+        byte[] thumb = client().get(thumbUrl).andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/jpeg"))
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("immutable")))
+                .andReturn().getResponse().getContentAsByteArray();
+        assertThat(ImageIO.read(new ByteArrayInputStream(thumb)).getWidth()).isEqualTo(192);
+        assertThat(thumb.length).isLessThan(jpeg.length);
 
         // Yenidən yükləmə — yeni versiya; uyğun olmayanlar
         upload(owner, imagePath, image(300, 300, "png")).andExpect(status().isOk());
@@ -203,6 +213,31 @@ class CatalogIT extends TapIntegrationTest {
         owner.delete("/catalog/items/" + itemId + "/image").andExpect(status().isOk())
                 .andExpect(jsonPath("$.categories[0].items[0].imageUrl").doesNotExist());
         client().get("/api/v1/public/catalog/items/" + itemId + "/image").andExpect(status().isNotFound());
+        client().get("/api/v1/public/catalog/items/" + itemId + "/thumb").andExpect(status().isNotFound());
+    }
+
+    @Test
+    void thumbnailOfImageUploadedBeforeThumbnailsExistedIsCreatedOnFirstRequest() throws Exception {
+        AdminClient owner = owner();
+        String category = idOf(body(owner.post("/catalog/categories", Map.of("name", Map.of("az", "Köhnə")))),
+                "$.categories[0].id");
+        String itemId = idOf(body(owner.post("/catalog/items", item(category, "Plov", 12))), "$.categories[0].items[0].id");
+        // Köhnə vəziyyət: əsas şəkil PNG, kiçik variant yoxdur
+        byte[] legacyPng = image(640, 640, "png");
+        az.tapstamp.tenancy.TenantContext.runAs(alpha(), () -> tenantJdbc.sql(
+                        "UPDATE catalog_items SET image = :png, image_thumb = NULL, image_version = 1 WHERE id = :id")
+                .param("png", legacyPng).param("id", UUID.fromString(itemId)).update());
+
+        client().get("/api/v1/public/catalog/items/" + itemId + "/image").andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/png"));
+        byte[] thumb = client().get("/api/v1/public/catalog/items/" + itemId + "/thumb").andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/jpeg"))
+                .andReturn().getResponse().getContentAsByteArray();
+        assertThat(ImageIO.read(new ByteArrayInputStream(thumb)).getWidth()).isEqualTo(192);
+        Integer saved = az.tapstamp.tenancy.TenantContext.callAs(alpha(), () -> tenantJdbc.sql(
+                        "SELECT count(*) FROM catalog_items WHERE id = :id AND image_thumb IS NOT NULL")
+                .param("id", UUID.fromString(itemId)).query(Integer.class).single());
+        assertThat(saved).isEqualTo(1);
     }
 
     @Test

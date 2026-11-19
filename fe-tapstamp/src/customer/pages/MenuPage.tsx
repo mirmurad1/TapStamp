@@ -224,6 +224,31 @@ function CategoryTabs({ categories }: { categories: Category[] }) {
   );
 }
 
+/**
+ * Məhsulun şəkli: kiçik variant (192 px JPEG, ~10–15 KB) yüklənir. Yüklənənə qədər yerində boz fon qalır ki, siyahı
+ * tullanmasın; şəkil gələndə yumşaq görünür. Ölçülər əvvəlcədən verilib — brauzer yeri ayırır.
+ */
+function ItemImage({ src }: { src: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <span className="size-[88px] shrink-0 self-center overflow-hidden rounded-2xl bg-muted">
+      <img
+        src={src}
+        alt=""
+        width={88}
+        height={88}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          'size-full object-cover transition-opacity duration-300 motion-reduce:transition-none',
+          loaded ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+    </span>
+  );
+}
+
 function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
@@ -251,9 +276,7 @@ function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
           ) : null}
         </p>
       </div>
-      {item.imageUrl ? (
-        <img src={item.imageUrl} alt="" loading="lazy" className="size-[88px] shrink-0 self-center rounded-2xl object-cover" />
-      ) : null}
+      {item.thumbUrl ?? item.imageUrl ? <ItemImage src={(item.thumbUrl ?? item.imageUrl) as string} /> : null}
     </li>
   );
 }

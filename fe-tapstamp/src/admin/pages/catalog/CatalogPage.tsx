@@ -381,7 +381,7 @@ function ItemRow({ item, index, order, categoryId, onEdit }: {
     <li className="flex flex-col gap-2 px-5 py-3 sm:px-6">
       {/* Telefonda düymələr mətnin altında bir sırada; geniş ekranda sağda */}
       <div className="flex flex-wrap items-start gap-x-3 gap-y-1 sm:flex-nowrap">
-        <Thumbnail url={item.imageUrl} />
+        <Thumbnail url={item.thumbUrl ?? item.imageUrl} />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-2 font-medium">
             <span className="break-words">{resolveText(item.name, lang)}</span>

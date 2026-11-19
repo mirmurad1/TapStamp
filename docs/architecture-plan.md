@@ -1016,7 +1016,8 @@ Baza yolu `/api/v1`-dir. Tenant **domendən** müəyyən olunur, ona görə yoll
 | GET | `/api/v1/public/legal/{type}` | Cari məxfilik siyasəti və ya şərtlər (3 dildə, versiya ilə) |
 | GET | `/manifest.webmanifest` | Şirkətə xas PWA manifesti (ad, rənglər, ikonlar) |
 | GET | `/api/v1/public/catalog?branchId=` | Menyu və ya xidmətlər (əlavə `CATALOG`, #64): görünən kateqoriyalar və məhsullar; əlavə yoxdursa `enabled = false` |
-| GET | `/api/v1/public/catalog/items/{id}/image?v=` | Məhsulun şəkli (PNG, versiyalı ünvan, uzun keş) |
+| GET | `/api/v1/public/catalog/items/{id}/image?v=` | Məhsulun şəkli (640 px JPEG, köhnələr PNG; versiyalı ünvan, uzun keş) |
+| GET | `/api/v1/public/catalog/items/{id}/thumb?v=` | Siyahı üçün kiçik şəkil (192 px JPEG, ~10–15 KB); köhnə şəkillər üçün ilk sorğuda yaradılır |
 | GET | `/api/v1/csrf` | CSRF cookie-sini təmin edir |
 
 ### 10.2 Müştəri autentifikasiyası — `/api/v1/auth`
@@ -1123,7 +1124,7 @@ Göstəricilərin dəqiq tərifləri `docs/metrics.md` faylında olacaq. Məsəl
 | GET, PUT | `/catalog`, `/catalog/settings` | Kataloq (OWNER, əlavə `CATALOG`): bütün kateqoriya və məhsullar; açar və bölmənin adı (MENU, SERVICES, PRICES) |
 | POST, PUT, DELETE | `/catalog/categories[/{id}]`, `/catalog/categories/order` | Kateqoriyalar (ən çox 30), gizlətmə, sıra; boş olmayan silinmir (`CATALOG_CATEGORY_NOT_EMPTY`) |
 | POST, PUT, DELETE | `/catalog/items[/{id}]`, `/catalog/categories/{id}/order` | Məhsul və xidmətlər (ən çox 300): 3 dildə ad və izah, qiymət, müddət, "hazırda yoxdur", filial, sıra |
-| PUT, DELETE | `/catalog/items/{id}/image` | Məhsulun şəkli (PNG/JPEG, 2 MB-a qədər → 640 px kvadrat PNG, EXIF silinir) |
+| PUT, DELETE | `/catalog/items/{id}/image` | Məhsulun şəkli (PNG/JPEG, 2 MB-a qədər → 640 px kvadrat JPEG və 192 px kiçik variant, EXIF silinir) |
 
 ### 10.9 Platforma — `/api/v1/platform` (yalnız platforma domenində)
 
