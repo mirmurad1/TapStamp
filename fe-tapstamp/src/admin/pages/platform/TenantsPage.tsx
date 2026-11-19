@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
@@ -21,6 +21,7 @@ import { TenantStatusBadge } from './TenantStatusBadge';
 export function TenantsPage() {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
+  const navigate = useNavigate();
   const paging = usePagination();
   const tenants = useQuery({
     queryKey: [...TENANTS_KEY, paging.page, paging.size],
@@ -44,7 +45,7 @@ export function TenantsPage() {
         </Button>
       </div>
       <Card>
-        <CardContent className="pt-5 sm:pt-6 sm:pt-6">
+        <CardContent className="pt-5 sm:pt-6">
           <ApiErrorAlert error={tenants.error} />
           {tenants.isPending ? <InlineLoading /> : null}
           {tenants.data && items.length === 0 ? <p className="text-sm text-muted-foreground">{t('platform.empty')}</p> : null}
@@ -61,19 +62,37 @@ export function TenantsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {items.map((tenant) => (
-                    <tr key={tenant.id}>
+                  {items.map((tenant) => {
+                    const name = resolveText(tenant.displayName, lang);
+                    return (
+                    // Bütün sətir kliklənir; ad keçidi klaviatura və ekran oxuyucusu üçün qalır
+                    <tr
+                      key={tenant.id}
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
+                      onClick={() => void navigate(`/tenants/${tenant.id}`)}
+                    >
                       <td className="px-5 py-3 sm:px-6">
-                        <Link
-                          to={`/tenants/${tenant.id}`}
-                          className="font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                          {resolveText(tenant.displayName, lang)}
-                        </Link>
-                        <p className="font-mono text-xs text-muted-foreground">{tenant.slug}</p>
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-sm font-semibold text-primary"
+                            aria-hidden="true"
+                          >
+                            {name.trim().charAt(0).toLocaleUpperCase(lang)}
+                          </span>
+                          <div className="min-w-0">
+                            <Link
+                              to={`/tenants/${tenant.id}`}
+                              onClick={(event) => event.stopPropagation()}
+                              className="font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              {name}
+                            </Link>
+                            <p className="font-mono text-xs text-muted-foreground">{tenant.slug}</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="break-all px-3 py-3">{tenant.primaryDomain}</td>
-                      <td className="px-3 py-3 uppercase">{tenant.defaultLanguage}</td>
+                      <td className="break-all px-3 py-3 text-muted-foreground">{tenant.primaryDomain}</td>
+                      <td className="px-3 py-3 uppercase text-muted-foreground">{tenant.defaultLanguage}</td>
                       <td className="px-3 py-3">
                         <TenantPlanSummary tenant={tenant} />
                       </td>
@@ -81,7 +100,8 @@ export function TenantsPage() {
                         <TenantStatusBadge status={tenant.status} />
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -25,9 +25,11 @@ export function TenantPlanSummary({ tenant }: { tenant: Tenant }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium">{t(`plan.names.${(tenant.plan ?? 'PREMIUM') as PlanName}`)}</span>
-      <PlanStatusBadge status={tenant.planStatus} expired={tenant.planExpired} />
+    <div className="flex flex-col items-start gap-1">
+      <span className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">{t(`plan.names.${(tenant.plan ?? 'PREMIUM') as PlanName}`)}</span>
+        <PlanStatusBadge status={tenant.planStatus} expired={tenant.planExpired} />
+      </span>
       {tenant.planStatus === 'TRIAL' && tenant.trialEndsAt ? (
         <span className="text-xs text-muted-foreground">
           {t('platform.plan.until', { date: formatDate(tenant.trialEndsAt, lang) })}

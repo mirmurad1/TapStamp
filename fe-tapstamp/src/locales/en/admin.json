@@ -326,7 +326,15 @@
       "copyLink": "Copy",
       "copied": "Copied",
       "audit": "Audit log",
-      "auditHint": "Who did what and when in this company: actions by staff, the system and the platform."
+      "auditHint": "Who did what and when in this company: actions by staff, the system and the platform.",
+      "sections": "Company sections",
+      "tabs": {
+        "overview": "Overview",
+        "tags": "NFC tags",
+        "sms": "SMS limit",
+        "domains": "Domains",
+        "audit": "Audit log"
+      }
     },
     "domains": {
       "title": "Domains",

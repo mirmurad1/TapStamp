@@ -1,15 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Crown, Pause, Play, Store, UserCheck, Users, UsersRound } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import { z } from 'zod';
 
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
+import { cn } from '@/shared/lib/cn';
 import { formatDateTime, formatNumber } from '@/shared/lib/format';
 import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
@@ -18,11 +19,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 import { useConfirm } from '@/shared/ui/ConfirmProvider';
+import { Tabs } from '@/shared/ui/tabs';
 
 import { platformApi, type Tenant, type TenantOwner } from '../../api/adminApi';
 import { useStepUp } from '../../auth/StepUpProvider';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
+import { Kpi } from '../../components/Kpi';
 import { emailField, useValidationMessage } from '../../lib/forms';
 import { DomainsCard } from './DomainsCard';
 import { TenantSmsLimitCard } from './SmsLimitCards';
@@ -33,6 +36,11 @@ import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
 import { TenantStatusBadge } from './TenantStatusBadge';
 
+type TenantTab = 'overview' | 'tags' | 'sms' | 'domains' | 'audit';
+const TABS: readonly TenantTab[] = ['overview', 'tags', 'sms', 'domains', 'audit'];
+/** Şirkət aktiv deyilsə, onun bazasına qoşulmaq olmur — yalnız bu bölmələr açıqdır. */
+const OFFLINE_TABS: readonly TenantTab[] = ['overview', 'domains'];
+
 export function TenantDetailPage() {
   const { t } = useTranslation('admin');
   const { tenantId = '' } = useParams();
@@ -40,41 +48,57 @@ export function TenantDetailPage() {
   const [notice, setNotice] = useState<string | undefined>(created ? t('platform.provision.created') : undefined);
   const tenant = useQuery({ queryKey: ['platform-tenant', tenantId], queryFn: () => platformApi.tenant(tenantId) });
   const active = tenant.data?.status === 'ACTIVE';
+  // Seçilmiş bölmə ünvanda saxlanılır: səhifə yenilənəndə və ya link paylaşılanda eyni bölmə açılır
+  const [params, setParams] = useSearchParams();
+  const available = active ? TABS : OFFLINE_TABS;
+  const requested = params.get('tab') as TenantTab | null;
+  const tab: TenantTab = requested && available.includes(requested) ? requested : 'overview';
+  const selectTab = (value: TenantTab) => setParams(value === 'overview' ? {} : { tab: value }, { replace: true });
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
-      <Button asChild variant="ghost" className="self-start">
-        <Link to="/">
-          <ArrowLeft aria-hidden="true" />
-          {t('platform.detail.back')}
-        </Link>
-      </Button>
+    <div className="flex flex-col gap-6">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t('platform.detail.back')}
+      </Link>
       <ApiErrorAlert error={tenant.error} />
       {tenant.isPending ? <InlineLoading /> : null}
       {tenant.data ? (
         <>
           <TenantHeader tenant={tenant.data} onNotice={setNotice} />
           {notice ? <Alert tone="success">{notice}</Alert> : null}
-          <TenantPlanCard tenantId={tenantId} />
-          <TenantAddonsCard tenantId={tenantId} />
-          {active ? (
+          <Tabs
+            label={t('platform.detail.sections')}
+            value={tab}
+            onChange={selectTab}
+            options={available.map((value) => ({ value, label: t(`platform.detail.tabs.${value}`) }))}
+          />
+          {tab === 'overview' ? (
             <>
-              <StatsCard tenantId={tenantId} />
-              <OwnersCard tenantId={tenantId} onNotice={setNotice} />
-              <TenantTagsCard tenantId={tenantId} />
-              <TenantSmsLimitCard tenantId={tenantId} />
-              <TenantAuditCard tenantId={tenantId} />
+              {active ? <StatsRow tenantId={tenantId} /> : <Alert tone="info">{t('platform.detail.unavailable')}</Alert>}
+              <div className="grid items-start gap-6 xl:grid-cols-2">
+                <TenantPlanCard tenantId={tenantId} />
+                <div className="flex flex-col gap-6">
+                  <TenantAddonsCard tenantId={tenantId} />
+                  {active ? <OwnersCard tenantId={tenantId} onNotice={setNotice} /> : null}
+                </div>
+              </div>
             </>
-          ) : (
-            <Alert tone="info">{t('platform.detail.unavailable')}</Alert>
-          )}
-          <DomainsCard tenantId={tenantId} />
+          ) : null}
+          {tab === 'tags' ? <TenantTagsCard tenantId={tenantId} /> : null}
+          {tab === 'sms' ? <TenantSmsLimitCard tenantId={tenantId} /> : null}
+          {tab === 'domains' ? <DomainsCard tenantId={tenantId} /> : null}
+          {tab === 'audit' ? <TenantAuditCard tenantId={tenantId} /> : null}
         </>
       ) : null}
     </div>
   );
 }
 
+/** Səhifənin başlığı (digər səhifələr kimi): şirkətin adı, texniki adı, statusu, domenləri və əsas əməliyyat sağda. */
 function TenantHeader({ tenant, onNotice }: { tenant: Tenant; onNotice: (message: string) => void }) {
   const { t } = useTranslation('admin');
   const queryClient = useQueryClient();
@@ -98,69 +122,69 @@ function TenantHeader({ tenant, onNotice }: { tenant: Tenant; onNotice: (message
     }
     void confirm({ message: t('platform.detail.suspendConfirm'), danger: true }).then((ok) => ok && toggle.mutate());
   };
+  const name = resolveText(tenant.displayName, lang);
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <span
+            className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary/10 font-display text-2xl font-semibold text-primary"
+            aria-hidden="true"
+          >
+            {name.trim().charAt(0).toLocaleUpperCase(lang)}
+          </span>
           <div className="min-w-0">
-            <CardTitle>{resolveText(tenant.displayName, lang)}</CardTitle>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">{tenant.slug}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="font-display text-2xl font-semibold">{name}</h1>
+              <TenantStatusBadge status={tenant.status} />
+            </div>
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="font-mono">{tenant.slug}</span>
+              {(tenant.domains ?? []).map((domain) => (
+                // Domen sətrə keçəndə ayırıcı nöqtə sətrin əvvəlində tək qalmasın deyə nöqtəsiz, nişan kimi göstərilir
+                <span
+                  key={domain}
+                  className={cn(
+                    'rounded-full border border-border px-2 py-0.5 text-xs',
+                    domain === tenant.primaryDomain && 'border-primary/30 bg-primary/5 font-medium text-foreground',
+                  )}
+                >
+                  {domain}
+                </span>
+              ))}
+            </p>
           </div>
-          <TenantStatusBadge status={tenant.status} />
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <ApiErrorAlert error={toggle.error} />
-        <div>
-          <p className="text-sm font-medium">{t('platform.detail.domains')}</p>
-          <ul className="mt-1 flex flex-wrap gap-2">
-            {(tenant.domains ?? []).map((domain) => (
-              <li key={domain}>
-                <Badge tone={domain === tenant.primaryDomain ? 'success' : 'neutral'}>{domain}</Badge>
-              </li>
-            ))}
-          </ul>
         </div>
         {tenant.status === 'ACTIVE' || suspended ? (
-          <Button variant={suspended ? 'default' : 'outline'} className="self-start" onClick={onToggle} disabled={toggle.isPending}>
+          <Button variant={suspended ? 'default' : 'outline'} onClick={onToggle} disabled={toggle.isPending}>
+            {suspended ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
             {suspended ? t('platform.detail.activate') : t('platform.detail.suspend')}
           </Button>
         ) : null}
-      </CardContent>
-    </Card>
+      </div>
+      <ApiErrorAlert error={toggle.error} />
+    </div>
   );
 }
 
-function StatsCard({ tenantId }: { tenantId: string }) {
+/** Şirkətin ümumi göstəriciləri — şirkətin öz göstəricilər panelindəki kartlarla eyni görünüşdə. */
+function StatsRow({ tenantId }: { tenantId: string }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
   const stats = useQuery({ queryKey: ['platform-tenant-stats', tenantId], queryFn: () => platformApi.stats(tenantId) });
-  const items = [
-    { label: t('platform.detail.branches'), value: stats.data?.branches },
-    { label: t('platform.detail.totalCustomers'), value: stats.data?.totalCustomers },
-    { label: t('platform.detail.customers'), value: stats.data?.activeCustomers },
-    { label: t('platform.detail.staff'), value: stats.data?.activeStaff },
-  ];
+  const n = (value: number | undefined) => (value === undefined ? '–' : formatNumber(value, lang));
+  const loading = stats.isPending;
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('platform.detail.stats')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ApiErrorAlert error={stats.error} />
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((item) => (
-            <div key={item.label} className="rounded-xl bg-muted px-4 py-3">
-              <dt className="text-sm text-muted-foreground">{item.label}</dt>
-              <dd className="mt-1 font-display text-2xl font-semibold">
-                {item.value === undefined ? '–' : formatNumber(item.value, lang)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </CardContent>
-    </Card>
+    <section aria-label={t('platform.detail.stats')} className="flex flex-col gap-3">
+      <ApiErrorAlert error={stats.error} />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Kpi icon={<Users />} label={t('platform.detail.totalCustomers')} value={n(stats.data?.totalCustomers)} loading={loading} />
+        <Kpi icon={<UserCheck />} label={t('platform.detail.customers')} value={n(stats.data?.activeCustomers)} loading={loading} />
+        <Kpi icon={<Store />} label={t('platform.detail.branches')} value={n(stats.data?.branches)} loading={loading} />
+        <Kpi icon={<UsersRound />} label={t('platform.detail.staff')} value={n(stats.data?.activeStaff)} loading={loading} />
+      </div>
+    </section>
   );
 }
 
@@ -211,7 +235,10 @@ function OwnersCard({ tenantId, onNotice }: { tenantId: string; onNotice: (messa
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('admin:platform.detail.owners')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Crown className="size-5 text-primary" aria-hidden="true" />
+          {t('admin:platform.detail.owners')}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <ApiErrorAlert error={owners.error ?? resetMfa.error ?? issueResetLink.error} />

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Gift, MessageSquareHeart, Repeat, Stamp, UserPlus, Users } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -24,6 +24,7 @@ import {
 } from '../api/adminApi';
 import { useMe } from '../auth/AdminAuthProvider';
 import { ApiErrorAlert } from '../components/ApiErrorAlert';
+import { Kpi } from '../components/Kpi';
 import { InlineLoading } from '../components/FullPageState';
 import { PlanLockedNotice } from '../components/PlanLocked';
 import { hasAnyRole } from '../layout/navigation';
@@ -292,38 +293,6 @@ function Analytics() {
       </>
       )}
     </>
-  );
-}
-
-function Kpi({
-  icon,
-  label,
-  value,
-  loading,
-  children,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  loading: boolean;
-  children: ReactNode;
-}) {
-  return (
-    // Yığcam, şaquli kart: başlıq və kiçik ikon, böyük rəqəm, bir sətirlik izah — beşi bir sıraya sığır
-    <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4">
-        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-          <span className="truncate">{label}</span>
-          <span className="shrink-0 text-primary [&>svg]:size-4" aria-hidden="true">
-            {icon}
-          </span>
-        </div>
-        <div>
-          <p className="font-display text-3xl font-semibold tabular-nums" aria-busy={loading}>
-            {loading ? '…' : value}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">{loading ? ' ' : children}</p>
-        </div>
-    </div>
   );
 }
 

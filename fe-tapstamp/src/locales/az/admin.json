@@ -326,7 +326,15 @@
       "copyLink": "Kopyala",
       "copied": "Kopyalandı",
       "audit": "Audit jurnalı",
-      "auditHint": "Şirkətdə kim, nə vaxt və nə etdi: işçilərin, sistemin və platformanın əməliyyatları."
+      "auditHint": "Şirkətdə kim, nə vaxt və nə etdi: işçilərin, sistemin və platformanın əməliyyatları.",
+      "sections": "Şirkətin bölmələri",
+      "tabs": {
+        "overview": "Ümumi",
+        "tags": "NFC çipləri",
+        "sms": "SMS limiti",
+        "domains": "Domenlər",
+        "audit": "Audit jurnalı"
+      }
     },
     "domains": {
       "title": "Domenlər",

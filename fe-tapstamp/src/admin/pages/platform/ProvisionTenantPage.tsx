@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Card, CardContent } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 
@@ -77,18 +77,19 @@ export function ProvisionTenantPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <Button asChild variant="ghost" className="self-start">
-        <Link to="/">
-          <ArrowLeft aria-hidden="true" />
-          {t('admin:platform.detail.back')}
-        </Link>
-      </Button>
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t('admin:platform.detail.back')}
+      </Link>
+      <div>
+        <h1 className="font-display text-2xl font-semibold">{t('admin:platform.provision.title')}</h1>
+        <p className="mt-1 text-muted-foreground">{t('admin:platform.provision.description')}</p>
+      </div>
       <Card>
-        <CardHeader>
-          <CardTitle>{t('admin:platform.provision.title')}</CardTitle>
-          <CardDescription>{t('admin:platform.provision.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-5 sm:pt-6">
           <form onSubmit={form.handleSubmit((values) => provision.mutate(values))} className="flex flex-col gap-4" noValidate>
             <ApiErrorAlert error={provision.error} />
             <Field id="slug" label={t('admin:platform.provision.slug')} hint={t('admin:platform.provision.slugHint')} error={error('slug')}>

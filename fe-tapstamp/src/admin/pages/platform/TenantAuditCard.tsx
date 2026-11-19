@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +33,10 @@ export function TenantAuditCard({ tenantId }: { tenantId: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('platform.detail.audit')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
+          {t('platform.detail.audit')}
+        </CardTitle>
         <CardDescription>{t('platform.detail.auditHint')}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

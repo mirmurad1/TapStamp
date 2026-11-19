@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Download, KeyRound, Megaphone, MessageSquareText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { usePagination } from '@/shared/ui/usePagination';
 import { platformSmsApi } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
 import { InlineLoading } from '../../components/FullPageState';
+import { Kpi } from '../../components/Kpi';
 import { toCsv } from '../../lib/csv';
 import { PlatformSmsBudgetCard } from './SmsLimitCards';
 import { downloadBlob } from '../../lib/download';
@@ -156,9 +157,11 @@ function UsageSection({ today }: { today: string }) {
         <ApiErrorAlert error={report.error} />
         {report.isFetching && !report.data ? <InlineLoading /> : null}
         {report.data ? (
-          <div>
-            <p className="text-sm text-muted-foreground">{t('platform.sms.total')}</p>
-            <p className="mt-1 font-display text-2xl font-semibold">{formatNumber(report.data.messages ?? 0, lang)}</p>
+          // Göstəricilər panelindəki kimi kartlar: cəmi və növlərə görə
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Kpi icon={<MessageSquareText />} label={t('platform.sms.total')} value={formatNumber(report.data.messages ?? 0, lang)} />
+            <Kpi icon={<KeyRound />} label={t('platform.sms.columns.otp')} value={formatNumber(report.data.otp ?? 0, lang)} />
+            <Kpi icon={<Megaphone />} label={t('platform.sms.columns.campaign')} value={formatNumber(report.data.campaign ?? 0, lang)} />
           </div>
         ) : null}
         {report.data && rows.length === 0 ? (
