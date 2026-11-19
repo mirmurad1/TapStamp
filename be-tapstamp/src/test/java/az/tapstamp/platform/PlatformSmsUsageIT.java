@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import az.tapstamp.notification.sms.SmsLog;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.support.AdminClient;
 import az.tapstamp.support.TapIntegrationTest;
 import org.awaitility.Awaitility;
@@ -110,7 +111,7 @@ class PlatformSmsUsageIT extends TapIntegrationTest {
         for (String query : new String[] {phone.substring(1), local, phone.substring(4, 9)}) {
             admin.get(base + query)
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.items[?(@.phone == '" + phone + "')].status").value(
+                    .andExpect(jsonPath("$.items[?(@.phone == '" + PhoneMasker.mask(phone) + "')].status").value(
                             org.hamcrest.Matchers.contains("SENT")));
         }
         admin.get(base + "994000000000").andExpect(jsonPath("$.total").value(0));

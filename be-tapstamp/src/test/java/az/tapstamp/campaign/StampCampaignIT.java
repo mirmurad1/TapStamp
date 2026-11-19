@@ -10,6 +10,7 @@ import java.util.Map;
 
 import az.tapstamp.notification.sms.SmsDeliveryException.Kind;
 import az.tapstamp.security.admin.AdminRole;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.support.AdminClient;
 import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.TapIntegrationTest;
@@ -122,7 +123,7 @@ class StampCampaignIT extends TapIntegrationTest {
         assertThat(flaky.stamps()).isEqualTo(1);
         owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"));
         owner.get("/campaigns/" + id + "/failures").andExpect(status().isOk())
-                .andExpect(jsonPath("$.items[?(@.phone == '" + rejected.phone() + "')].error")
+                .andExpect(jsonPath("$.items[?(@.phone == '" + PhoneMasker.mask(rejected.phone()) + "')].error")
                         .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.containsString("RECIPIENT"))));
     }
 

@@ -1020,7 +1020,7 @@
     },
     "/api/v1/admin/campaigns/{campaignId}/failures" : {
       "get" : {
-        "description" : "Ad, tam nömrə və səbəb; möhür də verilməyib.",
+        "description" : "Ad, maskalanmış nömrə və səbəb; möhür də verilməyib.",
         "operationId" : "failures",
         "parameters" : [ {
           "in" : "path",

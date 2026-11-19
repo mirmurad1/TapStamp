@@ -21,6 +21,7 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -84,9 +85,9 @@ public class CustomerAccountService {
         List<LegalDocumentService.DocumentRef> pending = legal.pendingFor(customer.id()).stream()
                 .map(document -> new LegalDocumentService.DocumentRef(document.type(), document.version()))
                 .toList();
-        // Müştəri öz nömrəsini tam görür (parametrlər ekranı)
-        String phone = cipher.decryptString(customer.phoneEnc(),
-                Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customer.id()));
+        // Parametrlər ekranında da nömrə maskalanmış göstərilir (ekran başqasının gözü önündə ola bilər)
+        String phone = PhoneMasker.mask(cipher.decryptString(customer.phoneEnc(),
+                Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", customer.id())));
         return new Profile(customer.id(), customer.name(), phone, customer.language(),
                 customer.registeredAt(), card, rewards, pending);
     }

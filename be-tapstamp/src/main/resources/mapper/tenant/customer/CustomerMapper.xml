@@ -35,6 +35,18 @@
         WHERE id = #{id} AND status = 'ACTIVE'
     </update>
 
+    <select id="findLegacyMasks" resultType="az.tapstamp.customer.repository.CustomerMapper$LegacyMask">
+        SELECT id, phone_enc FROM customers
+        WHERE phone_enc IS NOT NULL AND strpos(phone_masked, #{marker}) > 0
+        <if test="after != null">AND id &gt; #{after}</if>
+        ORDER BY id
+        LIMIT #{limit}
+    </select>
+
+    <update id="updatePhoneMasked">
+        UPDATE customers SET phone_masked = #{phoneMasked} WHERE id = #{id}
+    </update>
+
     <update id="anonymize">
         UPDATE customers
         SET status = 'DELETED', phone_enc = NULL, phone_hash = NULL, phone_masked = NULL, name = NULL,

@@ -7,7 +7,7 @@ import { Link } from 'react-router';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { cn } from '@/shared/lib/cn';
-import { formatDateTime, formatNumber, formatPercent, formatPhone } from '@/shared/lib/format';
+import { formatDateTime, formatNumber, formatPercent } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -241,9 +241,7 @@ function FeedbackItem({ item }: { item: FeedbackView }) {
           <Link to={`/customers/${item.customerId ?? ''}`} className="font-semibold underline-offset-4 hover:underline">
             {item.customerName || t('customers.noName')}
           </Link>
-          <a href={`tel:${item.phone ?? ''}`} className="text-sm tabular-nums text-muted-foreground hover:underline">
-            {formatPhone(item.phone)}
-          </a>
+          <span className="text-sm tabular-nums text-muted-foreground">{item.phone}</span>
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {resolveText(item.branchName, lang)} · {item.createdAt ? formatDateTime(item.createdAt, lang) : ''}

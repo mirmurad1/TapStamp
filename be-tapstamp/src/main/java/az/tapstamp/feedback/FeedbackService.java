@@ -28,6 +28,7 @@ import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.tenancy.TenantContext;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
@@ -198,8 +199,8 @@ public class FeedbackService {
         return page.result(feedback.list(rating, unresolvedOnly, branchId, page.limit(), page.offset()),
                         feedback.count(rating, unresolvedOnly, branchId))
                 .map(row -> new FeedbackView(row.id(), row.customerId(), row.customerName(),
-                        cipher.decryptString(row.phoneEnc(),
-                                Aad.tenantField(tenantId, "customers", "phone_enc", row.customerId())),
+                        PhoneMasker.mask(cipher.decryptString(row.phoneEnc(),
+                                Aad.tenantField(tenantId, "customers", "phone_enc", row.customerId()))),
                         row.branchId(), row.branchName(), row.rating(),
                         row.reasons() == null ? List.of() : List.of(row.reasons().split(",")), row.comment(),
                         row.createdAt(), row.resolvedAt(), row.resolutionNote()));

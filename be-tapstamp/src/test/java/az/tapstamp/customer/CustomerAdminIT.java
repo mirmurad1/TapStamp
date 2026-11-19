@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import az.tapstamp.security.admin.AdminRole;
 import az.tapstamp.shared.id.Ids;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.support.AdminClient;
 import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.TapIntegrationTest;
@@ -132,9 +133,9 @@ class CustomerAdminIT extends TapIntegrationTest {
     void ownerAndManagerSeeFullPhone() throws Exception {
         Fixture f = customerWithStamp();
         signedInStaff(HOST, AdminRole.BRANCH_MANAGER, f.branchId()).get("/customers/" + f.customerId())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.phone").value(f.phone()));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.phone").value(PhoneMasker.mask(f.phone())));
         signedInStaff(HOST, AdminRole.COMPANY_OWNER, null).get("/customers?branchId=" + f.branchId())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].phone").value(f.phone()));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].phone").value(PhoneMasker.mask(f.phone())));
     }
 
     @Test

@@ -16,6 +16,7 @@ import java.util.concurrent.Future;
 
 import az.tapstamp.notification.sms.SmsMessage;
 import az.tapstamp.notification.sms.SmsSegments;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.CustomerIntegrationTest;
 import az.tapstamp.tenancy.TenantContext;
@@ -104,7 +105,7 @@ class OtpIT extends CustomerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Aysel"))
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
-                .andExpect(jsonPath("$.phone").value(phone))
+                .andExpect(jsonPath("$.phone").value(PhoneMasker.mask(phone)))
                 .andExpect(jsonPath("$.card.currentStamps").value(0))
                 .andExpect(jsonPath("$.card.stampsRequired").value(9))
                 .andExpect(jsonPath("$.pendingConsents.length()").value(0));
@@ -214,7 +215,7 @@ class OtpIT extends CustomerIntegrationTest {
         signedIn(phone);
         TenantContext.runAs(directory.findByHost(HOST).orElseThrow(), () -> tenantJdbc.sql(
                         "UPDATE customers SET status = 'BLOCKED' WHERE name = 'Test Müştəri' AND phone_masked = :masked")
-                .param("masked", "+994 55 ***-**-" + phone.substring(11))
+                .param("masked", PhoneMasker.mask(phone))
                 .update());
         CustomerClient client = client();
         String[] challenge = requestCode(client, phone, "az");

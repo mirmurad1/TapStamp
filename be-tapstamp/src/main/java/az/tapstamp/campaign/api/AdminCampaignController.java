@@ -133,7 +133,7 @@ public class AdminCampaignController {
     }
 
     @GetMapping("/{campaignId}/failures")
-    @Operation(summary = "SMS-i göndərilməyən müştərilər", description = "Ad, tam nömrə və səbəb; möhür də verilməyib.")
+    @Operation(summary = "SMS-i göndərilməyən müştərilər", description = "Ad, maskalanmış nömrə və səbəb; möhür də verilməyib.")
     PageResult<CampaignFailureView> failures(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID campaignId,
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {

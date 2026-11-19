@@ -25,6 +25,7 @@ import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,7 +56,7 @@ public class CampaignService {
                         @Nullable Integer inactiveDays, @Nullable UUID branchId, boolean personalized, boolean latin) {
     }
 
-    /** SMS-i göndərilməyən alıcı (sahib üçün: ad, tam nömrə, səbəb). */
+    /** SMS-i göndərilməyən alıcı (sahib üçün: ad, maskalanmış nömrə, səbəb). */
     public record FailedRecipient(UUID customerId, @Nullable String name, @Nullable String phone,
                                   @Nullable String error, @Nullable Instant at) {
     }
@@ -135,7 +136,7 @@ public class CampaignService {
         return page.result(campaigns.list(type.name(), page.limit(), page.offset()), campaigns.countByType(type.name()));
     }
 
-    /** SMS-i göndərilməyən alıcılar və səbəbləri (sahib tam nömrəni görür). */
+    /** SMS-i göndərilməyən alıcılar və səbəbləri (nömrə maskalanmış). */
     public PageResult<FailedRecipient> failures(AdminPrincipal principal, UUID id, PageQuery page) {
         AccessPolicy.requireCompanyWide(principal);
         campaigns.find(id).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
@@ -143,8 +144,8 @@ public class CampaignService {
         // Yalnız göstərilən səhifənin nömrələri deşifrə olunur
         return page.result(campaigns.failedRecipients(id, page.limit(), page.offset()), campaigns.countFailed(id))
                 .map(f -> new FailedRecipient(f.customerId(), f.name(), f.phoneEnc() == null ? null
-                        : cipher.decryptString(f.phoneEnc(),
-                                Aad.tenantField(tenantId, "customers", "phone_enc", f.customerId())),
+                        : PhoneMasker.mask(cipher.decryptString(f.phoneEnc(),
+                                Aad.tenantField(tenantId, "customers", "phone_enc", f.customerId()))),
                         f.error(), f.at()));
     }
 

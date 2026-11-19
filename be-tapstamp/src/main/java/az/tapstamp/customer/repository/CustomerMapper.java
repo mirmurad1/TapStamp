@@ -1,6 +1,7 @@
 package az.tapstamp.customer.repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +56,19 @@ public interface CustomerMapper {
     default void updateProfile(UUID id, String name, Language language, Instant now) {
         updateProfile(id, name == null, name == null || name.isBlank() ? null : name.strip(), language, now);
     }
+
+    /** Maskası köhnə formatda qalmış müştərilər, id-yə görə {@code after}-dən sonra ({@code marker} — köhnə formatın parçası). */
+    record LegacyMask(UUID id, byte[] phoneEnc) {
+
+        @Override
+        public @NonNull String toString() {
+            return "LegacyMask[id=" + id + "]";
+        }
+    }
+
+    List<LegacyMask> findLegacyMasks(String marker, UUID after, int limit);
+
+    void updatePhoneMasked(UUID id, String phoneMasked);
 
     /** Şəxsi məlumat silinir; möhürlər və mükafatlar anonim ID ilə statistikada qalır. */
     void anonymize(UUID id, Instant now);

@@ -10,6 +10,7 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.pii.PhoneMasker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -90,7 +91,7 @@ public class PlatformSmsController {
         PageQuery.of(page, size); // ölçü yalnız 5, 10, 20, 50
         SmsLog.MessagePage result = smsLog.messages(from, to, status, phone, page, size);
         return new SmsMessagePage(result.items().stream()
-                .map(m -> new SmsMessageRow(m.id(), m.createdAt(), m.tenantId(), m.slug(), m.displayName(), m.phone(),
+                .map(m -> new SmsMessageRow(m.id(), m.createdAt(), m.tenantId(), m.slug(), m.displayName(), PhoneMasker.mask(m.phone()),
                         m.text(), m.purpose(), m.status(), m.error()))
                 .toList(), result.page(), result.size(), result.total());
     }

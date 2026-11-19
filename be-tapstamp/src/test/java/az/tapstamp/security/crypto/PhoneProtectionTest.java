@@ -26,8 +26,8 @@ class PhoneProtectionTest {
 
     @Test
     void masksAzerbaijaniAndForeignNumbers() {
-        assertThat(PhoneMasker.mask("+994501234567")).isEqualTo("+994 50 ***-**-67");
-        assertThat(PhoneMasker.mask("+447911123456")).isEqualTo("+447 ***56");
+        assertThat(PhoneMasker.mask("+994501234567")).isEqualTo("+994 50 *** 45 67");
+        assertThat(PhoneMasker.mask("+447911123456")).isEqualTo("+447 *** 34 56");
         assertThat(PhoneMasker.mask("not a phone")).isEqualTo("***");
         assertThat(PhoneMasker.mask(null)).isEqualTo("***");
     }

@@ -23,13 +23,14 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.paging.PageQuery;
 import az.tapstamp.shared.paging.PageResult;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
  * Admin paneli üçün müştəri sorğuları: siyahı (axtarış, filtrlər, sıralama, səhifələmə), detallar, zaman xətti və CSV
- * üçün sətirlər. Tam telefon nömrəsi heç vaxt qaytarılmır (yalnız maskalanmış). Menecer yalnız öz filiallarında
+ * üçün sətirlər. Ekranlara tam telefon nömrəsi qaytarılmır (yalnız maskalanmış), tam nömrə yalnız CSV ixracındadır. Menecer yalnız öz filiallarında
  * möhürü olan müştəriləri görür; başqa müştəri onun üçün "mövcud deyil" (404).
  */
 @Service
@@ -54,7 +55,7 @@ public class CustomerDirectory {
                          LocalDate registeredFrom, LocalDate registeredTo, Sort sort, boolean descending) {
     }
 
-    /** {@code phone} — tam nömrə (E.164): sahib və menecer kampaniyalar üçün görür. */
+    /** {@code phone} — siyahı və detallarda maskalanmış ({@code +994 51 *** 29 67}), CSV ixracında tam nömrə (E.164). */
     public record Row(UUID id, String name, String phone, String language, String status, Instant registeredAt,
                       Instant lastVisitAt, int currentStamps, int totalStamps, int rewardsEarned, int rewardsRedeemed,
                       int openFraudFlags) {
@@ -94,20 +95,22 @@ public class CustomerDirectory {
         if (query == null) {
             return new Page(List.of(), 0, page, size);
         }
-        return new Page(customers.list(query).stream().map(this::toRow).toList(), customers.count(query), page, size);
+        return new Page(customers.list(query).stream().map(entry -> toRow(entry, true)).toList(), customers.count(query),
+                page, size);
     }
 
     /** CSV ixracı üçün: filtrə uyğun bütün sətirlər axınla (yaddaşa yığılmadan) emal olunur. */
     public void forEach(AdminPrincipal principal, Filter filter, Consumer<Row> consumer) {
         Query query = query(principal, filter, 0, 0);
         if (query != null) {
-            customers.stream(query, context -> consumer.accept(toRow(context.getResultObject())));
+            // CSV ixracı (əlavə təsdiqlə) — tam nömrə; ekranlarda yalnız maskalanmış
+            customers.stream(query, context -> consumer.accept(toRow(context.getResultObject(), false)));
         }
     }
 
     public Row get(AdminPrincipal principal, UUID customerId) {
         BranchScope scope = BranchScope.of(principal, null);
-        return customers.find(customerId, scope.all(), scope.branchIds()).map(this::toRow)
+        return customers.find(customerId, scope.all(), scope.branchIds()).map(entry -> toRow(entry, true))
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
@@ -117,10 +120,10 @@ public class CustomerDirectory {
         return page.result(customers.timeline(customerId, page.limit(), page.offset()), customers.countTimeline(customerId));
     }
 
-    private Row toRow(CustomerDirectoryMapper.Entry entry) {
+    private Row toRow(CustomerDirectoryMapper.Entry entry, boolean masked) {
         String phone = cipher.decryptString(entry.phoneEnc(),
                 Aad.tenantField(TenantContext.require().id(), "customers", "phone_enc", entry.id()));
-        return new Row(entry.id(), entry.name(), phone, entry.language(), entry.status(), entry.registeredAt(),
+        return new Row(entry.id(), entry.name(), masked ? PhoneMasker.mask(phone) : phone, entry.language(), entry.status(), entry.registeredAt(),
                 entry.lastVisitAt(), entry.currentStamps(), entry.totalStamps(), entry.rewardsEarned(),
                 entry.rewardsRedeemed(), entry.openFraudFlags());
     }

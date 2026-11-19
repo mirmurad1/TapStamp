@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import az.tapstamp.security.admin.AdminRole;
+import az.tapstamp.shared.pii.PhoneMasker;
 import az.tapstamp.support.AdminClient;
 import az.tapstamp.support.CustomerClient;
 import az.tapstamp.support.TapIntegrationTest;
@@ -97,7 +98,7 @@ class FeedbackIT extends TapIntegrationTest {
         String list = owner.get("/feedback?unresolved=true&rating=BAD&size=50").andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
         List<String> phones = JsonPath.read(list, "$.items[?(@.customerId == '" + customerId + "')].phone");
-        assertThat(phones).containsExactly(phone);
+        assertThat(phones).containsExactly(PhoneMasker.mask(phone));
         List<String> ids = JsonPath.read(list, "$.items[?(@.customerId == '" + customerId + "')].id");
         owner.get("/feedback/summary").andExpect(jsonPath("$.unresolvedBad")
                 .value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));

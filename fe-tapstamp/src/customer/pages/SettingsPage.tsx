@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router';
 
 import { currentLanguage } from '@/shared/i18n/setup';
-import { formatPhone, formatRelative } from '@/shared/lib/format';
+import { formatRelative } from '@/shared/lib/format';
 import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -69,7 +69,7 @@ export function SettingsPage() {
             </span>
             <span className="flex-1 text-sm font-semibold">{t('settings.phone')}</span>
             <span className="text-sm text-muted-foreground" dir="ltr">
-              {formatPhone(me.phone)}
+              {me.phone}
             </span>
           </div>
           <div className="flex items-center gap-3 px-4 py-3">
