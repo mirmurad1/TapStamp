@@ -170,6 +170,10 @@ export const platformApi = {
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/stats', { params: { path: { tenantId } } })),
   owners: (tenantId: string) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/owners', { params: { path: { tenantId } } })),
+  auditLog: (tenantId: string, query: { action?: string } & PageParams) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/audit-logs', { params: { path: { tenantId }, query } })),
+  auditActions: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/audit-logs/actions', { params: { path: { tenantId } } })),
   inviteOwner: (tenantId: string, body: Schemas['OwnerInvitationRequest']) =>
     unwrap(api.POST('/api/v1/platform/tenants/{tenantId}/owner-invitations', { params: { path: { tenantId } }, body })),
   ownerPasswordResetLink: (tenantId: string, userId: string) =>

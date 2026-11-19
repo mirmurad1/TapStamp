@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.platform.service.PlatformTenantService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -90,7 +91,9 @@ public class PlatformTenantController {
                                 Instant lastLoginAt) {
     }
 
-    public record StatsResponse(int branches, long activeCustomers, int activeStaff) {
+    public record StatsResponse(int branches,
+                                @Schema(description = "Silinməmiş bütün müştərilər (aktiv və bloklanmış)") long totalCustomers,
+                                long activeCustomers, int activeStaff) {
     }
 
     @GetMapping
@@ -130,7 +133,23 @@ public class PlatformTenantController {
     @Operation(summary = "Şirkətin ümumi göstəriciləri", description = "Yalnız saylar — müştərilərin şəxsi məlumatı göstərilmir.")
     StatsResponse stats(@PathVariable UUID tenantId) {
         var stats = tenants.stats(tenantId);
-        return new StatsResponse(stats.branches(), stats.activeCustomers(), stats.activeStaff());
+        return new StatsResponse(stats.branches(), stats.totalCustomers(), stats.activeCustomers(), stats.activeStaff());
+    }
+
+    @GetMapping("/{tenantId}/audit-logs")
+    @Operation(summary = "Şirkətin audit jurnalı",
+            description = "Şirkətin öz jurnalı (işçilərin, sistemin və platformanın əməliyyatları). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<AuditLogQuery.Entry> auditLog(@PathVariable UUID tenantId,
+                                             @RequestParam(required = false) @Pattern(regexp = "^[A-Z_]{1,64}$") String action,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
+        return tenants.auditLog(tenantId, action, PageQuery.of(page, size));
+    }
+
+    @GetMapping("/{tenantId}/audit-logs/actions")
+    @Operation(summary = "Şirkətin jurnalında olan əməliyyat adları (filtr üçün)")
+    List<String> auditActions(@PathVariable UUID tenantId) {
+        return tenants.auditActions(tenantId);
     }
 
     @GetMapping("/{tenantId}/owners")

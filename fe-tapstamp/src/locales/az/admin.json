@@ -301,6 +301,7 @@
       "back": "Bütün şirkətlər",
       "stats": "Göstəricilər",
       "branches": "Filiallar",
+      "totalCustomers": "Ümumi müştərilər",
       "customers": "Aktiv müştərilər",
       "staff": "Aktiv işçilər",
       "domains": "Domenlər",
@@ -323,7 +324,9 @@
       "resetLinkTitle": "{{name}} üçün şifrə bərpa linki",
       "resetLinkHint": "Linki yalnız sahibin özünə göndərin. Bir dəfəlikdir və {{time}} tarixinə qədər etibarlıdır. Bu səhifəni bağlasanız, link bir daha göstərilməyəcək.",
       "copyLink": "Kopyala",
-      "copied": "Kopyalandı"
+      "copied": "Kopyalandı",
+      "audit": "Audit jurnalı",
+      "auditHint": "Şirkətdə kim, nə vaxt və nə etdi: işçilərin, sistemin və platformanın əməliyyatları."
     },
     "domains": {
       "title": "Domenlər",

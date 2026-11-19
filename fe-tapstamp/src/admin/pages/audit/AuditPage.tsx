@@ -17,7 +17,6 @@ import { InlineLoading } from '../../components/FullPageState';
 /** Audit jurnalı (yalnız sahib): kim, nə vaxt, nə etdi. Jurnal dəyişdirilə bilməz. */
 export function AuditPage() {
   const { t } = useTranslation(['admin', 'common']);
-  const lang = currentLanguage();
   const [action, setAction] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -64,28 +63,35 @@ export function AuditPage() {
           <ApiErrorAlert error={entries.error ?? actions.error} />
           {entries.isPending ? <InlineLoading /> : null}
           {entries.data && items.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">{t('admin:audit.empty')}</p> : null}
-          {items.length > 0 ? (
-            <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
-              <table className="w-full min-w-[48rem] text-left text-sm">
-                <thead className="border-b border-border text-xs text-muted-foreground">
-                  <tr>
-                    <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('admin:audit.columns.time')}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('admin:audit.columns.actor')}</th>
-                    <th scope="col" className="px-3 py-2 font-medium">{t('admin:audit.columns.action')}</th>
-                    <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('admin:audit.columns.details')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border align-top">
-                  {items.map((entry) => (
-                    <AuditRow key={entry.id} entry={entry} lang={lang} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
+          {items.length > 0 ? <AuditTable items={items} /> : null}
           <Pagination state={paging} total={entries.data?.total ?? 0} />
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/** Jurnal qeydlərinin cədvəli — şirkətin öz panelində və platforma panelində (şirkətin səhifəsində) eynidir. */
+export function AuditTable({ items }: { items: AuditEntry[] }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  return (
+    <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
+      <table className="w-full min-w-[48rem] text-left text-sm">
+        <thead className="border-b border-border text-xs text-muted-foreground">
+          <tr>
+            <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('audit.columns.time')}</th>
+            <th scope="col" className="px-3 py-2 font-medium">{t('audit.columns.actor')}</th>
+            <th scope="col" className="px-3 py-2 font-medium">{t('audit.columns.action')}</th>
+            <th scope="col" className="px-5 py-2 font-medium sm:px-6">{t('audit.columns.details')}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border align-top">
+          {items.map((entry) => (
+            <AuditRow key={entry.id} entry={entry} lang={lang} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

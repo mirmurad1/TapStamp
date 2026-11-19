@@ -4895,6 +4895,92 @@
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/audit-logs" : {
+      "get" : {
+        "description" : "Şirkətin öz jurnalı (işçilərin, sistemin və platformanın əməliyyatları). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
+        "operationId" : "auditLog",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "action",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "^[A-Z_]{1,64}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultEntry"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin audit jurnalı",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/audit-logs/actions" : {
+      "get" : {
+        "operationId" : "auditActions",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin jurnalında olan əməliyyat adları (filtr üçün)",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/domains" : {
       "get" : {
         "description" : "Əsas domen birinci; TLS sertifikatının vəziyyəti ilə.",
@@ -10178,6 +10264,11 @@
           "branches" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "totalCustomers" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Silinməmiş bütün müştərilər (aktiv və bloklanmış)"
           }
         }
       },

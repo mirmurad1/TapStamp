@@ -5,6 +5,7 @@
 
     <select id="stats" resultType="az.tapstamp.platform.service.PlatformTenantService$TenantStats">
         SELECT (SELECT count(*) FROM branches WHERE status = 'ACTIVE') AS branches,
+               (SELECT count(*) FROM customers WHERE status &lt;&gt; 'DELETED') AS total_customers,
                (SELECT count(*) FROM customers WHERE status = 'ACTIVE') AS active_customers,
                (SELECT count(*) FROM staff_users WHERE status = 'ACTIVE') AS active_staff
     </select>

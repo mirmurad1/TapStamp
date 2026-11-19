@@ -301,6 +301,7 @@
       "back": "All companies",
       "stats": "Overview",
       "branches": "Branches",
+      "totalCustomers": "Total customers",
       "customers": "Active customers",
       "staff": "Active staff",
       "domains": "Domains",
@@ -323,7 +324,9 @@
       "resetLinkTitle": "Password reset link for {{name}}",
       "resetLinkHint": "Send the link only to the owner. It works once and is valid until {{time}}. If you leave this page, the link will not be shown again.",
       "copyLink": "Copy",
-      "copied": "Copied"
+      "copied": "Copied",
+      "audit": "Audit log",
+      "auditHint": "Who did what and when in this company: actions by staff, the system and the platform."
     },
     "domains": {
       "title": "Domains",

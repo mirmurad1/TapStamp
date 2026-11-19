@@ -1,6 +1,9 @@
 package az.tapstamp.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,6 +92,7 @@ class PlatformAdminIT extends AdminIntegrationTest {
         String alphaId = tenant(TestTenants.ALPHA_HOST).id().toString();
         String body = admin.get("/tenants/" + alphaId + "/stats").andExpect(status().isOk())
                 .andExpect(jsonPath("$.branches").isNumber())
+                .andExpect(jsonPath("$.totalCustomers").isNumber())
                 .andReturn().getResponse().getContentAsString();
         assertThat(body).doesNotContain("phone", "+994");
         // DB şifrələri və adları heç vaxt qaytarılmır
@@ -169,6 +173,15 @@ class PlatformAdminIT extends AdminIntegrationTest {
                         WHERE action = 'STAFF_MFA_RESET' AND actor_type = 'PLATFORM' AND target_id = :id""")
                 .param("id", ownerId.toString()).query(Integer.class).single());
         assertThat(audited).isEqualTo(1);
+
+        // Platforma paneli şirkətin jurnalını görür: platformanın müdaxiləsi "PLATFORM" icraçısı ilə, filtr işləyir
+        admin.get("/tenants/" + alphaId + "/audit-logs?action=STAFF_MFA_RESET&size=50")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[?(@.targetId == '" + ownerId + "')].actorType").value("PLATFORM"))
+                .andExpect(jsonPath("$.items[*].action").value(everyItem(is("STAFF_MFA_RESET"))));
+        admin.get("/tenants/" + alphaId + "/audit-logs/actions")
+                .andExpect(jsonPath("$").value(hasItem("STAFF_MFA_RESET")));
+        admin.get("/tenants/" + alphaId + "/audit-logs?action=bad-value").andExpect(status().isBadRequest());
     }
 
     @Test

@@ -27,6 +27,7 @@ import { emailField, useValidationMessage } from '../../lib/forms';
 import { DomainsCard } from './DomainsCard';
 import { TenantSmsLimitCard } from './SmsLimitCards';
 import { TenantAddonsCard } from './TenantAddonsCard';
+import { TenantAuditCard } from './TenantAuditCard';
 import { TenantPlanCard } from './TenantPlanCard';
 import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
@@ -62,6 +63,7 @@ export function TenantDetailPage() {
               <OwnersCard tenantId={tenantId} onNotice={setNotice} />
               <TenantTagsCard tenantId={tenantId} />
               <TenantSmsLimitCard tenantId={tenantId} />
+              <TenantAuditCard tenantId={tenantId} />
             </>
           ) : (
             <Alert tone="info">{t('platform.detail.unavailable')}</Alert>
@@ -136,6 +138,7 @@ function StatsCard({ tenantId }: { tenantId: string }) {
   const stats = useQuery({ queryKey: ['platform-tenant-stats', tenantId], queryFn: () => platformApi.stats(tenantId) });
   const items = [
     { label: t('platform.detail.branches'), value: stats.data?.branches },
+    { label: t('platform.detail.totalCustomers'), value: stats.data?.totalCustomers },
     { label: t('platform.detail.customers'), value: stats.data?.activeCustomers },
     { label: t('platform.detail.staff'), value: stats.data?.activeStaff },
   ];
@@ -146,7 +149,7 @@ function StatsCard({ tenantId }: { tenantId: string }) {
       </CardHeader>
       <CardContent>
         <ApiErrorAlert error={stats.error} />
-        <dl className="grid gap-4 sm:grid-cols-3">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => (
             <div key={item.label} className="rounded-xl bg-muted px-4 py-3">
               <dt className="text-sm text-muted-foreground">{item.label}</dt>

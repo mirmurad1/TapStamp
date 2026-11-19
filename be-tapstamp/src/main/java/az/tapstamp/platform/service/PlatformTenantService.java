@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.plan.PlanService;
@@ -19,6 +20,8 @@ import az.tapstamp.shared.error.ApiException;
 import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.Language;
 import az.tapstamp.shared.i18n.LocalizedText;
+import az.tapstamp.shared.paging.PageQuery;
+import az.tapstamp.shared.paging.PageResult;
 import az.tapstamp.shared.pii.EmailMasker;
 import az.tapstamp.staff.service.InvitationService;
 import az.tapstamp.tenancy.TenancyProperties;
@@ -42,7 +45,8 @@ public class PlatformTenantService {
                                 Subscription subscription, boolean planExpired) {
     }
 
-    public record TenantStats(int branches, long activeCustomers, int activeStaff) {
+    /** {@code totalCustomers} — silinməmiş bütün müştərilər (aktiv və bloklanmış). */
+    public record TenantStats(int branches, long totalCustomers, long activeCustomers, int activeStaff) {
     }
 
     public record OwnerView(UUID id, String email, String displayName, String status, boolean totpEnabled,
@@ -59,10 +63,12 @@ public class PlatformTenantService {
     private final TenantOverviewMapper overview;
     private final Clock clock;
     private final PlanService plans;
+    private final AuditLogQuery auditLog;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
-                                 TenantOverviewMapper overview, Clock clock, PlanService plans) {
+                                 TenantOverviewMapper overview, Clock clock, PlanService plans,
+                                 AuditLogQuery auditLog) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -73,6 +79,7 @@ public class PlatformTenantService {
         this.overview = overview;
         this.clock = clock;
         this.plans = plans;
+        this.auditLog = auditLog;
     }
 
     public List<TenantSummary> list() {
@@ -118,6 +125,18 @@ public class PlatformTenantService {
     public TenantStats stats(UUID tenantId) {
         TenantRecord tenant = activeTenant(tenantId);
         return TenantContext.callAs(tenant.toInfo(), overview::stats);
+    }
+
+    /** Şirkətin öz audit jurnalı (şirkətin bazasından), yenidən köhnəyə. Şəxsi məlumat jurnalda saxlanılmır. */
+    public PageResult<AuditLogQuery.Entry> auditLog(UUID tenantId, String action, PageQuery page) {
+        TenantRecord tenant = activeTenant(tenantId);
+        return TenantContext.callAs(tenant.toInfo(), () -> auditLog.list(action, null, null, null, page));
+    }
+
+    /** Şirkətin jurnalında rast gəlinən əməliyyat adları (filtr üçün). */
+    public List<String> auditActions(UUID tenantId) {
+        TenantRecord tenant = activeTenant(tenantId);
+        return TenantContext.callAs(tenant.toInfo(), auditLog::actions);
     }
 
     public List<OwnerView> owners(UUID tenantId) {

@@ -2749,6 +2749,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin audit jurnalı
+         * @description Şirkətin öz jurnalı (işçilərin, sistemin və platformanın əməliyyatları). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
+         */
+        get: operations["auditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/audit-logs/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Şirkətin jurnalında olan əməliyyat adları (filtr üçün) */
+        get: operations["auditActions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/domains": {
         parameters: {
             query?: never;
@@ -5161,6 +5198,11 @@ export interface components {
             activeStaff?: number;
             /** Format: int32 */
             branches?: number;
+            /**
+             * Format: int64
+             * @description Silinməmiş bütün müştərilər (aktiv və bloklanmış)
+             */
+            totalCustomers?: number;
         };
         StatusRequest: {
             status: string;
@@ -9057,6 +9099,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TenantResponse"];
+                };
+            };
+        };
+    };
+    auditLog: {
+        parameters: {
+            query?: {
+                action?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResultEntry"];
+                };
+            };
+        };
+    };
+    auditActions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string[];
                 };
             };
         };
