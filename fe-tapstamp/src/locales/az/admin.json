@@ -493,8 +493,8 @@
       }
     },
     "reviewCard": {
-      "title": "Google rəyi üçün masaüstü kart",
-      "description": "Stend üçün kart: müştəri QR kodu skan edib filialın Google rəy səhifəsinə düşür. Kartı burada hazırlayıb çap etdirin və şirkətə təhvil verin.",
+      "title": "Masaüstü QR kart (stend)",
+      "description": "Stend üçün çap kartı: müştəri QR kodu skan edib filialın Google rəy səhifəsinə və ya şirkətin menyusuna düşür. Kartı burada hazırlayıb çap etdirin və şirkətə təhvil verin.",
       "branch": "Filial",
       "linkSet": "Google rəy linki qoşulub",
       "linkMissing": "Google rəy linki qoşulmayıb: QR şirkətin adı ilə Google Maps axtarışına aparacaq. Dəqiq link üçün sahib onu Parametrlər → Filiallar bölməsində əlavə etsin — kartı yenidən çap etmək lazım olmayacaq.",
@@ -519,8 +519,6 @@
       "note": "QR kod şirkətin domeninə yönəlir, oradan Google-a keçir və hər skan sayılır. Google linki sonradan dəyişsə, kartı yenidən çap etmək lazım deyil.",
       "print": "Çap et / PDF",
       "printHint": "Çap pəncərəsində \"PDF kimi saxla\" seçib faylı stend hazırlayana göndərə bilərsiniz.",
-      "downloadQr": "Google QR (SVG)",
-      "copyLink": "Google QR linkini kopyala",
       "copied": "Kopyalandı",
       "noBranches": "Şirkətin aktiv filialı yoxdur.",
       "preview": "Kartın önizləməsi",
@@ -536,14 +534,31 @@
           "PRICES": "Qiymətlərə baxın"
         },
         "welcome": "Xoş gəlmisiniz!",
-        "scanEither": "Telefonun kamerasını lazım olan QR koda tutun"
+        "scanEither": "Telefonun kamerasını lazım olan QR koda tutun",
+        "menuTitle": {
+          "MENU": "Menyumuzla tanış olun",
+          "SERVICES": "Xidmətlərimizlə tanış olun",
+          "PRICES": "Qiymətlərimizlə tanış olun"
+        },
+        "menuSubtitle": "Hər şey telefonunuzda — həmişə aktual"
       },
-      "withMenu": "Menyunun QR kodunu da əlavə et",
-      "withMenuHint": "Kartda iki QR olacaq: Google rəyi və menyu. Kartın ölçüsü dəyişmir.",
       "menuClosed": "Şirkətin menyusu açıq deyil: \"Menyu və xidmətlər\" əlavəsi qoşulmalı və bölmə aktiv olmalıdır.",
-      "downloadQrs": "QR kodlarını yüklə",
       "qrReview": "Google rəyi QR (SVG)",
-      "qrMenu": "Menyu QR (SVG)"
+      "qrMenu": "Menyu QR (SVG)",
+      "content": "Kartda nə olsun",
+      "contents": {
+        "review": "Google rəyi",
+        "menu": "Menyu",
+        "both": "Hər ikisi"
+      },
+      "contentHints": {
+        "review": "Rəy yazmağa çağırış",
+        "menu": "Menyu və qiymətlər",
+        "both": "İki QR, eyni ölçü"
+      },
+      "qrMenuLink": "Menyu linkini kopyala",
+      "qrReviewLink": "Google linkini kopyala",
+      "qrActions": "QR kodu"
     }
   },
   "staffConsole": {

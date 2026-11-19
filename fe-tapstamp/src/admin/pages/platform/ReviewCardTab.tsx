@@ -32,39 +32,51 @@ const BASE_FONT = { A6: '3.7mm', A5: '5.23mm', A4: '3.7mm' } as const;
 /** Önizləmədə eyni nisbət konteynerin eninə görə: 3.7 mm / 105 mm ≈ 3.524% en. */
 const PREVIEW_FONT = '3.524cqw';
 
+/** Kartda nə olsun: yalnız Google rəyi, yalnız menyu və ya hər ikisi. */
+type Content = 'review' | 'menu' | 'both';
+const CONTENTS: readonly Content[] = ['review', 'menu', 'both'];
+
 interface CardProps {
   tenantId: string;
   companyName: string;
   branchName: string;
   brandColor: string;
-  qrUrl: string;
   languages: Languages;
   /** Kartın əsas şrift ölçüsü; bütün ölçülər ona nisbətdədir. */
   fontSize: string;
-  /** Menyu QR-ı da olsun: kartın ölçüsü eyni qalır, iki QR yan-yana yerləşir. */
+  /** Filialın Google rəyi QR-ı (şirkətin domenindən yönləndirmə) — kartda rəy varsa. */
+  review?: { url: string };
+  /** Menyu QR-ı — kartda menyu varsa; {@code title} bölmənin adıdır (MENU, SERVICES, PRICES). */
   menu?: { url: string; title: MenuTitle };
 }
+
+const QR_FRAME = 'border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)]';
 
 /**
  * Çap olunan kartın üzü (A6 nisbəti, 105 × 148 mm). Bütün ölçülər em-dədir: eyni kart önizləmədə, A6 və A5 çapında
  * yalnız əsas şrift ölçüsü ilə böyüyür. Mətnlər seçilmiş dil(lər)dədir, panelin dilindən asılı deyil.
+ * Üç növ: yalnız Google rəyi (ulduzlar, bir QR), yalnız menyu (kitab nişanı, bir QR), hər ikisi (salam, iki QR).
  */
-function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, languages, fontSize, menu }: CardProps) {
+function ReviewCardFace({ tenantId, companyName, branchName, brandColor, languages, fontSize, review, menu }: CardProps) {
   const { t } = useTranslation('admin');
   const second = languages === 'az' ? undefined : languages.slice(3);
+  const both = Boolean(review && menu);
   // Kartın mətnləri seçilmiş dildə (panelin dilindən asılı deyil)
   const texts = (lng: string) => ({
-    title: t('platform.reviewCard.card.title', { lng }),
-    subtitle: t('platform.reviewCard.card.subtitle', { lng }),
-    scan: t('platform.reviewCard.card.scan', { lng }),
+    title: both
+      ? t('platform.reviewCard.card.welcome', { lng })
+      : menu
+        ? t(`platform.reviewCard.card.menuTitle.${menu.title}`, { lng })
+        : t('platform.reviewCard.card.title', { lng }),
+    subtitle: menu ? t('platform.reviewCard.card.menuSubtitle', { lng }) : t('platform.reviewCard.card.subtitle', { lng }),
+    scan: both ? t('platform.reviewCard.card.scanEither', { lng }) : t('platform.reviewCard.card.scan', { lng }),
     thanks: t('platform.reviewCard.card.thanks', { lng }),
     review: t('platform.reviewCard.card.review', { lng }),
-    welcome: t('platform.reviewCard.card.welcome', { lng }),
-    scanEither: t('platform.reviewCard.card.scanEither', { lng }),
     menu: menu ? t(`platform.reviewCard.card.menu.${menu.title}`, { lng }) : '',
   });
   const az = texts('az');
   const other = second ? texts(second) : undefined;
+  const single = review ?? menu;
   return (
     <div
       className="flex size-full flex-col items-center overflow-hidden bg-white text-center text-[#151a2d] [-webkit-print-color-adjust:exact] [print-color-adjust:exact]"
@@ -73,8 +85,8 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
       <div
         className={cn(
           'flex w-full flex-col items-center gap-[0.35em] bg-[linear-gradient(150deg,var(--brand),color-mix(in_srgb,var(--brand)_68%,#000))] px-[1.4em] pt-[1.4em] text-white',
-          // Ulduzlar zolağın altına girir — menyu kartında ulduz yoxdur, zolaq qısadır
-          menu ? 'pb-[1.4em]' : 'pb-[2.1em]',
+          // Nişan (ulduzlar və ya kitab) zolağın altına girir; iki QR-lı kartda nişan yoxdur, zolaq qısadır
+          both ? 'pb-[1.4em]' : 'pb-[2.1em]',
         )}
       >
         <TenantLogo
@@ -86,34 +98,30 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
         <p className="mt-[0.2em] text-[1.55em] leading-tight font-extrabold tracking-tight">{companyName}</p>
         <p className="text-[0.9em] opacity-85">{branchName}</p>
       </div>
-      {/*
-       * Menyu QR-ı da olanda kart yalnız rəy üçün deyil: başlıq neytral salamdır, ulduzlar göstərilmir — hər QR-ın
-       * altında nəyə apardığı yazılır.
-       */}
-      {menu ? null : (
+      {both ? null : (
         <div className="-mt-[1.35em] flex gap-[0.15em] rounded-full bg-white px-[0.9em] py-[0.5em] shadow-[0_0.4em_1em_-0.4em_rgb(0_0_0/0.3)]">
-          {[0, 1, 2, 3, 4].map((index) => (
-            <Star key={index} className="size-[1.9em] fill-amber-400 text-amber-400" aria-hidden="true" />
-          ))}
+          {menu ? (
+            <BookOpen className="size-[1.9em] text-[var(--brand)]" aria-hidden="true" />
+          ) : (
+            [0, 1, 2, 3, 4].map((index) => (
+              <Star key={index} className="size-[1.9em] fill-amber-400 text-amber-400" aria-hidden="true" />
+            ))
+          )}
         </div>
       )}
-      <p className={cn('px-[0.8em] text-[1.7em] leading-[1.12] font-extrabold tracking-tight text-balance', menu ? 'mt-[0.75em]' : 'mt-[0.85em]')}>
-        {menu ? az.welcome : az.title}
+      <p className={cn('px-[0.8em] text-[1.7em] leading-[1.12] font-extrabold tracking-tight text-balance', both ? 'mt-[0.75em]' : 'mt-[0.85em]')}>
+        {az.title}
       </p>
-      {other ? (
-        <p className="mt-[0.2em] px-[1em] text-[1.15em] leading-tight font-bold text-[#5b6178]">
-          {menu ? other.welcome : other.title}
-        </p>
-      ) : null}
-      {menu ? (
+      {other ? <p className="mt-[0.2em] px-[1em] text-[1.15em] leading-tight font-bold text-[#5b6178]">{other.title}</p> : null}
+      {both && review && menu ? (
         // İki QR: Google rəyi və menyu — hər birinin altında nəyə apardığı yazılır
         <div className="mt-[1em] grid w-full grid-cols-2 gap-[1em] px-[1.6em]">
           {[
-            { url: qrUrl, icon: <Star className="size-[1em] fill-amber-400 text-amber-400" aria-hidden="true" />, label: az.review, second: other?.review },
+            { url: review.url, icon: <Star className="size-[1em] fill-amber-400 text-amber-400" aria-hidden="true" />, label: az.review, second: other?.review },
             { url: menu.url, icon: <BookOpen className="size-[1em] text-[var(--brand)]" aria-hidden="true" />, label: az.menu, second: other?.menu },
           ].map((item) => (
             <div key={item.url} className="flex min-w-0 flex-col items-center">
-              <div className="aspect-square w-full rounded-[0.9em] border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)] p-[0.4em]">
+              <div className={cn('aspect-square w-full rounded-[0.9em] p-[0.4em]', QR_FRAME)}>
                 <QrCode value={item.url} label={item.label} className="size-full" />
               </div>
               <p className="mt-[0.45em] flex items-center gap-[0.3em] text-[0.88em] leading-tight font-bold">
@@ -124,20 +132,16 @@ function ReviewCardFace({ tenantId, companyName, branchName, brandColor, qrUrl, 
             </div>
           ))}
         </div>
-      ) : (
+      ) : single ? (
         <>
           <p className="mt-[0.5em] px-[2em] text-[0.92em] leading-snug text-[#5b6178]">{az.subtitle}</p>
-          <div className="mt-[0.9em] size-[11.5em] rounded-[1.1em] border-[0.14em] border-[color-mix(in_srgb,var(--brand)_18%,#fff)] p-[0.5em]">
-            <QrCode value={qrUrl} label={az.scan} className="size-full" />
+          <div className={cn('mt-[0.9em] size-[11.5em] rounded-[1.1em] p-[0.5em]', QR_FRAME)}>
+            <QrCode value={single.url} label={az.scan} className="size-full" />
           </div>
         </>
-      )}
-      <p className="mt-[0.75em] px-[1.5em] text-[0.92em] leading-snug font-semibold text-[#3b3f55]">
-        {menu ? az.scanEither : az.scan}
-      </p>
-      {other ? (
-        <p className="px-[1.5em] text-[0.8em] leading-snug text-[#5b6178]">{menu ? other.scanEither : other.scan}</p>
       ) : null}
+      <p className="mt-[0.75em] px-[1.5em] text-[0.92em] leading-snug font-semibold text-[#3b3f55]">{az.scan}</p>
+      {other ? <p className="px-[1.5em] text-[0.8em] leading-snug text-[#5b6178]">{other.scan}</p> : null}
       <p className="mt-auto pb-[1em] text-[0.78em] text-[#9aa0b4]">
         {az.thanks}
         {other ? ` · ${other.thanks}` : null}
@@ -199,7 +203,10 @@ function PrintPages({ size, card }: { size: Size; card: Omit<CardProps, 'fontSiz
   );
 }
 
-/** Platforma panelində şirkətin "Çap materialları" bölməsi: Google rəyi üçün QR kart (stend) hazırlanır və çap olunur. */
+/**
+ * Platforma panelində şirkətin "Çap materialları" bölməsi: stend üçün QR kart hazırlanır və çap olunur — Google rəyi,
+ * menyu və ya hər ikisi (menyu yalnız açıqdırsa).
+ */
 export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: string; companyName: string; slug: string }) {
   const { t } = useTranslation('admin');
   const lang = currentLanguage();
@@ -209,8 +216,8 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
   const [size, setSize] = useState<Size>('A6');
   const [languages, setLanguages] = useState<Languages>('az');
   const [printing, setPrinting] = useState(false);
-  const [withMenu, setWithMenu] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [content, setContent] = useState<Content>('review');
+  const [copied, setCopied] = useState<'review' | 'menu'>();
   const selected: ReviewCard | undefined = cards.find((card) => card.branchId === branchId) ?? cards[0];
 
   // Çap: kartlar səhifəyə əlavə olunur, brauzerin çap pəncərəsi açılır, bağlananda təmizlənir.
@@ -253,28 +260,22 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
   }
 
   const branchName = resolveText(selected.name, 'az');
+  const menuOpen = Boolean(data.data?.menuUrl);
+  // Menyu bağlıdırsa yalnız Google rəyi qalır (seçim əvvəlcədən edilmiş olsa da)
+  const shown: Content = menuOpen ? content : 'review';
+  const menu = data.data?.menuUrl ? { url: data.data.menuUrl, title: (data.data.menuTitle ?? 'MENU') as MenuTitle } : undefined;
   const card = {
     tenantId,
     companyName,
     branchName,
     brandColor: data.data?.brandColor ?? '#6D28D9',
-    qrUrl: selected.qrUrl ?? '',
     languages,
-    // Menyu yalnız açıq olanda və seçiləndə; kartın ölçüsü dəyişmir
-    menu: withMenu && data.data?.menuUrl
-      ? { url: data.data.menuUrl, title: (data.data.menuTitle ?? 'MENU') as MenuTitle }
-      : undefined,
+    review: shown === 'menu' ? undefined : { url: selected.qrUrl ?? '' },
+    menu: shown === 'review' ? undefined : menu,
   };
-  const menuOpen = Boolean(data.data?.menuUrl);
-  const copyLink = () => void navigator.clipboard.writeText(card.qrUrl).then(() => setCopied(true));
+  const copy = (kind: 'review' | 'menu', value: string) => void navigator.clipboard.writeText(value).then(() => setCopied(kind));
   // Fayl adında filial da var: hər filialın Google QR-ı fərqlidir; menyu QR-ı şirkət üzrə birdir
   const svg = (value: string) => new Blob([qrSvg(value)], { type: 'image/svg+xml' });
-  const downloadReviewQr = () => downloadBlob(svg(card.qrUrl), `google-qr-${slug}-${fileSlug(branchName)}.svg`);
-  const downloadMenuQr = () => {
-    if (card.menu) {
-      downloadBlob(svg(card.menu.url), `menu-qr-${slug}.svg`);
-    }
-  };
 
   return (
     <Card>
@@ -293,7 +294,7 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
               value={selected.branchId}
               onChange={(event) => {
                 setBranchId(event.target.value);
-                setCopied(false);
+                setCopied(undefined);
               }}
             >
               {cards.map((item) => (
@@ -302,7 +303,7 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
                 </option>
               ))}
             </Select>
-            {selected.googleReviewUrl ? (
+            {!card.review ? null : selected.googleReviewUrl ? (
               <span className="flex items-center gap-1.5 text-sm font-normal text-[var(--success-ink)]">
                 <Check className="size-4" aria-hidden="true" />
                 {t('platform.reviewCard.linkSet')}
@@ -314,6 +315,24 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
               </span>
             )}
           </label>
+
+          <Choice
+            label={t('platform.reviewCard.content')}
+            value={shown}
+            options={CONTENTS.map((value) => ({
+              value,
+              title: t(`platform.reviewCard.contents.${value}`),
+              hint: t(`platform.reviewCard.contentHints.${value}`),
+              disabled: value !== 'review' && !menuOpen,
+            }))}
+            onChange={setContent}
+          />
+          {menuOpen ? null : (
+            <p className="-mt-3 flex items-start gap-1.5 text-sm text-muted-foreground">
+              <BookOpen className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {t('platform.reviewCard.menuClosed')}
+            </p>
+          )}
 
           <Choice
             label={t('platform.reviewCard.size')}
@@ -332,32 +351,16 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
             onChange={setLanguages}
           />
 
-          <label className={cn('flex items-start gap-3 text-sm', !menuOpen && 'cursor-not-allowed opacity-60')}>
-            <input
-              type="checkbox"
-              checked={withMenu && menuOpen}
-              disabled={!menuOpen}
-              onChange={(event) => setWithMenu(event.target.checked)}
-              className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
-            />
-            <span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <BookOpen className="size-4 text-primary" aria-hidden="true" />
-                {t('platform.reviewCard.withMenu')}
-              </span>
-              <span className="block text-muted-foreground">
-                {menuOpen ? t('platform.reviewCard.withMenuHint') : t('platform.reviewCard.menuClosed')}
-              </span>
-            </span>
-          </label>
-
-          <p className="rounded-xl bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
-            {t('platform.reviewCard.scans', {
-              recent: formatNumber(selected.recentScans ?? 0, lang),
-              total: formatNumber(selected.totalScans ?? 0, lang),
-            })}
-            <span className="mt-1 block text-xs">{t('platform.reviewCard.note')}</span>
-          </p>
+          {/* Skanlar yalnız Google QR-ı üçün sayılır (menyu QR-ı birbaşa menyuya aparır) */}
+          {card.review ? (
+            <p className="rounded-xl bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
+              {t('platform.reviewCard.scans', {
+                recent: formatNumber(selected.recentScans ?? 0, lang),
+                total: formatNumber(selected.totalScans ?? 0, lang),
+              })}
+              <span className="mt-1 block text-xs">{t('platform.reviewCard.note')}</span>
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-2">
@@ -365,37 +368,44 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
                 <Printer aria-hidden="true" />
                 {t('platform.reviewCard.print')}
               </Button>
-              {/* QR faylları: menyu varsa seçim siyahısı (Google rəyi, menyu), yoxdursa birbaşa Google QR-ı */}
-              {card.menu ? (
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                      <Download aria-hidden="true" />
-                      {t('platform.reviewCard.downloadQrs')}
-                      <ChevronDown aria-hidden="true" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onSelect={downloadReviewQr}>
-                      <Star aria-hidden="true" />
-                      {t('platform.reviewCard.qrReview')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={downloadMenuQr}>
-                      <BookOpen aria-hidden="true" />
-                      {t('platform.reviewCard.qrMenu')}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button variant="outline" onClick={downloadReviewQr}>
-                  <Download aria-hidden="true" />
-                  {t('platform.reviewCard.downloadQr')}
-                </Button>
-              )}
-              <Button variant="ghost" onClick={copyLink}>
-                {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                {copied ? t('platform.reviewCard.copied') : t('platform.reviewCard.copyLink')}
-              </Button>
+              {/* QR faylları və linkləri: kartdakı QR-lar üzrə bir siyahı */}
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {copied ? <Check aria-hidden="true" /> : <Download aria-hidden="true" />}
+                    {copied ? t('platform.reviewCard.copied') : t('platform.reviewCard.qrActions')}
+                    <ChevronDown aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {card.review ? (
+                    <>
+                      <DropdownMenuItem
+                        onSelect={() => downloadBlob(svg(card.review?.url ?? ''), `google-qr-${slug}-${fileSlug(branchName)}.svg`)}
+                      >
+                        <Star aria-hidden="true" />
+                        {t('platform.reviewCard.qrReview')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => copy('review', card.review?.url ?? '')}>
+                        <Copy aria-hidden="true" />
+                        {t('platform.reviewCard.qrReviewLink')}
+                      </DropdownMenuItem>
+                    </>
+                  ) : null}
+                  {card.menu ? (
+                    <>
+                      <DropdownMenuItem onSelect={() => downloadBlob(svg(card.menu?.url ?? ''), `menu-qr-${slug}.svg`)}>
+                        <BookOpen aria-hidden="true" />
+                        {t('platform.reviewCard.qrMenu')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => copy('menu', card.menu?.url ?? '')}>
+                        <Copy aria-hidden="true" />
+                        {t('platform.reviewCard.qrMenuLink')}
+                      </DropdownMenuItem>
+                    </>
+                  ) : null}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <p className="text-xs text-muted-foreground">{t('platform.reviewCard.printHint')}</p>
           </div>
@@ -421,7 +431,7 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
 function Choice<T extends string>({ label, value, options, onChange }: {
   label: string;
   value: T;
-  options: { value: T; title: string; hint?: string }[];
+  options: { value: T; title: string; hint?: string; disabled?: boolean }[];
   onChange: (value: T) => void;
 }) {
   return (
@@ -433,10 +443,12 @@ function Choice<T extends string>({ label, value, options, onChange }: {
             key={option.value}
             type="button"
             aria-pressed={option.value === value}
+            disabled={option.disabled}
             onClick={() => onChange(option.value)}
             className={cn(
               'rounded-xl border px-3.5 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               option.value === value ? 'border-2 border-primary bg-primary/5' : 'border-border hover:bg-muted',
+              'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent',
             )}
           >
             <span className="block font-semibold">{option.title}</span>

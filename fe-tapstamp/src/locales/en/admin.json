@@ -493,8 +493,8 @@
       }
     },
     "reviewCard": {
-      "title": "Google review table card",
-      "description": "A card for a stand: customers scan the QR code and land on the branch Google review page. Prepare the card here, have it printed and hand it over to the company.",
+      "title": "Table QR card (stand)",
+      "description": "A printed card for a stand: customers scan the QR code and land on the branch Google review page or the company menu. Prepare the card here, have it printed and hand it over to the company.",
       "branch": "Branch",
       "linkSet": "Google review link connected",
       "linkMissing": "No Google review link yet: the QR code will open a Google Maps search for the company. For the exact link the owner can add it in Settings → Branches — the card will not need reprinting.",
@@ -519,8 +519,6 @@
       "note": "The QR code points to the company domain, which redirects to Google and counts every scan. If the Google link changes later, the card does not need reprinting.",
       "print": "Print / PDF",
       "printHint": "In the print dialog choose \"Save as PDF\" to send the file to the stand maker.",
-      "downloadQr": "Google QR (SVG)",
-      "copyLink": "Copy Google QR link",
       "copied": "Copied",
       "noBranches": "The company has no active branches.",
       "preview": "Card preview",
@@ -536,14 +534,31 @@
           "PRICES": "See our prices"
         },
         "welcome": "Welcome!",
-        "scanEither": "Point your phone camera at the QR code you need"
+        "scanEither": "Point your phone camera at the QR code you need",
+        "menuTitle": {
+          "MENU": "Explore our menu",
+          "SERVICES": "Explore our services",
+          "PRICES": "See our prices"
+        },
+        "menuSubtitle": "Everything on your phone — always up to date"
       },
-      "withMenu": "Add the menu QR code too",
-      "withMenuHint": "The card will have two QR codes: Google review and menu. The card size stays the same.",
       "menuClosed": "The company menu is not open: the \"Menu and services\" add-on must be enabled and the section turned on.",
-      "downloadQrs": "Download QR codes",
       "qrReview": "Google review QR (SVG)",
-      "qrMenu": "Menu QR (SVG)"
+      "qrMenu": "Menu QR (SVG)",
+      "content": "What the card shows",
+      "contents": {
+        "review": "Google review",
+        "menu": "Menu",
+        "both": "Both"
+      },
+      "contentHints": {
+        "review": "Invites to leave a review",
+        "menu": "Menu and prices",
+        "both": "Two QR codes, same size"
+      },
+      "qrMenuLink": "Copy menu link",
+      "qrReviewLink": "Copy Google link",
+      "qrActions": "QR code"
     }
   },
   "staffConsole": {
