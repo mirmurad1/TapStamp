@@ -27,6 +27,8 @@ const LANGUAGES: readonly Languages[] = ['az', 'az-ru', 'az-en'];
 
 /** Kartın əsas şrift ölçüsü (bütün ölçülər em ilə) — A6-da ~14 px; A5 √2 dəfə böyükdür. */
 const BASE_FONT = { A6: '3.7mm', A5: '5.23mm', A4: '3.7mm' } as const;
+/** Önizləmədə eyni nisbət konteynerin eninə görə: 3.7 mm / 105 mm ≈ 3.524% en. */
+const PREVIEW_FONT = '3.524cqw';
 
 interface CardProps {
   tenantId: string;
@@ -196,7 +198,7 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
         </CardTitle>
         <CardDescription>{t('platform.reviewCard.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-8 lg:grid-cols-[1fr_auto]">
+      <CardContent className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
         <div className="flex min-w-0 flex-col gap-5">
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             {t('platform.reviewCard.branch')}
@@ -273,10 +275,13 @@ export function ReviewCardTab({ tenantId, companyName, slug }: { tenantId: strin
           </div>
         </div>
 
-        {/* Önizləmə: A6 kartın real ölçüsü (105 × 148 mm) ekranda */}
-        <figure className="mx-auto flex flex-col items-center gap-2 lg:mx-0">
-          <div className="h-[148mm] w-[105mm] overflow-hidden rounded-2xl shadow-[0_20px_50px_-20px_rgb(40_20_90/0.35)] ring-1 ring-border">
-            <ReviewCardFace {...card} fontSize={BASE_FONT.A6} />
+        {/*
+         * Önizləmə: geniş ekranda A6-nın real ölçüsü (105 × 148 mm), telefonda ekranın eninə sığır. Kart em ilə
+         * qurulub, şrift konteynerin eninə nisbətdədir (cqw) — kiçildikdə nisbətlər eyni qalır.
+         */}
+        <figure className="mx-auto flex w-full max-w-[105mm] min-w-0 flex-col items-center gap-2 lg:mx-0 lg:w-[105mm]">
+          <div className="aspect-[105/148] w-full overflow-hidden rounded-2xl shadow-[0_20px_50px_-20px_rgb(40_20_90/0.35)] ring-1 ring-border [container-type:inline-size]">
+            <ReviewCardFace {...card} fontSize={PREVIEW_FONT} />
           </div>
           <figcaption className="text-xs text-muted-foreground">{t('platform.reviewCard.preview')}</figcaption>
         </figure>
