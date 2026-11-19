@@ -262,13 +262,16 @@ class CatalogIT extends TapIntegrationTest {
         owner.put("/catalog/settings", Map.of("enabled", true, "title", "SERVICES")).andExpect(status().isOk());
         String html = client().get("/api/v1/public/share/menu").andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", org.hamcrest.Matchers.startsWith("text/html")))
+                .andExpect(header().stringValues("Vary", org.hamcrest.Matchers.hasItem(org.hamcrest.Matchers.containsString("User-Agent"))))
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("private")))
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
         assertThat(html).contains("<meta property=\"og:title\" content=\"")
                 .contains(" · Xidmətlər\">")
                 .contains("xidmətləri və qiymətləri ilə tanış olun.")
                 .contains("<meta property=\"og:url\" content=\"http://" + HOST + "/menu\">")
                 .contains("/api/v1/public/icons/512.png")
-                .contains("http-equiv=\"refresh\"")
+                // Yönləndirmə "/menu/"-ya: nginx-in bot qaydası (dəqiq "/menu") təkrarlanmır — dövr yoxdur
+                .contains("http-equiv=\"refresh\" content=\"0; url=http://" + HOST + "/menu/\"")
                 // Şirkət adı HTML-də qaçırılır
                 .doesNotContain("<script");
 

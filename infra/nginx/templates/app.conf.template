@@ -22,9 +22,15 @@ map "$host$uri" $platform_customer_path {
 
 # Link önizləmə botları (WhatsApp, Telegram, Viber, Facebook/Instagram, X, Slack, Discord, LinkedIn, VK və s.):
 # JavaScript işlətmir, ona görə /menu üçün backend-in Open Graph HTML-i verilir (catalog/web/MenuShareController)
+# Sıra vacibdir (ilk uyğun gələn qalib gəlir): əvvəl brauzer mühərrikli axtarış botları, sonra bütün real brauzerlər
+# (tətbiq daxili brauzerlər də: Viber, Yandex Browser, Pinterest, Facebook) — onlar bot deyil, adi tətbiqi almalıdır.
+# Əvvəllər "viber", "yandex", "pinterest" sözləri Viber-in QR skanerindən açılan brauzeri, Yandex Browser-i və s.
+# bot sayırdı: müştəri menyu əvəzinə önizləmə səhifəsində qalırdı (ağ ekran).
 map $http_user_agent $link_preview_bot {
     default 0;
-    "~*(whatsapp|telegrambot|viber|facebookexternalhit|facebot|meta-externalagent|twitterbot|slackbot|discordbot|linkedinbot|skypeuripreview|vkshare|pinterest|applebot|googlebot|bingbot|yandex)" 1;
+    "~*(googlebot|bingbot|applebot|yandexbot|yandeximages)" 1;
+    "~*(applewebkit|gecko/)" 0;
+    "~*(whatsapp|telegrambot|viber|facebookexternalhit|facebot|meta-externalagent|twitterbot|slackbot|discordbot|linkedinbot|skypeuripreview|vkshare|pinterest)" 1;
 }
 
 # HTTP: yalnız ACME (Let's Encrypt) yoxlaması və HTTPS-ə yönləndirmə

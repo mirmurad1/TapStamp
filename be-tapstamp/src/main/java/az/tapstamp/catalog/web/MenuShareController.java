@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.MessageSource;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +56,9 @@ public class MenuShareController {
         String name = info.name().resolve(language);
         String origin = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         String url = origin + "/menu";
+        // İnsan bu səhifəyə düşsə (məs. bot kimi tanınan tətbiq daxili brauzer), "/menu/" ilə tətbiqə keçir: nginx-in
+        // bot qaydası yalnız dəqiq "/menu"-dadır, ona görə eyni səhifəyə təkrar yönləndirmə dövrü yaranmır
+        String appUrl = origin + "/menu/";
         String image = origin + "/api/v1/public/icons/512.png";
         String heading = messages.getMessage("share.menu.title." + title, new Object[] {name}, locale);
         String description = messages.getMessage("share.menu.description." + title, new Object[] {name}, locale);
@@ -75,14 +79,16 @@ public class MenuShareController {
                 <meta property="og:image:height" content="512">
                 <meta property="og:locale" content="%7$s">
                 <meta name="twitter:card" content="summary">
-                <meta http-equiv="refresh" content="0; url=%5$s">
+                <meta http-equiv="refresh" content="0; url=%8$s">
                 </head>
-                <body><a href="%5$s">%2$s</a></body>
+                <body><a href="%8$s">%2$s</a></body>
                 </html>
                 """.formatted(language.tag(), escape(heading), escape(description), escape(name), escape(url),
-                escape(image), ogLocale(language));
+                escape(image), ogLocale(language), escape(appUrl));
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic())
+                // Ünvan (/menu) brauzerlərlə eynidir: ara keşlər bot səhifəsini insana verməsin
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePrivate())
+                .header(HttpHeaders.VARY, HttpHeaders.USER_AGENT)
                 .contentType(new MediaType(MediaType.TEXT_HTML, java.nio.charset.StandardCharsets.UTF_8))
                 .body(html);
     }
