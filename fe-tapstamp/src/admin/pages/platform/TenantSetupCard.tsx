@@ -39,7 +39,14 @@ export function TenantSetupCard({ tenantId }: { tenantId: string }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <ApiErrorAlert error={setup.error} />
-        <ul className="grid gap-2 sm:grid-cols-2">
+        {data ? (
+          <div className="h-2 overflow-hidden rounded-full bg-primary/15" role="progressbar" aria-label={t('platform.detail.setup.title')}
+            aria-valuemin={0} aria-valuemax={required.length} aria-valuenow={data.requiredDone ?? 0}>
+            <div className={cn('h-full rounded-full', data.requiredComplete ? 'bg-success' : 'bg-primary')}
+              style={{ width: `${((data.requiredDone ?? 0) / Math.max(required.length, 1)) * 100}%` }} />
+          </div>
+        ) : null}
+        <ul className="flex flex-col gap-2">
           {required.map((step) => (
             <li key={step.key} className="flex items-center gap-2 text-sm">
               {step.done ? (
@@ -49,8 +56,13 @@ export function TenantSetupCard({ tenantId }: { tenantId: string }) {
               ) : (
                 <Circle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               )}
-              <span className={cn(!step.done && 'font-semibold')}>{stepTitle(step.key)}</span>
-              {step.partial ? <span className="text-xs text-muted-foreground">({t('platform.detail.setup.partial')})</span> : null}
+              <span className={cn(!step.done && 'font-semibold')}>
+                {step.key === 'NFC_TAG' ? t('platform.detail.setup.nfc') : stepTitle(step.key)}
+              </span>
+              {step.partial ? <span className="text-xs text-muted-foreground">— {t('platform.detail.setup.partial')}</span> : null}
+              {step.key === 'NFC_TAG' && !step.done ? (
+                <span className="text-xs text-muted-foreground">— {t('platform.detail.setup.nfcHint')}</span>
+              ) : null}
             </li>
           ))}
         </ul>

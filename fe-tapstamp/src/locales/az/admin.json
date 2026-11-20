@@ -340,7 +340,9 @@
         "title": "Başlanğıc",
         "subtitle": "Şirkətin hesabı nə qədər qurulub: məcburi addımlar və açılmış müştəri cəlbi imkanları.",
         "partial": "iş saatı yoxdur",
-        "recommended": "Müştəri cəlbi imkanları: {{enabled}}/{{total}} açıq"
+        "recommended": "Müştəri cəlbi imkanları: {{enabled}}/{{total}} açıq",
+        "nfc": "NFC çipi",
+        "nfcHint": "çip qeydiyyata alınmayıb (NFC çipləri tabı)"
       }
     },
     "domains": {

@@ -340,7 +340,9 @@
         "title": "Setup",
         "subtitle": "How far the company has set up its account: required steps and features turned on.",
         "partial": "no opening hours",
-        "recommended": "Customer features: {{enabled}}/{{total}} on"
+        "recommended": "Customer features: {{enabled}}/{{total}} on",
+        "nfc": "NFC tag",
+        "nfcHint": "no tag registered yet (NFC tags tab)"
       }
     },
     "domains": {
