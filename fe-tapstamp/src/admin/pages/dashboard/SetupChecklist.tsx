@@ -5,6 +5,7 @@ import {
   BellRing,
   BookOpen,
   Check,
+  ChevronDown,
   Gift,
   MessageSquareHeart,
   Nfc,
@@ -17,6 +18,7 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -25,6 +27,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 
 import { SETUP_KEY, setupApi, type SetupView } from '../../api/adminApi';
+import { setSetupCollapsed, setupCollapsed } from '../../lib/setupCollapse';
 import { setupStepKey, type SetupStepKey } from './setupSteps';
 
 /** Addımın ikonu və keçid ünvanı (admin panelində). */
@@ -69,26 +72,68 @@ export function SetupChecklist() {
   );
 }
 
+/**
+ * Məcburi addımlar: tamamlanana qədər gizlədilmir, amma "Sonra davam et" ilə bir sətrə kiçilir ("4/5 tamamlandı ·
+ * Növbəti: …"). Kiçik qalır — səhifələr arasında keçəndə də; yalnız sistemdən çıxıb girəndə və ya sessiya bitəndə yenə
+ * tam açılır.
+ */
 function Required({ data }: { data: SetupView }) {
   const { t } = useTranslation('admin');
   const steps = data.required ?? [];
   const done = data.requiredDone ?? 0;
+  const [collapsed, setCollapsed] = useState(setupCollapsed);
+  const toggle = (next: boolean) => {
+    setSetupCollapsed(next);
+    setCollapsed(next);
+  };
+  const nextStep = setupStepKey(steps.find((step) => !step.done)?.key);
+  const bar = (
+    <div className="h-2 overflow-hidden rounded-full bg-primary/15" role="progressbar"
+      aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={done} aria-label={t('setup.title')}>
+      <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(done / Math.max(steps.length, 1)) * 100}%` }} />
+    </div>
+  );
+  if (collapsed) {
+    return (
+      <Card className="overflow-hidden border-primary/25">
+        <CardContent className="flex flex-col gap-2.5 px-5 py-3.5 sm:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <p className="text-sm">
+              <span className="font-bold">{t('setup.title')}</span>
+              <span className="text-muted-foreground"> · </span>
+              <span className="font-semibold tabular-nums text-primary">{t('setup.progress', { done, total: steps.length })}</span>
+              {nextStep ? (
+                <span className="text-muted-foreground"> · {t('setup.next', { step: t(`setup.steps.${nextStep}.title`) })}</span>
+              ) : null}
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => toggle(false)}>
+              <ChevronDown className="size-4" aria-hidden="true" />
+              {t('setup.expand')}
+            </Button>
+          </div>
+          {bar}
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <Card className="overflow-hidden border-primary/25">
       <CardContent className="flex flex-col gap-4 p-5 sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
           <div>
             <h2 className="text-lg font-bold">{t('setup.title')}</h2>
             <p className="text-sm text-muted-foreground">{t('setup.subtitle')}</p>
           </div>
-          <span className="text-sm font-semibold tabular-nums text-primary">
-            {t('setup.progress', { done, total: steps.length })}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold tabular-nums text-primary">
+              {t('setup.progress', { done, total: steps.length })}
+            </span>
+            <Button variant="outline" size="sm" onClick={() => toggle(true)}>
+              {t('setup.later')}
+            </Button>
+          </div>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-primary/15" role="progressbar"
-          aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={done} aria-label={t('setup.title')}>
-          <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(done / Math.max(steps.length, 1)) * 100}%` }} />
-        </div>
+        {bar}
         <ol className="flex flex-col divide-y divide-border rounded-xl border border-border">
           {steps.map((step, index) => (
             <RequiredRow key={step.key} step={step} index={index} />

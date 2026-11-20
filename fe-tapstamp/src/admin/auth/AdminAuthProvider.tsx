@@ -5,6 +5,7 @@ import { toSupportedLanguage } from '@/shared/i18n/languages';
 import { changeLanguage, currentLanguage } from '@/shared/i18n/setup';
 
 import { accountApi, authApi, contextApi, type ContextScope, type Me, type Realm, type SessionState } from '../api/adminApi';
+import { setSetupCollapsed } from '../lib/setupCollapse';
 import { sessionKeys } from './session';
 
 interface AdminAuthValue {
@@ -61,6 +62,13 @@ export function AdminAuthProvider({ children, loading, renderError }: AdminAuthP
     queryFn: () => accountApi.me(realm),
     enabled: session.data === 'ACTIVE',
   });
+
+  // Sistemdən çıxanda və ya sessiya bitəndə başlanğıc siyahısının "Sonra davam et" seçimi silinir: yenidən girişdə tam açılır
+  useEffect(() => {
+    if (session.data !== undefined && session.data !== 'ACTIVE') {
+      setSetupCollapsed(false);
+    }
+  }, [session.data]);
 
   // Profil dili (bütün cihazlarda eyni) interfeysə tətbiq olunur
   const profileLanguage = toSupportedLanguage(me.data?.preferredLanguage);
