@@ -810,7 +810,7 @@ Bütün cookie-lər şirkətin öz domeninə bağlıdır.
 | `__Host-XSRF-TOKEN` | CSRF tokeni | Secure; SameSite=Lax; `Path=/` (JS oxuya bilir) | sessiya |
 | `__Host-cl_bid` | brauzer identifikatoru (toxunuşu bağlamaq üçün) | HttpOnly; Secure; SameSite=Lax; `Path=/` | 1 il |
 | `lang` | `az`, `en` və ya `ru` | Secure; SameSite=Lax; `Path=/` | 1 il |
-| `__Host-cl_staff` | işçi sessiyası | HttpOnly; Secure; SameSite=Strict; `Path=/` | 8 saat, 30 dəq fəaliyyətsizlik |
+| `__Host-cl_staff` | işçi sessiyası | HttpOnly; Secure; SameSite=Strict; `Path=/` | 30 gün, 24 saat fəaliyyətsizlik |
 | `__Host-cl_platform` | platforma admin sessiyası (yalnız platforma domenində) | HttpOnly; Secure; SameSite=Strict; `Path=/` | 8 saat, 30 dəq fəaliyyətsizlik |
 
 `__Host-` prefiksi cookie-nin yalnız həmin domenə aid olmasını, `Secure` olmasını və subdomenlərdən dəyişdirilə bilməməsini brauzer səviyyəsində təmin edir. Refresh tokeni yalnız `/api/v1/auth` yollarına göndərilir.
@@ -889,7 +889,7 @@ Hər vəziyyət keçidində sessiya tokeni yenilənir.
 - **Step-up** (həssas əməliyyat üçün əlavə təsdiq): tam telefonun göstərilməsi, CSV ixracı, çip provisioning paketi, rolların dəyişməsi və 2FA-nın sıfırlanması son 10 dəqiqədə TOTP təsdiqi tələb edir.
 - **Şifrə bərpası:** `POST …/password/forgot` həmişə `202` qaytarır. Token 256 bitdir, hash kimi saxlanılır, 30 dəqiqə etibarlıdır və birdəfəlikdir. Email istifadəçinin dilində göndərilir, link şirkətin öz domenindədir. Bərpadan sonra bütün sessiyalar ləğv olunur və bildiriş emaili gedir. Bərpa 2FA-nı keçmir.
 - **Dəvətlər:** OWNER işçini email ilə dəvət edir. İlk OWNER-i tenant yaradılanda SUPER_ADMIN dəvət edir. Link 72 saat etibarlıdır. İşçi şifrəni özü təyin edir, rol tələb edirsə TOTP da qurur. Bu üsulla heç kimə şifrə ötürülmür.
-- **Sessiya:** mütləq ömür 8 saat, fəaliyyətsizlik limiti 30 dəqiqə. Fon sorğuları (məs. işçi panelinin avtomatik yenilənməsi) `X-Background: 1` başlığı ilə gedir və fəaliyyətsizlik taymerini uzatmır.
+- **Sessiya:** şirkət panelində mütləq ömür 30 gün, fəaliyyətsizlik limiti 24 saat; platforma panelində 8 saat və 30 dəqiqə. Fon sorğuları (məs. işçi panelinin avtomatik yenilənməsi) `X-Background: 1` başlığı ilə gedir və fəaliyyətsizlik taymerini uzatmır.
 
 ### 8.2 Rol matrisi
 

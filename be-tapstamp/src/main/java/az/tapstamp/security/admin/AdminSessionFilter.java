@@ -76,7 +76,7 @@ public class AdminSessionFilter extends OncePerRequestFilter {
             return;
         }
         AdminSession session = found.get();
-        boolean idle = session.lastActivityAt().plus(properties.sessionIdle()).isBefore(now);
+        boolean idle = session.lastActivityAt().plus(properties.sessionIdle(realm)).isBefore(now);
         if (!session.absoluteExpiresAt().isAfter(now) || idle) {
             sessions.revoke(session.id(), idle ? "IDLE_TIMEOUT" : "EXPIRED", now);
             expired(request, response, realm);

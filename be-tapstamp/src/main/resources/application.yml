@@ -135,8 +135,12 @@ app:
     access-ttl: 15m
     refresh-ttl: 180d
   admin-auth:
+    # Platforma paneli
     session-absolute: 8h
     session-idle: 30m
+    # Şirkət admin paneli: 1 gün fəaliyyət olmasa çıxış
+    staff-session-absolute: 30d
+    staff-session-idle: 24h
     step-up-validity: 10m
     password-reset-ttl: 30m
     invitation-ttl: 72h

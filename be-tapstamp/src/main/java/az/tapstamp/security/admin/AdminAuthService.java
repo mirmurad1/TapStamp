@@ -425,7 +425,7 @@ public class AdminAuthService {
     private IssuedSession openSession(AdminRealm realm, UUID userId, AdminSession.State state, ClientInfo client,
                                       Instant now) {
         String token = SecureTokens.generate();
-        Duration ttl = state == AdminSession.State.ACTIVE ? properties.sessionAbsolute() : properties.pendingMfaTtl();
+        Duration ttl = state == AdminSession.State.ACTIVE ? properties.sessionAbsolute(realm) : properties.pendingMfaTtl();
         realms.sessions(realm).create(userId, SecureTokens.hash(token), state, now, now.plus(ttl), null,
                 client.ip(), client.userAgent());
         return new IssuedSession(token, state, ttl);
@@ -435,7 +435,7 @@ public class AdminAuthService {
     private IssuedSession rotate(AdminPrincipal principal, Instant now) {
         AdminSession.State state = AdminSession.State.ACTIVE;
         String token = SecureTokens.generate();
-        Duration ttl = properties.sessionAbsolute();
+        Duration ttl = properties.sessionAbsolute(principal.realm());
         Instant mfaVerifiedAt = principal.state() != AdminSession.State.ACTIVE ? now : null;
         realms.sessions(principal.realm()).rotate(principal.sessionId(), SecureTokens.hash(token), state,
                 now.plus(ttl), mfaVerifiedAt, now);
