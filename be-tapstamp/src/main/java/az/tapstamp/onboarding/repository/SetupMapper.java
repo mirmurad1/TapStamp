@@ -28,7 +28,8 @@ public interface SetupMapper {
     record State(@Nullable Instant recommendationsHiddenAt, @Nullable Instant brandingDoneAt) {
     }
 
-    State state();
+    /** Sətirdə bütün sütunlar NULL-dursa MyBatis {@code null} qaytarır — çağıran bunu nəzərə alır. */
+    @Nullable State state();
 
     /** Loqo addımı ilk dəfə tamamlandı (artıq qeyd olunubsa dəyişmir). */
     void markBrandingDone(Instant now);

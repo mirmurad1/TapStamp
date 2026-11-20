@@ -68,7 +68,9 @@ public class SetupService {
         Instant now = clock.instant();
         LocalDate today = now.atZone(TenantContext.require().timezone()).toLocalDate();
         Signals s = setup.signals(now, today);
-        SetupMapper.State state = setup.state();
+        // MyBatis bütün sütunları NULL olan sətir üçün null qaytarır (yeni şirkət: heç nə gizlədilməyib, loqo yoxdur)
+        SetupMapper.State stored = setup.state();
+        SetupMapper.State state = stored != null ? stored : new SetupMapper.State(null, null);
         // Loqo: bir dəfə yüklənibsə, sonradan silinsə də tamamlanmış sayılır (standart loqo görünür)
         boolean branding = s.branding() || state.brandingDoneAt() != null;
         if (s.branding() && state.brandingDoneAt() == null) {

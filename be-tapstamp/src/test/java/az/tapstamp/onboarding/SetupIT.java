@@ -31,6 +31,18 @@ class SetupIT extends TapIntegrationTest {
     }
 
     @Test
+    void freshCompanyWithNothingStoredYetGetsTheChecklist() throws Exception {
+        // Yeni şirkət: setup_state sətrinin bütün sahələri boşdur
+        TenantContext.runAs(alpha(), () -> tenantJdbc.sql(
+                "UPDATE setup_state SET recommendations_hidden_at = NULL, branding_done_at = NULL").update());
+        signedInPlatformAdmin().get("/tenants/" + alpha().id() + "/setup").andExpect(status().isOk())
+                .andExpect(jsonPath("$.recommendationsHidden").value(false));
+        TenantContext.runAs(alpha(), () -> tenantJdbc.sql(
+                "UPDATE setup_state SET recommendations_hidden_at = NULL, branding_done_at = NULL").update());
+        owner().get("/setup").andExpect(status().isOk());
+    }
+
+    @Test
     void requiredStepsComeFromExistingDataAndRecommendationsCanBeHidden() throws Exception {
         AdminClient owner = owner();
         owner.get("/setup").andExpect(status().isOk())
