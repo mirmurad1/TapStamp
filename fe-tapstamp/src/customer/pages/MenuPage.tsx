@@ -330,7 +330,8 @@ function SalePrice({ price, discount, size = 'md' }: { price: number; discount: 
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
   return (
-    <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
+    // relative: "sr-only" mətn (mütləq mövqeli) sürüşən banner kartında səhifədən kənara çıxıb səhifəni enə genişləndirirdi
+    <span className="relative inline-flex flex-wrap items-baseline gap-x-1.5">
       <span className={cn('font-extrabold text-primary tabular-nums', size === 'lg' ? 'text-lg' : 'text-[15px]')}>
         {formatCurrency(Number(discount.salePrice), lang)}
       </span>
@@ -376,7 +377,7 @@ function DealsBanner({ items, onOpen }: { items: Item[]; onOpen: (id: string) =>
   }
   const single = deals.length === 1;
   return (
-    <section aria-labelledby="deals-title" className="overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-[0_10px_30px_-14px_var(--primary)]">
+    <section aria-labelledby="deals-title" className="relative overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-[0_10px_30px_-14px_var(--primary)]">
       <div className="flex items-center gap-3 px-5 pt-5">
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15" aria-hidden="true">
           <BadgePercent className="size-5" />
@@ -389,7 +390,7 @@ function DealsBanner({ items, onOpen }: { items: Item[]; onOpen: (id: string) =>
       {/* scroll-px: snap kartı bannerin kənarına yapışdırmasın — kartlar həmişə içəridən 20 px aralıda qalır */}
       <ul className="flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto overscroll-x-contain px-5 pt-4 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {deals.map((item) => (
-          <li key={item.id} className={cn('shrink-0 snap-start', single ? 'w-full' : 'w-[80%] max-w-[300px]')}>
+          <li key={item.id} className={cn('relative shrink-0 snap-start', single ? 'w-full' : 'w-[80%] max-w-[300px]')}>
             <button
               type="button"
               onClick={() => onOpen(item.id ?? '')}
