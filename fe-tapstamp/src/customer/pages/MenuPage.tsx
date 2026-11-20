@@ -84,6 +84,7 @@ export function MenuPage() {
   return (
     <>
       <h1 className="pt-2 font-display text-3xl font-extrabold leading-tight tracking-tight">{title}</h1>
+      <LoyaltyBanner />
       <DealsBanner
         items={categories.flatMap((category) => category.items ?? [])}
         onOpen={(id) => {
@@ -99,7 +100,6 @@ export function MenuPage() {
           });
         }}
       />
-      <LoyaltyBanner />
       <SearchField value={query} onChange={setQuery} placeholder={t(`menu.searchIn.${titleKey}`)} />
       {needle ? null : <CategoryTabs categories={categories} />}
       {needle && shown.length === 0 ? (
@@ -360,8 +360,8 @@ function DealsBanner({ items, onOpen }: { items: Item[]; onOpen: (id: string) =>
   }
   const single = deals.length === 1;
   return (
-    <section aria-labelledby="deals-title" className="-mx-1 overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-[0_10px_30px_-14px_var(--primary)]">
-      <div className="flex items-center gap-2.5 px-4 pt-4">
+    <section aria-labelledby="deals-title" className="overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-[0_10px_30px_-14px_var(--primary)]">
+      <div className="flex items-center gap-3 px-5 pt-5">
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15" aria-hidden="true">
           <BadgePercent className="size-5" />
         </span>
@@ -370,13 +370,14 @@ function DealsBanner({ items, onOpen }: { items: Item[]; onOpen: (id: string) =>
           <p className="text-[13px] leading-snug text-primary-foreground/80">{t('menu.deals.subtitle', { count: deals.length })}</p>
         </span>
       </div>
-      <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* scroll-px: snap kartı bannerin kənarına yapışdırmasın — kartlar həmişə içəridən 20 px aralıda qalır */}
+      <ul className="flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto overscroll-x-contain px-5 pt-4 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {deals.map((item) => (
-          <li key={item.id} className={cn('shrink-0 snap-start', single ? 'w-full' : 'w-[82%] max-w-[300px]')}>
+          <li key={item.id} className={cn('shrink-0 snap-start', single ? 'w-full' : 'w-[80%] max-w-[300px]')}>
             <button
               type="button"
               onClick={() => onOpen(item.id ?? '')}
-              className="flex h-full w-full items-center gap-3 rounded-2xl bg-card p-3 text-left text-card-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="flex h-full w-full items-center gap-3.5 rounded-2xl bg-card p-3.5 text-left text-card-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               {item.thumbUrl ?? item.imageUrl ? (
                 <img src={(item.thumbUrl ?? item.imageUrl) as string} alt="" width={64} height={64} loading="lazy" decoding="async"
