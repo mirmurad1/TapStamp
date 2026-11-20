@@ -2937,6 +2937,56 @@
         "tags" : [ "Admin: parametrlər" ]
       }
     },
+    "/api/v1/admin/setup" : {
+      "get" : {
+        "description" : "Məcburi addımlar (BRANDING, REWARD_RULE, BRANCH, TEAM, NFC_TAG) və paketə görə müştəri cəlbi tövsiyələri (FEEDBACK, GOOGLE_REVIEW, REFERRALS, TIERS, REMINDERS, BONUS_RULES, CATALOG). Vəziyyət mövcud məlumatdan hesablanır.",
+        "operationId" : "setupChecklist",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SetupView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Başlanğıc siyahısı",
+        "tags" : [ "Admin: başlanğıc siyahısı" ]
+      }
+    },
+    "/api/v1/admin/setup/recommendations" : {
+      "put" : {
+        "description" : "Məcburi addımlar gizlədilmir.",
+        "operationId" : "hideSetupRecommendations",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RecommendationsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SetupView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Tövsiyələri gizlətmək və ya göstərmək",
+        "tags" : [ "Admin: başlanğıc siyahısı" ]
+      }
+    },
     "/api/v1/admin/staff-console/gift-cards/check" : {
       "post" : {
         "description" : "Kart tapılırsa statusu ilə qaytarılır (yan təsiri yoxdur), tapılmırsa `GIFT_CARD_NOT_FOUND`. İşçi üzrə dəqiqədə 30 cəhd; uğursuz cəhdlər audit jurnalına yazılır.",
@@ -5564,6 +5614,35 @@
           }
         },
         "summary" : "Google rəyi üçün çap kartları (QR)",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/{tenantId}/setup" : {
+      "get" : {
+        "description" : "Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi, NFC çipi) və paketə görə açılmış müştəri cəlbi imkanları.",
+        "operationId" : "tenantSetup",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SetupView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin başlanğıc siyahısı",
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
@@ -9803,6 +9882,15 @@
           }
         }
       },
+      "RecommendationsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "hidden" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "hidden" ]
+      },
       "RecoveryCodesResponse" : {
         "type" : "object",
         "description" : "Bərpa kodları yalnız bir dəfə göstərilir; hər biri bir dəfə istifadə oluna bilər",
@@ -10508,6 +10596,33 @@
         },
         "required" : [ "enabled", "title" ]
       },
+      "SetupView" : {
+        "type" : "object",
+        "properties" : {
+          "recommendationsHidden" : {
+            "type" : "boolean"
+          },
+          "recommended" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Step"
+            }
+          },
+          "required" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Step"
+            }
+          },
+          "requiredComplete" : {
+            "type" : "boolean"
+          },
+          "requiredDone" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "SmsLimitRequest" : {
         "type" : "object",
         "properties" : {
@@ -10788,6 +10903,20 @@
           }
         },
         "required" : [ "status" ]
+      },
+      "Step" : {
+        "type" : "object",
+        "properties" : {
+          "done" : {
+            "type" : "boolean"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "partial" : {
+            "type" : "boolean"
+          }
+        }
       },
       "StepUpRequest" : {
         "type" : "object",

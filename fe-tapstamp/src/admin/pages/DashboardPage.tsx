@@ -30,6 +30,7 @@ import { PlanLockedNotice } from '../components/PlanLocked';
 import { hasAnyRole } from '../layout/navigation';
 import { useBranchNames } from '../lib/branches';
 import { ComparisonView } from './dashboard/ComparisonView';
+import { SetupChecklist } from './dashboard/SetupChecklist';
 import { ReferralDashboard } from './referrals/ReferralDashboard';
 
 const PERIODS = [7, 30, 90, 365] as const;
@@ -64,6 +65,7 @@ export function DashboardPage() {
   const { t } = useTranslation(['admin', 'common']);
   const me = useMe();
   const canSeeAnalytics = hasAnyRole(me, ['COMPANY_OWNER', 'BRANCH_MANAGER']);
+  const isOwner = hasAnyRole(me, ['COMPANY_OWNER']);
 
   return (
     <div className="flex flex-col gap-6">
@@ -71,6 +73,7 @@ export function DashboardPage() {
         <h1 className="font-display text-2xl font-semibold">{t('admin:dashboard.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('admin:dashboard.subtitle')}</p>
       </div>
+      {isOwner ? <SetupChecklist /> : null}
       {canSeeAnalytics ? <Analytics /> : <StaffShortcut />}
     </div>
   );

@@ -1484,6 +1484,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Başlanğıc siyahısı
+         * @description Məcburi addımlar (BRANDING, REWARD_RULE, BRANCH, TEAM) və paketə görə müştəri cəlbi tövsiyələri (FEEDBACK, GOOGLE_REVIEW, REFERRALS, TIERS, REMINDERS, BONUS_RULES, CATALOG). Vəziyyət mövcud məlumatdan hesablanır.
+         */
+        get: operations["setupChecklist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/setup/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Tövsiyələri gizlətmək və ya göstərmək
+         * @description Məcburi addımlar gizlədilmir.
+         */
+        put: operations["hideSetupRecommendations"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/staff-console/gift-cards/check": {
         parameters: {
             query?: never;
@@ -3117,6 +3157,26 @@ export interface paths {
          * @description Aktiv filiallar: Google rəy linki (varsa), QR-ın ünvanı (şirkətin domenində, skan sayılır və Google-a yönləndirir) və skanlar — son 30 gün və cəmi. Menyu açıqdırsa `menuTitle` və `menuUrl` — kartda ikinci QR.
          */
         get: operations["reviewCards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{tenantId}/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin başlanğıc siyahısı
+         * @description Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi) və paketə görə açılmış müştəri cəlbi imkanları.
+         */
+        get: operations["tenantSetup"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5063,6 +5123,9 @@ export interface components {
             /** Format: time-local */
             startTime?: string;
         };
+        RecommendationsRequest: {
+            hidden: boolean;
+        };
         /** @description Bərpa kodları yalnız bir dəfə göstərilir; hər biri bir dəfə istifadə oluna bilər */
         RecoveryCodesResponse: {
             recoveryCodes?: string[];
@@ -5369,6 +5432,14 @@ export interface components {
             /** @description MENU, SERVICES və ya PRICES */
             title: string;
         };
+        SetupView: {
+            recommendationsHidden?: boolean;
+            recommended?: components["schemas"]["Step"][];
+            required?: components["schemas"]["Step"][];
+            requiredComplete?: boolean;
+            /** Format: int32 */
+            requiredDone?: number;
+        };
         SmsLimitRequest: {
             /**
              * Format: int32
@@ -5500,6 +5571,11 @@ export interface components {
         };
         StatusRequest: {
             status: string;
+        };
+        Step: {
+            done?: boolean;
+            key?: string;
+            partial?: boolean;
         };
         /** @description 2FA aktivdirsə code (TOTP), deyilsə password (cari şifrə) göndərilir */
         StepUpRequest: {
@@ -7850,6 +7926,50 @@ export interface operations {
             };
         };
     };
+    setupChecklist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SetupView"];
+                };
+            };
+        };
+    };
+    hideSetupRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendationsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SetupView"];
+                };
+            };
+        };
+    };
     check: {
         parameters: {
             query?: never;
@@ -9870,6 +9990,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ReviewCardsView"];
+                };
+            };
+        };
+    };
+    tenantSetup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SetupView"];
                 };
             };
         };

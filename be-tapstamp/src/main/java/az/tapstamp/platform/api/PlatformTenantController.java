@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import az.tapstamp.audit.AuditLogQuery;
+import az.tapstamp.onboarding.SetupService;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.platform.service.PlatformTenantService;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -139,6 +140,14 @@ public class PlatformTenantController {
     StatsResponse stats(@PathVariable UUID tenantId) {
         var stats = tenants.stats(tenantId);
         return new StatsResponse(stats.branches(), stats.totalCustomers(), stats.activeCustomers(), stats.activeStaff());
+    }
+
+    @GetMapping("/{tenantId}/setup")
+    @Operation(summary = "Şirkətin başlanğıc siyahısı", description = """
+            Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi, NFC çipi) və paketə görə açılmış müştəri cəlbi \
+            imkanları.""")
+    SetupService.SetupView setup(@PathVariable UUID tenantId) {
+        return tenants.setup(tenantId);
     }
 
     @GetMapping("/{tenantId}/review-cards")

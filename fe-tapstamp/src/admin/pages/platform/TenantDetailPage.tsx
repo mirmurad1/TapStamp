@@ -37,6 +37,7 @@ import { TenantPlanCard } from './TenantPlanCard';
 import { TenantTagsCard } from './TenantTagsCard';
 import { TENANTS_KEY } from './keys';
 import { TenantStatusBadge } from './TenantStatusBadge';
+import { TenantSetupCard } from './TenantSetupCard';
 
 type TenantTab = 'overview' | 'tags' | 'sms' | 'print' | 'domains' | 'audit';
 const TABS: readonly TenantTab[] = ['overview', 'tags', 'sms', 'print', 'domains', 'audit'];
@@ -84,6 +85,7 @@ export function TenantDetailPage() {
               <div className="grid items-start gap-6 xl:grid-cols-2">
                 <TenantPlanCard tenantId={tenantId} />
                 <div className="flex flex-col gap-6">
+                  {active ? <TenantSetupCard tenantId={tenantId} /> : null}
                   <TenantAddonsCard tenantId={tenantId} />
                   {active ? <OwnersCard tenantId={tenantId} onNotice={setNotice} /> : null}
                 </div>

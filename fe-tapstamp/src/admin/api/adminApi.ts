@@ -169,6 +169,8 @@ export const platformApi = {
     unwrap(api.PATCH('/api/v1/platform/tenants/{tenantId}/status', { params: { path: { tenantId } }, body: { status } })),
   stats: (tenantId: string) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/stats', { params: { path: { tenantId } } })),
+  setup: (tenantId: string) =>
+    unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/setup', { params: { path: { tenantId } } })),
   owners: (tenantId: string) =>
     unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/owners', { params: { path: { tenantId } } })),
   auditLog: (tenantId: string, query: { action?: string } & PageParams) =>
@@ -649,4 +651,13 @@ export const feedbackApi = {
     unwrap(api.GET('/api/v1/admin/feedback', { params: { query } })),
   resolve: (feedbackId: string, note?: string) =>
     unwrap(api.POST('/api/v1/admin/feedback/{feedbackId}/resolve', { params: { path: { feedbackId } }, body: { note } })),
+};
+
+export type SetupView = Schemas['SetupView'];
+export const SETUP_KEY = ['setup-checklist'] as const;
+
+/** Başlanğıc siyahısı (sahib): məcburi addımlar və paketə görə müştəri cəlbi tövsiyələri. */
+export const setupApi = {
+  get: () => unwrap(api.GET('/api/v1/admin/setup')),
+  hideRecommendations: (hidden: boolean) => unwrap(api.PUT('/api/v1/admin/setup/recommendations', { body: { hidden } })),
 };

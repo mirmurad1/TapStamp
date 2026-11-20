@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gift, Stamp } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
@@ -30,7 +31,11 @@ export function SettingsPage() {
   const policy = useQuery({ queryKey: POLICY_KEY, queryFn: settingsApi.stampPolicy });
   const reward = useQuery({ queryKey: REWARD_KEY, queryFn: settingsApi.rewardRule });
   // Bölmələr ayrı tablarda — uzun səhifə əvəzinə
-  const [tab, setTab] = useState<(typeof SETTINGS_TABS)[number]>('loyalty');
+  // Başlanğıc siyahısından keçid: ?tab=branches və s.
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<(typeof SETTINGS_TABS)[number]>(
+    () => SETTINGS_TABS.find((value) => value === params.get('tab')) ?? 'loyalty',
+  );
   return (
     <div className="flex flex-col gap-6">
       <div>

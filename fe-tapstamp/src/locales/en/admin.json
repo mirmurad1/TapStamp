@@ -335,6 +335,12 @@
         "domains": "Domains",
         "audit": "Audit log",
         "print": "Print materials"
+      },
+      "setup": {
+        "title": "Setup",
+        "subtitle": "How far the company has set up its account: required steps and features turned on.",
+        "partial": "no opening hours",
+        "recommended": "Customer features: {{enabled}}/{{total}} on"
       }
     },
     "domains": {
@@ -1528,6 +1534,74 @@
       "stats": "{{items}} discounts · sent to {{recipients}} customers · {{delivered}} delivered · {{opened}} opened ({{rate}})",
       "waiting_one": "{{count}} customer will get it when the branch opens",
       "waiting_other": "{{count}} customers will get it when the branch opens"
+    }
+  },
+  "setup": {
+    "title": "Set up your account",
+    "subtitle": "These 5 steps are required in every plan — complete them so the app works correctly.",
+    "progress": "{{done}}/{{total}} done",
+    "start": "Start",
+    "request": "Request",
+    "finish": "Finish",
+    "done": "done",
+    "todo": "not done",
+    "recommended": {
+      "title": "Bring in more customers",
+      "subtitle": "Features in your plan: {{enabled}}/{{total}} on. Not required, but the more you turn on, the more often customers come back.",
+      "hide": "Hide",
+      "enabled": "On",
+      "enable": "Turn on"
+    },
+    "steps": {
+      "BRANDING": {
+        "title": "Logo and brand color",
+        "hint": "Shown in the customer app, on the stamp card and on the home-screen icon."
+      },
+      "REWARD_RULE": {
+        "title": "Reward rule",
+        "hint": "Which gift customers get after how many stamps — the core of the card."
+      },
+      "BRANCH": {
+        "title": "Branch and opening hours",
+        "hint": "At least one branch with opening hours: NFC tags, the menu and notifications depend on it.",
+        "partial": "Branch added — enter its opening hours."
+      },
+      "TEAM": {
+        "title": "Invite staff",
+        "hint": "Invite the staff who confirm stamps and hand over gifts at the counter."
+      },
+      "NFC_TAG": {
+        "title": "Request an NFC tag",
+        "hint": "The platform programs the tag and delivers it to your branch — contact us. The step completes as soon as the tag is registered."
+      },
+      "FEEDBACK": {
+        "title": "Feedback after a visit",
+        "hint": "Spot unhappy customers in time and fix the issue."
+      },
+      "GOOGLE_REVIEW": {
+        "title": "Google review link",
+        "hint": "Happy customers leave Google reviews — that brings new customers."
+      },
+      "REFERRALS": {
+        "title": "Refer a friend",
+        "hint": "Customers bring friends and both earn bonus stamps."
+      },
+      "TIERS": {
+        "title": "Tiers",
+        "hint": "Regulars become Silver, Gold and get extra stamps on every visit."
+      },
+      "REMINDERS": {
+        "title": "Automatic reminders",
+        "hint": "Free notifications to customers close to a gift or who haven't visited for a while."
+      },
+      "BONUS_RULES": {
+        "title": "Bonus campaign",
+        "hint": "Double stamps in quiet hours — brings customers in at those times."
+      },
+      "CATALOG": {
+        "title": "Menu",
+        "hint": "Prices and discounts on the phone; opens from the QR on the table."
+      }
     }
   }
 }

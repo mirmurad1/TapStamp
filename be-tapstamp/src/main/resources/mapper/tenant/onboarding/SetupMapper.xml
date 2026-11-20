@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Başlanğıc siyahısı: addımların vəziyyəti mövcud məlumatdan -->
+<mapper namespace="az.tapstamp.onboarding.repository.SetupMapper">
+
+    <select id="signals" resultType="az.tapstamp.onboarding.repository.SetupMapper$Signals">
+        SELECT
+            coalesce((SELECT logo IS NOT NULL FROM company_profile), false) AS branding,
+            EXISTS (SELECT 1 FROM reward_rules WHERE active) AS reward_rule,
+            EXISTS (SELECT 1 FROM branches WHERE status = 'ACTIVE') AS branch,
+            EXISTS (SELECT 1 FROM branches WHERE status = 'ACTIVE' AND business_hours IS NOT NULL
+                    AND business_hours &lt;&gt; '{}'::jsonb) AS branch_hours,
+            (EXISTS (SELECT 1 FROM staff_users u JOIN staff_roles r ON r.staff_user_id = u.id
+                     WHERE u.status IN ('ACTIVE', 'INVITED') AND r.role &lt;&gt; 'COMPANY_OWNER')
+             OR EXISTS (SELECT 1 FROM staff_invitations i
+                        WHERE i.role &lt;&gt; 'COMPANY_OWNER' AND i.accepted_at IS NULL AND i.revoked_at IS NULL
+                          AND i.expires_at &gt; #{now})) AS team,
+            EXISTS (SELECT 1 FROM nfc_tags t JOIN branches b ON b.id = t.branch_id
+                    WHERE t.status = 'ACTIVE' AND b.status = 'ACTIVE') AS nfc_tag,
+            coalesce((SELECT enabled FROM feedback_settings WHERE id = 1), false) AS feedback,
+            EXISTS (SELECT 1 FROM branches WHERE status = 'ACTIVE' AND google_review_url IS NOT NULL) AS google_review,
+            coalesce((SELECT enabled FROM referral_settings WHERE id = 1), false) AS referrals,
+            (coalesce((SELECT enabled FROM tier_settings WHERE id = 1), false)
+             AND EXISTS (SELECT 1 FROM loyalty_tiers)) AS tiers,
+            coalesce((SELECT near_reward_enabled OR winback_enabled OR unused_gift_enabled
+                      FROM reminder_settings WHERE id = 1), false) AS reminders,
+            EXISTS (SELECT 1 FROM bonus_rules WHERE active
+                    AND (ends_on IS NULL OR ends_on &gt;= #{today})) AS bonus_rules,
+            (coalesce((SELECT enabled FROM catalog_settings WHERE id = 1), false)
+             AND EXISTS (SELECT 1 FROM catalog_items)) AS catalog
+    </select>
+
+    <select id="state" resultType="az.tapstamp.onboarding.repository.SetupMapper$State">
+        SELECT recommendations_hidden_at, branding_done_at FROM setup_state WHERE id = 1
+    </select>
+
+    <update id="markBrandingDone">
+        UPDATE setup_state SET branding_done_at = #{now} WHERE id = 1 AND branding_done_at IS NULL
+    </update>
+
+    <update id="setRecommendationsHidden">
+        UPDATE setup_state SET recommendations_hidden_at = #{hiddenAt}, updated_by = #{staffId} WHERE id = 1
+    </update>
+</mapper>

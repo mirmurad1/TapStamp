@@ -15,6 +15,7 @@ import az.tapstamp.company.service.CompanyLogoService;
 import az.tapstamp.company.service.CompanySettings;
 import az.tapstamp.feedback.ReviewLinkService;
 import az.tapstamp.feedback.repository.FeedbackMapper.ReviewCard;
+import az.tapstamp.onboarding.SetupService;
 import az.tapstamp.plan.Plan;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.plan.Subscription;
@@ -76,12 +77,13 @@ public class PlatformTenantService {
     private final ReviewLinkService reviewLinks;
     private final CompanySettings companySettings;
     private final CatalogService catalog;
+    private final SetupService setup;
 
     public PlatformTenantService(TenantDirectory directory, TenantProvisioner provisioner, TenancyProperties tenancy,
                                  InvitationService invitations, AdminRealms realms, AdminAuthService auth, AuditLogger audit,
                                  TenantOverviewMapper overview, Clock clock, PlanService plans,
                                  AuditLogQuery auditLog, CompanyLogoService logos, ReviewLinkService reviewLinks,
-                                 CompanySettings companySettings, CatalogService catalog) {
+                                 CompanySettings companySettings, CatalogService catalog, SetupService setup) {
         this.directory = directory;
         this.provisioner = provisioner;
         this.tenancy = tenancy;
@@ -97,6 +99,7 @@ public class PlatformTenantService {
         this.reviewLinks = reviewLinks;
         this.companySettings = companySettings;
         this.catalog = catalog;
+        this.setup = setup;
     }
 
     public List<TenantSummary> list() {
@@ -142,6 +145,12 @@ public class PlatformTenantService {
     public TenantStats stats(UUID tenantId) {
         TenantRecord tenant = activeTenant(tenantId);
         return TenantContext.callAs(tenant.toInfo(), overview::stats);
+    }
+
+    /** Şirkətin başlanğıc siyahısı: məcburi addımlar və paketə görə tövsiyələr (şirkət özü gizlətsə də hamısı). */
+    public SetupService.SetupView setup(UUID tenantId) {
+        TenantRecord tenant = activeTenant(tenantId);
+        return TenantContext.callAs(tenant.toInfo(), setup::progress);
     }
 
     /**

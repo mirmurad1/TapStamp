@@ -335,6 +335,12 @@
         "domains": "Domenlər",
         "audit": "Audit jurnalı",
         "print": "Çap materialları"
+      },
+      "setup": {
+        "title": "Başlanğıc",
+        "subtitle": "Şirkətin hesabı nə qədər qurulub: məcburi addımlar və açılmış müştəri cəlbi imkanları.",
+        "partial": "iş saatı yoxdur",
+        "recommended": "Müştəri cəlbi imkanları: {{enabled}}/{{total}} açıq"
       }
     },
     "domains": {
@@ -1528,6 +1534,74 @@
       "stats": "{{items}} endirim · {{recipients}} müştəriyə göndərildi · {{delivered}} çatdı · {{opened}} açdı ({{rate}})",
       "waiting_one": "{{count}} müştəri filial açılanda alacaq",
       "waiting_other": "{{count}} müştəri filial açılanda alacaq"
+    }
+  },
+  "setup": {
+    "title": "Hesabınızı qurun",
+    "subtitle": "Bu 5 addım bütün paketlərdə vacibdir — tətbiqin düzgün işləməsi üçün tamamlayın.",
+    "progress": "{{done}}/{{total}} tamamlandı",
+    "start": "Başla",
+    "request": "Tələb et",
+    "finish": "Tamamla",
+    "done": "tamamlanıb",
+    "todo": "tamamlanmayıb",
+    "recommended": {
+      "title": "Daha çox müştəri üçün",
+      "subtitle": "Paketinizdəki imkanlar: {{enabled}}/{{total}} açıqdır. Məcburi deyil, amma açdıqca müştərilər daha tez-tez qayıdır.",
+      "hide": "Gizlət",
+      "enabled": "Açıqdır",
+      "enable": "Aç"
+    },
+    "steps": {
+      "BRANDING": {
+        "title": "Loqo və brend rəngi",
+        "hint": "Müştəri tətbiqində, möhür kartında və telefonun ana ekranındakı ikonda görünür."
+      },
+      "REWARD_RULE": {
+        "title": "Hədiyyə qaydası",
+        "hint": "Neçə möhürdən sonra hansı hədiyyə verilir — kartın əsası budur."
+      },
+      "BRANCH": {
+        "title": "Filial və iş saatları",
+        "hint": "Ən azı bir filial və onun iş saatları: NFC çipləri, menyu və bildirişlər buna bağlıdır.",
+        "partial": "Filial əlavə olunub — iş saatlarını yazın."
+      },
+      "TEAM": {
+        "title": "İşçi dəvəti",
+        "hint": "Kassada möhürləri təsdiqləyən və hədiyyəni təhvil verən işçini dəvət edin."
+      },
+      "NFC_TAG": {
+        "title": "NFC çipini tələb edin",
+        "hint": "Çipi platforma proqramlaşdırıb filialınıza təhvil verir — bizimlə əlaqə saxlayın. Çip qeydiyyata alınan kimi addım tamamlanır."
+      },
+      "FEEDBACK": {
+        "title": "Ziyarətdən sonra rəy",
+        "hint": "Narazı müştərini vaxtında görün və problemi həll edin."
+      },
+      "GOOGLE_REVIEW": {
+        "title": "Google rəy linki",
+        "hint": "Razı müştərilər Google-da rəy yazır — bu, yeni müştəri gətirir."
+      },
+      "REFERRALS": {
+        "title": "Dost dəvəti",
+        "hint": "Müştəri dostunu gətirir, hər ikisi bonus möhür qazanır."
+      },
+      "TIERS": {
+        "title": "Səviyyələr",
+        "hint": "Daimi müştərilər Gümüş, Qızıl olur və hər ziyarətdə əlavə möhür alır."
+      },
+      "REMINDERS": {
+        "title": "Avtomatik xatırlatmalar",
+        "hint": "Hədiyyəsinə az qalan və ya çoxdandır gəlməyən müştəriyə pulsuz bildiriş."
+      },
+      "BONUS_RULES": {
+        "title": "Bonus kampaniyası",
+        "hint": "Sakit saatlarda ikiqat möhür — müştərini həmin saatlara çəkir."
+      },
+      "CATALOG": {
+        "title": "Menyu",
+        "hint": "Qiymətlər və endirimlər telefonda; stol üstündəki QR ilə açılır."
+      }
     }
   }
 }
