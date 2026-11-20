@@ -1250,6 +1250,75 @@
         "tags" : [ "Admin: menyu və xidmətlər" ]
       }
     },
+    "/api/v1/admin/catalog/deal-notifications" : {
+      "get" : {
+        "description" : "Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).",
+        "operationId" : "dealNotificationOverview",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DealNotificationOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Endirim bildirişləri",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/deal-notifications/send" : {
+      "post" : {
+        "description" : "Elan gözləyən yeni endirimlər bir bildirişdə, gündə bir elan. Müştəriyə filialının iş saatında çatır: `recipients` — dərhal göndərildi, `waiting` — filial açılanda gedəcək. Nəticə `status`-dadır (SENT, NOTHING_TO_SEND, ALREADY_SENT_TODAY, UNAVAILABLE).",
+        "operationId" : "sendDealNotification",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DealSendResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "İndi göndər",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
+    "/api/v1/admin/catalog/deal-notifications/settings" : {
+      "put" : {
+        "operationId" : "updateDealNotificationSettings",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DealNotificationSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DealNotificationOverview"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Endirim bildirişlərinin parametrləri",
+        "tags" : [ "Admin: menyu və xidmətlər" ]
+      }
+    },
     "/api/v1/admin/catalog/items" : {
       "post" : {
         "description" : "Kateqoriyanın sonuna əlavə olunur. Ən çox 300 məhsul.",
@@ -3814,6 +3883,28 @@
         },
         "summary" : "Ad və dilin dəyişdirilməsi",
         "tags" : [ "Müştəri: profil" ]
+      }
+    },
+    "/api/v1/me/deal-notifications/{announcementId}/opened" : {
+      "post" : {
+        "description" : "Elanın nəticəsində bir dəfə sayılır.",
+        "operationId" : "dealNotificationOpened",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "announcementId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Endirim bildirişinə toxunub menyunu açdı",
+        "tags" : [ "Müştəri: bildirişlər" ]
       }
     },
     "/api/v1/me/feedback-request" : {
@@ -7416,6 +7507,141 @@
           }
         }
       },
+      "DealAnnouncement" : {
+        "type" : "object",
+        "properties" : {
+          "announcedOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "delivered" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "itemCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "opened" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "recipients" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "trigger" : {
+            "type" : "string"
+          },
+          "waiting" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "DealNotificationOverview" : {
+        "type" : "object",
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "customersWithPush" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "pending" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PendingDeal"
+            }
+          },
+          "preview" : {
+            "$ref" : "#/components/schemas/DealPreview"
+          },
+          "recent" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DealAnnouncement"
+            }
+          },
+          "sentToday" : {
+            "type" : "boolean"
+          },
+          "settings" : {
+            "$ref" : "#/components/schemas/DealNotificationSettings"
+          }
+        }
+      },
+      "DealNotificationSettings" : {
+        "type" : "object",
+        "properties" : {
+          "autoEnabled" : {
+            "type" : "boolean"
+          },
+          "lastDayEnabled" : {
+            "type" : "boolean"
+          },
+          "sendTime" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DealNotificationSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "autoEnabled" : {
+            "type" : "boolean"
+          },
+          "lastDayEnabled" : {
+            "type" : "boolean"
+          },
+          "sendTime" : {
+            "type" : "string",
+            "description" : "Avtomatik göndərişin saatı, HH:mm (30 dəqiqəlik addım)",
+            "pattern" : "^([01]\\d|2[0-3]):(00|30)$"
+          }
+        },
+        "required" : [ "autoEnabled", "lastDayEnabled", "sendTime" ]
+      },
+      "DealPreview" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DealSendResult" : {
+        "type" : "object",
+        "properties" : {
+          "recipients" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "SENT", "NOTHING_TO_SEND", "ALREADY_SENT_TODAY", "UNAVAILABLE" ]
+          },
+          "waiting" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "DeleteResult" : {
         "type" : "object",
         "properties" : {
@@ -9048,6 +9274,22 @@
             "enum" : [ "PRIVACY_POLICY", "TERMS" ]
           },
           "version" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "PendingDeal" : {
+        "type" : "object",
+        "properties" : {
+          "itemId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "percent" : {
             "type" : "integer",
             "format" : "int32"
           }

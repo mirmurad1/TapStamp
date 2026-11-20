@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import az.tapstamp.catalog.repository.CatalogMapper.Discount;
 import az.tapstamp.catalog.repository.CatalogMapper.Image;
 import az.tapstamp.catalog.repository.CatalogMapper.Item;
 import az.tapstamp.catalog.repository.CatalogMapper.Settings;
+import az.tapstamp.catalog.repository.DealNotificationMapper;
 import az.tapstamp.plan.Addon;
 import az.tapstamp.plan.PlanService;
 import az.tapstamp.security.admin.AccessPolicy;
@@ -90,12 +92,15 @@ public class CatalogService {
     }
 
     private final CatalogMapper catalog;
+    private final DealNotificationMapper deals;
     private final PlanService plans;
     private final AuditLogger audit;
     private final Clock clock;
 
-    public CatalogService(CatalogMapper catalog, PlanService plans, AuditLogger audit, Clock clock) {
+    public CatalogService(CatalogMapper catalog, DealNotificationMapper deals, PlanService plans, AuditLogger audit,
+                          Clock clock) {
         this.catalog = catalog;
+        this.deals = deals;
         this.plans = plans;
         this.audit = audit;
         this.clock = clock;
@@ -246,6 +251,7 @@ public class CatalogService {
         catalog.updateItem(id, input.categoryId(), input.name(), input.description(), input.price(),
                 input.durationMinutes(), input.available(), input.branchId(), position, input.discount(),
                 principal.userId(), clock.instant());
+        resetAnnouncements(before, input.discount());
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("name", input.name().az());
         details.put("price", input.price() == null ? "" : input.price().toPlainString());
@@ -302,6 +308,22 @@ public class CatalogService {
     }
 
     // ---------------------------------------------------------------- köməkçilər
+
+    /**
+     * Endirim bildirişləri: yeni qurulan endirim (əvvəl yox idi və ya müddəti bitmişdi) yenidən elan olunur; faiz və
+     * ya qiymət dəyişəndə təkrar göndərilmir. Son gün dəyişibsə, son gün xatırlatması yenidən mümkündür.
+     */
+    private void resetAnnouncements(Item before, @Nullable Discount after) {
+        if (after == null) {
+            return;
+        }
+        DiscountView previous = discount(before, today());
+        if (previous == null || previous.status() == DiscountStatus.EXPIRED) {
+            deals.resetAnnouncement(before.id());
+        } else if (!Objects.equals(before.discountEndsOn(), after.endsOn())) {
+            deals.resetLastDayAnnouncement(before.id());
+        }
+    }
 
     private void validate(ItemInput input) {
         category(input.categoryId());
@@ -375,19 +397,31 @@ public class CatalogService {
                 item.durationMinutes(), imageUrl, thumbUrl, item.available(), item.branchId(), discount);
     }
 
+    /** Endirimli qiymət (AZN, 2 rəqəm). */
+    static BigDecimal salePrice(String kind, BigDecimal value, BigDecimal price) {
+        return "PERCENT".equals(kind)
+                ? price.multiply(BigDecimal.valueOf(100).subtract(value)).divide(BigDecimal.valueOf(100), 2,
+                        RoundingMode.HALF_UP)
+                : value.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /** Endirim faizi (tam ədəd): faizlə verilibsə özü, yeni qiymətlə verilibsə hesablanır. */
+    static int discountPercent(String kind, BigDecimal value, BigDecimal price) {
+        if ("PERCENT".equals(kind)) {
+            return value.intValue();
+        }
+        return BigDecimal.ONE.subtract(salePrice(kind, value, price).divide(price, 4, RoundingMode.HALF_UP))
+                .movePointRight(2).setScale(0, RoundingMode.HALF_UP).intValue();
+    }
+
     static @Nullable DiscountView discount(Item item, LocalDate today) {
         BigDecimal price = item.price();
         BigDecimal value = item.discountValue();
         if (item.discountKind() == null || value == null || price == null || price.signum() <= 0) {
             return null;
         }
-        BigDecimal sale = "PERCENT".equals(item.discountKind())
-                ? price.multiply(BigDecimal.valueOf(100).subtract(value)).divide(BigDecimal.valueOf(100), 2,
-                        RoundingMode.HALF_UP)
-                : value.setScale(2, RoundingMode.HALF_UP);
-        int percent = "PERCENT".equals(item.discountKind()) ? value.intValue()
-                : BigDecimal.ONE.subtract(sale.divide(price, 4, RoundingMode.HALF_UP)).movePointRight(2)
-                        .setScale(0, RoundingMode.HALF_UP).intValue();
+        BigDecimal sale = salePrice(item.discountKind(), value, price);
+        int percent = discountPercent(item.discountKind(), value, price);
         DiscountStatus status = item.discountStartsOn() != null && today.isBefore(item.discountStartsOn())
                 ? DiscountStatus.SCHEDULED
                 : item.discountEndsOn() != null && today.isAfter(item.discountEndsOn()) ? DiscountStatus.EXPIRED

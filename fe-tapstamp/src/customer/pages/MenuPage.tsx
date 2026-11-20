@@ -10,7 +10,7 @@ import { cn } from '@/shared/lib/cn';
 import { companyToday, formatCurrency, formatDayMonth } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 
-import { CATALOG_KEY, publicApi, type PublicCatalog } from '../api/customerApi';
+import { CATALOG_KEY, meApi, publicApi, type PublicCatalog } from '../api/customerApi';
 import { useCustomerSession } from '../auth/CustomerSessionProvider';
 
 type Category = NonNullable<PublicCatalog['categories']>[number];
@@ -33,8 +33,24 @@ function normalized(value: string | undefined): string {
 export function MenuPage() {
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const branchId = params.get('branch') ?? undefined;
+  const { status } = useCustomerSession();
+  // Endirim bildirişindən gəlib (?deal=<elan>): açılış sayılır, parametr ünvandan götürülür
+  const announcement = params.get('deal');
+  useEffect(() => {
+    if (!announcement || status === 'loading') {
+      return;
+    }
+    if (status === 'signedIn' && /^[0-9a-f-]{36}$/i.test(announcement)) {
+      void meApi.dealOpened(announcement).catch(() => undefined);
+    }
+    setParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete('deal');
+      return next;
+    }, { replace: true });
+  }, [announcement, status, setParams]);
   const catalog = useQuery({
     queryKey: [...CATALOG_KEY, branchId ?? ''],
     queryFn: () => publicApi.catalog(branchId),

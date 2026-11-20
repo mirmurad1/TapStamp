@@ -76,6 +76,9 @@ export const meApi = {
   revokeDevice: (sessionId: string) =>
     unwrap(api.DELETE('/api/v1/me/sessions/{sessionId}', { params: { path: { sessionId } } })),
   revokeOtherDevices: () => unwrap(api.POST('/api/v1/me/sessions/revoke-others')),
+  /** Endirim bildirişinə toxunub menyunu açdı (elanın nəticəsində sayılır). */
+  dealOpened: (announcementId: string) =>
+    api.POST('/api/v1/me/deal-notifications/{announcementId}/opened', { params: { path: { announcementId } } }),
 };
 
 /** NFC toxunuşundan sonrakı səhifə: tokenin vəziyyəti və möhürün alınması. */

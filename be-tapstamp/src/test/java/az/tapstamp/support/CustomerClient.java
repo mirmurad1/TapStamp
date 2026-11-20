@@ -85,6 +85,10 @@ public final class CustomerClient {
         return perform(json(MockMvcRequestBuilders.patch(path), body), path);
     }
 
+    public ResultActions put(String path, Object body) throws Exception {
+        return perform(json(MockMvcRequestBuilders.put(path), body), path);
+    }
+
     public ResultActions delete(String path) throws Exception {
         return perform(MockMvcRequestBuilders.delete(path), path);
     }

@@ -584,6 +584,18 @@ export const catalogApi = {
     unwrap(api.DELETE('/api/v1/admin/catalog/items/{itemId}/image', { params: { path: { itemId } } })),
 };
 
+export const DEAL_NOTIFICATIONS_KEY = ['deal-notifications'] as const;
+export type DealNotificationOverview = Schemas['DealNotificationOverview'];
+export type DealNotificationSettingsRequest = Schemas['DealNotificationSettingsRequest'];
+
+/** Endirim bildirişləri: parametrlər, "İndi göndər" və son elanların nəticəsi. */
+export const dealNotificationsApi = {
+  get: () => unwrap(api.GET('/api/v1/admin/catalog/deal-notifications')),
+  settings: (body: DealNotificationSettingsRequest) =>
+    unwrap(api.PUT('/api/v1/admin/catalog/deal-notifications/settings', { body })),
+  send: () => unwrap(api.POST('/api/v1/admin/catalog/deal-notifications/send')),
+};
+
 export type AddonName = NonNullable<Schemas['TenantAddonsResponse']['addons']>[number];
 /** Satılan əlavələrin hamısı (platforma panelində sıra ilə). */
 export const ADDONS: readonly AddonName[] = ['CATALOG'];

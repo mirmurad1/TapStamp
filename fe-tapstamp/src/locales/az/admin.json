@@ -1474,6 +1474,60 @@
         "range": "Başlanğıc son gündən sonra ola bilməz.",
         "past": "Son gün keçib — endirim müştərilərə göstərilməyəcək."
       }
+    },
+    "deals": {
+      "title": "Endirim bildirişləri",
+      "subtitle": "Yeni endirimlər bildirişləri açıq olan müştərilərə tək-tək yox, bir bildirişdə göndərilir — seçdiyiniz saatda avtomatik və ya indi. Bildiriş müştəriyə filialının iş saatında çatır.",
+      "pending_one": "{{count}} yeni endirim elan olunmayıb:",
+      "pending_other": "{{count}} yeni endirim elan olunmayıb:",
+      "nothingPending": "Elan gözləyən yeni endirim yoxdur. Endirim əlavə edəndə burada görünəcək.",
+      "preview": "Müştəri belə bildiriş alacaq",
+      "send": "İndi göndər",
+      "confirm_one": "Bildiriş bildirişləri açıq olan {{count}} müştəriyə göndərilsin? Bu gün başqa endirim bildirişi getməyəcək.",
+      "confirm_other": "Bildiriş bildirişləri açıq olan {{count}} müştəriyə göndərilsin? Bu gün başqa endirim bildirişi getməyəcək.",
+      "autoAt": "Göndərməsəniz, bu gün saat {{time}}-da avtomatik gedəcək.",
+      "autoTomorrow": "Bugünkü saat keçib — sabah saat {{time}}-da avtomatik gedəcək.",
+      "manualOnly": "Avtomatik göndəriş söndürülüb — yalnız bu düymə ilə.",
+      "blocked": {
+        "unavailable": "Bildirişlər hazırda mümkün deyil (paketdə push yoxdur və ya menyu söndürülüb).",
+        "sentToday": "Bu gün artıq endirim bildirişi göndərilib. Yeni endirimlər sabah elan olunacaq."
+      },
+      "result": {
+        "SENT_one": "Bildiriş {{count}} müştəriyə göndərildi.",
+        "SENT_other": "Bildiriş {{count}} müştəriyə göndərildi.",
+        "NOTHING_TO_SEND": "Elan gözləyən endirim yoxdur.",
+        "ALREADY_SENT_TODAY": "Bu gün artıq endirim bildirişi göndərilib.",
+        "UNAVAILABLE": "Bildirişlər hazırda mümkün deyil.",
+        "waiting_one": "{{count}} müştəri filialı açılanda alacaq.",
+        "waiting_other": "{{count}} müştəri filialı açılanda alacaq."
+      },
+      "audience_one": "Bildirişləri açıq olan müştərilər: {{formatted}}",
+      "audience_other": "Bildirişləri açıq olan müştərilər: {{formatted}}",
+      "settings": "Parametrlər",
+      "auto": "Avtomatik göndər",
+      "autoHint": "Hər gün seçilmiş saatda yeni endirimlər varsa, bir bildirişdə gedir. Filialı bağlı olan müştəri bildirişi filial açılanda alır.",
+      "time": "Saat",
+      "lastDay": "Son gün xatırlatması",
+      "lastDayHint": "Endirimin son günü bir dəfə \"Son gün\" bildirişi (həmin gün yeni endirim elanı yoxdursa).",
+      "rules": {
+        "once": "Hər endirim bir dəfə elan olunur; faizi dəyişsəniz təkrar getmir. Gələcək tarixli endirim başladığı gün elan olunur.",
+        "daily": "Gündə ən çox bir endirim bildirişi. Müştəriyə sonuncu gəldiyi filialın iş saatında çatır; filial bağlıdırsa — açılanda (24 saat ərzində).",
+        "branch": "Yalnız bir filialda olan endirim həmin filiala gələn müştərilərə gedir; \"Hazırda yoxdur\" məhsullar elan olunmur."
+      },
+      "saved": "Yadda saxlanıldı.",
+      "recent": "Son bildirişlər",
+      "recentEmpty": "Hələ endirim bildirişi göndərilməyib.",
+      "kinds": {
+        "NEW": "Yeni endirimlər",
+        "LAST_DAY": "Son gün"
+      },
+      "triggers": {
+        "AUTO": "Avtomatik",
+        "MANUAL": "Əl ilə"
+      },
+      "stats": "{{items}} endirim · {{recipients}} müştəriyə göndərildi · {{delivered}} çatdı · {{opened}} açdı ({{rate}})",
+      "waiting_one": "{{count}} müştəri filial açılanda alacaq",
+      "waiting_other": "{{count}} müştəri filial açılanda alacaq"
     }
   }
 }

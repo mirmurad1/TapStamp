@@ -1474,6 +1474,60 @@
         "range": "The start cannot be after the last day.",
         "past": "The last day has passed — customers will not see this discount."
       }
+    },
+    "deals": {
+      "title": "Discount notifications",
+      "subtitle": "New discounts are sent to customers with notifications on in a single notification, not one by one — automatically at the time you choose or right now. Customers get it during their branch's opening hours.",
+      "pending_one": "{{count}} new discount not announced yet:",
+      "pending_other": "{{count}} new discounts not announced yet:",
+      "nothingPending": "No new discounts waiting to be announced. They will appear here when you add one.",
+      "preview": "Customers will get this notification",
+      "send": "Send now",
+      "confirm_one": "Send the notification to {{count}} customer with notifications on? No other discount notification will go out today.",
+      "confirm_other": "Send the notification to {{count}} customers with notifications on? No other discount notification will go out today.",
+      "autoAt": "If you don't send it, it goes out automatically today at {{time}}.",
+      "autoTomorrow": "Today's time has passed — it goes out automatically tomorrow at {{time}}.",
+      "manualOnly": "Automatic sending is off — only with this button.",
+      "blocked": {
+        "unavailable": "Notifications are not available right now (push is not in the plan or the menu is off).",
+        "sentToday": "A discount notification was already sent today. New discounts will be announced tomorrow."
+      },
+      "result": {
+        "SENT_one": "Notification sent to {{count}} customer.",
+        "SENT_other": "Notification sent to {{count}} customers.",
+        "NOTHING_TO_SEND": "No discounts waiting to be announced.",
+        "ALREADY_SENT_TODAY": "A discount notification was already sent today.",
+        "UNAVAILABLE": "Notifications are not available right now.",
+        "waiting_one": "{{count}} customer will get it when their branch opens.",
+        "waiting_other": "{{count}} customers will get it when their branch opens."
+      },
+      "audience_one": "Customers with notifications on: {{formatted}}",
+      "audience_other": "Customers with notifications on: {{formatted}}",
+      "settings": "Settings",
+      "auto": "Send automatically",
+      "autoHint": "Every day at the chosen time, if there are new discounts, they go out in one notification. Customers whose branch is closed get it when the branch opens.",
+      "time": "Time",
+      "lastDay": "Last-day reminder",
+      "lastDayHint": "A one-time \"Last day\" notification on the discount's last day (if no new discounts are announced that day).",
+      "rules": {
+        "once": "Each discount is announced once; changing the percentage does not resend it. A future discount is announced on its start day.",
+        "daily": "At most one discount notification a day. It reaches customers during the opening hours of the branch they last visited; if it is closed — when it opens (within 24 hours).",
+        "branch": "A discount for one branch goes only to that branch's customers; sold-out items are not announced."
+      },
+      "saved": "Saved.",
+      "recent": "Recent notifications",
+      "recentEmpty": "No discount notifications sent yet.",
+      "kinds": {
+        "NEW": "New discounts",
+        "LAST_DAY": "Last day"
+      },
+      "triggers": {
+        "AUTO": "Automatic",
+        "MANUAL": "Manual"
+      },
+      "stats": "{{items}} discounts · sent to {{recipients}} customers · {{delivered}} delivered · {{opened}} opened ({{rate}})",
+      "waiting_one": "{{count}} customer will get it when the branch opens",
+      "waiting_other": "{{count}} customers will get it when the branch opens"
     }
   }
 }

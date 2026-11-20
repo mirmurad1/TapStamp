@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Endirim bildirişləri: parametrlər, elan olunacaq endirimlər, alıcılar, elanlar və açılışlar -->
+<mapper namespace="az.tapstamp.catalog.repository.DealNotificationMapper">
+
+    <select id="settings" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$Settings">
+        SELECT auto_enabled, send_time, last_day_enabled, last_auto_run_on FROM deal_notification_settings WHERE id = 1
+    </select>
+
+    <update id="updateSettings">
+        UPDATE deal_notification_settings
+        SET auto_enabled = #{autoEnabled}, send_time = #{sendTime}, last_day_enabled = #{lastDayEnabled},
+            updated_at = #{now}, updated_by = #{staffId}
+        WHERE id = 1
+    </update>
+
+    <update id="claimAutoRun">
+        UPDATE deal_notification_settings SET last_auto_run_on = #{today}
+        WHERE id = 1 AND last_auto_run_on IS DISTINCT FROM #{today}
+    </update>
+
+    <!-- Menyu açıq, kateqoriya görünür, məhsul mövcud, endirim bu gün qüvvədə -->
+    <sql id="activeDeal">
+        FROM catalog_items i
+        JOIN catalog_categories c ON c.id = i.category_id
+        WHERE c.active AND i.available AND i.price IS NOT NULL AND i.discount_kind IS NOT NULL
+          AND (SELECT enabled FROM catalog_settings WHERE id = 1)
+          AND (i.discount_starts_on IS NULL OR i.discount_starts_on &lt;= #{today})
+          AND (i.discount_ends_on IS NULL OR i.discount_ends_on &gt;= #{today})
+    </sql>
+
+    <sql id="dealColumns">i.id, i.name, i.price, i.discount_kind, i.discount_value, i.branch_id</sql>
+
+    <select id="newDeals" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$DealItem">
+        SELECT <include refid="dealColumns"/>
+        <include refid="activeDeal"/>
+          AND i.discount_announced_at IS NULL
+        ORDER BY c.position, i.position
+    </select>
+
+    <select id="lastDayDeals" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$DealItem">
+        SELECT <include refid="dealColumns"/>
+        <include refid="activeDeal"/>
+          AND i.discount_ends_on = #{today}
+          AND i.discount_announced_at IS NOT NULL AND i.discount_last_day_announced_at IS NULL
+        ORDER BY c.position, i.position
+    </select>
+
+    <insert id="insertAnnouncement">
+        INSERT INTO deal_announcements (id, kind, trigger, announced_on, item_count, created_at, created_by)
+        VALUES (#{id}, #{kind}, #{trigger}, #{announcedOn}, #{itemCount}, #{now}, #{staffId})
+        ON CONFLICT (announced_on) DO NOTHING
+    </insert>
+
+    <select id="announcedOn" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM deal_announcements WHERE announced_on = #{day})
+    </select>
+
+    <update id="markAnnounced">
+        UPDATE catalog_items SET discount_announced_at = #{now}
+        WHERE id IN <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <update id="markLastDayAnnounced">
+        UPDATE catalog_items SET discount_last_day_announced_at = #{now}
+        WHERE id IN <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="recipients" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$Recipient">
+        SELECT c.id AS customer_id, c.last_branch_id
+        FROM customers c
+        WHERE c.status = 'ACTIVE'
+          AND EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.customer_id = c.id)
+          AND NOT EXISTS (SELECT 1 FROM deal_push_log l WHERE l.customer_id = c.id
+                          AND (l.sent_on = #{today} OR l.sent_at &gt;= #{dayStart}
+                               OR (l.sent_at IS NULL AND l.dropped_at IS NULL)))
+          <if test="after != null">AND c.id &gt; #{after}</if>
+        ORDER BY c.id
+        LIMIT #{limit}
+    </select>
+
+    <insert id="queuePush">
+        INSERT INTO deal_push_log (announcement_id, customer_id, sent_on, branch_id, item_count, items_text, created_at)
+        VALUES (#{announcementId}, #{customerId}, #{sentOn}, #{branchId}, #{itemCount}, CAST(#{itemsText} AS jsonb), #{now})
+        ON CONFLICT DO NOTHING
+    </insert>
+
+    <select id="waiting" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$WaitingPush">
+        SELECT l.announcement_id, l.customer_id, a.kind, l.branch_id, l.item_count, l.items_text
+        FROM deal_push_log l
+        JOIN deal_announcements a ON a.id = l.announcement_id
+        WHERE l.sent_at IS NULL AND l.dropped_at IS NULL
+          <if test="after != null">AND (l.announcement_id, l.customer_id) &gt; (#{after.announcementId}, #{after.customerId})</if>
+        ORDER BY l.announcement_id, l.customer_id
+        LIMIT #{limit}
+    </select>
+
+    <update id="markSent">
+        UPDATE deal_push_log SET sent_at = #{now}
+        WHERE announcement_id = #{announcementId} AND customer_id = #{customerId}
+          AND sent_at IS NULL AND dropped_at IS NULL
+    </update>
+
+    <update id="dropStale">
+        UPDATE deal_push_log SET dropped_at = #{now}
+        WHERE sent_at IS NULL AND dropped_at IS NULL AND created_at &lt; #{before}
+    </update>
+
+    <select id="branchHours" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$BranchHours">
+        SELECT id, business_hours::text AS business_hours FROM branches WHERE status = 'ACTIVE'
+    </select>
+
+    <update id="incrementDelivered">
+        UPDATE deal_announcements SET delivered = delivered + 1 WHERE id = #{announcementId}
+    </update>
+
+    <update id="markOpened">
+        UPDATE deal_push_log SET opened_at = #{now}
+        WHERE announcement_id = #{announcementId} AND customer_id = #{customerId} AND opened_at IS NULL
+    </update>
+
+    <select id="recent" resultType="az.tapstamp.catalog.repository.DealNotificationMapper$DealAnnouncement">
+        SELECT a.id, a.kind, a.trigger, a.announced_on, a.item_count,
+               (SELECT count(*) FROM deal_push_log l WHERE l.announcement_id = a.id AND l.sent_at IS NOT NULL)::int
+                   AS recipients,
+               (SELECT count(*) FROM deal_push_log l
+                WHERE l.announcement_id = a.id AND l.sent_at IS NULL AND l.dropped_at IS NULL)::int AS waiting,
+               a.delivered,
+               (SELECT count(*) FROM deal_push_log l WHERE l.announcement_id = a.id AND l.opened_at IS NOT NULL)::int
+                   AS opened,
+               a.created_at
+        FROM deal_announcements a
+        ORDER BY a.announced_on DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="resetAnnouncement">
+        UPDATE catalog_items SET discount_announced_at = NULL, discount_last_day_announced_at = NULL WHERE id = #{itemId}
+    </update>
+
+    <update id="resetLastDayAnnouncement">
+        UPDATE catalog_items SET discount_last_day_announced_at = NULL WHERE id = #{itemId}
+    </update>
+</mapper>

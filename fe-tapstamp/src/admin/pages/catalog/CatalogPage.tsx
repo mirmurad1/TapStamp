@@ -32,6 +32,7 @@ import { QrCode } from '@/shared/ui/QrCode';
 import {
   CATALOG_KEY,
   catalogApi,
+  DEAL_NOTIFICATIONS_KEY,
   type CatalogCategory,
   type CatalogItem,
   type CatalogTitle,
@@ -39,6 +40,7 @@ import {
   type Localized,
 } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
+import { DealNotificationsCard } from './DealNotificationsCard';
 import { InlineLoading } from '../../components/FullPageState';
 import { useBranchNames } from '../../lib/branches';
 import { toLocalized } from '../../lib/localized';
@@ -87,6 +89,7 @@ export function CatalogPage() {
       <ApiErrorAlert error={catalog.error} />
       {catalog.isPending ? <InlineLoading /> : null}
       {catalog.data ? <SettingsCard data={catalog.data} /> : null}
+      {catalog.data?.enabled && itemCount > 0 ? <DealNotificationsCard /> : null}
       {catalog.data && categories.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-start gap-3 py-8">
@@ -130,7 +133,14 @@ export function CatalogPage() {
 
 function useCatalogMutation<T>(fn: (input: T) => Promise<CatalogView>) {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: fn, onSuccess: (data) => queryClient.setQueryData(CATALOG_KEY, data) });
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (data) => {
+      queryClient.setQueryData(CATALOG_KEY, data);
+      // Elan gözləyən endirimlər dəyişə bilər
+      void queryClient.invalidateQueries({ queryKey: DEAL_NOTIFICATIONS_KEY });
+    },
+  });
 }
 
 /** Bölmənin açarı (söndürüləndə müştəri görmür) və müştəriyə görünən adı. */
@@ -566,6 +576,7 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(CATALOG_KEY, data);
+      void queryClient.invalidateQueries({ queryKey: DEAL_NOTIFICATIONS_KEY });
       onClose();
     },
     // Məhsul yaradılıb, amma şəkil alınmayıbsa — siyahı yenilənsin

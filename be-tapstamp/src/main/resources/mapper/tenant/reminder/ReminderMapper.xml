@@ -25,6 +25,9 @@
         c.status = 'ACTIVE'
         AND EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.customer_id = c.id)
         AND NOT EXISTS (SELECT 1 FROM reminder_log w WHERE w.customer_id = c.id AND w.sent_at &gt; #{weekAgo})
+        <!-- Son 24 saatda endirim bildirişi alıbsa, xatırlatma həmin gün getmir (weekAgo + 6 gün = 1 gün əvvəl) -->
+        AND NOT EXISTS (SELECT 1 FROM deal_push_log d WHERE d.customer_id = c.id
+                        AND d.sent_at &gt; CAST(#{weekAgo} AS timestamptz) + interval '6 days')
     </sql>
 
     <!-- Kartın qaydası: yarımçıq kart öz qaydası ilə, yoxdursa aktiv qayda -->

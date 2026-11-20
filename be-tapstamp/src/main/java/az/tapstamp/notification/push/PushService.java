@@ -56,7 +56,11 @@ public class PushService {
         /** Səviyyəyə çatdı (çatma imtiyazı ilə); arqument: səviyyənin adı ({@link LocalizedText}). */
         TIER_REACHED("/gift-cards"),
         /** Ziyarətdən 15 dəqiqə sonra rəy sorğusu (qərar #61). */
-        FEEDBACK_REQUEST("/?feedback=1");
+        FEEDBACK_REQUEST("/?feedback=1"),
+        /** Yeni endirimlər (bir bildirişdə); arqumentlər: say, siyahı ({@link LocalizedText}). Ünvan elanla verilir. */
+        DEALS_NEW("/menu"),
+        /** Endirimin son günü; arqumentlər: say, siyahı ({@link LocalizedText}). */
+        DEALS_LAST_DAY("/menu");
 
         private final String url;
 
@@ -144,20 +148,29 @@ public class PushService {
      * {@code false} dərhal.
      */
     public void notifyTracked(UUID customerId, Kind kind, Consumer<Boolean> onResult, Object... args) {
+        notifyTracked(customerId, kind, kind.url, onResult, args);
+    }
+
+    /** {@link #notifyTracked} kimi, klikdə açılan ünvan verilir (məs. açılışı saymaq üçün elanın id-si ilə). */
+    public void notifyTracked(UUID customerId, Kind kind, String url, Consumer<Boolean> onResult, Object... args) {
         if (!available()) {
             onResult.accept(false);
             return;
         }
-        enqueue(customerId, kind, args, onResult);
+        enqueue(customerId, kind, url, args, onResult);
     }
 
     private void enqueue(UUID customerId, Kind kind, Object[] args, @Nullable Consumer<Boolean> onResult) {
+        enqueue(customerId, kind, kind.url, args, onResult);
+    }
+
+    private void enqueue(UUID customerId, Kind kind, String url, Object[] args, @Nullable Consumer<Boolean> onResult) {
         if (!available()) {
             return;
         }
         TenantInfo tenant = TenantContext.require();
         Runnable task = () -> executor.execute(() -> TenantContext.runAs(tenant, () -> {
-            boolean delivered = deliver(customerId, kind, args);
+            boolean delivered = deliver(customerId, kind, url, args);
             if (onResult != null) {
                 onResult.accept(delivered);
             }
@@ -175,7 +188,7 @@ public class PushService {
     }
 
     /** Ən azı bir cihaza çatdırılıbsa (push xidməti qəbul edib) — {@code true}. */
-    private boolean deliver(UUID customerId, Kind kind, Object[] args) {
+    private boolean deliver(UUID customerId, Kind kind, String url, Object[] args) {
         try {
             List<Subscription> devices = subscriptions.forCustomer(customerId);
             if (devices.isEmpty()) {
@@ -191,7 +204,7 @@ public class PushService {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("title", messages.getMessage(key + ".title", localized, language.locale()));
             payload.put("body", messages.getMessage(key + ".body", localized, language.locale()));
-            payload.put("url", kind.url);
+            payload.put("url", url);
             payload.put("tag", kind.name());
             byte[] body = json.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8);
             for (Subscription device : devices) {

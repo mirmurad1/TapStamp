@@ -654,6 +654,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/catalog/deal-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Endirim bildirişləri
+         * @description Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).
+         */
+        get: operations["dealNotificationOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/deal-notifications/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * İndi göndər
+         * @description Elan gözləyən yeni endirimlər bir bildirişdə, gündə bir elan. Müştəriyə filialının iş saatında çatır: `recipients` — dərhal göndərildi, `waiting` — filial açılanda gedəcək. Nəticə `status`-dadır (SENT, NOTHING_TO_SEND, ALREADY_SENT_TODAY, UNAVAILABLE).
+         */
+        post: operations["sendDealNotification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/deal-notifications/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Endirim bildirişlərinin parametrləri */
+        put: operations["updateDealNotificationSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/catalog/items": {
         parameters: {
             query?: never;
@@ -2020,6 +2077,26 @@ export interface paths {
          * @description Dil SMS-lərə və bütün cihazlara tətbiq olunur.
          */
         patch: operations["update_6"];
+        trace?: never;
+    };
+    "/api/v1/me/deal-notifications/{announcementId}/opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Endirim bildirişinə toxunub menyunu açdı
+         * @description Elanın nəticəsində bir dəfə sayılır.
+         */
+        post: operations["dealNotificationOpened"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/me/feedback-request": {
@@ -4058,6 +4135,59 @@ export interface components {
             to?: string;
             topReferrers?: components["schemas"]["TopReferrer"][];
         };
+        DealAnnouncement: {
+            /** Format: date */
+            announcedOn?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: int32 */
+            delivered?: number;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            itemCount?: number;
+            kind?: string;
+            /** Format: int32 */
+            opened?: number;
+            /** Format: int32 */
+            recipients?: number;
+            trigger?: string;
+            /** Format: int32 */
+            waiting?: number;
+        };
+        DealNotificationOverview: {
+            available?: boolean;
+            /** Format: int64 */
+            customersWithPush?: number;
+            pending?: components["schemas"]["PendingDeal"][];
+            preview?: components["schemas"]["DealPreview"];
+            recent?: components["schemas"]["DealAnnouncement"][];
+            sentToday?: boolean;
+            settings?: components["schemas"]["DealNotificationSettings"];
+        };
+        DealNotificationSettings: {
+            autoEnabled?: boolean;
+            lastDayEnabled?: boolean;
+            sendTime?: string;
+        };
+        DealNotificationSettingsRequest: {
+            autoEnabled: boolean;
+            lastDayEnabled: boolean;
+            /** @description Avtomatik göndərişin saatı, HH:mm (30 dəqiqəlik addım) */
+            sendTime: string;
+        };
+        DealPreview: {
+            body?: string;
+            title?: string;
+        };
+        DealSendResult: {
+            /** Format: int32 */
+            recipients?: number;
+            /** @enum {string} */
+            status?: "SENT" | "NOTHING_TO_SEND" | "ALREADY_SENT_TODAY" | "UNAVAILABLE";
+            /** Format: int32 */
+            waiting?: number;
+        };
         DeleteResult: {
             deleted?: boolean;
         };
@@ -4708,6 +4838,13 @@ export interface components {
             type?: "PRIVACY_POLICY" | "TERMS";
             /** Format: int32 */
             version?: number;
+        };
+        PendingDeal: {
+            /** Format: uuid */
+            itemId?: string;
+            name?: components["schemas"]["LocalizedText"];
+            /** Format: int32 */
+            percent?: number;
         };
         /** @description Təsdiq gözləyən möhür. Telefon yalnız maskalı göstərilir. */
         PendingStampResponse: {
@@ -6468,6 +6605,70 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CatalogView"];
+                };
+            };
+        };
+    };
+    dealNotificationOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealNotificationOverview"];
+                };
+            };
+        };
+    };
+    sendDealNotification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealSendResult"];
+                };
+            };
+        };
+    };
+    updateDealNotificationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DealNotificationSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealNotificationOverview"];
                 };
             };
         };
@@ -8401,6 +8602,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["CustomerMeResponse"];
                 };
+            };
+        };
+    };
+    dealNotificationOpened: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                announcementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
