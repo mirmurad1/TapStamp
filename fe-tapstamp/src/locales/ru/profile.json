@@ -383,6 +383,18 @@
       "MENU": "Поиск по меню",
       "SERVICES": "Поиск по услугам",
       "PRICES": "Поиск по ценам"
+    },
+    "deals": {
+      "title": "Скидки",
+      "subtitle_one": "Действует {{count}} предложение",
+      "subtitle_few": "Действуют {{count}} предложения",
+      "subtitle_many": "Действуют {{count}} предложений",
+      "subtitle_other": "Действуют {{count}} предложения",
+      "until": "До {{date}}",
+      "lastDay": "Сегодня последний день",
+      "forever": "Постоянная скидка",
+      "off": "−{{percent}}%",
+      "oldPrice": "Старая цена"
     }
   }
 }

@@ -5,7 +5,8 @@
 
     <sql id="itemColumns">
         id, category_id, name, description, price, duration_minutes,
-        CASE WHEN image IS NULL THEN 0 ELSE image_version END AS image_version, available, branch_id, position
+        CASE WHEN image IS NULL THEN 0 ELSE image_version END AS image_version, available, branch_id, position,
+        discount_kind, discount_value, discount_starts_on, discount_ends_on
     </sql>
 
     <select id="settings" resultType="az.tapstamp.catalog.repository.CatalogMapper$Settings">
@@ -71,16 +72,20 @@
 
     <insert id="insertItem">
         INSERT INTO catalog_items (id, category_id, name, description, price, duration_minutes, available, branch_id,
-                                   position, created_at, updated_at, updated_by)
+                                   position, discount_kind, discount_value, discount_starts_on, discount_ends_on,
+                                   created_at, updated_at, updated_by)
         VALUES (#{id}, #{categoryId}, CAST(#{name} AS jsonb), CAST(#{description} AS jsonb), #{price},
-                #{durationMinutes}, #{available}, #{branchId}, #{position}, #{now}, #{now}, #{staffId})
+                #{durationMinutes}, #{available}, #{branchId}, #{position}, #{discount.kind}, #{discount.value},
+                #{discount.startsOn}, #{discount.endsOn}, #{now}, #{now}, #{staffId})
     </insert>
 
     <update id="updateItem">
         UPDATE catalog_items
         SET category_id = #{categoryId}, name = CAST(#{name} AS jsonb), description = CAST(#{description} AS jsonb),
             price = #{price}, duration_minutes = #{durationMinutes}, available = #{available}, branch_id = #{branchId},
-            position = #{position}, updated_at = #{now}, updated_by = #{staffId}
+            position = #{position}, discount_kind = #{discount.kind}, discount_value = #{discount.value},
+            discount_starts_on = #{discount.startsOn}, discount_ends_on = #{discount.endsOn},
+            updated_at = #{now}, updated_by = #{staffId}
         WHERE id = #{id}
     </update>
 

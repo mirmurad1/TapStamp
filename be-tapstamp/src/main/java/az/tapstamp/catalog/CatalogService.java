@@ -1,7 +1,9 @@
 package az.tapstamp.catalog;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,6 +16,7 @@ import java.util.UUID;
 import az.tapstamp.audit.AuditLogger;
 import az.tapstamp.catalog.repository.CatalogMapper;
 import az.tapstamp.catalog.repository.CatalogMapper.Category;
+import az.tapstamp.catalog.repository.CatalogMapper.Discount;
 import az.tapstamp.catalog.repository.CatalogMapper.Image;
 import az.tapstamp.catalog.repository.CatalogMapper.Item;
 import az.tapstamp.catalog.repository.CatalogMapper.Settings;
@@ -26,6 +29,7 @@ import az.tapstamp.shared.error.ErrorCode;
 import az.tapstamp.shared.i18n.LocalizedText;
 import az.tapstamp.shared.id.Ids;
 import az.tapstamp.shared.image.SquarePng;
+import az.tapstamp.tenancy.TenantContext;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Menyu və ya xidmətlər kataloqu (əlavə {@code CATALOG}, qərar #64): şirkət sahibi kateqoriyaları və onların
  * məhsul/xidmətlərini idarə edir, müştəri ictimai səhifədə görür (giriş tələb etmir). Yalnız kataloqdur — sifariş və
- * ödəniş yoxdur. Gizlədilmiş kateqoriya müştəriyə göstərilmir; "hazırda yoxdur" məhsul göstərilir (solğun).
+ * ödəniş yoxdur. Gizlədilmiş kateqoriya müştəriyə göstərilmir; "hazırda yoxdur" məhsul göstərilir (solğun). Məhsul və
+ * ya xidmətə müddətli və ya həmişəlik endirim verilə bilər — qüvvədə olan endirimlər menyunun bannerində görünür.
  */
 @Service
 public class CatalogService {
@@ -49,13 +54,32 @@ public class CatalogService {
 
     public record ItemInput(UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                             @Nullable BigDecimal price, @Nullable Integer durationMinutes, boolean available,
-                            @Nullable UUID branchId) {
+                            @Nullable UUID branchId, @Nullable Discount discount) {
+    }
+
+    /** Endirimin bu günə görə vəziyyəti. */
+    public enum DiscountStatus {
+        /** Qüvvədədir — müştəri menyusunda və endirim bannerində görünür. */
+        ACTIVE,
+        /** Başlanğıc tarixi hələ gəlməyib. */
+        SCHEDULED,
+        /** Son tarix keçib. */
+        EXPIRED
+    }
+
+    /**
+     * Endirim: {@code salePrice} — endirimli qiymət (AZN, 2 rəqəm), {@code percent} — endirim faizi (tam ədəd, banner
+     * üçün), {@code endsOn} null — həmişəlik. Müştəriyə yalnız {@code ACTIVE} endirim qaytarılır.
+     */
+    public record DiscountView(String kind, BigDecimal value, @Nullable LocalDate startsOn, @Nullable LocalDate endsOn,
+                               BigDecimal salePrice, int percent, DiscountStatus status) {
     }
 
     /** {@code imageUrl} — versiyalı ictimai ünvan (şəkil yoxdursa null); {@code thumbUrl} — siyahı üçün kiçik variant. */
     public record ItemView(UUID id, UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                            @Nullable BigDecimal price, @Nullable Integer durationMinutes, @Nullable String imageUrl,
-                           @Nullable String thumbUrl, boolean available, @Nullable UUID branchId) {
+                           @Nullable String thumbUrl, boolean available, @Nullable UUID branchId,
+                           @Nullable DiscountView discount) {
     }
 
     public record CategoryView(UUID id, LocalizedText name, boolean active, List<ItemView> items) {
@@ -88,7 +112,7 @@ public class CatalogService {
         if (!plans.has(Addon.CATALOG) || !settings.enabled()) {
             return new CatalogView(false, settings.title(), List.of());
         }
-        List<CategoryView> categories = build(catalog.categories(), catalog.items()).stream()
+        List<CategoryView> categories = build(catalog.categories(), catalog.items(), today(), true).stream()
                 .filter(CategoryView::active)
                 .map(category -> new CategoryView(category.id(), category.name(), true, category.items().stream()
                         .filter(item -> branchId == null || item.branchId() == null || item.branchId().equals(branchId))
@@ -136,7 +160,8 @@ public class CatalogService {
     public CatalogView adminCatalog(AdminPrincipal principal) {
         AccessPolicy.requireCompanyWide(principal);
         Settings settings = catalog.settings();
-        return new CatalogView(settings.enabled(), settings.title(), build(catalog.categories(), catalog.items()));
+        return new CatalogView(settings.enabled(), settings.title(),
+                build(catalog.categories(), catalog.items(), today(), false));
     }
 
     @Transactional
@@ -205,7 +230,7 @@ public class CatalogService {
         UUID id = Ids.newId();
         catalog.insertItem(id, input.categoryId(), input.name(), input.description(), input.price(),
                 input.durationMinutes(), input.available(), input.branchId(),
-                catalog.nextItemPosition(input.categoryId()), principal.userId(), clock.instant());
+                catalog.nextItemPosition(input.categoryId()), input.discount(), principal.userId(), clock.instant());
         audit(principal, "CATALOG_ITEM_CREATED", id, Map.of("name", input.name().az()));
         return adminCatalog(principal);
     }
@@ -219,12 +244,16 @@ public class CatalogService {
         int position = before.categoryId().equals(input.categoryId()) ? before.position()
                 : catalog.nextItemPosition(input.categoryId());
         catalog.updateItem(id, input.categoryId(), input.name(), input.description(), input.price(),
-                input.durationMinutes(), input.available(), input.branchId(), position, principal.userId(),
-                clock.instant());
+                input.durationMinutes(), input.available(), input.branchId(), position, input.discount(),
+                principal.userId(), clock.instant());
         Map<String, Object> details = new LinkedHashMap<>();
         details.put("name", input.name().az());
         details.put("price", input.price() == null ? "" : input.price().toPlainString());
         details.put("available", input.available());
+        Discount discount = input.discount();
+        details.put("discount", discount == null ? "" : discount.kind() + " " + discount.value().toPlainString()
+                + (discount.startsOn() == null ? "" : " " + discount.startsOn())
+                + " – " + (discount.endsOn() == null ? "∞" : discount.endsOn()));
         audit(principal, "CATALOG_ITEM_UPDATED", id, details);
         return adminCatalog(principal);
     }
@@ -279,6 +308,31 @@ public class CatalogService {
         if (input.branchId() != null && !catalog.branchExists(input.branchId())) {
             throw new ApiException(ErrorCode.VALIDATION_FAILED);
         }
+        Discount discount = input.discount();
+        if (discount != null && !validDiscount(discount, input.price())) {
+            throw new ApiException(ErrorCode.VALIDATION_FAILED);
+        }
+    }
+
+    /** Endirim yalnız qiyməti olan məhsula: faiz 1–99 (tam), yeni qiymət köhnədən aşağı; başlanğıc sondan sonra deyil. */
+    static boolean validDiscount(Discount discount, @Nullable BigDecimal price) {
+        if (price == null || price.signum() <= 0) {
+            return false;
+        }
+        boolean value = switch (discount.kind()) {
+            case "PERCENT" -> discount.value().stripTrailingZeros().scale() <= 0
+                    && discount.value().compareTo(BigDecimal.ONE) >= 0
+                    && discount.value().compareTo(BigDecimal.valueOf(99)) <= 0;
+            case "PRICE" -> discount.value().signum() >= 0 && discount.value().compareTo(price) < 0;
+            default -> false;
+        };
+        return value && (discount.startsOn() == null || discount.endsOn() == null
+                || !discount.startsOn().isAfter(discount.endsOn()));
+    }
+
+    /** Bu gün — şirkətin saat qurşağında (endirimin tarixləri də onunla müqayisə olunur). */
+    private LocalDate today() {
+        return clock.instant().atZone(TenantContext.require().timezone()).toLocalDate();
     }
 
     private Category category(UUID id) {
@@ -295,10 +349,13 @@ public class CatalogService {
         }
     }
 
-    private static List<CategoryView> build(List<Category> categories, List<Item> items) {
+    /** {@code activeDiscountsOnly} — müştəri üçün: qüvvədə olmayan endirim göstərilmir. */
+    private static List<CategoryView> build(List<Category> categories, List<Item> items, LocalDate today,
+                                            boolean activeDiscountsOnly) {
         Map<UUID, List<ItemView>> byCategory = new LinkedHashMap<>();
         for (Item item : items) {
-            byCategory.computeIfAbsent(item.categoryId(), key -> new ArrayList<>()).add(view(item));
+            byCategory.computeIfAbsent(item.categoryId(), key -> new ArrayList<>())
+                    .add(view(item, today, activeDiscountsOnly));
         }
         return categories.stream()
                 .map(category -> new CategoryView(category.id(), category.name(), category.active(),
@@ -306,12 +363,37 @@ public class CatalogService {
                 .toList();
     }
 
-    private static ItemView view(Item item) {
+    private static ItemView view(Item item, LocalDate today, boolean activeDiscountsOnly) {
         String base = "/api/v1/public/catalog/items/" + item.id();
         String imageUrl = item.imageVersion() == 0 ? null : base + "/image?v=" + item.imageVersion();
         String thumbUrl = item.imageVersion() == 0 ? null : base + "/thumb?v=" + item.imageVersion();
+        DiscountView discount = discount(item, today);
+        if (activeDiscountsOnly && discount != null && discount.status() != DiscountStatus.ACTIVE) {
+            discount = null;
+        }
         return new ItemView(item.id(), item.categoryId(), item.name(), item.description(), item.price(),
-                item.durationMinutes(), imageUrl, thumbUrl, item.available(), item.branchId());
+                item.durationMinutes(), imageUrl, thumbUrl, item.available(), item.branchId(), discount);
+    }
+
+    static @Nullable DiscountView discount(Item item, LocalDate today) {
+        BigDecimal price = item.price();
+        BigDecimal value = item.discountValue();
+        if (item.discountKind() == null || value == null || price == null || price.signum() <= 0) {
+            return null;
+        }
+        BigDecimal sale = "PERCENT".equals(item.discountKind())
+                ? price.multiply(BigDecimal.valueOf(100).subtract(value)).divide(BigDecimal.valueOf(100), 2,
+                        RoundingMode.HALF_UP)
+                : value.setScale(2, RoundingMode.HALF_UP);
+        int percent = "PERCENT".equals(item.discountKind()) ? value.intValue()
+                : BigDecimal.ONE.subtract(sale.divide(price, 4, RoundingMode.HALF_UP)).movePointRight(2)
+                        .setScale(0, RoundingMode.HALF_UP).intValue();
+        DiscountStatus status = item.discountStartsOn() != null && today.isBefore(item.discountStartsOn())
+                ? DiscountStatus.SCHEDULED
+                : item.discountEndsOn() != null && today.isAfter(item.discountEndsOn()) ? DiscountStatus.EXPIRED
+                : DiscountStatus.ACTIVE;
+        return new DiscountView(item.discountKind(), value, item.discountStartsOn(), item.discountEndsOn(), sale,
+                percent, status);
     }
 
     private void audit(AdminPrincipal principal, String action, @Nullable UUID targetId, Map<String, Object> details) {

@@ -7515,6 +7515,64 @@
           }
         }
       },
+      "DiscountRequest" : {
+        "type" : "object",
+        "properties" : {
+          "endsOn" : {
+            "type" : "string",
+            "format" : "date",
+            "description" : "Son gün (daxil); null — həmişəlik"
+          },
+          "kind" : {
+            "type" : "string",
+            "description" : "PERCENT — faizlə (1–99), PRICE — yeni qiymət (AZN)",
+            "pattern" : "PERCENT|PRICE"
+          },
+          "startsOn" : {
+            "type" : "string",
+            "format" : "date",
+            "description" : "Başlanğıc (daxil); null — dərhal"
+          },
+          "value" : {
+            "type" : "number",
+            "description" : "Faiz və ya yeni qiymət",
+            "maximum" : 100000,
+            "minimum" : 0
+          }
+        },
+        "description" : "Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula",
+        "required" : [ "kind", "value" ]
+      },
+      "DiscountView" : {
+        "type" : "object",
+        "properties" : {
+          "endsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "percent" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "salePrice" : {
+            "type" : "number"
+          },
+          "startsOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "SCHEDULED", "EXPIRED" ]
+          },
+          "value" : {
+            "type" : "number"
+          }
+        }
+      },
       "DocumentAcceptance" : {
         "type" : "object",
         "properties" : {
@@ -8064,6 +8122,9 @@
           "description" : {
             "$ref" : "#/components/schemas/LocalizedText"
           },
+          "discount" : {
+            "$ref" : "#/components/schemas/DiscountRequest"
+          },
           "durationMinutes" : {
             "type" : "integer",
             "format" : "int32",
@@ -8099,6 +8160,9 @@
           },
           "description" : {
             "$ref" : "#/components/schemas/LocalizedText"
+          },
+          "discount" : {
+            "$ref" : "#/components/schemas/DiscountView"
           },
           "durationMinutes" : {
             "type" : "integer",

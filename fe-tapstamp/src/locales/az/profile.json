@@ -337,6 +337,16 @@
       "MENU": "Menyuda axtarın",
       "SERVICES": "Xidmətlərdə axtarın",
       "PRICES": "Qiymətlərdə axtarın"
+    },
+    "deals": {
+      "title": "Endirimlər",
+      "subtitle_one": "{{count}} təklif qüvvədədir",
+      "subtitle_other": "{{count}} təklif qüvvədədir",
+      "until": "{{date}} tarixinədək",
+      "lastDay": "Bu gün son gündür",
+      "forever": "Daimi endirim",
+      "off": "−{{percent}}%",
+      "oldPrice": "Əvvəlki qiymət"
     }
   }
 }

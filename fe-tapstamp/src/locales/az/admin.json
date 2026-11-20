@@ -1435,6 +1435,45 @@
       "title": "Menyu QR kodu",
       "hint": "Çap edib stolun üstünə qoyun: müştəri telefonla skan edib menyunu açır, giriş tələb etmir.",
       "download": "Yüklə (SVG)"
+    },
+    "discount": {
+      "enable": "Endirim",
+      "enableHint": "Müştəri menyusunda köhnə qiymət üstündən xətlə, yenisi və faiz göstərilir; menyunun başındakı endirim bannerinə düşür.",
+      "kind": "Endirim növü",
+      "kinds": {
+        "PERCENT": "Faizlə",
+        "PRICE": "Yeni qiymət"
+      },
+      "percent": "Endirim (%)",
+      "newPrice": "Yeni qiymət (AZN)",
+      "preview": "Müştəri görəcək:",
+      "off": "−{{percent}}%",
+      "period": "Keçərlilik müddəti",
+      "periods": {
+        "FOREVER": "Həmişəlik",
+        "RANGE": "Müddətli"
+      },
+      "foreverHint": "Endirim siz söndürənə qədər qüvvədə qalır.",
+      "startsOnLabel": "Başlanğıc",
+      "startsOnHint": "Boş — bu gündən.",
+      "endsOnLabel": "Son gün",
+      "endsOnHint": "Bu gün daxil olmaqla.",
+      "until": "{{date}} tarixinədək",
+      "startsOn": "{{date}} tarixindən",
+      "forever": "Həmişəlik",
+      "status": {
+        "ACTIVE": "Qüvvədədir",
+        "SCHEDULED": "Hələ başlamayıb",
+        "EXPIRED": "Müddəti bitib"
+      },
+      "errors": {
+        "noPrice": "Endirim üçün əvvəlcə qiyməti yazın.",
+        "percent": "Faiz 1-dən 99-a qədər tam ədəd olmalıdır.",
+        "price": "Yeni qiymət köhnə qiymətdən aşağı olmalıdır.",
+        "endsOn": "Müddətli endirim üçün son günü seçin.",
+        "range": "Başlanğıc son gündən sonra ola bilməz.",
+        "past": "Son gün keçib — endirim müştərilərə göstərilməyəcək."
+      }
     }
   }
 }

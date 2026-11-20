@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 
 import type { Language } from '@/shared/i18n/languages';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { DEFAULT_TIME_ZONE, formatDate, formatNumber, formatPercent } from '@/shared/lib/format';
+import { companyToday, formatDate, formatNumber, formatPercent } from '@/shared/lib/format';
 import { useFeature } from '@/shared/plan/plan';
 import { Button } from '@/shared/ui/button';
 import { Tabs } from '@/shared/ui/tabs';
@@ -47,11 +47,6 @@ const DATE_INPUT = 'min-w-0 appearance-none [&::-webkit-date-and-time-value]:tex
 /** İki tarix arasındakı gün fərqi (YYYY-MM-DD). */
 function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
-}
-
-/** Şirkətin "bu gün"ü (YYYY-MM-DD) — analitika tarixləri şirkətin saat qurşağındadır. */
-function companyToday(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: DEFAULT_TIME_ZONE }).format(new Date());
 }
 
 /** Qrafik oxu üçün qısa tarix: GG.AA (bütün dillərdə eyni). */

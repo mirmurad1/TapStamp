@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ChevronRight, Gift, Search, X } from 'lucide-react';
+import { BadgePercent, BookOpen, ChevronRight, Clock, Gift, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
@@ -7,7 +7,7 @@ import { Link, useSearchParams } from 'react-router';
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
 import { cn } from '@/shared/lib/cn';
-import { formatCurrency } from '@/shared/lib/format';
+import { companyToday, formatCurrency, formatDayMonth } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 
 import { CATALOG_KEY, publicApi, type PublicCatalog } from '../api/customerApi';
@@ -15,6 +15,7 @@ import { useCustomerSession } from '../auth/CustomerSessionProvider';
 
 type Category = NonNullable<PublicCatalog['categories']>[number];
 type Item = NonNullable<Category['items']>[number];
+type Discount = NonNullable<Item['discount']>;
 
 /** Kateqoriya düymələri yapışqan zolaqdadır — hissəyə keçəndə başlıq onun altında qalmasın. */
 const SCROLL_OFFSET = 132;
@@ -42,6 +43,7 @@ export function MenuPage() {
   const company = useQuery({ queryKey: ['public-company'], queryFn: publicApi.company, staleTime: 5 * 60_000 });
   const categories = catalog.data?.categories ?? [];
   const [query, setQuery] = useState('');
+  const [highlighted, setHighlighted] = useState<string>();
   const titleKey = (catalog.data?.title ?? 'MENU') as 'MENU' | 'SERVICES' | 'PRICES';
   const title = t(`menu.titles.${titleKey}`);
   // Hədiyyə: məhsulun adı möhür kartının hədiyyəsinin adı ilə eynidirsə (istənilən dildə)
@@ -82,6 +84,21 @@ export function MenuPage() {
   return (
     <>
       <h1 className="pt-2 font-display text-3xl font-extrabold leading-tight tracking-tight">{title}</h1>
+      <DealsBanner
+        items={categories.flatMap((category) => category.items ?? [])}
+        onOpen={(id) => {
+          // Axtarış açıqdırsa təmizlənir ki, məhsul siyahıda olsun; sonra ona keçib qısa müddət vurğulanır
+          setQuery('');
+          window.requestAnimationFrame(() => {
+            const row = document.getElementById(`i-${id}`);
+            if (row) {
+              window.scrollTo({ top: row.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET - 8, behavior: 'smooth' });
+            }
+            setHighlighted(id);
+            window.setTimeout(() => setHighlighted((current) => (current === id ? undefined : current)), 1800);
+          });
+        }}
+      />
       <LoyaltyBanner />
       <SearchField value={query} onChange={setQuery} placeholder={t(`menu.searchIn.${titleKey}`)} />
       {needle ? null : <CategoryTabs categories={categories} />}
@@ -96,7 +113,7 @@ export function MenuPage() {
           </h2>
           <ul className="divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.12)]">
             {(category.items ?? []).map((item) => (
-              <ItemCard key={item.id} item={item} reward={isReward(item)} />
+              <ItemCard key={item.id} item={item} reward={isReward(item)} highlighted={highlighted === item.id} />
             ))}
           </ul>
         </section>
@@ -249,19 +266,29 @@ function ItemImage({ src }: { src: string }) {
   );
 }
 
-function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
+function ItemCard({ item, reward, highlighted }: { item: Item; reward: boolean; highlighted: boolean }) {
   const { t } = useTranslation('profile');
   const lang = currentLanguage();
   const soldOut = item.available === false;
+  const discount = item.discount;
   return (
-    <li className={cn('flex gap-4 px-4 py-4', soldOut && 'opacity-55')}>
+    <li
+      id={`i-${item.id}`}
+      className={cn(
+        'flex scroll-mt-36 gap-4 px-4 py-4 transition-colors duration-700 motion-reduce:transition-none',
+        soldOut && 'opacity-55',
+        highlighted && 'bg-primary/10',
+      )}
+    >
       <div className="min-w-0 flex-1">
         <p className="text-[16px] font-semibold leading-snug break-words">{resolveText(item.name, lang)}</p>
         {item.description ? (
           <p className="mt-1 line-clamp-2 text-sm leading-snug text-muted-foreground">{resolveText(item.description, lang)}</p>
         ) : null}
         <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-          {item.price != null ? (
+          {item.price != null && discount ? (
+            <SalePrice price={Number(item.price)} discount={discount} />
+          ) : item.price != null ? (
             <span className="text-[15px] font-extrabold text-primary tabular-nums">{formatCurrency(Number(item.price), lang)}</span>
           ) : null}
           {item.durationMinutes ? <span className="text-muted-foreground">{t('menu.minutes', { count: item.durationMinutes })}</span> : null}
@@ -275,9 +302,100 @@ function ItemCard({ item, reward }: { item: Item; reward: boolean }) {
             </span>
           ) : null}
         </p>
+        {discount ? <Validity discount={discount} className="mt-1.5 text-muted-foreground" /> : null}
       </div>
       {item.thumbUrl ?? item.imageUrl ? <ItemImage src={(item.thumbUrl ?? item.imageUrl) as string} /> : null}
     </li>
+  );
+}
+
+/** Endirimli qiymət: yeni qiymət brend rəngində, köhnəsi üstündən xətlə, yanında qırmızı "−20%". */
+function SalePrice({ price, discount, size = 'md' }: { price: number; discount: Discount; size?: 'md' | 'lg' }) {
+  const { t } = useTranslation('profile');
+  const lang = currentLanguage();
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
+      <span className={cn('font-extrabold text-primary tabular-nums', size === 'lg' ? 'text-lg' : 'text-[15px]')}>
+        {formatCurrency(Number(discount.salePrice), lang)}
+      </span>
+      <s className="text-[13px] text-muted-foreground tabular-nums">
+        <span className="sr-only">{t('menu.deals.oldPrice')} </span>
+        {formatCurrency(price, lang)}
+      </s>
+      <span className="self-center rounded-full bg-red-600 px-1.5 py-0.5 text-[11px] leading-none font-extrabold text-white tabular-nums">
+        {t('menu.deals.off', { percent: discount.percent ?? 0 })}
+      </span>
+    </span>
+  );
+}
+
+/** Endirimin müddəti: "31 dekabr tarixinədək", son gün — "Bu gün son gündür", son tarix yoxdursa "Daimi endirim". */
+function Validity({ discount, className }: { discount: Discount; className?: string }) {
+  const { t } = useTranslation('profile');
+  const lang = currentLanguage();
+  const text = !discount.endsOn
+    ? t('menu.deals.forever')
+    : discount.endsOn === companyToday()
+      ? t('menu.deals.lastDay')
+      : t('menu.deals.until', { date: formatDayMonth(discount.endsOn, lang) });
+  return (
+    <span className={cn('flex items-center gap-1 text-xs font-medium', className)}>
+      <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+      {text}
+    </span>
+  );
+}
+
+/**
+ * Menyunun başında endirim banneri: brend rəngli zolaq, içində qüvvədə olan endirimli məhsulların kartları (üfüqi
+ * sürüşür). Kartda şəkil, endirimli və köhnə qiymət, faiz və müddət; toxunanda siyahıdakı məhsula keçir. Endirim
+ * yoxdursa banner göstərilmir. "Hazırda yoxdur" məhsullar bannerə düşmür.
+ */
+function DealsBanner({ items, onOpen }: { items: Item[]; onOpen: (id: string) => void }) {
+  const { t } = useTranslation('profile');
+  const lang = currentLanguage();
+  const deals = items.filter((item) => item.discount && item.price != null && item.available !== false);
+  if (deals.length === 0) {
+    return null;
+  }
+  const single = deals.length === 1;
+  return (
+    <section aria-labelledby="deals-title" className="-mx-1 overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-[0_10px_30px_-14px_var(--primary)]">
+      <div className="flex items-center gap-2.5 px-4 pt-4">
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15" aria-hidden="true">
+          <BadgePercent className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <h2 id="deals-title" className="text-lg leading-tight font-extrabold">{t('menu.deals.title')}</h2>
+          <p className="text-[13px] leading-snug text-primary-foreground/80">{t('menu.deals.subtitle', { count: deals.length })}</p>
+        </span>
+      </div>
+      <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {deals.map((item) => (
+          <li key={item.id} className={cn('shrink-0 snap-start', single ? 'w-full' : 'w-[82%] max-w-[300px]')}>
+            <button
+              type="button"
+              onClick={() => onOpen(item.id ?? '')}
+              className="flex h-full w-full items-center gap-3 rounded-2xl bg-card p-3 text-left text-card-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              {item.thumbUrl ?? item.imageUrl ? (
+                <img src={(item.thumbUrl ?? item.imageUrl) as string} alt="" width={64} height={64} loading="lazy" decoding="async"
+                  className="size-16 shrink-0 rounded-xl bg-muted object-cover" />
+              ) : (
+                <span className="grid size-16 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary" aria-hidden="true">
+                  <BadgePercent className="size-7" />
+                </span>
+              )}
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="line-clamp-1 font-semibold leading-snug">{resolveText(item.name, lang)}</span>
+                <SalePrice price={Number(item.price)} discount={item.discount as Discount} />
+                <Validity discount={item.discount as Discount} className="text-red-700 dark:text-red-400" />
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

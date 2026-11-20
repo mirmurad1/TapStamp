@@ -140,3 +140,22 @@ export function formatPhone(e164: string | undefined): string {
   const az = /^\+994(\d{2})(\d{3})(\d{2})(\d{2})$/.exec(e164 ?? '');
   return az ? `+994 ${az[1]} ${az[2]} ${az[3]} ${az[4]}` : (e164 ?? '');
 }
+
+/** Şirkətin "bu gün"ü (YYYY-MM-DD) — endirim kimi tarixlər şirkətin saat qurşağındadır. */
+export function companyToday(timeZone = DEFAULT_TIME_ZONE): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date());
+}
+
+/**
+ * Təqvim günü (YYYY-MM-DD) gün və ay ilə: "31 dekabr", "31 December", "31 декабря"; il cari ildən fərqlidirsə əlavə
+ * olunur. Saat qurşağı tətbiq olunmur — tarix artıq şirkətin günüdür.
+ */
+export function formatDayMonth(isoDate: string, lang: Language): string {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  const withYear = year !== Number(companyToday().slice(0, 4));
+  if (lang === 'az') {
+    return `${day} ${AZ_MONTHS[(month ?? 1) - 1] ?? ''}${withYear ? ` ${year}` : ''}`;
+  }
+  return new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+    .format(new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, day ?? 1)));
+}

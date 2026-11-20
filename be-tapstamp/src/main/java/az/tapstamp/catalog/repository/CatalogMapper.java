@@ -2,6 +2,7 @@ package az.tapstamp.catalog.repository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,10 +25,19 @@ public interface CatalogMapper {
     record Category(UUID id, LocalizedText name, int position, boolean active) {
     }
 
-    /** {@code imageVersion} — 0 olanda şəkil yoxdur. */
+    /** {@code imageVersion} — 0 olanda şəkil yoxdur; {@code discountKind} null — endirim yoxdur. */
     record Item(UUID id, UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                 @Nullable BigDecimal price, @Nullable Integer durationMinutes, int imageVersion, boolean available,
-                @Nullable UUID branchId, int position) {
+                @Nullable UUID branchId, int position, @Nullable String discountKind,
+                @Nullable BigDecimal discountValue, @Nullable LocalDate discountStartsOn,
+                @Nullable LocalDate discountEndsOn) {
+    }
+
+    /**
+     * Endirim: {@code kind} — PERCENT (1–99) və ya PRICE (yeni qiymət, AZN); tarixlər şirkətin saat qurşağında,
+     * {@code startsOn} null — dərhal, {@code endsOn} null — həmişəlik.
+     */
+    record Discount(String kind, BigDecimal value, @Nullable LocalDate startsOn, @Nullable LocalDate endsOn) {
     }
 
     /** Əsas şəkil: yeni yükləmələrdə JPEG, köhnələrdə PNG (sahənin adı tarixi səbəbdən {@code png}-dir). */
@@ -75,11 +85,11 @@ public interface CatalogMapper {
 
     void insertItem(UUID id, UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                     @Nullable BigDecimal price, @Nullable Integer durationMinutes, boolean available,
-                    @Nullable UUID branchId, int position, UUID staffId, Instant now);
+                    @Nullable UUID branchId, int position, @Nullable Discount discount, UUID staffId, Instant now);
 
     void updateItem(UUID id, UUID categoryId, LocalizedText name, @Nullable LocalizedText description,
                     @Nullable BigDecimal price, @Nullable Integer durationMinutes, boolean available,
-                    @Nullable UUID branchId, int position, UUID staffId, Instant now);
+                    @Nullable UUID branchId, int position, @Nullable Discount discount, UUID staffId, Instant now);
 
     void setItemPosition(UUID id, int position);
 

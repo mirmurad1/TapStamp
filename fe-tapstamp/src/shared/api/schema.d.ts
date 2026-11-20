@@ -539,7 +539,7 @@ export interface paths {
         };
         /**
          * SMS-i göndərilməyən müştərilər
-         * @description Ad, tam nömrə və səbəb; möhür də verilməyib.
+         * @description Ad, maskalanmış nömrə və səbəb; möhür də verilməyib.
          */
         get: operations["failures"];
         put?: never;
@@ -4090,6 +4090,36 @@ export interface components {
             /** Format: date-time */
             lastSeenAt?: string;
         };
+        /** @description Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula */
+        DiscountRequest: {
+            /**
+             * Format: date
+             * @description Son gün (daxil); null — həmişəlik
+             */
+            endsOn?: string;
+            /** @description PERCENT — faizlə (1–99), PRICE — yeni qiymət (AZN) */
+            kind: string;
+            /**
+             * Format: date
+             * @description Başlanğıc (daxil); null — dərhal
+             */
+            startsOn?: string;
+            /** @description Faiz və ya yeni qiymət */
+            value: number;
+        };
+        DiscountView: {
+            /** Format: date */
+            endsOn?: string;
+            kind?: string;
+            /** Format: int32 */
+            percent?: number;
+            salePrice?: number;
+            /** Format: date */
+            startsOn?: string;
+            /** @enum {string} */
+            status?: "ACTIVE" | "SCHEDULED" | "EXPIRED";
+            value?: number;
+        };
         DocumentAcceptance: {
             /** @enum {string} */
             type: "PRIVACY_POLICY" | "TERMS";
@@ -4318,6 +4348,7 @@ export interface components {
             /** Format: uuid */
             categoryId: string;
             description?: components["schemas"]["LocalizedText"];
+            discount?: components["schemas"]["DiscountRequest"];
             /**
              * Format: int32
              * @description Xidmətin müddəti, dəqiqə (istəyə bağlı)
@@ -4334,6 +4365,7 @@ export interface components {
             /** Format: uuid */
             categoryId?: string;
             description?: components["schemas"]["LocalizedText"];
+            discount?: components["schemas"]["DiscountView"];
             /** Format: int32 */
             durationMinutes?: number;
             /** Format: uuid */

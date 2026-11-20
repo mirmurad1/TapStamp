@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +151,59 @@ class CatalogIT extends TapIntegrationTest {
         owner.post("/catalog/items", item(drinks, "Səhv", "1.234")).andExpect(status().isBadRequest());
         owner.post("/catalog/items", item(UUID.randomUUID().toString(), "Səhv", 1)).andExpect(status().isNotFound());
         assertThat(count("SELECT count(*) FROM audit_logs WHERE action LIKE 'CATALOG_%'", Map.of())).isGreaterThanOrEqualTo(10);
+    }
+
+    @Test
+    void discountsArePricedValidatedAndShownToCustomersOnlyWhileActive() throws Exception {
+        AdminClient owner = owner();
+        String category = idOf(body(owner.post("/catalog/categories", Map.of("name", Map.of("az", "Kofe")))),
+                "$.categories[0].id");
+        LocalDate today = clock.instant().atZone(alpha().timezone()).toLocalDate();
+
+        Map<String, Object> percent = item(category, "Latte", 5);
+        percent.put("discount", Map.of("kind", "PERCENT", "value", 20, "endsOn", today.plusDays(10).toString()));
+        owner.post("/catalog/items", percent).andExpect(status().isCreated());
+        Map<String, Object> newPrice = item(category, "Kapuçino", "4.50");
+        newPrice.put("discount", Map.of("kind", "PRICE", "value", "3.60"));
+        owner.post("/catalog/items", newPrice).andExpect(status().isCreated());
+        Map<String, Object> scheduled = item(category, "Espresso", 3);
+        scheduled.put("discount", Map.of("kind", "PERCENT", "value", 10, "startsOn", today.plusDays(2).toString()));
+        owner.post("/catalog/items", scheduled).andExpect(status().isCreated());
+        Map<String, Object> expired = item(category, "Mokko", 6);
+        expired.put("discount", Map.of("kind", "PERCENT", "value", 50, "startsOn", today.minusDays(5).toString(),
+                "endsOn", today.minusDays(1).toString()));
+        owner.post("/catalog/items", expired).andExpect(status().isCreated());
+
+        // Admin hamısını vəziyyəti ilə görür
+        owner.get("/catalog").andExpect(status().isOk())
+                .andExpect(jsonPath("$.categories[0].items[0].discount.salePrice").value(4.0))
+                .andExpect(jsonPath("$.categories[0].items[0].discount.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.categories[0].items[1].discount.salePrice").value(3.6))
+                .andExpect(jsonPath("$.categories[0].items[1].discount.percent").value(20))
+                .andExpect(jsonPath("$.categories[0].items[1].discount.endsOn").doesNotExist())
+                .andExpect(jsonPath("$.categories[0].items[2].discount.status").value("SCHEDULED"))
+                .andExpect(jsonPath("$.categories[0].items[3].discount.status").value("EXPIRED"));
+        // Müştəri yalnız qüvvədə olanı görür
+        publicCatalog("")
+                .andExpect(jsonPath("$.categories[0].items[0].discount.endsOn").value(today.plusDays(10).toString()))
+                .andExpect(jsonPath("$.categories[0].items[1].discount.salePrice").value(3.6))
+                .andExpect(jsonPath("$.categories[0].items[2].discount").doesNotExist())
+                .andExpect(jsonPath("$.categories[0].items[3].discount").doesNotExist());
+
+        // Səhv endirimlər: qiymətsiz, köhnədən baha, 100%, tarixlər tərs
+        Map<String, Object> noPrice = item(category, "Səhv", null);
+        noPrice.put("discount", Map.of("kind", "PERCENT", "value", 10));
+        owner.post("/catalog/items", noPrice).andExpect(status().isBadRequest());
+        Map<String, Object> higher = item(category, "Səhv", 4);
+        higher.put("discount", Map.of("kind", "PRICE", "value", 4));
+        owner.post("/catalog/items", higher).andExpect(status().isBadRequest());
+        Map<String, Object> full = item(category, "Səhv", 4);
+        full.put("discount", Map.of("kind", "PERCENT", "value", 100));
+        owner.post("/catalog/items", full).andExpect(status().isBadRequest());
+        Map<String, Object> reversed = item(category, "Səhv", 4);
+        reversed.put("discount", Map.of("kind", "PERCENT", "value", 10, "startsOn", today.plusDays(3).toString(),
+                "endsOn", today.toString()));
+        owner.post("/catalog/items", reversed).andExpect(status().isBadRequest());
     }
 
     @Test

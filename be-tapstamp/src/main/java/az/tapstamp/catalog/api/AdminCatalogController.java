@@ -2,12 +2,14 @@ package az.tapstamp.catalog.api;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import az.tapstamp.catalog.CatalogService;
 import az.tapstamp.catalog.CatalogService.CatalogView;
 import az.tapstamp.catalog.CatalogService.ItemInput;
+import az.tapstamp.catalog.repository.CatalogMapper;
 import az.tapstamp.plan.Addon;
 import az.tapstamp.plan.RequiresAddon;
 import az.tapstamp.security.admin.AdminPrincipal;
@@ -82,11 +84,28 @@ public class AdminCatalogController {
                               @Schema(description = "false — \"hazırda yoxdur\" (müştəriyə solğun göstərilir)")
                               @Nullable Boolean available,
                               @Schema(description = "Yalnız bu filialda; null — bütün filiallarda")
-                              @Nullable UUID branchId) {
+                              @Nullable UUID branchId,
+                              @Schema(description = "Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula")
+                              @Nullable @Valid DiscountRequest discount) {
 
         ItemInput toInput() {
             return new ItemInput(categoryId, name, description, price, durationMinutes,
-                    !Boolean.FALSE.equals(available), branchId);
+                    !Boolean.FALSE.equals(available), branchId, discount == null ? null : discount.toDiscount());
+        }
+    }
+
+    public record DiscountRequest(@Schema(description = "PERCENT — faizlə (1–99), PRICE — yeni qiymət (AZN)")
+                                  @NotNull @Pattern(regexp = "PERCENT|PRICE") String kind,
+                                  @Schema(description = "Faiz və ya yeni qiymət")
+                                  @NotNull @DecimalMin("0") @DecimalMax("100000") @Digits(integer = 6, fraction = 2)
+                                  BigDecimal value,
+                                  @Schema(description = "Başlanğıc (daxil); null — dərhal")
+                                  @Nullable LocalDate startsOn,
+                                  @Schema(description = "Son gün (daxil); null — həmişəlik")
+                                  @Nullable LocalDate endsOn) {
+
+        CatalogMapper.Discount toDiscount() {
+            return new CatalogMapper.Discount(kind, value, startsOn, endsOn);
         }
     }
 

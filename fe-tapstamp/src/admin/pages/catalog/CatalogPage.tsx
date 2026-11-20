@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 import { resolveText } from '@/shared/i18n/localized';
 import { currentLanguage } from '@/shared/i18n/setup';
-import { formatCurrency } from '@/shared/lib/format';
+import { companyToday, formatCurrency, formatDayMonth } from '@/shared/lib/format';
 import { prepareImage } from '@/shared/lib/image';
 import { Alert } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
@@ -51,6 +51,7 @@ const MAX_ITEMS = 300;
 const IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 /** Qiymət: 0–100000, ən çox iki onluq (vergül də qəbul olunur). */
 const PRICE = /^\d{1,6}([.,]\d{1,2})?$/;
+const DATE_INPUT = 'min-w-0 appearance-none [&::-webkit-date-and-time-value]:text-left';
 /** Sətirdəki kiçik ikon düymələri (40 px — barmaqla toxunmaq üçün kifayətdir, sətri hündür etmir). */
 const ICON_BUTTON = 'size-10';
 
@@ -372,8 +373,9 @@ function ItemRow({ item, index, order, categoryId, onEdit }: {
       remove.mutate(undefined);
     }
   };
+  const discount = item.discount;
   const details = [
-    item.price == null ? null : formatCurrency(Number(item.price), lang),
+    item.price == null ? null : formatCurrency(Number(discount?.status === 'ACTIVE' ? discount.salePrice : item.price), lang),
     item.durationMinutes ? t('admin:catalog.minutes', { count: item.durationMinutes }) : null,
   ].filter(Boolean);
   const branch = item.branchId ? nameOf(item.branchId) : undefined;
@@ -392,6 +394,7 @@ function ItemRow({ item, index, order, categoryId, onEdit }: {
             <p className="line-clamp-2 text-sm text-muted-foreground">{resolveText(item.description, lang)}</p>
           ) : null}
           {details.length > 0 ? <p className="mt-0.5 text-sm font-semibold tabular-nums">{details.join(' · ')}</p> : null}
+          {discount && item.price != null ? <DiscountSummary price={Number(item.price)} discount={discount} /> : null}
         </div>
         <span className="flex w-full shrink-0 items-center justify-end gap-0.5 sm:w-auto">
           <OrderButtons index={index} count={order.length} disabled={reorder.isPending}
@@ -407,6 +410,31 @@ function ItemRow({ item, index, order, categoryId, onEdit }: {
       </div>
       <ApiErrorAlert error={remove.error ?? reorder.error} />
     </li>
+  );
+}
+
+type CatalogDiscount = NonNullable<CatalogItem['discount']>;
+
+/** Siyahıda endirim: "−20% · köhnə qiymət · 31 dekabr tarixinədək" və vəziyyəti (planlaşdırılıb, bitib). */
+function DiscountSummary({ price, discount }: { price: number; discount: CatalogDiscount }) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const period = discount.status === 'SCHEDULED' && discount.startsOn
+    ? t('catalog.discount.startsOn', { date: formatDayMonth(discount.startsOn, lang) })
+    : discount.endsOn
+      ? t('catalog.discount.until', { date: formatDayMonth(discount.endsOn, lang) })
+      : t('catalog.discount.forever');
+  return (
+    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+      <Badge tone={discount.status === 'ACTIVE' ? 'danger' : 'neutral'}>
+        {t('catalog.discount.off', { percent: discount.percent ?? 0 })}
+      </Badge>
+      {discount.status === 'ACTIVE' ? <s className="text-muted-foreground tabular-nums">{formatCurrency(price, lang)}</s> : null}
+      <span className="text-muted-foreground">{period}</span>
+      {discount.status !== 'ACTIVE' ? (
+        <Badge tone={discount.status === 'EXPIRED' ? 'warning' : 'neutral'}>{t(`catalog.discount.status.${discount.status ?? 'ACTIVE'}`)}</Badge>
+      ) : null}
+    </p>
   );
 }
 
@@ -486,6 +514,7 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
   const [duration, setDuration] = useState(item?.durationMinutes ? String(item.durationMinutes) : '');
   const [available, setAvailable] = useState(item?.available ?? true);
   const [branchId, setBranchId] = useState(item?.branchId ?? '');
+  const [discount, setDiscount] = useState<DiscountDraft>(() => draftOf(item?.discount));
   // Şəkil: yeni seçilən fayl, köhnənin silinməsi; önizləmə üçün brauzer ünvanı
   const [file, setFile] = useState<File>();
   const [removeImage, setRemoveImage] = useState(false);
@@ -503,6 +532,8 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
 
   const priceValid = price.trim() === '' || (PRICE.test(price.trim()) && Number(price.replace(',', '.')) <= 100000);
   const durationValid = duration.trim() === '' || (/^\d{1,4}$/.test(duration.trim()) && Number(duration) >= 1 && Number(duration) <= 1440);
+  const priceNumber = price.trim() === '' || !priceValid ? undefined : Number(price.trim().replace(',', '.'));
+  const discountCheck = checkDiscount(discount, priceNumber);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -514,6 +545,7 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
         durationMinutes: duration.trim() === '' ? undefined : Number(duration),
         available,
         branchId: branchId || undefined,
+        discount: discount.enabled && discountCheck.valid ? toDiscountRequest(discount) : undefined,
       };
       let data: CatalogView;
       let itemId = item?.id;
@@ -592,6 +624,7 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
                 aria-invalid={!durationValid} />
             </Field>
           </div>
+          <DiscountFields value={discount} onChange={setDiscount} price={priceNumber} check={discountCheck} />
           {branches.length > 1 ? (
             <Field id="item-branch" label={t('admin:catalog.form.branch')}>
               <Select value={branchId} onChange={(event) => setBranchId(event.target.value)}>
@@ -641,12 +674,165 @@ function ItemDialog({ categories, categoryId, item, onClose }: {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common:actions.cancel')}
             </Button>
-            <Button type="submit" disabled={save.isPending || preparing || !name.az.trim() || !priceValid || !durationValid}>
+            <Button type="submit" disabled={save.isPending || preparing || !name.az.trim() || !priceValid || !durationValid
+              || (discount.enabled && !discountCheck.valid)}>
               {t('common:actions.save')}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Formadakı endirim: faiz və ya yeni qiymət; müddət — həmişəlik və ya tarix aralığı (başlanğıc boş — bu gündən). */
+type DiscountDraft = {
+  enabled: boolean;
+  kind: 'PERCENT' | 'PRICE';
+  value: string;
+  period: 'FOREVER' | 'RANGE';
+  startsOn: string;
+  endsOn: string;
+};
+
+function draftOf(discount: CatalogDiscount | undefined): DiscountDraft {
+  return {
+    enabled: Boolean(discount),
+    kind: discount?.kind === 'PRICE' ? 'PRICE' : 'PERCENT',
+    value: discount?.value == null ? '' : String(discount.value),
+    period: discount?.endsOn || discount?.startsOn ? 'RANGE' : 'FOREVER',
+    startsOn: discount?.startsOn ?? '',
+    endsOn: discount?.endsOn ?? '',
+  };
+}
+
+function toDiscountRequest(draft: DiscountDraft) {
+  return {
+    kind: draft.kind,
+    value: Number(draft.value.trim().replace(',', '.')),
+    startsOn: draft.period === 'RANGE' && draft.startsOn ? draft.startsOn : undefined,
+    endsOn: draft.period === 'RANGE' ? draft.endsOn : undefined,
+  };
+}
+
+type DiscountError = 'noPrice' | 'percent' | 'price' | 'endsOn' | 'range' | 'past';
+
+/** Yoxlama və önizləmə: endirimli qiymət və faiz (server də eyni qaydanı tətbiq edir). */
+function checkDiscount(draft: DiscountDraft, price: number | undefined): { valid: boolean; error?: DiscountError; sale?: number; percent?: number } {
+  if (!draft.enabled) {
+    return { valid: true };
+  }
+  if (price == null || price <= 0) {
+    return { valid: false, error: 'noPrice' };
+  }
+  const raw = draft.value.trim().replace(',', '.');
+  let sale: number;
+  let percent: number;
+  if (draft.kind === 'PERCENT') {
+    if (!/^\d{1,2}$/.test(raw) || Number(raw) < 1) {
+      return { valid: false, error: draft.value.trim() ? 'percent' : undefined };
+    }
+    percent = Number(raw);
+    sale = Math.round(price * (100 - percent)) / 100;
+  } else {
+    if (!PRICE.test(raw) || Number(raw) >= price) {
+      return { valid: false, error: draft.value.trim() ? 'price' : undefined };
+    }
+    sale = Number(raw);
+    percent = Math.round((1 - sale / price) * 100);
+  }
+  if (draft.period === 'RANGE') {
+    if (!draft.endsOn) {
+      return { valid: false, error: 'endsOn', sale, percent };
+    }
+    if (draft.startsOn && draft.startsOn > draft.endsOn) {
+      return { valid: false, error: 'range', sale, percent };
+    }
+    if (draft.endsOn < companyToday()) {
+      return { valid: true, error: 'past', sale, percent };
+    }
+  }
+  return { valid: true, sale, percent };
+}
+
+/** Endirim bölməsi: açar, növ (faiz / yeni qiymət), dəyər, önizləmə və müddət. */
+function DiscountFields({ value, onChange, price, check }: {
+  value: DiscountDraft;
+  onChange: (next: DiscountDraft) => void;
+  price: number | undefined;
+  check: ReturnType<typeof checkDiscount>;
+}) {
+  const { t } = useTranslation('admin');
+  const lang = currentLanguage();
+  const set = (patch: Partial<DiscountDraft>) => onChange({ ...value, ...patch });
+  const today = companyToday();
+  return (
+    <fieldset className="flex flex-col gap-3 rounded-2xl border border-border p-3.5">
+      <label className="flex items-start gap-3 text-sm">
+        <input type="checkbox" checked={value.enabled} onChange={(event) => set({ enabled: event.target.checked })}
+          className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]" />
+        <span>
+          <span className="block font-medium">{t('catalog.discount.enable')}</span>
+          <span className="block text-muted-foreground">{t('catalog.discount.enableHint')}</span>
+        </span>
+      </label>
+      {value.enabled ? (
+        <>
+          {price == null ? <Alert tone="info">{t('catalog.discount.errors.noPrice')}</Alert> : null}
+          <div className="grid grid-cols-2 gap-3">
+            <Field id="discount-kind" label={t('catalog.discount.kind')}>
+              <Select value={value.kind} onChange={(event) => set({ kind: event.target.value as DiscountDraft['kind'], value: '' })}>
+                <option value="PERCENT">{t('catalog.discount.kinds.PERCENT')}</option>
+                <option value="PRICE">{t('catalog.discount.kinds.PRICE')}</option>
+              </Select>
+            </Field>
+            <Field id="discount-value" label={value.kind === 'PERCENT' ? t('catalog.discount.percent') : t('catalog.discount.newPrice')}>
+              <Input inputMode={value.kind === 'PERCENT' ? 'numeric' : 'decimal'} value={value.value}
+                onChange={(event) => set({ value: event.target.value })}
+                aria-invalid={check.error === 'percent' || check.error === 'price'}
+                placeholder={value.kind === 'PERCENT' ? '20' : '3.60'} />
+            </Field>
+          </div>
+          {check.sale != null && price != null ? (
+            <p className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-muted-foreground">{t('catalog.discount.preview')}</span>
+              <span className="font-bold text-primary tabular-nums">{formatCurrency(check.sale, lang)}</span>
+              <s className="text-muted-foreground tabular-nums">{formatCurrency(price, lang)}</s>
+              <Badge tone="danger">{t('catalog.discount.off', { percent: check.percent ?? 0 })}</Badge>
+            </p>
+          ) : null}
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-sm font-medium">{t('catalog.discount.period')}</legend>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              {(['FOREVER', 'RANGE'] as const).map((period) => (
+                <label key={period} className="flex items-center gap-2">
+                  <input type="radio" name="discount-period" checked={value.period === period}
+                    onChange={() => set({ period })} className="size-4 accent-[var(--primary)]" />
+                  {t(`catalog.discount.periods.${period}`)}
+                </label>
+              ))}
+            </div>
+            {value.period === 'RANGE' ? (
+              <div className="grid grid-cols-2 gap-3">
+                <Field id="discount-starts" label={t('catalog.discount.startsOnLabel')} hint={t('catalog.discount.startsOnHint')}>
+                  <Input type="date" value={value.startsOn} max={value.endsOn || undefined} className={DATE_INPUT}
+                    onChange={(event) => set({ startsOn: event.target.value })} />
+                </Field>
+                <Field id="discount-ends" label={t('catalog.discount.endsOnLabel')} hint={t('catalog.discount.endsOnHint')}>
+                  <Input type="date" value={value.endsOn} min={value.startsOn || today} className={DATE_INPUT}
+                    aria-invalid={check.error === 'endsOn' || check.error === 'range'}
+                    onChange={(event) => set({ endsOn: event.target.value })} />
+                </Field>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t('catalog.discount.foreverHint')}</p>
+            )}
+          </fieldset>
+          {check.error && check.error !== 'noPrice' ? (
+            <Alert tone={check.error === 'past' ? 'info' : 'error'}>{t(`catalog.discount.errors.${check.error}`)}</Alert>
+          ) : null}
+        </>
+      ) : null}
+    </fieldset>
   );
 }

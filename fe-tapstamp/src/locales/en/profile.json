@@ -337,6 +337,16 @@
       "MENU": "Search the menu",
       "SERVICES": "Search services",
       "PRICES": "Search prices"
+    },
+    "deals": {
+      "title": "Discounts",
+      "subtitle_one": "{{count}} offer available now",
+      "subtitle_other": "{{count}} offers available now",
+      "until": "Until {{date}}",
+      "lastDay": "Last day today",
+      "forever": "Ongoing discount",
+      "off": "−{{percent}}%",
+      "oldPrice": "Old price"
     }
   }
 }

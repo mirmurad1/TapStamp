@@ -1435,6 +1435,45 @@
       "title": "Menu QR code",
       "hint": "Print it and put it on the table: customers scan it with their phone to open the menu, no sign-in needed.",
       "download": "Download (SVG)"
+    },
+    "discount": {
+      "enable": "Discount",
+      "enableHint": "Customers see the old price struck through, the new price and the percentage; the item appears in the discount banner at the top of the menu.",
+      "kind": "Discount type",
+      "kinds": {
+        "PERCENT": "Percentage",
+        "PRICE": "New price"
+      },
+      "percent": "Discount (%)",
+      "newPrice": "New price (AZN)",
+      "preview": "Customers will see:",
+      "off": "−{{percent}}%",
+      "period": "Validity",
+      "periods": {
+        "FOREVER": "Ongoing",
+        "RANGE": "For a period"
+      },
+      "foreverHint": "The discount stays on until you turn it off.",
+      "startsOnLabel": "Start",
+      "startsOnHint": "Empty — from today.",
+      "endsOnLabel": "Last day",
+      "endsOnHint": "Inclusive.",
+      "until": "Until {{date}}",
+      "startsOn": "From {{date}}",
+      "forever": "Ongoing",
+      "status": {
+        "ACTIVE": "Active",
+        "SCHEDULED": "Not started yet",
+        "EXPIRED": "Expired"
+      },
+      "errors": {
+        "noPrice": "Enter the price first to add a discount.",
+        "percent": "The percentage must be a whole number from 1 to 99.",
+        "price": "The new price must be lower than the old one.",
+        "endsOn": "Choose the last day for a time-limited discount.",
+        "range": "The start cannot be after the last day.",
+        "past": "The last day has passed — customers will not see this discount."
+      }
     }
   }
 }

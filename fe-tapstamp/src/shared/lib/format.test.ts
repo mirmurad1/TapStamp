@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCurrency, formatDate, formatDateTime, formatPhone, formatRelative, formatTime } from './format';
+import { companyToday, formatCurrency, formatDate, formatDateTime, formatDayMonth, formatPhone, formatRelative, formatTime } from './format';
 
 // Intl çıxışında adi boşluq əvəzinə NBSP və ya dar NBSP ola bilər — müqayisə üçün normallaşdırırıq
 const normalize = (value: string) => value.replace(/[\u00a0\u202f]/g, ' ');
@@ -43,5 +43,12 @@ describe('lokallaşdırılmış formatlar', () => {
     expect(formatPhone('+994501234567')).toBe('+994 50 123 45 67');
     expect(formatPhone('+905321234567')).toBe('+905321234567');
     expect(formatPhone(undefined)).toBe('');
+  });
+  it('gün və ay: cari ildə il yazılmır, başqa ildə yazılır', () => {
+    const year = Number(companyToday().slice(0, 4));
+    expect(formatDayMonth(`${year}-12-31`, 'az')).toBe('31 dekabr');
+    expect(normalize(formatDayMonth(`${year}-12-31`, 'ru'))).toBe('31 декабря');
+    expect(formatDayMonth(`${year}-12-31`, 'en')).toBe('December 31');
+    expect(formatDayMonth(`${year + 1}-01-05`, 'az')).toBe(`5 yanvar ${year + 1}`);
   });
 });
