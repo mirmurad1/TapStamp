@@ -192,6 +192,8 @@ function ClaimSuccess({ result, branch }: { result: ClaimResult; branch: string 
   );
 }
 
+const FINAL_TAP_ERRORS = ['BRANCH_CLOSED', 'TAG_DISABLED', 'OUTSIDE_BUSINESS_HOURS'] as const;
+
 export function TapError({ error, message }: { error?: unknown; message?: string }) {
   const { t } = useTranslation('profile');
   const errorMessage = useErrorMessage();
@@ -199,6 +201,8 @@ export function TapError({ error, message }: { error?: unknown; message?: string
   const [until] = useState(() => (retryAfter ? Date.now() + retryAfter * 1000 : undefined));
   const secondsLeft = useSecondsUntil(until);
   const cooldown = isApiError(error, 'STAMP_COOLDOWN_ACTIVE') || isApiError(error, 'STAMP_DAILY_LIMIT_REACHED');
+  // Təkrar toxunmaq kömək etmir: filial bağlıdır, çip deaktivdir və ya filial iş saatından kənardadır
+  const final = FINAL_TAP_ERRORS.some((code) => isApiError(error, code));
   return (
     <Card className="animate-fade-up">
       <CardHeader className="items-center text-center">
@@ -214,7 +218,7 @@ export function TapError({ error, message }: { error?: unknown; message?: string
             {formatCountdown(secondsLeft)}
           </p>
         ) : null}
-        {!cooldown ? <p className="text-sm text-muted-foreground">{t('tap.tryAgain')}</p> : null}
+        {!cooldown && !final ? <p className="text-sm text-muted-foreground">{t('tap.tryAgain')}</p> : null}
       </CardHeader>
       <CardContent>
         <Button asChild size="lg" variant="outline" className="w-full">
