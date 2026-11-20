@@ -37,6 +37,7 @@
   "TAP_MALFORMED": "This tap link is incomplete. Tap your phone on the NFC tag again.",
   "TAG_UNKNOWN": "This NFC tag is not recognised. Please ask a staff member.",
   "TAG_DISABLED": "This NFC tag is not working right now. Please ask a staff member.",
+  "BRANCH_CLOSED": "This branch is not operating at the moment, so no stamp is given. You can collect stamps at other branches of the company.",
   "TAP_SIGNATURE_INVALID": "We could not verify this tap. Tap your phone on the NFC tag again.",
   "TAP_REPLAYED": "This link has already been used. Each tap works only once.",
   "TAP_TOKEN_EXPIRED": "This tap has expired. Tap your phone on the NFC tag again.",

@@ -33,6 +33,9 @@ public interface NfcTagMapper {
     /** Sətir kilidi: eyni çipin paralel toxunuşları ardıcıl emal olunur (replay qorunması). */
     NfcTag lock(UUID id);
 
+    /** Çipin filialı aktivdir (şirkət bağlamayıb). */
+    boolean branchActive(UUID branchId);
+
     void acceptCounter(UUID id, int counter, Instant now);
 
     /** Yoxlama üçün açar dəstləri: əvvəlcə ACTIVE, sonra (rotasiya gedirsə) PENDING. */

@@ -37,6 +37,7 @@
   "TAP_MALFORMED": "Toxunuş linki natamamdır. Telefonu NFC nişanına yenidən toxundurun.",
   "TAG_UNKNOWN": "Bu NFC nişanı tanınmadı. İşçiyə müraciət edin.",
   "TAG_DISABLED": "Bu NFC nişanı hazırda işləmir. İşçiyə müraciət edin.",
+  "BRANCH_CLOSED": "Bu filial hazırda fəaliyyət göstərmir, möhür verilmir. Şirkətin digər filiallarında möhür toplaya bilərsiniz.",
   "TAP_SIGNATURE_INVALID": "Toxunuşu təsdiqləmək mümkün olmadı. Telefonu NFC nişanına yenidən toxundurun.",
   "TAP_REPLAYED": "Bu link artıq istifadə olunub. Hər toxunuş yalnız bir dəfə keçərlidir.",
   "TAP_TOKEN_EXPIRED": "Toxunuşun vaxtı keçib. Telefonu NFC nişanına yenidən toxundurun.",

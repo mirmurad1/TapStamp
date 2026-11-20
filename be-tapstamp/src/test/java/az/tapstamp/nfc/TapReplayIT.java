@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -117,6 +118,26 @@ class TapReplayIT extends TapIntegrationTest {
         TenantContext.runAs(alpha(), () -> tenantJdbc
                 .sql("UPDATE nfc_tags SET status = 'DISABLED' WHERE id = :id").param("id", tag.id()).update());
         assertThat(tap(client, tapPath(tag, 1))).isEqualTo("/tap/error?code=TAG_DISABLED");
+    }
+
+    @Test
+    void tagOfAClosedBranchGivesNoStampAndItsLinkCannotBeReusedLater() throws Exception {
+        UUID branch = newBranch(Policy.relaxed());
+        TestTag tag = newTag(branch);
+        CustomerClient client = client();
+        Map<String, Object> byTag = Map.of("tagId", tag.id());
+
+        TenantContext.runAs(alpha(), () -> tenantJdbc
+                .sql("UPDATE branches SET status = 'CLOSED' WHERE id = :id").param("id", branch).update());
+        assertThat(tap(client, tapPath(tag, 1))).isEqualTo("/tap/error?code=BRANCH_CLOSED");
+        assertThat(count("SELECT count(*) FROM tap_events WHERE tag_id = :tagId AND reason = 'BRANCH_CLOSED'", byTag))
+                .isEqualTo(1);
+
+        // Filial yenidən açılır: çip işləyir, bağlı vaxtın linki isə təkrar işləmir
+        TenantContext.runAs(alpha(), () -> tenantJdbc
+                .sql("UPDATE branches SET status = 'ACTIVE' WHERE id = :id").param("id", branch).update());
+        assertThat(tap(client, tapPath(tag, 1))).isEqualTo("/tap/error?code=TAP_REPLAYED");
+        tapToken(client, tag, 2);
     }
 
     @Test

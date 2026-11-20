@@ -226,6 +226,15 @@ class CatalogIT extends TapIntegrationTest {
         publicCatalog("?branchId=" + branch).andExpect(jsonPath("$.categories[0].items.length()").value(2))
                 .andExpect(jsonPath("$.categories[0].items[1].durationMinutes").value(30));
         publicCatalog("?branchId=" + other).andExpect(jsonPath("$.categories[0].items.length()").value(1));
+
+        // Filial bağlanıb: ona aid məhsul gizlənir, onun QR-ı ilə ümumi menyu açılır
+        az.tapstamp.tenancy.TenantContext.runAs(alpha(), () -> tenantJdbc.sql(
+                "UPDATE branches SET status = 'CLOSED' WHERE id = :id").param("id", branch).update());
+        publicCatalog("").andExpect(jsonPath("$.categories[0].items.length()").value(1));
+        publicCatalog("?branchId=" + branch).andExpect(jsonPath("$.categories[0].items.length()").value(1))
+                .andExpect(jsonPath("$.categories[0].items[0].name.az").value("Hamısında"));
+        // Admin hamısını görür
+        owner.get("/catalog").andExpect(jsonPath("$.categories[0].items.length()").value(2));
     }
 
     @Test

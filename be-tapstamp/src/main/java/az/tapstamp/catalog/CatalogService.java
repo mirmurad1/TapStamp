@@ -110,17 +110,22 @@ public class CatalogService {
 
     /**
      * İctimai kataloq: əlavə açıq və bölmə aktiv olmalıdır. Gizlədilmiş və boş kateqoriyalar göstərilmir; filial
-     * verilibsə, yalnız bütün filiallar üçün olan və həmin filiala aid məhsullar.
+     * verilibsə, yalnız bütün filiallar üçün olan və həmin filiala aid məhsullar. Bağlanmış filiala aid məhsullar
+     * göstərilmir; bağlanmış filialın QR-ı ilə açılan menyu ümumi menyunu göstərir.
      */
-    public CatalogView publicCatalog(@Nullable UUID branchId) {
+    public CatalogView publicCatalog(@Nullable UUID requestedBranch) {
         Settings settings = catalog.settings();
         if (!plans.has(Addon.CATALOG) || !settings.enabled()) {
             return new CatalogView(false, settings.title(), List.of());
         }
+        Set<UUID> openBranches = new HashSet<>(catalog.activeBranchIds());
+        UUID branchId = requestedBranch != null && openBranches.contains(requestedBranch) ? requestedBranch : null;
         List<CategoryView> categories = build(catalog.categories(), catalog.items(), today(), true).stream()
                 .filter(CategoryView::active)
                 .map(category -> new CategoryView(category.id(), category.name(), true, category.items().stream()
-                        .filter(item -> branchId == null || item.branchId() == null || item.branchId().equals(branchId))
+                        .filter(item -> item.branchId() == null
+                                || openBranches.contains(item.branchId())
+                                && (branchId == null || item.branchId().equals(branchId)))
                         .toList()))
                 .filter(category -> !category.items().isEmpty())
                 .toList();

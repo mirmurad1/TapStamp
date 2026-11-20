@@ -163,6 +163,12 @@ public class TapVerificationService {
         }
         Integer gap = locked.lastCounter() < 0 ? null : counter - locked.lastCounter() - 1;
         tags.acceptCounter(tagId, counter, now);
+        // Filial bağlanıb: sayğac qəbul olunur (bu link sonra, filial açılanda təkrar işlədilə bilməsin), möhür verilmir
+        if (!tags.branchActive(locked.branchId())) {
+            events.record(Event.of(Stage.VERIFY, locked.branchId(), tagId, "BRANCH_CLOSED", source)
+                    .withCounter(counter, gap), now);
+            return new Outcome(null, ErrorCode.BRANCH_CLOSED);
+        }
         UUID eventId = events.record(Event.of(Stage.VERIFY, locked.branchId(), tagId, null, source)
                 .withCounter(counter, gap), now);
         if (gap != null && gap >= COUNTER_GAP_THRESHOLD) {

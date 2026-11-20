@@ -106,4 +106,7 @@ public interface CatalogMapper {
     void saveThumbnail(UUID id, byte[] thumb);
 
     boolean branchExists(UUID branchId);
+
+    /** Aktiv (bağlanmamış) filiallar — müştəri menyusunda bağlı filiala aid məhsullar göstərilmir. */
+    List<UUID> activeBranchIds();
 }

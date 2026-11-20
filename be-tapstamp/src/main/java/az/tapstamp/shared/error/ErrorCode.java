@@ -101,6 +101,8 @@ public enum ErrorCode {
     STAMP_DAILY_LIMIT_REACHED(HttpStatus.CONFLICT),
     /** Filial hazırda bağlıdır (iş saatları qaydası aktivdir). */
     OUTSIDE_BUSINESS_HOURS(HttpStatus.CONFLICT),
+    /** Çipin filialı şirkət tərəfindən bağlanıb (deaktiv): möhür verilmir. */
+    BRANCH_CLOSED(HttpStatus.CONFLICT),
     /** Möhür artıq təsdiqlənib, rədd edilib və ya vaxtı keçib. */
     STAMP_NOT_PENDING(HttpStatus.CONFLICT),
     /** Belə hədiyyə kartı yoxdur (və ya başqa şirkətindir). */

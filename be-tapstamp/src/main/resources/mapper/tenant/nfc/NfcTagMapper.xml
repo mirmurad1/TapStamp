@@ -19,6 +19,10 @@
         SELECT <include refid="tagColumns"/> FROM nfc_tags WHERE id = #{id} FOR UPDATE
     </select>
 
+    <select id="branchActive" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM branches WHERE id = #{branchId} AND status = 'ACTIVE')
+    </select>
+
     <update id="acceptCounter">
         UPDATE nfc_tags
         SET last_counter = #{counter}, last_tap_at = #{now}, updated_at = #{now}, version = version + 1
