@@ -177,6 +177,22 @@ SSH bağlantısı kəsilsə də deploy serverdə sona qədər gedir. Log: `/var/
 
 Açarı ləğv etmək üçün `authorized_keys`-dən `github-deploy` sətrini silmək kifayətdir.
 
+## Bazaya qoşulmaq (DBeaver, SSH tuneli)
+
+PostgreSQL serverdə yalnız `127.0.0.1:5432`-də açıqdır (internetdən görünmür). Kompüterdən **SSH tuneli** (SSH bağlantısı
+üzərindən portun ötürülməsi) ilə qoşulun:
+
+1. DBeaver → *Yeni bağlantı* → PostgreSQL.
+2. **SSH** bölməsi: *Use SSH tunnel*, host — serverin IP-si, port 22, SSH istifadəçisi və açarı (və ya şifrəsi).
+3. **Main** bölməsi: host `localhost`, port `5432`, baza `loyalty_platform`, istifadəçi `postgres`, şifrə — `.env`-dəki
+   `POSTGRES_PASSWORD`. *Show all databases* işarələnsin ki, şirkətlərin bazaları da görünsün.
+
+Şirkətin bazasının adı `loyalty_platform.tenants` cədvəlinin `db_name` sütunundadır. Telefon nömrələri bazada şifrəlidir
+(`phone_enc`). Cədvəlləri əl ilə dəyişməyin (Flyway miqrasiyaları idarə edir); məlumatı dəyişməzdən əvvəl ehtiyat nüsxə
+götürün (§8). Serverdə 5432 portu başqa proqramla məşğuldursa, `.env`-də `POSTGRES_HOST_PORT` ilə başqa port seçin.
+
+Terminaldan: `docker compose -f docker-compose.yml -f docker-compose.prod.yml exec postgres psql -U postgres -d loyalty_platform`.
+
 ## 10. Yoxlama siyahısı
 
 - [ ] `https://platform.sizinbrend.az/admin` açılır, sertifikat etibarlıdır.

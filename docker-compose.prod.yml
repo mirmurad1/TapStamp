@@ -5,6 +5,12 @@
 #  * certbot hər domen üçün Let's Encrypt sertifikatı alır və yeniləyir;
 #  * nginx sertifikatları müntəzəm yenidən oxuyur (yeni domen ~10 dəqiqəyə HTTPS ilə açılır).
 services:
+  postgres:
+    # Yalnız serverin öz daxilində (127.0.0.1) açıqdır — internetdən görünmür. Kompüterdən SSH tuneli ilə qoşulmaq
+    # üçün (DBeaver və s.): docs/deployment.md, "Bazaya qoşulmaq"
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+
   backend:
     environment:
       SPRING_PROFILES_ACTIVE: prod
