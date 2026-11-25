@@ -83,6 +83,7 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
   const approve = useMutation({ mutationFn: () => platformCampaignsApi.approve(tenantId, id), onSuccess: refresh });
   const reject = useMutation({ mutationFn: () => platformCampaignsApi.reject(tenantId, id, reason.trim()), onSuccess: refresh });
   const resume = useMutation({ mutationFn: () => platformCampaignsApi.resume(tenantId, id), onSuccess: refresh });
+  const cancel = useMutation({ mutationFn: () => platformCampaignsApi.cancel(tenantId, id), onSuccess: refresh });
   const pending = campaign.status === 'PENDING_APPROVAL';
   const total = formatNumber(campaign.totalSms ?? 0, lang);
 
@@ -125,7 +126,7 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
             <p className="text-muted-foreground">{t('admin:platform.campaigns.totalSms')}</p>
             <p className="font-display text-xl font-semibold">{total}</p>
           </div>
-          {['SENT', 'SENDING', 'PAUSED'].includes(campaign.status ?? '') ? (
+          {['SENT', 'SENDING', 'PAUSED', 'CANCELLED'].includes(campaign.status ?? '') ? (
             <div>
               <p className="text-muted-foreground">{t('admin:platform.campaigns.delivery')}</p>
               <p className="font-display text-xl font-semibold">
@@ -153,20 +154,33 @@ function CampaignCard({ campaign }: { campaign: PlatformCampaign }) {
             {t('admin:platform.campaigns.pauseReason', { reason: campaign.pauseReason })}
           </p>
         ) : null}
-        <ApiErrorAlert error={approve.error ?? reject.error ?? resume.error} />
+        <ApiErrorAlert error={approve.error ?? reject.error ?? resume.error ?? cancel.error} />
         {campaign.status === 'PAUSED' ? (
-          <Button
-            className="self-start"
-            disabled={resume.isPending}
-            onClick={async () => {
-              if (await confirm({ message: t('admin:platform.campaigns.resumeConfirm') })) {
-                resume.mutate();
-              }
-            }}
-          >
-            <Play className="size-4" aria-hidden="true" />
-            {t('admin:platform.campaigns.resume')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={resume.isPending || cancel.isPending}
+              onClick={async () => {
+                if (await confirm({ message: t('admin:platform.campaigns.resumeConfirm') })) {
+                  resume.mutate();
+                }
+              }}
+            >
+              <Play className="size-4" aria-hidden="true" />
+              {t('admin:platform.campaigns.resume')}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={resume.isPending || cancel.isPending}
+              onClick={async () => {
+                if (await confirm({ message: t('admin:platform.campaigns.cancelConfirm'), danger: true })) {
+                  cancel.mutate();
+                }
+              }}
+            >
+              <X className="size-4" aria-hidden="true" />
+              {t('admin:platform.campaigns.cancel')}
+            </Button>
+          </div>
         ) : null}
         {pending && !rejecting ? (
           <div className="flex flex-wrap gap-2">

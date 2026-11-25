@@ -232,6 +232,17 @@ public class CampaignService {
         return campaigns.find(id).orElseThrow();
     }
 
+    /**
+     * Dayandırılmış kampaniyanı birdəfəlik bağlamaq (davam etdirmək istənmirsə): PAUSED → CANCELLED, göndərilməmiş
+     * alıcılar SKIPPED olur. Artıq göndərilmiş SMS-lər olduğu kimi qalır.
+     */
+    public Campaign cancelPaused(UUID platformAdminId, UUID id) {
+        change(id, "PAUSED", "CANCELLED", null, null);
+        campaigns.skipUnsent(id);
+        audit.tenant("CAMPAIGN_CANCELLED", AuditLogger.ActorType.PLATFORM, platformAdminId, "campaign", id, Map.of());
+        return campaigns.find(id).orElseThrow();
+    }
+
     // ---------------------------------------------------------------- köməkçilər
 
     private void change(UUID id, String from, String to, @Nullable UUID decidedBy, @Nullable String reason) {

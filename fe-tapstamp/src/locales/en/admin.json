@@ -469,7 +469,9 @@
       "pauseReason": "Pause reason: {{reason}}",
       "resume": "Resume",
       "resumeConfirm": "Is the SMS account problem fixed? Sending will resume.",
-      "showAll": "Show all"
+      "showAll": "Show all",
+      "cancel": "Cancel",
+      "cancelConfirm": "Cancel this campaign? Unsent SMS will not go out; those already sent stay as they are. This cannot be undone."
     },
     "smsLimit": {
       "title": "SMS limit",
@@ -1087,7 +1089,8 @@
       "CATALOG_ITEM_DELETED": "Menu item deleted",
       "CATALOG_ITEM_IMAGE_UPDATED": "Item image updated",
       "CATALOG_ITEM_IMAGE_REMOVED": "Item image removed",
-      "CATALOG_REORDERED": "Menu reordered"
+      "CATALOG_REORDERED": "Menu reordered",
+      "TENANT_CAMPAIGN_CANCELLED": "Paused campaign cancelled"
     },
     "targets": {
       "tenant": "company",

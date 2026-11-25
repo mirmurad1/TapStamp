@@ -152,6 +152,27 @@ class StampCampaignIT extends TapIntegrationTest {
         signedInStaff(HOST, AdminRole.COMPANY_OWNER, null).get("/campaigns/" + id).andExpect(jsonPath("$.status").value("SENT"));
     }
 
+    @Test
+    void platformCancelsAPausedCampaignWithoutSendingTheRest() throws Exception {
+        Customer customer = customer();
+        smsFailures.failNext(customer.phone(), Kind.ACCOUNT);
+        AdminClient owner = signedInStaff(HOST, AdminRole.COMPANY_OWNER, null);
+        String id = approvedCampaign(owner, 1);
+        sendUntilDone();
+        owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("PAUSED"));
+
+        AdminClient platform = signedInPlatformAdmin();
+        platform.post("/campaigns/" + alpha().id() + "/" + id + "/cancel").andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"));
+        sendUntilDone();
+        owner.get("/campaigns/" + id).andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.pendingCount").value(0));
+        assertThat(customer.stamps()).isZero();
+        // Yalnız dayandırılmış kampaniya ləğv olunur
+        platform.post("/campaigns/" + alpha().id() + "/" + id + "/cancel")
+                .andExpect(jsonPath("$.code").value("CAMPAIGN_STATE_CHANGED"));
+    }
+
     private static int jsonInt(AdminClient client, String id, String path) throws Exception {
         return com.jayway.jsonpath.JsonPath.read(
                 client.get("/campaigns/" + id).andReturn().getResponse().getContentAsString(), path);

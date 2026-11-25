@@ -503,6 +503,9 @@ export const platformCampaignsApi = {
   /** Hesab xÉ™tasÄ±na gÃ¶rÉ™ dayandÄ±rÄ±lmÄ±ÅŸ kampaniyanÄ± davam etdirmÉ™k. */
   resume: (tenantId: string, campaignId: string) =>
     unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/resume', { params: { path: { tenantId, campaignId } } })),
+  /** Dayandırılmış kampaniyanı davam etdirmədən bağlamaq: göndərilməmiş SMS-lər ötürülür. */
+  cancel: (tenantId: string, campaignId: string) =>
+    unwrap(api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/cancel', { params: { path: { tenantId, campaignId } } })),
   reject: (tenantId: string, campaignId: string, reason: string) =>
     unwrap(
       api.POST('/api/v1/platform/campaigns/{tenantId}/{campaignId}/reject', {

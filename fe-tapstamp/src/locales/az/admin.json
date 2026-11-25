@@ -469,7 +469,9 @@
       "pauseReason": "Dayandırılma səbəbi: {{reason}}",
       "resume": "Davam et",
       "resumeConfirm": "SMS hesabındakı problem həll olunub? Göndəriş davam edəcək.",
-      "showAll": "Hamısını göstər"
+      "showAll": "Hamısını göstər",
+      "cancel": "Ləğv et",
+      "cancelConfirm": "Kampaniya ləğv olunsun? Göndərilməmiş SMS-lər göndərilməyəcək, artıq gedənlər olduğu kimi qalır. Bunu geri qaytarmaq olmur."
     },
     "smsLimit": {
       "title": "SMS limiti",
@@ -1087,7 +1089,8 @@
       "CATALOG_ITEM_DELETED": "Menyu məhsulu silindi",
       "CATALOG_ITEM_IMAGE_UPDATED": "Məhsulun şəkli yeniləndi",
       "CATALOG_ITEM_IMAGE_REMOVED": "Məhsulun şəkli silindi",
-      "CATALOG_REORDERED": "Menyunun sırası dəyişdirildi"
+      "CATALOG_REORDERED": "Menyunun sırası dəyişdirildi",
+      "TENANT_CAMPAIGN_CANCELLED": "Dayandırılmış kampaniya ləğv olundu"
     },
     "targets": {
       "tenant": "şirkət",

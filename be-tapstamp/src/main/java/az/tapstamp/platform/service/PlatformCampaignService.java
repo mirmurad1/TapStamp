@@ -79,6 +79,15 @@ public class PlatformCampaignService {
         return new TenantCampaign(tenant, campaign);
     }
 
+    /** Dayandırılmış kampaniyanı davam etdirmədən bağlamaq. */
+    public TenantCampaign cancelPaused(AdminPrincipal principal, UUID tenantId, UUID campaignId) {
+        TenantRecord tenant = tenant(tenantId);
+        Campaign campaign = TenantContext.callAs(tenant.toInfo(), () -> campaigns.cancelPaused(principal.userId(), campaignId));
+        realms.audit(AdminRealm.PLATFORM, "TENANT_CAMPAIGN_CANCELLED", principal.userId(), "tenant", tenantId,
+                Map.of("campaignId", campaignId.toString()));
+        return new TenantCampaign(tenant, campaign);
+    }
+
     private TenantRecord tenant(UUID tenantId) {
         TenantRecord tenant = directory.findById(tenantId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         if (tenant.status().outOfService()) {

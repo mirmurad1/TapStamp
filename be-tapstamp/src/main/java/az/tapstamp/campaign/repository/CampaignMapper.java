@@ -101,6 +101,9 @@ public interface CampaignMapper {
     /** Platforma admini: PAUSED → SENDING; son müddət davam etmə anından yenidən hesablanır. */
     int resume(UUID id, Instant deadlineAt);
 
+    /** Ləğv olunan kampaniya: hələ göndərilməmiş alıcılar SKIPPED olur. */
+    int skipUnsent(UUID campaignId);
+
     /** Artıq SMS ala bilməyən alıcılar (bloklanıb, silinib) SKIPPED olur. */
     int skipIneligible(UUID campaignId);
 

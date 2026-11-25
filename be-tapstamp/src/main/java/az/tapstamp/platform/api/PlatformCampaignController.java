@@ -95,6 +95,14 @@ public class PlatformCampaignController {
         return PlatformCampaignView.from(campaigns.resume(principal, tenantId, campaignId));
     }
 
+    @PostMapping("/{tenantId}/{campaignId}/cancel")
+    @Operation(summary = "Dayandırılmış kampaniyanı ləğv etmək", description = """
+            Yalnız PAUSED kampaniya: davam etdirilmir, göndərilməmiş SMS-lər ötürülür (SKIPPED). Başqa vəziyyətdə             CAMPAIGN_STATE_CHANGED.""")
+    PlatformCampaignView cancel(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,
+                                @PathVariable UUID campaignId) {
+        return PlatformCampaignView.from(campaigns.cancelPaused(principal, tenantId, campaignId));
+    }
+
     @PostMapping("/{tenantId}/{campaignId}/reject")
     @Operation(summary = "Kampaniyanı ləğv etmək (rədd)", description = "Səbəb sahibə göstərilir. Platforma kampaniyanı dəyişə bilməz.")
     PlatformCampaignView reject(@AuthenticationPrincipal AdminPrincipal principal, @PathVariable UUID tenantId,

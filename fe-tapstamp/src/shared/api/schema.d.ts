@@ -523,7 +523,7 @@ export interface paths {
          * Kampaniyanı ləğv etmək
          * @description Yalnız təsdiqə qədər; sonra `CAMPAIGN_STATE_CHANGED`.
          */
-        post: operations["cancel"];
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2581,6 +2581,26 @@ export interface paths {
          * @description Ödəniş alındıqdan sonra. Göndəriş 09:00–21:00 arası (şirkətin saatı ilə) avtomatik başlayır.
          */
         post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/campaigns/{tenantId}/{campaignId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dayandırılmış kampaniyanı ləğv etmək
+         * @description Yalnız PAUSED kampaniya: davam etdirilmir, göndərilməmiş SMS-lər ötürülür (SKIPPED). Başqa vəziyyətdə             CAMPAIGN_STATE_CHANGED.
+         */
+        post: operations["cancel"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6565,7 +6585,7 @@ export interface operations {
             };
         };
     };
-    cancel: {
+    cancel_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9287,6 +9307,29 @@ export interface operations {
         };
     };
     approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: string;
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlatformCampaignView"];
+                };
+            };
+        };
+    };
+    cancel: {
         parameters: {
             query?: never;
             header?: never;

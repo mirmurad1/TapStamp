@@ -481,7 +481,9 @@
       "pauseReason": "Причина остановки: {{reason}}",
       "resume": "Продолжить",
       "resumeConfirm": "Проблема SMS-аккаунта решена? Отправка продолжится.",
-      "showAll": "Показать все"
+      "showAll": "Показать все",
+      "cancel": "Отменить",
+      "cancelConfirm": "Отменить рассылку? Неотправленные SMS не уйдут, уже отправленные останутся. Это нельзя отменить."
     },
     "smsLimit": {
       "title": "Лимит SMS",
@@ -1115,7 +1117,8 @@
       "CATALOG_ITEM_DELETED": "Позиция меню удалена",
       "CATALOG_ITEM_IMAGE_UPDATED": "Фото позиции обновлено",
       "CATALOG_ITEM_IMAGE_REMOVED": "Фото позиции удалено",
-      "CATALOG_REORDERED": "Порядок меню изменён"
+      "CATALOG_REORDERED": "Порядок меню изменён",
+      "TENANT_CAMPAIGN_CANCELLED": "Приостановленная рассылка отменена"
     },
     "targets": {
       "tenant": "компания",

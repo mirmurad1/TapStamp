@@ -171,6 +171,11 @@
         WHERE id = #{id} AND status = 'PAUSED'
     </update>
 
+    <update id="skipUnsent">
+        UPDATE campaign_recipients SET status = 'SKIPPED'
+        WHERE campaign_id = #{campaignId} AND status IN ('PENDING', 'SENDING')
+    </update>
+
     <update id="skipIneligible">
         UPDATE campaign_recipients r SET status = 'SKIPPED'
         FROM customers c
