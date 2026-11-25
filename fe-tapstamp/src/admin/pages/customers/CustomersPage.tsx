@@ -1,15 +1,10 @@
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Download, Search, ShieldAlert } from 'lucide-react';
+import { Download, Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 
 import { SUPPORTED_LANGUAGES } from '@/shared/i18n/languages';
-import { currentLanguage } from '@/shared/i18n/setup';
-import { cn } from '@/shared/lib/cn';
-import { formatDate, formatNumber } from '@/shared/lib/format';
 import { useFeature } from '@/shared/plan/plan';
-import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input, Select } from '@/shared/ui/input';
@@ -24,22 +19,13 @@ import { InlineLoading } from '../../components/FullPageState';
 import { hasAnyRole } from '../../layout/navigation';
 import { useBranchNames } from '../../lib/branches';
 import { downloadBlob } from '../../lib/download';
+import { CustomerTable } from './CustomerTable';
 
-/** Cədvəlin sütunları; field — sıralana bilən sahə. */
-const HEADERS: readonly { field?: CustomerSort; label: 'admin:customers.columns.customer' | 'admin:customers.columns.language' | 'admin:customers.columns.stamps' | 'admin:customers.columns.rewards' | 'admin:customers.columns.lastVisit' | 'admin:customers.columns.registered'; className: string }[] = [
-  { field: 'NAME', label: 'admin:customers.columns.customer', className: 'px-5 py-2 sm:px-6' },
-  { label: 'admin:customers.columns.language', className: 'px-3 py-2' },
-  { field: 'TOTAL_STAMPS', label: 'admin:customers.columns.stamps', className: 'px-3 py-2' },
-  { label: 'admin:customers.columns.rewards', className: 'px-3 py-2' },
-  { field: 'LAST_VISIT_AT', label: 'admin:customers.columns.lastVisit', className: 'px-3 py-2' },
-  { field: 'REGISTERED_AT', label: 'admin:customers.columns.registered', className: 'px-5 py-2 sm:px-6' },
-];
 const INACTIVE_OPTIONS = [14, 30, 60, 90] as const;
 
 export function CustomersPage() {
   const { t } = useTranslation(['admin', 'common']);
   const me = useMe();
-  const lang = currentLanguage();
   // Hədiyyə üçün lazım olan möhür sayı (aktiv qayda) — kartdakı möhürlərin zolağı üçün
   const company = useQuery({ queryKey: ['public-company'], queryFn: contextApi.company, staleTime: 5 * 60_000 });
   const required = company.data?.rewardRule?.stampsRequired ?? 0;
@@ -82,17 +68,6 @@ export function CustomersPage() {
 
   const data = customers.data;
   const total = data?.total ?? 0;
-
-  const sortHeader = (field: CustomerSort, label: string, className: string) => (
-    <th key={field} scope="col" className={className} aria-sort={sort === field ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button type="button" className="inline-flex items-center gap-1 font-medium hover:text-foreground" onClick={() => toggleSort(field)}>
-        {label}
-        {sort === field ? (
-          direction === 'asc' ? <ArrowUp className="size-3" aria-hidden="true" /> : <ArrowDown className="size-3" aria-hidden="true" />
-        ) : null}
-      </button>
-    </th>
-  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -183,69 +158,14 @@ export function CustomersPage() {
           ) : null}
 
           {data && (data.items?.length ?? 0) > 0 ? (
-            <div className="-mx-5 overflow-x-auto sm:-mx-6" tabIndex={0}>
-              <table className="w-full min-w-[52rem] text-left text-sm">
-                <thead className="border-b border-border text-xs text-muted-foreground">
-                  <tr>
-                    {HEADERS.map((header) =>
-                      header.field ? (
-                        sortHeader(header.field, t(header.label), header.className)
-                      ) : (
-                        <th key={header.label} scope="col" className={cn(header.className, 'font-medium')}>
-                          {t(header.label)}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {data.items?.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-muted/50">
-                      <td className="px-5 py-3 sm:px-6">
-                        <Link to={`/customers/${customer.id}`} className="font-semibold text-foreground underline-offset-4 hover:underline">
-                          {customer.name || t('admin:customers.noName')}
-                        </Link>
-                        <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <span className="tabular-nums">{customer.phone}</span>
-                          {customer.status === 'BLOCKED' ? <Badge tone="danger">{t('admin:customers.status.BLOCKED')}</Badge> : null}
-                          {(customer.openFraudFlags ?? 0) > 0 ? (
-                            <Badge tone="warning">
-                              <ShieldAlert className="mr-1 size-3" aria-hidden="true" />
-                              {t('admin:customers.flags', { count: customer.openFraudFlags })}
-                            </Badge>
-                          ) : null}
-                        </p>
-                      </td>
-                      <td className="px-3 py-3 uppercase text-muted-foreground">{customer.language}</td>
-                      <td className="px-3 py-3 tabular-nums">
-                        {/* Kartdakı möhürlər zolaqla (hədiyyəyə qədər), altında ümumi say */}
-                        <span className="flex items-center gap-2">
-                          <span className="font-medium">{customer.currentStamps ?? 0}/{required || '–'}</span>
-                          {required ? (
-                            <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-                              <span className="block h-full rounded-full bg-primary"
-                                style={{ width: `${Math.min(100, ((customer.currentStamps ?? 0) / required) * 100)}%` }} />
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">
-                          {t('admin:customers.stampsTotal', { total: formatNumber(customer.totalStamps ?? 0, lang) })}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 tabular-nums">
-                        {formatNumber(customer.rewardsRedeemed ?? 0, lang)} / {formatNumber(customer.rewardsEarned ?? 0, lang)}
-                      </td>
-                      <td className="px-3 py-3 text-muted-foreground">
-                        {customer.lastVisitAt ? formatDate(customer.lastVisitAt, lang) : t('admin:team.never')}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                        {customer.registeredAt ? formatDate(customer.registeredAt, lang) : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <CustomerTable
+              items={data.items ?? []}
+              required={required}
+              sort={sort}
+              direction={direction}
+              onSort={toggleSort}
+              linkTo={(id) => `/customers/${id}`}
+            />
           ) : null}
 
           <Pagination state={paging} total={total} />

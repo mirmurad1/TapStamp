@@ -32,6 +32,7 @@ import { TenantSmsLimitCard } from './SmsLimitCards';
 import { TenantAddonsCard } from './TenantAddonsCard';
 import { ReviewCardTab } from './ReviewCardTab';
 import { TenantAuditCard } from './TenantAuditCard';
+import { TenantCustomersDialog } from './TenantCustomersDialog';
 import { TenantLogo } from './TenantLogo';
 import { TenantPlanCard } from './TenantPlanCard';
 import { TenantTagsCard } from './TenantTagsCard';
@@ -186,15 +187,32 @@ function StatsRow({ tenantId }: { tenantId: string }) {
   const stats = useQuery({ queryKey: ['platform-tenant-stats', tenantId], queryFn: () => platformApi.stats(tenantId) });
   const n = (value: number | undefined) => (value === undefined ? '–' : formatNumber(value, lang));
   const loading = stats.isPending;
+  // Ümumi və ya aktiv müştərilərin siyahısı (şirkət panelindəki kimi, telefonlar maskalanmış)
+  const [customersOf, setCustomersOf] = useState<'all' | 'active'>();
   return (
     <section aria-label={t('platform.detail.stats')} className="flex flex-col gap-3">
       <ApiErrorAlert error={stats.error} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi icon={<Users />} label={t('platform.detail.totalCustomers')} value={n(stats.data?.totalCustomers)} loading={loading} />
-        <Kpi icon={<UserCheck />} label={t('platform.detail.customers')} value={n(stats.data?.activeCustomers)} loading={loading} />
+        <Kpi
+          icon={<Users />}
+          label={t('platform.detail.totalCustomers')}
+          value={n(stats.data?.totalCustomers)}
+          loading={loading}
+          action={{ label: t('platform.detail.showCustomers'), onClick: () => setCustomersOf('all') }}
+        />
+        <Kpi
+          icon={<UserCheck />}
+          label={t('platform.detail.customers')}
+          value={n(stats.data?.activeCustomers)}
+          loading={loading}
+          action={{ label: t('platform.detail.showCustomers'), onClick: () => setCustomersOf('active') }}
+        />
         <Kpi icon={<Store />} label={t('platform.detail.branches')} value={n(stats.data?.branches)} loading={loading} />
         <Kpi icon={<UsersRound />} label={t('platform.detail.staff')} value={n(stats.data?.activeStaff)} loading={loading} />
       </div>
+      {customersOf ? (
+        <TenantCustomersDialog tenantId={tenantId} onlyActive={customersOf === 'active'} onClose={() => setCustomersOf(undefined)} />
+      ) : null}
     </section>
   );
 }

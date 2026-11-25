@@ -136,7 +136,7 @@ public class PlatformTenantController {
     }
 
     @GetMapping("/{tenantId}/stats")
-    @Operation(summary = "Şirkətin ümumi göstəriciləri", description = "Yalnız saylar — müştərilərin şəxsi məlumatı göstərilmir.")
+    @Operation(summary = "Şirkətin ümumi göstəriciləri", description = "Saylar; müştəri siyahısı ayrıca endpoint-dədir (/customers, telefonlar maskalanmış).")
     StatsResponse stats(@PathVariable UUID tenantId) {
         var stats = tenants.stats(tenantId);
         return new StatsResponse(stats.branches(), stats.totalCustomers(), stats.activeCustomers(), stats.activeStaff());

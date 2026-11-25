@@ -343,7 +343,9 @@
         "recommended": "Customer features: {{enabled}}/{{total}} on",
         "nfc": "NFC tag",
         "nfcHint": "no tag registered yet (NFC tags tab)"
-      }
+      },
+      "showCustomers": "View list",
+      "customersMasked": "The customer list from the company panel. Phone numbers are shown masked."
     },
     "domains": {
       "title": "Domains",

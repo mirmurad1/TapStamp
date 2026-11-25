@@ -138,7 +138,7 @@
     "/api/v1/admin/analytics/overview" : {
       "get" : {
         "description" : "Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.",
-        "operationId" : "overview_1",
+        "operationId" : "overview_2",
         "parameters" : [ {
           "in" : "query",
           "name" : "from",
@@ -286,7 +286,7 @@
     "/api/v1/admin/audit-logs" : {
       "get" : {
         "description" : "Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_13",
+        "operationId" : "list_14",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -1068,7 +1068,7 @@
     "/api/v1/admin/catalog" : {
       "get" : {
         "description" : "Parametrlər (açar, bölmənin adı), kateqoriyalar sıra ilə və hər kateqoriyanın məhsulları (gizlədilənlər və \"hazırda yoxdur\" olanlar da daxil).",
-        "operationId" : "get_5",
+        "operationId" : "get_6",
         "responses" : {
           "200" : {
             "content" : {
@@ -1253,7 +1253,7 @@
     "/api/v1/admin/catalog/deal-notifications" : {
       "get" : {
         "description" : "Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).",
-        "operationId" : "dealNotificationOverview",
+        "operationId" : "overview_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -1273,7 +1273,7 @@
     "/api/v1/admin/catalog/deal-notifications/send" : {
       "post" : {
         "description" : "Elan gözləyən yeni endirimlər bir bildirişdə, gündə bir elan. Müştəriyə filialının iş saatında çatır: `recipients` — dərhal göndərildi, `waiting` — filial açılanda gedəcək. Nəticə `status`-dadır (SENT, NOTHING_TO_SEND, ALREADY_SENT_TODAY, UNAVAILABLE).",
-        "operationId" : "sendDealNotification",
+        "operationId" : "send",
         "responses" : {
           "200" : {
             "content" : {
@@ -1292,7 +1292,7 @@
     },
     "/api/v1/admin/catalog/deal-notifications/settings" : {
       "put" : {
-        "operationId" : "updateDealNotificationSettings",
+        "operationId" : "updateSettings_3",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1518,7 +1518,7 @@
     "/api/v1/admin/customers" : {
       "get" : {
         "description" : "Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).",
-        "operationId" : "list_12",
+        "operationId" : "list_13",
         "parameters" : [ {
           "in" : "query",
           "name" : "q",
@@ -1730,7 +1730,7 @@
     },
     "/api/v1/admin/customers/{customerId}" : {
       "get" : {
-        "operationId" : "get_4",
+        "operationId" : "get_5",
         "parameters" : [ {
           "in" : "path",
           "name" : "customerId",
@@ -1931,7 +1931,7 @@
     "/api/v1/admin/feedback" : {
       "get" : {
         "description" : "Ən yenisi birinci, səhifə-səhifə; `rating` və `unresolved` (yalnız həll olunmamış) süzgəcləri. Müştərinin adı və tam telefon nömrəsi ilə.",
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "parameters" : [ {
           "in" : "query",
           "name" : "rating",
@@ -2320,7 +2320,7 @@
     "/api/v1/admin/referrals" : {
       "get" : {
         "description" : "Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "parameters" : [ {
           "in" : "query",
           "name" : "activity",
@@ -2940,7 +2940,7 @@
     "/api/v1/admin/setup" : {
       "get" : {
         "description" : "Məcburi addımlar (BRANDING, REWARD_RULE, BRANCH, TEAM, NFC_TAG) və paketə görə müştəri cəlbi tövsiyələri (FEEDBACK, GOOGLE_REVIEW, REFERRALS, TIERS, REMINDERS, BONUS_RULES, CATALOG). Vəziyyət mövcud məlumatdan hesablanır.",
-        "operationId" : "setupChecklist",
+        "operationId" : "get_4",
         "responses" : {
           "200" : {
             "content" : {
@@ -2960,7 +2960,7 @@
     "/api/v1/admin/setup/recommendations" : {
       "put" : {
         "description" : "Məcburi addımlar gizlədilmir.",
-        "operationId" : "hideSetupRecommendations",
+        "operationId" : "recommendations",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -3197,7 +3197,7 @@
     "/api/v1/admin/tags" : {
       "get" : {
         "description" : "Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "parameters" : [ {
           "in" : "query",
           "name" : "branchId",
@@ -3938,7 +3938,7 @@
     "/api/v1/me/deal-notifications/{announcementId}/opened" : {
       "post" : {
         "description" : "Elanın nəticəsində bir dəfə sayılır.",
-        "operationId" : "dealNotificationOpened",
+        "operationId" : "opened",
         "parameters" : [ {
           "in" : "path",
           "name" : "announcementId",
@@ -4011,7 +4011,7 @@
     },
     "/api/v1/me/feedback-request/{requestId}/review-click" : {
       "post" : {
-        "description" : "Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).",
+        "description" : "Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir             dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).",
         "operationId" : "reviewClick",
         "parameters" : [ {
           "in" : "path",
@@ -4034,7 +4034,7 @@
     "/api/v1/me/gift-cards" : {
       "get" : {
         "description" : "Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.",
-        "operationId" : "list_8",
+        "operationId" : "list_9",
         "responses" : {
           "200" : {
             "content" : {
@@ -4204,7 +4204,7 @@
     "/api/v1/platform/audit-logs" : {
       "get" : {
         "description" : "Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_7",
+        "operationId" : "list_8",
         "parameters" : [ {
           "in" : "query",
           "name" : "action",
@@ -4463,7 +4463,7 @@
     "/api/v1/platform/campaigns" : {
       "get" : {
         "description" : "`status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
-        "operationId" : "list_6",
+        "operationId" : "list_7",
         "parameters" : [ {
           "in" : "query",
           "name" : "status",
@@ -5144,6 +5144,88 @@
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
+    "/api/v1/platform/tenants/{tenantId}/customers" : {
+      "get" : {
+        "description" : "Şirkət panelindəki \"Müştərilər\" siyahısı: axtarış (`q` — ad və ya tam nömrə), status (`ACTIVE` — aktiv müştərilər), sıralama və səhifələmə. Telefonlar yalnız maskalanmış; `stampsRequired` — aktiv qaydanın möhür sayı.",
+        "operationId" : "list_6",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "tenantId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 80,
+            "minLength" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "ACTIVE|BLOCKED"
+          }
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "REGISTERED_AT",
+            "enum" : [ "REGISTERED_AT", "LAST_VISIT_AT", "NAME", "TOTAL_STAMPS" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "direction",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "desc",
+            "pattern" : "asc|desc"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerList"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Şirkətin müştəriləri",
+        "tags" : [ "Platforma: şirkətin müştəriləri" ]
+      }
+    },
     "/api/v1/platform/tenants/{tenantId}/domains" : {
       "get" : {
         "description" : "Əsas domen birinci; TLS sertifikatının vəziyyəti ilə.",
@@ -5620,7 +5702,7 @@
     "/api/v1/platform/tenants/{tenantId}/setup" : {
       "get" : {
         "description" : "Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi, NFC çipi) və paketə görə açılmış müştəri cəlbi imkanları.",
-        "operationId" : "tenantSetup",
+        "operationId" : "setup",
         "parameters" : [ {
           "in" : "path",
           "name" : "tenantId",
@@ -5714,7 +5796,7 @@
     },
     "/api/v1/platform/tenants/{tenantId}/stats" : {
       "get" : {
-        "description" : "Yalnız saylar — müştərilərin şəxsi məlumatı göstərilmir.",
+        "description" : "Saylar; müştəri siyahısı ayrıca endpoint-dədir (/customers, telefonlar maskalanmış).",
         "operationId" : "stats",
         "parameters" : [ {
           "in" : "path",
@@ -7445,6 +7527,18 @@
           }
         }
       },
+      "CustomerList" : {
+        "type" : "object",
+        "properties" : {
+          "customers" : {
+            "$ref" : "#/components/schemas/Page"
+          },
+          "stampsRequired" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "CustomerMeResponse" : {
         "type" : "object",
         "description" : "Müştərinin profili (telefon — müştərinin öz nömrəsi, tam).",
@@ -7845,7 +7939,6 @@
             "minimum" : 0
           }
         },
-        "description" : "Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula",
         "required" : [ "kind", "value" ]
       },
       "DiscountView" : {
@@ -8428,7 +8521,8 @@
             "$ref" : "#/components/schemas/LocalizedText"
           },
           "discount" : {
-            "$ref" : "#/components/schemas/DiscountRequest"
+            "$ref" : "#/components/schemas/DiscountRequest",
+            "description" : "Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula"
           },
           "durationMinutes" : {
             "type" : "integer",

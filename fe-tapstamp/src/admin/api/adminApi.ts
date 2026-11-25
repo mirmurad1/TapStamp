@@ -164,6 +164,10 @@ export const teamApi = {
 export const platformApi = {
   tenants: (query: PageParams) => unwrap(api.GET('/api/v1/platform/tenants', { params: { query } })),
   tenant: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}', { params: { path: { tenantId } } })),
+  customers: (
+    tenantId: string,
+    query: { q?: string; status?: 'ACTIVE' | 'BLOCKED'; sort: CustomerSort; direction: 'asc' | 'desc'; page: number; size: number },
+  ) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}/customers', { params: { path: { tenantId }, query } })),
   provision: (body: ProvisionRequest) => unwrap(api.POST('/api/v1/platform/tenants', { body })),
   updateStatus: (tenantId: string, status: 'ACTIVE' | 'SUSPENDED') =>
     unwrap(api.PATCH('/api/v1/platform/tenants/{tenantId}/status', { params: { path: { tenantId } }, body: { status } })),

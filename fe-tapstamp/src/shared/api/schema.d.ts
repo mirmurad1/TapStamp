@@ -72,7 +72,7 @@ export interface paths {
          * Əsas göstəricilər
          * @description Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.
          */
-        get: operations["overview_1"];
+        get: operations["overview_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,7 +132,7 @@ export interface paths {
          * Audit jurnalı
          * @description Filtrlər: əməliyyat, icraçı, tarix aralığı (şirkətin yerli tarixləri). Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_13"];
+        get: operations["list_14"];
         put?: never;
         post?: never;
         delete?: never;
@@ -561,7 +561,7 @@ export interface paths {
          * Kataloq
          * @description Parametrlər (açar, bölmənin adı), kateqoriyalar sıra ilə və hər kateqoriyanın məhsulları (gizlədilənlər və "hazırda yoxdur" olanlar da daxil).
          */
-        get: operations["get_5"];
+        get: operations["get_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -665,7 +665,7 @@ export interface paths {
          * Endirim bildirişləri
          * @description Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).
          */
-        get: operations["dealNotificationOverview"];
+        get: operations["overview_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -687,7 +687,7 @@ export interface paths {
          * İndi göndər
          * @description Elan gözləyən yeni endirimlər bir bildirişdə, gündə bir elan. Müştəriyə filialının iş saatında çatır: `recipients` — dərhal göndərildi, `waiting` — filial açılanda gedəcək. Nəticə `status`-dadır (SENT, NOTHING_TO_SEND, ALREADY_SENT_TODAY, UNAVAILABLE).
          */
-        post: operations["sendDealNotification"];
+        post: operations["send"];
         delete?: never;
         options?: never;
         head?: never;
@@ -703,7 +703,7 @@ export interface paths {
         };
         get?: never;
         /** Endirim bildirişlərinin parametrləri */
-        put: operations["updateDealNotificationSettings"];
+        put: operations["updateSettings_3"];
         post?: never;
         delete?: never;
         options?: never;
@@ -804,7 +804,7 @@ export interface paths {
          * Müştərilərin siyahısı
          * @description Axtarış (`q`): ad hissəsi və ya tam telefon nömrəsi (nömrə HMAC ilə dəqiq tapılır). Filtrlər: dil, status, `inactiveDays` (son N gündə gəlməyənlər), filial, qeydiyyat tarixi. Səhifələmə `page` (0-dan) və `size` (5, 10, 20, 50).
          */
-        get: operations["list_12"];
+        get: operations["list_13"];
         put?: never;
         post?: never;
         delete?: never;
@@ -861,7 +861,7 @@ export interface paths {
             cookie?: never;
         };
         /** Müştərinin detalları */
-        get: operations["get_4"];
+        get: operations["get_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -958,7 +958,7 @@ export interface paths {
          * Rəylər
          * @description Ən yenisi birinci, səhifə-səhifə; `rating` və `unresolved` (yalnız həll olunmamış) süzgəcləri. Müştərinin adı və tam telefon nömrəsi ilə.
          */
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1197,7 +1197,7 @@ export interface paths {
          * Dəvətlər
          * @description Yenidən köhnəyə; telefonlar maskalı; dostun gəlişləri (təsdiqlənmiş NFC möhürləri) və son gəlişi ilə. `activity`: ALL, NONE (gəlməyib), ONCE (bir gün gəlib), RETURNED (2+ fərqli gündə). Səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1493,9 +1493,9 @@ export interface paths {
         };
         /**
          * Başlanğıc siyahısı
-         * @description Məcburi addımlar (BRANDING, REWARD_RULE, BRANCH, TEAM) və paketə görə müştəri cəlbi tövsiyələri (FEEDBACK, GOOGLE_REVIEW, REFERRALS, TIERS, REMINDERS, BONUS_RULES, CATALOG). Vəziyyət mövcud məlumatdan hesablanır.
+         * @description Məcburi addımlar (BRANDING, REWARD_RULE, BRANCH, TEAM, NFC_TAG) və paketə görə müştəri cəlbi tövsiyələri (FEEDBACK, GOOGLE_REVIEW, REFERRALS, TIERS, REMINDERS, BONUS_RULES, CATALOG). Vəziyyət mövcud məlumatdan hesablanır.
          */
-        get: operations["setupChecklist"];
+        get: operations["get_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1516,7 +1516,7 @@ export interface paths {
          * Tövsiyələri gizlətmək və ya göstərmək
          * @description Məcburi addımlar gizlədilmir.
          */
-        put: operations["hideSetupRecommendations"];
+        put: operations["recommendations"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1655,7 +1655,7 @@ export interface paths {
          * Çiplərin siyahısı
          * @description Açar vəziyyəti (ACTIVE/PENDING versiyası) və son 7 gündə toxunuş sayı ilə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2132,7 +2132,7 @@ export interface paths {
          * Endirim bildirişinə toxunub menyunu açdı
          * @description Elanın nəticəsində bir dəfə sayılır.
          */
-        post: operations["dealNotificationOpened"];
+        post: operations["opened"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2190,7 +2190,7 @@ export interface paths {
         put?: never;
         /**
          * Google rəy səhifəsinə keçid
-         * @description Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).
+         * @description Müştəri rəydən sonra filialın Google rəy səhifəsini açdı — sahibin hesabatında sayılır. Hər rəy üçün bir             dəfə; təkrar və ya tapılmayan sorğu səssizcə nəzərə alınmır (204).
          */
         post: operations["reviewClick"];
         delete?: never;
@@ -2210,7 +2210,7 @@ export interface paths {
          * Hədiyyə kartları
          * @description Əvvəlcə istifadə oluna bilənlər, sonra tarixçə.
          */
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2358,7 +2358,7 @@ export interface paths {
          * Platforma audit jurnalı
          * @description Yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_7"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2558,7 +2558,7 @@ export interface paths {
          * Kampaniyalar
          * @description `status` — PENDING (diqqət tələb edənlər: təsdiq gözləyənlər və dayandırılmışlar) və ya ALL. Bütün şirkətlər üzrə yenidən köhnəyə; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
-        get: operations["list_6"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2923,6 +2923,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/tenants/{tenantId}/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirkətin müştəriləri
+         * @description Şirkət panelindəki "Müştərilər" siyahısı: axtarış (`q` — ad və ya tam nömrə), status (`ACTIVE` — aktiv müştərilər), sıralama və səhifələmə. Telefonlar yalnız maskalanmış; `stampsRequired` — aktiv qaydanın möhür sayı.
+         */
+        get: operations["list_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{tenantId}/domains": {
         parameters: {
             query?: never;
@@ -3174,9 +3194,9 @@ export interface paths {
         };
         /**
          * Şirkətin başlanğıc siyahısı
-         * @description Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi) və paketə görə açılmış müştəri cəlbi imkanları.
+         * @description Məcburi addımlar (loqo, hədiyyə qaydası, filial və iş saatları, işçi, NFC çipi) və paketə görə açılmış müştəri cəlbi imkanları.
          */
-        get: operations["tenantSetup"];
+        get: operations["setup"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3218,7 +3238,7 @@ export interface paths {
         };
         /**
          * Şirkətin ümumi göstəriciləri
-         * @description Yalnız saylar — müştərilərin şəxsi məlumatı göstərilmir.
+         * @description Saylar; müştəri siyahısı ayrıca endpoint-dədir (/customers, telefonlar maskalanmış).
          */
         get: operations["stats"];
         put?: never;
@@ -4139,6 +4159,11 @@ export interface components {
             scope?: "TENANT" | "PLATFORM" | "NONE";
             tenant?: components["schemas"]["Tenant"];
         };
+        CustomerList: {
+            customers?: components["schemas"]["Page"];
+            /** Format: int32 */
+            stampsRequired?: number;
+        };
         /** @description Müştərinin profili (telefon — müştərinin öz nömrəsi, tam). */
         CustomerMeResponse: {
             availableRewards?: components["schemas"]["RewardResponse"][];
@@ -4280,7 +4305,6 @@ export interface components {
             /** Format: date-time */
             lastSeenAt?: string;
         };
-        /** @description Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula */
         DiscountRequest: {
             /**
              * Format: date
@@ -4538,6 +4562,7 @@ export interface components {
             /** Format: uuid */
             categoryId: string;
             description?: components["schemas"]["LocalizedText"];
+            /** @description Endirim; null — endirim yoxdur. Yalnız qiyməti olan məhsula */
             discount?: components["schemas"]["DiscountRequest"];
             /**
              * Format: int32
@@ -5893,7 +5918,7 @@ export interface operations {
             };
         };
     };
-    overview_1: {
+    overview_2: {
         parameters: {
             query?: {
                 from?: string;
@@ -5967,7 +5992,7 @@ export interface operations {
             };
         };
     };
-    list_13: {
+    list_14: {
         parameters: {
             query?: {
                 action?: string;
@@ -6543,7 +6568,7 @@ export interface operations {
             };
         };
     };
-    get_5: {
+    get_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -6685,7 +6710,7 @@ export interface operations {
             };
         };
     };
-    dealNotificationOverview: {
+    overview_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6705,7 +6730,7 @@ export interface operations {
             };
         };
     };
-    sendDealNotification: {
+    send: {
         parameters: {
             query?: never;
             header?: never;
@@ -6725,7 +6750,7 @@ export interface operations {
             };
         };
     };
-    updateDealNotificationSettings: {
+    updateSettings_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -6896,7 +6921,7 @@ export interface operations {
             };
         };
     };
-    list_12: {
+    list_13: {
         parameters: {
             query?: {
                 q?: string;
@@ -6978,7 +7003,7 @@ export interface operations {
             };
         };
     };
-    get_4: {
+    get_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -7103,7 +7128,7 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    list_12: {
         parameters: {
             query?: {
                 rating?: string;
@@ -7413,7 +7438,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: {
                 activity?: string;
@@ -7926,7 +7951,7 @@ export interface operations {
             };
         };
     };
-    setupChecklist: {
+    get_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -7946,7 +7971,7 @@ export interface operations {
             };
         };
     };
-    hideSetupRecommendations: {
+    recommendations: {
         parameters: {
             query?: never;
             header?: never;
@@ -8112,7 +8137,7 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    list_10: {
         parameters: {
             query?: {
                 branchId?: string;
@@ -8725,7 +8750,7 @@ export interface operations {
             };
         };
     };
-    dealNotificationOpened: {
+    opened: {
         parameters: {
             query?: never;
             header?: never;
@@ -8809,7 +8834,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -8973,7 +8998,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_8: {
         parameters: {
             query?: {
                 action?: string;
@@ -9193,7 +9218,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_7: {
         parameters: {
             query?: {
                 status?: string;
@@ -9669,6 +9694,35 @@ export interface operations {
             };
         };
     };
+    list_6: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: string;
+                sort?: "REGISTERED_AT" | "LAST_VISIT_AT" | "NAME" | "TOTAL_STAMPS";
+                direction?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                tenantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CustomerList"];
+                };
+            };
+        };
+    };
     list_1: {
         parameters: {
             query?: never;
@@ -9994,7 +10048,7 @@ export interface operations {
             };
         };
     };
-    tenantSetup: {
+    setup: {
         parameters: {
             query?: never;
             header?: never;

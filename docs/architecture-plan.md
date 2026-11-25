@@ -896,7 +896,7 @@ Hər vəziyyət keçidində sessiya tokeni yenilənir.
 | İcazə | SUPER_ADMIN (platforma) | COMPANY_OWNER | BRANCH_MANAGER | STAFF |
 |---|---|---|---|---|
 | Tenant-ların yaradılması, dayandırılması, domenlər | ✅ | — | — | — |
-| Tenant üzrə ümumi göstəricilər (yalnız saylar) | ✅ | — | — | — |
+| Tenant üzrə ümumi göstəricilər və müştəri siyahısı (nömrələr maskalanmış, qərar 67) | ✅ | — | — | — |
 | OWNER dəvəti və OWNER-in 2FA-sının sıfırlanması | ✅ | — | — | — |
 | Panel və analitika | — | ✅ bütün filiallar | ✅ öz filialı | — |
 | Müştərilər cədvəli (maskalı telefon) | — | ✅ | ✅ | — |
@@ -1671,6 +1671,7 @@ Tam siyahı yekun təhlükəsizlik icmalında veriləcək.
 | 64 | Əlavələr (add-on) və menyu/xidmətlər kataloqu (istifadəçi qərarı) | Paketdən asılı olmayan, ayrıca satılan bölmələr: `Addon` (ilk — `CATALOG`), platforma bazasında `tenant_addons`. Platforma admini şirkətə açıb-bağlayır (platforma auditinə yazılır), bağlananda məlumat silinmir. Sınaq müddəti bitmiş şirkətdə əlavələr də bağlıdır. Controller-də `@RequiresAddon`, frontend-də `useAddon`; ictimai `/api/v1/public/plan` cavabında `addons`. İlk versiya yalnız kataloqdur (sifariş və ödəniş yoxdur); əlavənin qiyməti və ödənişi hələlik sistemdən kənarda | Menyu restoranlar üçün, xidmətlər digər sahələr üçün əlavə gəlir mənbəyidir; paket pilləsinə bağlamaq hər paketə satmağa imkan vermir |
 | 65 | Google rəyinə yönləndirmə (istifadəçi qərarı) | Filial üzrə Google rəy linki (`branches.google_review_url`). Rəy verən müştəriyə cavabdan sonra Google-da yazmaq təklif olunur: əla qiymətdə ulduzlu kart və əsas düymə, normal və pisdə sakit keçid. Keçid bir dəfə sayılır (`feedback.review_clicked_at`), sahib "Rəylər" xülasəsində "Google-a keçid" sayını görür | Google qaydası seçmə yolla yalnız razı müştəridən rəy istəməyi qadağan edir (review gating) — ona görə təklif hamıya göstərilir; link yalnız Google domenlərinə icazə verilir ki, panel başqa sayta yönləndirməsin |
 | 66 | Google rəyi üçün çap kartı — stend (istifadəçi qərarı) | Platforma panelində şirkətin "Çap materialları" bölməsi: filial, ölçü (A6, A5, A4-də 4 kart) və dil (AZ, AZ+RU, AZ+EN) seçilir, kart brauzerdə çap olunur və ya PDF kimi saxlanılır, QR ayrıca SVG kimi endirilir. QR şirkətin domeninə (`/api/v1/public/review/{filial}`) aparır: skan gün üzrə sayılır (`review_qr_scans`) və filialın Google rəy səhifəsinə, link yoxdursa şirkət adı ilə Google Maps axtarışına yönləndirilir | Kartı şirkət deyil, platforma hazırlayır və stendlə birlikdə ayrıca satır; QR-ın öz domenə aparması linki dəyişəndə kartın yenidən çap olunmamasını və skanların sayılmasını təmin edir |
+| 67 | Platformada şirkətin müştəri siyahısı (istifadəçi qərarı) | Şirkət səhifəsində "Ümumi müştərilər" və "Aktiv müştərilər" kartlarından siyahı açılır — şirkət panelindəki cədvəl (`CustomerTable`). Telefonlar yalnız maskalanmış, tam nömrə və CSV platformaya verilmir; endpoint `GET /api/v1/platform/tenants/{id}/customers` (yalnız `SUPER_ADMIN`) | Dəstək zamanı müştərinin vəziyyətini şirkətin panelinə girmədən görmək; əvvəlki "yalnız saylar" qaydası bu qədər yumşaldılıb |
 
 ---
 

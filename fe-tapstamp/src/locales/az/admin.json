@@ -343,7 +343,9 @@
         "recommended": "Müştəri cəlbi imkanları: {{enabled}}/{{total}} açıq",
         "nfc": "NFC çipi",
         "nfcHint": "çip qeydiyyata alınmayıb (NFC çipləri tabı)"
-      }
+      },
+      "showCustomers": "Siyahıya bax",
+      "customersMasked": "Şirkət panelindəki müştəri siyahısı. Telefon nömrələri gizlədilmiş formada göstərilir."
     },
     "domains": {
       "title": "Domenlər",

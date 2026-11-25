@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Platforma adminlərinin şirkətlər üzərində əməliyyatları. Şirkətin bazasına yalnız konkret əməliyyat üçün
- * ({@link TenantContext#callAs}) qoşulur; müştərilərin şəxsi məlumatları platformaya göstərilmir — yalnız saylar.
+ * ({@link TenantContext#callAs}) qoşulur; müştəri siyahısı yalnız maskalanmış nömrələrlə göstərilir (PlatformCustomerService).
  */
 @Service
 public class PlatformTenantService {
