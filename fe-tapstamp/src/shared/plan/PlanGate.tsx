@@ -10,11 +10,23 @@ import { PLAN_KEY, usePlan } from './plan';
 /**
  * Sınaq müddəti bitmiş şirkət: tətbiqin yerinə "xidmət dayandırılıb" ekranı. Backend bu halda şirkətin bütün
  * API-sinə {@code PLAN_TRIAL_EXPIRED} qaytarır; hər hansı sorğu bu xətanı alanda paket yenidən oxunur və ekran
- * dərhal dəyişir. Platforma domenində paket yoxdur (404) — tətbiq olduğu kimi göstərilir.
+ * dərhal dəyişir. `enabled={false}` — paketi olmayan domen (platforma): sorğu göndərilmir, tətbiq olduğu kimi göstərilir.
+ * (Əvvəl platformada sorğu 404 alırdı; məlumatsız sorğu hər təkrarında yenidən "yüklənir" olur və bütün tətbiq
+ * sıfırdan qurulurdu.)
  */
-export function PlanGate({ audience, loading, children }: { audience: 'staff' | 'customer'; loading: ReactNode; children: ReactNode }) {
+export function PlanGate({
+  audience,
+  loading,
+  children,
+  enabled = true,
+}: {
+  audience: 'staff' | 'customer';
+  loading: ReactNode;
+  children: ReactNode;
+  enabled?: boolean;
+}) {
   const queryClient = useQueryClient();
-  const plan = usePlan();
+  const plan = usePlan(enabled);
 
   useEffect(() => {
     const refreshOnExpiry = (error: unknown) => {
@@ -38,6 +50,9 @@ export function PlanGate({ audience, loading, children }: { audience: 'staff' | 
     };
   }, [queryClient]);
 
+  if (!enabled) {
+    return children;
+  }
   if (plan.isPending) {
     return loading;
   }
