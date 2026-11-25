@@ -179,7 +179,7 @@ Açarı ləğv etmək üçün `authorized_keys`-dən `github-deploy` sətrini si
 
 ## Bazaya qoşulmaq (DBeaver, SSH tuneli)
 
-PostgreSQL serverdə yalnız `127.0.0.1:5432`-də açıqdır (internetdən görünmür). Kompüterdən **SSH tuneli** (SSH bağlantısı
+PostgreSQL daxili şəbəkədədir; `db-tunnel` konteyneri (socat) onu serverdə yalnız `127.0.0.1:5432`-də açır (internetdən görünmür). Kompüterdən **SSH tuneli** (SSH bağlantısı
 üzərindən portun ötürülməsi) ilə qoşulun:
 
 1. DBeaver → *Yeni bağlantı* → PostgreSQL.
