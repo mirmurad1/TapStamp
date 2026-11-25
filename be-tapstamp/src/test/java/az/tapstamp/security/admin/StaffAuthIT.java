@@ -51,7 +51,7 @@ class StaffAuthIT extends AdminIntegrationTest {
         String setCookie = sessionCookieHeader(login);
         assertThat(setCookie).startsWith("__Host-cl_staff=")
                 .contains("Path=/", "Secure", "HttpOnly", "SameSite=Strict")
-                .contains("Max-Age=" + Duration.ofHours(8).toSeconds());
+                .contains("Max-Age=" + Duration.ofDays(30).toSeconds());
         // Token cavabın body-sində yoxdur (yalnız HttpOnly cookie-də)
         assertThat(login.andReturn().getResponse().getContentAsString()).doesNotContain(client.session());
 
@@ -240,21 +240,22 @@ class StaffAuthIT extends AdminIntegrationTest {
     @Test
     void idleSessionExpiresAndBackgroundRequestsDoNotExtendIt() throws Exception {
         AdminClient client = signedInStaff(HOST, newManager(), false);
-        clock.advance(Duration.ofMinutes(20));
+        // Şirkət panelində boş qalma limiti 24 saatdır
+        clock.advance(Duration.ofHours(20));
         client.getBackground("/me").andExpect(status().isOk());
-        clock.advance(Duration.ofMinutes(11));
+        clock.advance(Duration.ofHours(5));
         client.get("/me").andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
     }
 
     @Test
     void userActivityKeepsTheSessionAliveUntilTheAbsoluteLimit() throws Exception {
         AdminClient client = signedInStaff(HOST, newManager(), false);
-        for (int i = 0; i < 19; i++) {
-            clock.advance(Duration.ofMinutes(25));
+        for (int i = 0; i < 31; i++) {
+            clock.advance(Duration.ofHours(23));
             client.get("/me").andExpect(status().isOk());
         }
-        // 19 × 25 = 475 dəqiqə fəal iş; 8 saatlıq (480 dəq) mütləq limit fəaliyyətdən asılı deyil
-        clock.advance(Duration.ofMinutes(10));
+        // 31 × 23 = 713 saat fəal iş; 30 günlük (720 saat) mütləq limit fəaliyyətdən asılı deyil
+        clock.advance(Duration.ofHours(10));
         client.get("/me").andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
     }
 

@@ -95,9 +95,10 @@ class DealNotificationIT extends TapIntegrationTest {
 
     /** Saatı şirkətin verilmiş saatına gətirir (lazım olsa növbəti günə keçir). */
     private void at(LocalTime target) {
+        // Saniyələr də nəzərə alınır: dəqiqəyə yuvarlaqlaşdırma saatı hədəfdən bir az əvvəl (11:59:xx) saxlayırdı
         LocalTime local = clock.instant().atZone(alpha().timezone()).toLocalTime();
-        long minutes = Duration.between(local, target).toMinutes();
-        clock.advance(Duration.ofMinutes(minutes <= 0 ? minutes + 24 * 60 : minutes));
+        Duration delta = Duration.between(local, target);
+        clock.advance(delta.isNegative() || delta.isZero() ? delta.plusDays(1) : delta);
     }
 
     private LocalDate today() {
@@ -179,6 +180,8 @@ class DealNotificationIT extends TapIntegrationTest {
 
         // Açılış sayılır (bir dəfə)
         String announcement = url.substring("/menu?deal=".length());
+        // Saat irəli çəkilib — qısa ömürlü giriş tokeni bitib; tətbiq kimi sessiyanı yeniləyirik
+        customer.client().post("/api/v1/auth/refresh").andExpect(status().isOk());
         customer.client().post("/api/v1/me/deal-notifications/" + announcement + "/opened", Map.of())
                 .andExpect(status().isNoContent());
         customer.client().post("/api/v1/me/deal-notifications/" + announcement + "/opened", Map.of())
@@ -226,7 +229,8 @@ class DealNotificationIT extends TapIntegrationTest {
         assertThat(field(customer.browser(), lastDay, "$.body"))
                 .isEqualTo("Bu gün endirimin son günüdür: Latte −30%. Fürsəti qaçırmayın!");
 
-        // Söndürülübsə son gün xatırlatması getmir
+        // Söndürülübsə son gün xatırlatması getmir (bir gündən çox keçib — şirkət panelinin sessiyası bitib, yenidən giriş)
+        owner = owner();
         owner.put("/catalog/deal-notifications/settings", Map.of("autoEnabled", true, "sendTime", "12:30",
                 "lastDayEnabled", false)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.settings.sendTime").value("12:30"));
