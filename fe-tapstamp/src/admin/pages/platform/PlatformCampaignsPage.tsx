@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Play, X } from 'lucide-react';
+import { Check, Megaphone, Play, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformCampaignsApi, type PlatformCampaign } from '../../api/adminApi';
 import { ApiErrorAlert } from '../../components/ApiErrorAlert';
+import { EmptyState } from '../../components/EmptyState';
 import { InlineLoading } from '../../components/FullPageState';
 import { campaignStatus, campaignStatusTone } from '../campaigns/campaignLabels';
 
@@ -55,7 +56,11 @@ export function PlatformCampaignsPage() {
       <ApiErrorAlert error={campaigns.error} />
       {campaigns.isPending ? <InlineLoading /> : null}
       {campaigns.data && items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">{t(`platform.campaigns.empty.${filter}`)}</p>
+        <EmptyState
+          icon={<Megaphone />}
+          message={t(`platform.campaigns.empty.${filter}`)}
+          action={filter === 'PENDING' ? { label: t('platform.campaigns.showAll'), onClick: () => setFilter('ALL') } : undefined}
+        />
       ) : null}
       {items.map((campaign) => (
         <CampaignCard key={`${campaign.tenantId}-${campaign.id}`} campaign={campaign} />

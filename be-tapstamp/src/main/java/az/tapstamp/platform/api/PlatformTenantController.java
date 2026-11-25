@@ -3,7 +3,10 @@ package az.tapstamp.platform.api;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import az.tapstamp.audit.AuditLogQuery;
 import az.tapstamp.onboarding.SetupService;
@@ -102,11 +105,39 @@ public class PlatformTenantController {
                                 long activeCustomers, int activeStaff) {
     }
 
+    public record OverviewResponse(int tenants, int active, int suspended,
+                                   @Schema(description = "Sınağın bitməsinə 7 gün və ya az qalıb") int trialEndingSoon,
+                                   @Schema(description = "Sınaq bitib, ödəniş qeyd olunmayıb") int expired,
+                                   long totalCustomers,
+                                   @Schema(description = "Şirkətin id-si → müştəri sayı (bazası əlçatan olanlar)") Map<UUID, Long> customersByTenant) {
+    }
+
     @GetMapping
-    @Operation(summary = "Bütün şirkətlər", description = "səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
-    PageResult<TenantResponse> list(@RequestParam(defaultValue = "0") int page,
+    @Operation(summary = "Bütün şirkətlər", description = "`q` — ad, texniki ad və ya domen üzrə axtarış; `status` — ACTIVE, SUSPENDED və s.; səhifə `page` (0-dan), `size` (5, 10, 20, 50).")
+    PageResult<TenantResponse> list(@RequestParam(required = false) String q,
+                                    @RequestParam(required = false) String status,
+                                    @RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = PageQuery.DEFAULT_SIZE_PARAM) int size) {
-        return PageQuery.of(page, size).slice(tenants.list()).map(TenantResponse::from);
+        String needle = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
+        List<PlatformTenantService.TenantSummary> matches = tenants.list().stream()
+                .filter(t -> status == null || status.isBlank() || t.status().name().equals(status))
+                .filter(t -> needle.isEmpty() || matches(t, needle))
+                .toList();
+        return PageQuery.of(page, size).slice(matches).map(TenantResponse::from);
+    }
+
+    private static boolean matches(PlatformTenantService.TenantSummary tenant, String needle) {
+        LocalizedText name = tenant.displayName();
+        return Stream.concat(Stream.of(tenant.slug(), name.az(), name.en(), name.ru()), tenant.domains().stream())
+                .anyMatch(value -> value != null && value.toLowerCase(Locale.ROOT).contains(needle));
+    }
+
+    @GetMapping("/overview")
+    @Operation(summary = "Platformanın ümumi göstəriciləri", description = "Şirkət sayları və hər şirkətin müştəri sayı.")
+    OverviewResponse overview() {
+        var o = tenants.overview();
+        return new OverviewResponse(o.tenants(), o.active(), o.suspended(), o.trialEndingSoon(), o.expired(),
+                o.totalCustomers(), o.customersByTenant());
     }
 
     @GetMapping("/{tenantId}")

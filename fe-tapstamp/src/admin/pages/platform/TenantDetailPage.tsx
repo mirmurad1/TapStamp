@@ -302,8 +302,8 @@ function OwnersCard({ tenantId, onNotice }: { tenantId: string; onNotice: (messa
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge tone={owner.totpEnabled ? 'success' : 'danger'}>
-                    {owner.totpEnabled ? t('admin:account.security.enabled') : t('admin:account.security.disabled')}
+                  <Badge tone={owner.totpEnabled ? 'success' : 'warning'}>
+                    {owner.totpEnabled ? t('admin:platform.detail.mfaOn') : t('admin:platform.detail.mfaOff')}
                   </Badge>
                   <Button
                     variant="outline"

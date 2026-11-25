@@ -30,9 +30,9 @@ export function TenantPlanSummary({ tenant }: { tenant: Tenant }) {
         <span className="font-medium">{t(`plan.names.${(tenant.plan ?? 'PREMIUM') as PlanName}`)}</span>
         <PlanStatusBadge status={tenant.planStatus} expired={tenant.planExpired} />
       </span>
-      {tenant.planStatus === 'TRIAL' && tenant.trialEndsAt ? (
-        <span className="text-xs text-muted-foreground">
-          {t('platform.plan.until', { date: formatDate(tenant.trialEndsAt, lang) })}
+      {tenant.planStatus === 'TRIAL' && tenant.trialEndsAt && !tenant.planExpired ? (
+        <span className="text-xs text-muted-foreground" title={t('platform.plan.until', { date: formatDate(tenant.trialEndsAt, lang) })}>
+          {t('platform.plan.daysLeft', { count: daysUntil(tenant.trialEndsAt) })}
         </span>
       ) : null}
     </div>
@@ -47,8 +47,13 @@ function PlanStatusBadge({ status, expired }: { status?: string; expired?: boole
   return status === 'TRIAL' ? (
     <Badge tone="warning">{t('plan.status.TRIAL')}</Badge>
   ) : (
-    <Badge tone="success">{t('plan.status.ACTIVE')}</Badge>
+    <Badge tone="success">{t('platform.plan.paid')}</Badge>
   );
+}
+
+/** Sınağın bitməsinə qalan tam günlər (bu gün bitirsə — 0). */
+function daysUntil(iso: string): number {
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
 }
 
 /** Şirkətin səhifəsində: paket, sınaq müddəti (hər paket üçün bir dəfə), ödənişin qeyd olunması, əlavə filiallar. */

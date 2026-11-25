@@ -138,7 +138,7 @@
     "/api/v1/admin/analytics/overview" : {
       "get" : {
         "description" : "Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.",
-        "operationId" : "overview_2",
+        "operationId" : "overview_3",
         "parameters" : [ {
           "in" : "query",
           "name" : "from",
@@ -1253,7 +1253,7 @@
     "/api/v1/admin/catalog/deal-notifications" : {
       "get" : {
         "description" : "Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).",
-        "operationId" : "overview_1",
+        "operationId" : "overview_2",
         "responses" : {
           "200" : {
             "content" : {
@@ -4965,9 +4965,23 @@
     },
     "/api/v1/platform/tenants" : {
       "get" : {
-        "description" : "səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
+        "description" : "`q` — ad, texniki ad və ya domen üzrə axtarış; `status` — ACTIVE, SUSPENDED və s.; səhifə `page` (0-dan), `size` (5, 10, 20, 50).",
         "operationId" : "list",
         "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "in" : "query",
           "name" : "page",
           "required" : false,
@@ -5027,6 +5041,26 @@
           }
         },
         "summary" : "Yeni şirkət yaratmaq",
+        "tags" : [ "Platforma: şirkətlər" ]
+      }
+    },
+    "/api/v1/platform/tenants/overview" : {
+      "get" : {
+        "description" : "Şirkət sayları və hər şirkətin müştəri sayı.",
+        "operationId" : "overview_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OverviewResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Platformanın ümumi göstəriciləri",
         "tags" : [ "Platforma: şirkətlər" ]
       }
     },
@@ -8936,6 +8970,45 @@
           "totalCustomers" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "OverviewResponse" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "customersByTenant" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "description" : "Şirkətin id-si → müştəri sayı (bazası əlçatan olanlar)"
+          },
+          "expired" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Sınaq bitib, ödəniş qeyd olunmayıb"
+          },
+          "suspended" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tenants" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalCustomers" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "trialEndingSoon" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Sınağın bitməsinə 7 gün və ya az qalıb"
           }
         }
       },

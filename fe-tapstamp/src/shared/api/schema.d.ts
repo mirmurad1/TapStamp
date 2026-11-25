@@ -72,7 +72,7 @@ export interface paths {
          * Əsas göstəricilər
          * @description Ümumi və aktiv (7/30/90 gün) müştərilər, bu həftə/ay yeni müştərilər, dövrdə möhürlər, verilən və təhvil verilən hədiyyələr. Aktiv müştəri — son N gündə ən azı bir təsdiqlənmiş möhürü olan.
          */
-        get: operations["overview_2"];
+        get: operations["overview_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -665,7 +665,7 @@ export interface paths {
          * Endirim bildirişləri
          * @description Parametrlər, elan gözləyən yeni endirimlər və bildirişin önizləməsi, bu gün göndərilibmi, son elanların nəticəsi (göndərilən, çatdırılan, açan müştərilər).
          */
-        get: operations["overview_1"];
+        get: operations["overview_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2854,7 +2854,7 @@ export interface paths {
         };
         /**
          * Bütün şirkətlər
-         * @description səhifə `page` (0-dan), `size` (5, 10, 20, 50).
+         * @description `q` — ad, texniki ad və ya domen üzrə axtarış; `status` — ACTIVE, SUSPENDED və s.; səhifə `page` (0-dan), `size` (5, 10, 20, 50).
          */
         get: operations["list"];
         put?: never;
@@ -2863,6 +2863,26 @@ export interface paths {
          * @description Ayrıca baza və DB rolları yaradılır, miqrasiyalar işə salınır. Step-up tələb edir. Prod-da standart olaraq söndürülüb (`APP_PROVISIONING_ENABLED`) — onda `PROVISIONING_DISABLED`.
          */
         post: operations["provision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platformanın ümumi göstəriciləri
+         * @description Şirkət sayları və hər şirkətin müştəri sayı.
+         */
+        get: operations["overview_1"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4727,6 +4747,30 @@ export interface components {
             /** Format: int64 */
             totalCustomers?: number;
         };
+        OverviewResponse: {
+            /** Format: int32 */
+            active?: number;
+            /** @description Şirkətin id-si → müştəri sayı (bazası əlçatan olanlar) */
+            customersByTenant?: {
+                [key: string]: number;
+            };
+            /**
+             * Format: int32
+             * @description Sınaq bitib, ödəniş qeyd olunmayıb
+             */
+            expired?: number;
+            /** Format: int32 */
+            suspended?: number;
+            /** Format: int32 */
+            tenants?: number;
+            /** Format: int64 */
+            totalCustomers?: number;
+            /**
+             * Format: int32
+             * @description Sınağın bitməsinə 7 gün və ya az qalıb
+             */
+            trialEndingSoon?: number;
+        };
         OwnerInvitationRequest: {
             /** Format: email */
             email: string;
@@ -5918,7 +5962,7 @@ export interface operations {
             };
         };
     };
-    overview_2: {
+    overview_3: {
         parameters: {
             query?: {
                 from?: string;
@@ -6710,7 +6754,7 @@ export interface operations {
             };
         };
     };
-    overview_1: {
+    overview_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9580,6 +9624,8 @@ export interface operations {
     list: {
         parameters: {
             query?: {
+                q?: string;
+                status?: string;
                 page?: number;
                 size?: number;
             };
@@ -9620,6 +9666,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TenantResponse"];
+                };
+            };
+        };
+    };
+    overview_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OverviewResponse"];
                 };
             };
         };

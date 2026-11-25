@@ -59,7 +59,7 @@ export interface NavItem {
   group: NavGroup;
 }
 
-export const NAV_GROUPS = ["main", "growth", "manage"] as const;
+export const NAV_GROUPS = ['main', 'growth', 'monitor', 'manage'] as const;
 export type NavGroup = (typeof NAV_GROUPS)[number];
 
 const TENANT_ITEMS: readonly NavItem[] = [
@@ -81,10 +81,10 @@ const TENANT_ITEMS: readonly NavItem[] = [
 
 const PLATFORM_ITEMS: readonly NavItem[] = [
   { section: 'tenants', to: '/', icon: Building2, roles: ['SUPER_ADMIN'], group: 'main' },
-  { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'], group: 'main' },
   { section: 'campaigns', to: '/platform-campaigns', icon: Megaphone, roles: ['SUPER_ADMIN'], group: 'main' },
-  { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'], group: 'main' },
-  { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'], group: 'main' },
+  { section: 'smsUsage', to: '/sms-usage', icon: MessageSquareText, roles: ['SUPER_ADMIN'], group: 'monitor' },
+  { section: 'audit', to: '/platform-audit', icon: ShieldCheck, roles: ['SUPER_ADMIN'], group: 'monitor' },
+  { section: 'account', to: '/account', icon: UserCog, roles: ['SUPER_ADMIN'], group: 'manage' },
 ];
 
 export function hasAnyRole(me: Me, roles: readonly string[]): boolean {

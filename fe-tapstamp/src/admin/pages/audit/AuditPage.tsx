@@ -46,7 +46,7 @@ export function AuditPage() {
                 <option value="">{t('admin:customers.filters.any')}</option>
                 {actions.data?.map((name) => (
                   <option key={name} value={name}>
-                    {name}
+                    {actionLabel(t, name)}
                   </option>
                 ))}
               </Select>
@@ -98,7 +98,7 @@ export function AuditTable({ items }: { items: AuditEntry[] }) {
 
 function AuditRow({ entry, lang }: { entry: AuditEntry; lang: ReturnType<typeof currentLanguage> }) {
   const { t } = useTranslation('admin');
-  const details = entry.details && entry.details !== '{}' ? entry.details : null;
+  const details = parseDetails(entry.details);
   return (
     <tr>
       <td className="whitespace-nowrap px-5 py-3 text-muted-foreground sm:px-6">
@@ -106,20 +106,79 @@ function AuditRow({ entry, lang }: { entry: AuditEntry; lang: ReturnType<typeof 
       </td>
       <td className="px-3 py-3">
         <p className="font-medium">{entry.actorName ?? t(`audit.actorType.${(entry.actorType ?? 'SYSTEM') as 'SYSTEM'}`)}</p>
-        {entry.ip ? <p className="text-xs text-muted-foreground">{entry.ip}</p> : null}
+        {entry.ip ? <p className="text-xs text-muted-foreground">{LOCAL_IPS.has(entry.ip) ? t('audit.localIp') : entry.ip}</p> : null}
       </td>
       <td className="px-3 py-3">
-        <Badge>{entry.action}</Badge>
+        <Badge tone={actionTone(entry.action ?? '')} title={entry.action}>
+          {actionLabel(t, entry.action ?? '')}
+        </Badge>
         {entry.targetType ? (
           <p className="mt-1 text-xs text-muted-foreground">
-            {entry.targetType}
+            {t(`audit.targets.${entry.targetType}`, { defaultValue: entry.targetType })}
             {entry.targetId ? ` · ${entry.targetId.slice(0, 8)}` : null}
           </p>
         ) : null}
       </td>
       <td className="px-5 py-3 sm:px-6">
-        {details ? <code className="block max-w-md break-all text-xs text-muted-foreground">{details}</code> : null}
+        {details ? (
+          <dl className="flex max-w-md flex-col gap-0.5 text-xs">
+            {details.map(([key, value]) => (
+              <div key={key} className="flex gap-1.5">
+                <dt className="shrink-0 text-muted-foreground">{t(`audit.detailKeys.${key}`, { defaultValue: humanize(key) })}:</dt>
+                <dd className="break-all">{t(`audit.detailValues.${value}`, { defaultValue: value })}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
       </td>
     </tr>
   );
+}
+
+const LOCAL_IPS = new Set(['::1', '127.0.0.1', '0:0:0:0:0:0:0:1']);
+
+/** `ADMIN_LOGIN_FAILED` → "Admin login failed" — tərcüməsi olmayan (yeni) əməliyyat üçün oxunaqlı ehtiyat variant. */
+function humanize(code: string): string {
+  const words = code.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+type Translate = (key: string, options: { defaultValue: string }) => string;
+
+/** Əməliyyatın 3 dildə adı; tərcüməsi yoxdursa — koddan düzəldilmiş mətn. */
+export function actionLabel(t: Translate, action: string): string {
+  return t(`audit.actions.${action}`, { defaultValue: humanize(action) });
+}
+
+/** Rəng əməliyyatın mənasına görə: uğursuz/bloklanmış — qırmızı, sıfırlama/söndürmə — sarı, yaradılma/uğur — yaşıl. */
+function actionTone(action: string): 'danger' | 'warning' | 'success' | undefined {
+  if (/(FAILED|BLOCKED|LOCKED|REJECTED|SUSPENDED|DELETED|REPLAY|LOOKUP_FAILED)$/.test(action) || action.includes('_LOCKED')) {
+    return 'danger';
+  }
+  if (/(RESET|DISABLED|REMOVED|REVOKED|PAUSED|CANCELLED|EXPORTED|ALERT|ISSUED|REQUESTED|ROTATED)/.test(action)) {
+    return 'warning';
+  }
+  if (/(SUCCEEDED|CREATED|ACTIVATED|APPROVED|ENABLED|PROVISIONED|REGISTERED|ACCEPTED|COMPLETED|REWARDED)$/.test(action)) {
+    return 'success';
+  }
+  return undefined;
+}
+
+/** JSON təfərrüatı → [açar, dəyər] sətirləri; boş və ya oxunmayan JSON — null. */
+function parseDetails(raw: string | undefined): [string, string][] | null {
+  if (!raw || raw === '{}') {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const rows = Object.entries(parsed as Record<string, unknown>).map(
+        ([key, value]): [string, string] => [key, typeof value === 'string' ? value : JSON.stringify(value)],
+      );
+      return rows.length > 0 ? rows : null;
+    }
+  } catch {
+    // aşağıda xam mətn kimi
+  }
+  return [['details', raw]];
 }

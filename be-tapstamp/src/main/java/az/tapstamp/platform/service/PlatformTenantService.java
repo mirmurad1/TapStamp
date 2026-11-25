@@ -1,7 +1,9 @@
 package az.tapstamp.platform.service;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +42,8 @@ import az.tapstamp.tenancy.provisioning.TenantProvisioner;
 import az.tapstamp.tenancy.registry.TenantDirectory;
 import az.tapstamp.tenancy.registry.TenantRecord;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,6 +52,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PlatformTenantService {
+
+    private static final Logger log = LoggerFactory.getLogger(PlatformTenantService.class);
 
     public record TenantSummary(UUID id, String slug, LocalizedText displayName, TenantStatus status,
                                 Language defaultLanguage, String timezone, String primaryDomain, List<String> domains,
@@ -104,6 +110,51 @@ public class PlatformTenantService {
 
     public List<TenantSummary> list() {
         return directory.findAll().stream().map(this::summary).toList();
+    }
+
+    /** Platformanın ana səhifəsi üçün: şirkət sayları, sınağı tezliklə bitənlər və hər şirkətin müştəri sayı. */
+    public record PlatformOverview(int tenants, int active, int suspended, int trialEndingSoon, int expired,
+                                   long totalCustomers, Map<UUID, Long> customersByTenant) {
+    }
+
+    /** Sınağın bitməsinə bu qədər və ya az gün qalıbsa, "tezliklə bitir" sayılır. */
+    static final int TRIAL_ENDING_DAYS = 7;
+
+    public PlatformOverview overview() {
+        Instant soon = clock.instant().plus(Duration.ofDays(TRIAL_ENDING_DAYS));
+        int active = 0;
+        int suspended = 0;
+        int ending = 0;
+        int expired = 0;
+        long customers = 0;
+        Map<UUID, Long> byTenant = new LinkedHashMap<>();
+        List<TenantRecord> records = directory.findAll();
+        for (TenantRecord record : records) {
+            TenantSummary summary = summary(record);
+            if (summary.status() == TenantStatus.ACTIVE) {
+                active++;
+            } else if (summary.status() == TenantStatus.SUSPENDED) {
+                suspended++;
+            }
+            if (summary.planExpired()) {
+                expired++;
+            } else if (summary.subscription().trialEndsAt() != null
+                    && "TRIAL".equals(summary.subscription().status().name())
+                    && summary.subscription().trialEndsAt().isBefore(soon)) {
+                ending++;
+            }
+            if (summary.status() == TenantStatus.ACTIVE || summary.status() == TenantStatus.SUSPENDED) {
+                try {
+                    long count = TenantContext.callAs(record.toInfo(), overview::stats).totalCustomers();
+                    byTenant.put(record.id(), count);
+                    customers += count;
+                } catch (RuntimeException e) {
+                    // Bir şirkətin bazası əlçatmazdırsa, ümumi səhifə yenə açılmalıdır
+                    log.warn("Customer count unavailable for tenant {}", record.slug(), e);
+                }
+            }
+        }
+        return new PlatformOverview(records.size(), active, suspended, ending, expired, customers, byTenant);
     }
 
     public TenantSummary get(UUID tenantId) {

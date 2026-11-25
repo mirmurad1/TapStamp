@@ -162,7 +162,9 @@ export const teamApi = {
 };
 
 export const platformApi = {
-  tenants: (query: PageParams) => unwrap(api.GET('/api/v1/platform/tenants', { params: { query } })),
+  tenants: (query: PageParams & { q?: string; status?: string }) =>
+    unwrap(api.GET('/api/v1/platform/tenants', { params: { query } })),
+  overview: () => unwrap(api.GET('/api/v1/platform/tenants/overview')),
   tenant: (tenantId: string) => unwrap(api.GET('/api/v1/platform/tenants/{tenantId}', { params: { path: { tenantId } } })),
   customers: (
     tenantId: string,

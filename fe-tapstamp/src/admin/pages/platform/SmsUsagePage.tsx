@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field } from '@/shared/ui/field';
 import { Input, Select } from '@/shared/ui/input';
 import { Pagination } from '@/shared/ui/pagination';
+import { Tabs } from '@/shared/ui/tabs';
 import { usePagination } from '@/shared/ui/usePagination';
 
 import { platformSmsApi } from '../../api/adminApi';
@@ -98,10 +99,14 @@ function PeriodPicker({ id, today, state }: { id: string; today: string; state: 
   );
 }
 
-/** SMS hesabatı: şirkətlər üzrə uğurlu SMS-lər və ayrıca cədvəldə göndərilə bilməyənlər (səbəbi ilə). */
+const SMS_TABS = ['usage', 'failures', 'search'] as const;
+type SmsTab = (typeof SMS_TABS)[number];
+
+/** SMS hesabatı (tablarla): şirkətlər üzrə uğurlu SMS-lər və ayrıca cədvəldə göndərilə bilməyənlər (səbəbi ilə). */
 export function SmsUsagePage() {
   const { t } = useTranslation('admin');
   const today = bakuToday();
+  const [tab, setTab] = useState<SmsTab>('usage');
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,10 +114,20 @@ export function SmsUsagePage() {
         <h1 className="font-display text-2xl font-semibold">{t('platform.sms.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('platform.sms.subtitle')}</p>
       </div>
-      <PlatformSmsBudgetCard />
-      <UsageSection today={today} />
-      <MessagesSection today={today} mode="failures" />
-      <MessagesSection today={today} mode="search" />
+      <Tabs
+        label={t('platform.sms.title')}
+        value={tab}
+        onChange={setTab}
+        options={SMS_TABS.map((value) => ({ value, label: t(`platform.sms.tabs.${value}`) }))}
+      />
+      {tab === 'usage' ? (
+        <>
+          <PlatformSmsBudgetCard />
+          <UsageSection today={today} />
+        </>
+      ) : null}
+      {tab === 'failures' ? <MessagesSection today={today} mode="failures" /> : null}
+      {tab === 'search' ? <MessagesSection today={today} mode="search" /> : null}
     </div>
   );
 }
