@@ -26,7 +26,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Müştərilərin CSV ixracı (yalnız sahib, step-up ilə). Başlıqlar adminin dilindədir, fayl UTF-8 BOM ilə başlayır
- * (Excel Azərbaycan və rus hərflərini düzgün açsın). Telefon nömrəsi tam, yalnız rəqəmlərlə yazılır.
+ * (Excel Azərbaycan və rus hərflərini düzgün açsın). Telefon nömrəsi ekranlardakı kimi maskalanmış, "+" olmadan yazılır
+ * ({@code 994 51 *** 29 67} — "+" ilə başlayan xana formula sayılmasın). Tarixlər {@code dd.MM.yyyy HH:mm} formatındadır.
  *
  * <p><b>CSV injection</b> (formula yeridilməsi) qorunması: {@code = + - @}, tab və ya CR ilə başlayan xana
  * apostrofla başlayır ki, Excel onu formula kimi icra etməsin.
@@ -34,9 +35,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerCsvExporter {
 
-    private static final List<String> COLUMNS = List.of("id", "name", "phone", "language", "status", "registeredAt",
+    private static final List<String> COLUMNS = List.of("name", "phone", "language", "status", "registeredAt",
             "lastVisitAt", "currentStamps", "totalStamps", "rewardsEarned", "rewardsRedeemed");
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm", Locale.ROOT);
 
     private final CustomerDirectory directory;
     private final AdminAuthService adminAuth;
@@ -70,7 +71,7 @@ public class CustomerCsvExporter {
             writeLine(writer, COLUMNS.stream().map(c -> messages.getMessage("csv.customers." + c, null, locale)).toList());
             directory.forEach(principal, filter, row -> {
                 try {
-                    writeLine(writer, List.of(row.id().toString(), nullToEmpty(row.name()), phone(row.phone()),
+                    writeLine(writer, List.of(nullToEmpty(row.name()), phone(row.phone()),
                             row.language(), Objects.requireNonNullElse(
                                     messages.getMessage("csv.customers.status." + row.status(), null, row.status(),
                                             locale), row.status()),
@@ -110,9 +111,9 @@ public class CustomerCsvExporter {
         return instant == null ? "" : DATE_TIME.format(instant.atZone(zone));
     }
 
-    /** Nömrə yalnız rəqəmlərlə, "+" olmadan ({@code +994513102967} → {@code 994513102967}): apostrof əlavə olunmur. */
+    /** Maskalanmış nömrə "+" olmadan ({@code +994 51 *** 29 67} → {@code 994 51 *** 29 67}): apostrof əlavə olunmur. */
     static String phone(String value) {
-        return value == null ? "" : value.replaceAll("\\D", "");
+        return value == null ? "" : value.startsWith("+") ? value.substring(1) : value;
     }
 
     private static String nullToEmpty(String value) {

@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Admin paneli üçün müştəri sorğuları: siyahı (axtarış, filtrlər, sıralama, səhifələmə), detallar, zaman xətti və CSV
- * üçün sətirlər. Ekranlara tam telefon nömrəsi qaytarılmır (yalnız maskalanmış), tam nömrə yalnız CSV ixracındadır. Menecer yalnız öz filiallarında
+ * üçün sətirlər. Ekranlara və CSV ixracına tam telefon nömrəsi qaytarılmır (yalnız maskalanmış). Menecer yalnız öz filiallarında
  * möhürü olan müştəriləri görür; başqa müştəri onun üçün "mövcud deyil" (404).
  */
 @Service
@@ -55,7 +55,7 @@ public class CustomerDirectory {
                          LocalDate registeredFrom, LocalDate registeredTo, Sort sort, boolean descending) {
     }
 
-    /** {@code phone} — siyahı və detallarda maskalanmış ({@code +994 51 *** 29 67}), CSV ixracında tam nömrə (E.164). */
+    /** {@code phone} — siyahı, detallar və CSV ixracında maskalanmış ({@code +994 51 *** 29 67}). */
     public record Row(UUID id, String name, String phone, String language, String status, Instant registeredAt,
                       Instant lastVisitAt, int currentStamps, int totalStamps, int rewardsEarned, int rewardsRedeemed,
                       int openFraudFlags) {
@@ -103,8 +103,8 @@ public class CustomerDirectory {
     public void forEach(AdminPrincipal principal, Filter filter, Consumer<Row> consumer) {
         Query query = query(principal, filter, 0, 0);
         if (query != null) {
-            // CSV ixracı (əlavə təsdiqlə) — tam nömrə; ekranlarda yalnız maskalanmış
-            customers.stream(query, context -> consumer.accept(toRow(context.getResultObject(), false)));
+            // CSV ixracında da nömrə maskalanmış — tam nömrə fayla düşmür
+            customers.stream(query, context -> consumer.accept(toRow(context.getResultObject(), true)));
         }
     }
 

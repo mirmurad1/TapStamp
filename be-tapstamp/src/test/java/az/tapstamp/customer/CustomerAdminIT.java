@@ -195,13 +195,17 @@ class CustomerAdminIT extends TapIntegrationTest {
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
         String[] lines = csv.split("\r\n");
         assertThat(lines).hasSize(2);
-        assertThat(lines[0]).startsWith("﻿ID,Ad,Telefon,Dil,Status,Qeydiyyat");
-        assertThat(lines[1]).contains(f.customerId().toString())
-                .contains("\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\"")
+        // ID sütunu yoxdur; tarixlər dd.MM.yyyy HH:mm
+        assertThat(lines[0]).startsWith("﻿Ad,Telefon,Dil,Status,Qeydiyyat");
+        String masked = az.tapstamp.shared.pii.PhoneMasker.mask(f.phone()).substring(1);
+        assertThat(lines[1]).doesNotContain(f.customerId().toString())
+                .startsWith("\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\"")
                 .contains(",Aktiv,")
-                // Nömrə "+" və apostrofsuz, yalnız rəqəmlər: +994551234567 → 994551234567
-                .contains("," + f.phone().substring(1) + ",")
-                .doesNotContain("'+");
+                // Nömrə ekranlardakı kimi maskalanmış, "+" və apostrofsuz: +994551234567 → 994 55 *** 45 67
+                .contains("," + masked + ",")
+                .doesNotContain(f.phone().substring(1))
+                .doesNotContain("'+")
+                .containsPattern(",\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2},");
         assertThat(count("SELECT count(*) FROM audit_logs WHERE action = 'CUSTOMERS_EXPORTED' AND details ->> 'rows' = '1'",
                 Map.of())).isGreaterThanOrEqualTo(1);
     }
